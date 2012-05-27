@@ -10,15 +10,37 @@
 
   <groupId>org.avaje.metric</groupId>
   <artifactId>avaje-metric-core</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>avaje-metric-core</name>
-  <url>http://maven.apache.org</url>
+  <url>http://www.avaje.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  
+    <licenses>
+		<license>
+		  <name>The Apache Software License, Version 2.0</name>
+		  <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		  <distribution>repo</distribution>
+		</license>
+    </licenses>
+	
+	<developers>
+	  <developer>
+		<id>rbygrave</id>
+		<name>Rob Bygrave</name>
+		<email>robin.bygrave@gmail.com</email>
+	  </developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:rbygrave/avaje-metric-core.git</connection>
+		<developerConnection>scm:git:git@github.com:rbygrave/avaje-metric-core.git</developerConnection>
+		<url>git@github.com:rbygrave/avaje-metric-core.git</url>
+	</scm>
 
   <dependencies>
     <dependency>
