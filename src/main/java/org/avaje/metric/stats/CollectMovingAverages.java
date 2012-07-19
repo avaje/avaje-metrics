@@ -1,6 +1,6 @@
 package org.avaje.metric.stats;
 
-import static org.avaje.metric.NumFormat.fourdp;
+import static org.avaje.metric.NumFormat.onedp;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -45,7 +45,7 @@ public class CollectMovingAverages implements Stats.MovingAverages {
   }
 
   public String toString() {
-    return "count:" + getCount() + " 1min:" +getOneMinuteDisplay()+ " mean:" + fourdp(getMeanRate());
+    return "count:" + getCount() + " 1min:" +getOneMinuteDisplay()+ " mean:" + onedp(getMeanRate());
   }
 
   @Override
@@ -54,16 +54,16 @@ public class CollectMovingAverages implements Stats.MovingAverages {
   }
   
   public String getOneMinuteDisplay() {
-    return getDecription(getOneMinuteRate());
+    return getDescription(getOneMinuteRate());
   }
   
   public String getTenSecondRateDisplay() {
-    return fourdp(getTenSecondRate());
+    return onedp(getTenSecondRate());
   }
   
   
-  public String getDecription(double value) {
-    return fourdp(value)+" "+rateDescriptionSuffix;
+  public String getDescription(double value) {
+    return onedp(value)+" "+rateDescriptionSuffix;
   }
 
   public void clear() {

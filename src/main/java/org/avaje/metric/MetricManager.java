@@ -9,9 +9,6 @@ import org.avaje.metric.jvm.GarbageCollectionRateCollection;
 public class MetricManager {
 
   private static final DefaultMetricManager mgr = new DefaultMetricManager();
-  static {
-    mgr.addGcRateCollection();
-  }
 
   public static void updateStatistics() {
     mgr.updateStatistics();
@@ -62,10 +59,6 @@ public class MetricManager {
 
   public static Collection<Metric> getAllMetrics() {
     return mgr.getAllMetrics();
-  }
-  
-  public static GarbageCollectionRateCollection getGarbageCollectionRateCollection() {
-    return mgr.getGarbageCollectionRateCollection();
   }
 
 }

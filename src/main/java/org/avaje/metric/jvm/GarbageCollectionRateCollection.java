@@ -33,7 +33,7 @@ public class GarbageCollectionRateCollection {
       gcLoadMetrics[i] = collectors[i].getGCLoadMetric();
     }
     
-    timer.scheduleAtFixedRate(new CollectTask(), 10000, 10000);
+    timer.scheduleAtFixedRate(new CollectTask(), 20000, 20000);
   }
   
   public String toString() {
@@ -78,7 +78,7 @@ public class GarbageCollectionRateCollection {
       this.garbageCollectorMXBean = garbageCollectorMXBean;
       this.name = garbageCollectorMXBean.getName();
  
-      MetricName gcCountName = new MetricName(GarbageCollectionRateCollection.class, this.garbageCollectorMXBean.getName()+".gc");
+      MetricName gcCountName = new MetricName("jvm","gc", this.garbageCollectorMXBean.getName().toLowerCase());
 
       gcLoadMetric = new LoadMetric(gcCountName, TimeUnit.MINUTES, "gc", "ms");
     }
@@ -93,6 +93,7 @@ public class GarbageCollectionRateCollection {
       
       
       gcLoadMetric.addEvent(gcCountSince, gcDurationMillisSince);
+      //System.out.println("GC - "+gcLoadMetric);
      
       lastCollectionCount.set(collectionCount);
       lastCollectionTime.set(collectionTime);

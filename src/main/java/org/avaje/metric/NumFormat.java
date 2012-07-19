@@ -8,7 +8,16 @@ import java.text.DecimalFormat;
 public class NumFormat {
 
   private static DecimalFormat format4 = new DecimalFormat("0.0###");
-  
+
+  private static DecimalFormat format1 = new DecimalFormat("0.0");
+
+  /**
+   * Format the number to 1 decimal places.
+   */
+  public static String onedp(double number){
+    return format1.format(number);
+  }
+
   /**
    * Format the number to 4 decimal places.
    */

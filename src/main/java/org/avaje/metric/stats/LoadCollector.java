@@ -38,9 +38,9 @@ public class LoadCollector {
   
   public String toString() {
     return "totalCount:"+getTotalCount()+" totalLoad:"+getTotalLoad()
-        +" events: "+eventRate.getOneMinuteDisplay()
-        +" load: "+loadRate.getOneMinuteDisplay()
-        +" s10: "+loadRate.getTenSecondRateDisplay();
+        +" events.m1: "+eventRate.getOneMinuteDisplay()
+        +" load.1min: "+loadRate.getOneMinuteDisplay()
+        +" load.10sec: "+loadRate.getTenSecondRateDisplay();
   }
 
   public long getTotalCount() {

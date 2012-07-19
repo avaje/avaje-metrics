@@ -1,7 +1,7 @@
 package org.avaje.metric.stats;
 
 import static java.lang.Math.floor;
-import static org.avaje.metric.NumFormat.fourdp;
+import static org.avaje.metric.NumFormat.onedp;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,11 +53,11 @@ class PercentilesSnapshot implements Stats.Percentiles {
     
     
     public String toString() {
-      return "p75:"+fourdp(get75thPercentile())
-          +" p95:"+fourdp(get95thPercentile())
-          +" p99:"+fourdp(get99thPercentile())
-          +" p999:"+fourdp(get999thPercentile())
-          +" median:"+fourdp(getMedian());
+      return "p75:"+onedp(get75thPercentile())
+          +" p95:"+onedp(get95thPercentile())
+          +" p99:"+onedp(get99thPercentile())
+          +" p999:"+onedp(get999thPercentile())
+          +" median:"+onedp(getMedian());
     }
     
     /**

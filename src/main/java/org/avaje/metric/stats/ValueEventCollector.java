@@ -1,6 +1,6 @@
 package org.avaje.metric.stats;
 
-import static org.avaje.metric.NumFormat.fourdp;
+import static org.avaje.metric.NumFormat.onedp;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -45,13 +45,13 @@ public class ValueEventCollector implements MetricStatistics {
     Summary aggr = summaryStats.getAggregate();
     return "sinceSecs:" + aggr.getSinceSeconds()
         + " count:" + aggr.getCount() 
-        + " min:" + fourdp(aggr.getMin()) 
-        + " max:" + fourdp(aggr.getMax()) 
+        + " min:" + onedp(aggr.getMin())
+        + " max:" + onedp(aggr.getMax())
         + " sum:" + aggr.getSum()
-        + " mean:" + fourdp(aggr.getMean()) 
-        + " std:" + fourdp(aggr.getStdDev()) 
-        + " 1minWork:" + fourdp(workRate.getOneMinuteRate()) 
-        + " 1min:" + fourdp(eventRate.getOneMinuteRate()) 
+        + " mean:" + onedp(aggr.getMean())
+        + " std:" + onedp(aggr.getStdDev())
+        + " 1minWork:" + onedp(workRate.getOneMinuteRate())
+        + " 1min:" + onedp(eventRate.getOneMinuteRate())
         + " rateUnit:" + eventRate.getRateUnit();
   }
 

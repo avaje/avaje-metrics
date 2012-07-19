@@ -60,6 +60,6 @@ public final class LoadMetric implements Metric {
   }
 
   public String toString() {
-    return stats.toString();
+    return name+" "+stats.toString();
   }
 }
