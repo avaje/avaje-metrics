@@ -34,12 +34,12 @@ public class SummaryMovingBuffer {
     }
   }
 
-  public StatsSum getMovingAggregate(double stdDev) {
+  public StatsSum getMovingAggregate() {
     synchronized (this) {
       if (buffer[0] == null) {
         return EMPTY;
       }
-      StatsSum sum = new StatsSum(buffer[0], stdDev);
+      StatsSum sum = new StatsSum(buffer[0]);
       for (int i = 1; i < buffer.length; i++) {
         if (buffer[i] != null){
           sum = sum.merge(buffer[i]);

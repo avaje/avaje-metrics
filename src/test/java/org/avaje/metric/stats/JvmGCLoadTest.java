@@ -17,7 +17,7 @@ public class JvmGCLoadTest {
     Timer timer = new Timer();
     GarbageCollectionRateCollection gc = new GarbageCollectionRateCollection(timer);
     
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < 15; i++) {
       
       createSomeGarbage();
     }  
@@ -26,7 +26,7 @@ public class JvmGCLoadTest {
     System.out.println("Duration "+exe+" millis");
     System.out.println(""+gc);
     
-    Thread.sleep(100000);
+    Thread.sleep(10000);
   }
   
   

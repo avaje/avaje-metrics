@@ -19,8 +19,6 @@ public interface Stats {
     public double getMin();
 
     public double getMean();
-
-    public double getStdDev();
   }
 
   /**

@@ -48,7 +48,7 @@ public class EventMeterTest {
     meter.clearStatistics();
 
     Random random = new Random();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
       meter.markEvent();
       Thread.sleep(50 + random.nextInt(150));
     }

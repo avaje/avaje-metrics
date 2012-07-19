@@ -10,7 +10,6 @@ public class StatsSum implements Stats.Summary {
   final double max;
   final double min;
   final double mean;
-  final double stdDev;
 
   public StatsSum() {
     this.startTime = System.currentTimeMillis();
@@ -19,31 +18,24 @@ public class StatsSum implements Stats.Summary {
     this.max = Long.MIN_VALUE;
     this.min = Long.MAX_VALUE;
     this.mean = 0;
-    this.stdDev = 0;
   }
 
-  public StatsSum(long startTime, long count, double sum, double max, double min, double stdDev) {
+  public StatsSum(long startTime, long count, double sum, double max, double min) {
     this.startTime = startTime;
     this.count = count;
     this.sum = sum;
     this.max = max;
     this.min = min;
     this.mean = calcMean(count, sum);
-    this.stdDev = stdDev;
-  }
-
-  public StatsSum(Stats.Summary s) {
-    this(s, s.getStdDev());
   }
   
-  public StatsSum(Stats.Summary s, double stdDev) {
+  public StatsSum(Stats.Summary s) {
     this.startTime = s.getStartTime();
     this.count = s.getCount();
     this.sum = s.getSum();
     this.max = s.getMax();
     this.min = s.getMin();
     this.mean = s.getMean();
-    this.stdDev = stdDev;
   }
 
   public String toString() {
@@ -67,7 +59,7 @@ public class StatsSum implements Stats.Summary {
     double newMax = Math.max(max, s.getMax()); 
     long newStartTime = Math.min(startTime, s.getStartTime());
    
-    return new StatsSum(newStartTime, newCount, newSum, newMax, newMin, stdDev);
+    return new StatsSum(newStartTime, newCount, newSum, newMax, newMin);
   }
 
   public long getSinceSeconds() {
@@ -102,11 +94,6 @@ public class StatsSum implements Stats.Summary {
   @Override
   public double getMean() {
     return mean;
-  }
-
-  @Override
-  public double getStdDev() {
-    return stdDev;
   }
 
 }

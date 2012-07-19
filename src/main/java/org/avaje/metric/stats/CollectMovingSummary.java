@@ -17,12 +17,7 @@ public class CollectMovingSummary {
   private long max = Long.MIN_VALUE;
   private long sum;
 
-  // These are for the Welford algorithm for calculating
-  // running variance without floating-point doom.
-  private double[] variance = new double[] { -1, 0 }; // M,
-  private double[] varianceTemp = new double[] { -1, 0 }; // M,
-
-  private long count;;
+  private long count;
 
   private final SummaryMovingBuffer movingSummary;
 
@@ -52,7 +47,6 @@ public class CollectMovingSummary {
     sum = 0;
     max = Long.MIN_VALUE;
     min = Long.MAX_VALUE;
-    variance = new double[] { -1, 0 };
     lastAggregateTime = System.currentTimeMillis();
   }
 
@@ -72,7 +66,7 @@ public class CollectMovingSummary {
 
   public Stats.Summary getAggregate() {
     synchronized (this) {
-      StatsSum movingAggregate = movingSummary.getMovingAggregate(stdDev());
+      StatsSum movingAggregate = movingSummary.getMovingAggregate();
       // incorporate the recent data (in the last minute)
       return movingAggregate.merge( calc());
     }
@@ -132,7 +126,7 @@ public class CollectMovingSummary {
   }
 
   private StatsSum calc() {
-    return new StatsSum(lastAggregateTime, count, sum, max(), min(), stdDev());
+    return new StatsSum(lastAggregateTime, count, sum, max(), min());
   }
 
   private void update(long value) {
@@ -141,7 +135,6 @@ public class CollectMovingSummary {
     sum += value;
     setMax(value);
     setMin(value);
-    updateVariance(value);
   }
 
   private double max() {
@@ -158,20 +151,6 @@ public class CollectMovingSummary {
     return 0.0;
   }
 
-  private double stdDev() {
-    if (count > 0) {
-      return sqrt(variance());
-    }
-    return 0.0;
-  }
-
-  private double variance() {
-    if (count <= 1) {
-      return 0.0;
-    }
-    return variance[1] / (count - 1);
-  }
-
   private void setMax(long potentialMax) {
     if (potentialMax > max) {
       max = potentialMax;
@@ -182,27 +161,6 @@ public class CollectMovingSummary {
     if (potentialMin < min) {
       min = potentialMin;
     }
-  }
-
-  private void updateVariance(long value) {
-
-    if (variance[0] == -1) {
-      varianceTemp[0] = value;
-      varianceTemp[1] = 0;
-
-    } else {
-      final double oldM = variance[0];
-      final double oldS = variance[1];
-
-      final double newM = oldM + ((value - oldM) / count);
-      final double newS = oldS + ((value - oldM) * (value - newM));
-
-      varianceTemp[0] = newM;
-      varianceTemp[1] = newS;
-    }
-    double[] oldValues = variance;
-    variance = varianceTemp;
-    varianceTemp = oldValues;
   }
 
 }
