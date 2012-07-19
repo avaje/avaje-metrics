@@ -36,9 +36,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git@github.com:rbygrave/avaje-metric-core.git</connection>
-		<developerConnection>scm:git:git@github.com:rbygrave/avaje-metric-core.git</developerConnection>
-		<url>git@github.com:rbygrave/avaje-metric-core.git</url>
+		<connection>scm:git:https://github.com/rbygrave/avaje-metric-core.git</connection>
+		<developerConnection>scm:git:https://github.com/rbygrave/avaje-metric-core.git</developerConnection>
+		<url>https://github.com/rbygrave/avaje-metric-core.git</url>
 	</scm>
 
   <dependencies>
