@@ -1,18 +1,21 @@
 package org.avaje.metric.stats;
 
+import static java.lang.Math.floor;
+import static org.avaje.metric.NumFormat.fourdp;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
 
-import org.avaje.metric.MetricPercentiles;
-
-import static java.lang.Math.floor;
+import org.avaje.metric.Stats;
 
 /**
- * A statistical snapshot of a {@link PercentilesSnapshot}.
+ * A statistical snapshot of a Histogram.
  */
-class PercentilesSnapshot implements MetricPercentiles {
+class PercentilesSnapshot implements Stats.Percentiles {
+
   
     private static final double MEDIAN_Q = 0.5;
     private static final double P75_Q = 0.75;
@@ -47,9 +50,14 @@ class PercentilesSnapshot implements MetricPercentiles {
         System.arraycopy(values, 0, this.values, 0, values.length);
         Arrays.sort(this.values);
     }
-
+    
+    
     public String toString() {
-      return "75pct:"+get75thPercentile()+" 95pct:"+get95thPercentile()+" 99pct:"+get99thPercentile()+" 999pct:"+get999thPercentile()+" median:"+getMedian();
+      return "p75:"+fourdp(get75thPercentile())
+          +" p95:"+fourdp(get95thPercentile())
+          +" p99:"+fourdp(get99thPercentile())
+          +" p999:"+fourdp(get999thPercentile())
+          +" median:"+fourdp(getMedian());
     }
     
     /**
@@ -59,6 +67,7 @@ class PercentilesSnapshot implements MetricPercentiles {
      * @return the value in the distribution at {@code quantile}
      */
     public double getValue(double quantile) {
+      
         if (quantile < 0.0 || quantile > 1.0) {
             throw new IllegalArgumentException(quantile + " is not in [0..1]");
         }
@@ -91,25 +100,16 @@ class PercentilesSnapshot implements MetricPercentiles {
         return values.length;
     }
 
-    /* (non-Javadoc)
-     * @see org.avaje.metric.stats.MetricStatisticPercentiles#getMedian()
-     */
     @Override
     public double getMedian() {
         return getValue(MEDIAN_Q);
     }
 
-    /* (non-Javadoc)
-     * @see org.avaje.metric.stats.MetricStatisticPercentiles#get75thPercentile()
-     */
     @Override
     public double get75thPercentile() {
         return getValue(P75_Q);
     }
 
-    /* (non-Javadoc)
-     * @see org.avaje.metric.stats.MetricStatisticPercentiles#get95thPercentile()
-     */
     @Override
     public double get95thPercentile() {
         return getValue(P95_Q);
@@ -124,17 +124,11 @@ class PercentilesSnapshot implements MetricPercentiles {
         return getValue(P98_Q);
     }
 
-    /* (non-Javadoc)
-     * @see org.avaje.metric.stats.MetricStatisticPercentiles#get99thPercentile()
-     */
     @Override
     public double get99thPercentile() {
         return getValue(P99_Q);
     }
 
-    /* (non-Javadoc)
-     * @see org.avaje.metric.stats.MetricStatisticPercentiles#get999thPercentile()
-     */
     @Override
     public double get999thPercentile() {
         return getValue(P999_Q);

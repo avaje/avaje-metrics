@@ -10,7 +10,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.avaje.metric.MetricStatistics;
-import org.avaje.metric.MetricRateStatistics;
+import org.avaje.metric.Stats;
 
 public final class JmxMetricRegister {
 
@@ -19,13 +19,13 @@ public final class JmxMetricRegister {
   public JmxMetricRegister() {
   }
 
-  public RateStatisticsMXBean createMetricMXBean(MetricRateStatistics stats){
+  public RateStatisticsMXBean createMetricMXBean(Stats.MovingAverages stats){
     return new MxRateStatistics(stats);
   }
   
-  public MetricMXBean createMetricMXBean(MetricStatistics stats){
-    return new MxMetric(stats);
-  }
+//  public MetricMXBean createMetricMXBean(MetricStatistics stats){
+//    return new MxMetric(stats);
+//  }
   
   public void register(RateStatisticsMXBean mbean, ObjectName name) {
     registerMbean(mbean, name);

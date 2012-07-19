@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.avaje.metric.Clock;
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.MetricPercentiles;
+import org.avaje.metric.Stats;
 
 /**
  * An exponentially-decaying random sample of {@code long}s. Uses Cormode et al's forward-decaying
@@ -134,7 +134,7 @@ public class SampleExponentiallyDecaying implements Sample {
     }
 
     @Override
-    public MetricPercentiles getSnapshot() {
+    public Stats.Percentiles getSnapshot() {
         lockForRegularUsage();
         try {
             return new PercentilesSnapshot(values.values());

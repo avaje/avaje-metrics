@@ -2,13 +2,13 @@ package org.avaje.metric.core;
 
 import java.util.concurrent.TimeUnit;
 
-import org.avaje.metric.MetricRateStatistics;
+import org.avaje.metric.Stats;
 
 class MxRateStatistics implements RateStatisticsMXBean {
 
-  private final MetricRateStatistics rateStatistics;
+  private final Stats.MovingAverages rateStatistics;
 
-  MxRateStatistics(MetricRateStatistics rateStatistics) {
+  MxRateStatistics(Stats.MovingAverages rateStatistics) {
     this.rateStatistics = rateStatistics;
   }
 

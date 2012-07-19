@@ -1,46 +1,31 @@
 package org.avaje.metric;
 
-
+/**
+ * Statistics collected on metrics.
+ * <p>
+ * The statistics collected are intended to provide a good representation of the
+ * metrics current recent activity (10 seconds, 1 minute) as well as longer term
+ * activity (5 minute, 15 minute). This enables the user to collect statistics
+ * passively (every 1 minute or every 5 minutes) or view the immediate activity
+ * (last 10 seconds).
+ * </p>
+ */
 public interface MetricStatistics {
-  
-  public long getCount();
-
-  public double getFifteenMinuteRate();
-
-
-  public double getFiveMinuteRate();
-
-
-  public double getMeanRate();
-
-
-  public double getOneMinuteRate();
 
   /**
-   * Returns the longest recorded duration.
+   * Return the moving averages for the rate events are occurring.
    */
-  public double getMax();
+  public Stats.MovingAverages getEventRate();
 
   /**
-   * Returns the shortest recorded duration.
+   * Return the moving averages for the rate that load (execution time, bytes,
+   * rows etc) is occurring.
    */
-  public double getMin();
+  public Stats.MovingAverages getWorkRate();
 
   /**
-   * Returns the arithmetic mean of all recorded durations.
+   * Return the moving 5 minute summary statistics (minimum value over the last 5 minutes, maximum value of the last 5 minutes).
    */
-  public double getMean();
-
-  /**
-   * Returns the standard deviation of all recorded durations.
-   */
-  public double getStdDev();
-
-  /**
-   * Returns the sum of all recorded durations.
-   */
-  public double getSum();
-
-  public MetricPercentiles getPercentiles();
+  public Stats.Summary getSummary();
 
 }

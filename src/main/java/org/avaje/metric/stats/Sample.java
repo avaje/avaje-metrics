@@ -1,7 +1,7 @@
 package org.avaje.metric.stats;
 
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.MetricPercentiles;
+import org.avaje.metric.Stats;
 
 /**
  * A statistically representative sample of a data stream.
@@ -31,5 +31,5 @@ interface Sample {
      *
      * @return a snapshot of the sample's values
      */
-    MetricPercentiles getSnapshot();
+    Stats.Percentiles getSnapshot();
 }

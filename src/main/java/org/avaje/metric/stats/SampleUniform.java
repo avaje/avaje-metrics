@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.MetricPercentiles;
+import org.avaje.metric.Stats;
 
 /**
  * A random sample of a stream of {@code long}s. Uses Vitter's Algorithm R to produce a
@@ -83,7 +83,7 @@ public class SampleUniform implements Sample {
     }
 
     @Override
-    public MetricPercentiles getSnapshot() {
+    public Stats.Percentiles getSnapshot() {
         final int s = size();
         final List<Long> copy = new ArrayList<Long>(s);
         for (int i = 0; i < s; i++) {

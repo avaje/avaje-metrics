@@ -1,6 +1,5 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.MetricPercentiles;
 
 public interface MetricMXBean {
 
@@ -42,7 +41,7 @@ public interface MetricMXBean {
    */
   public double getSum();
   
-  public MetricPercentiles getPercentiles();
+  //public MetricPercentiles getPercentiles();
 
 
 }

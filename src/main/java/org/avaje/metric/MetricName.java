@@ -5,23 +5,20 @@ import java.lang.reflect.Method;
 import javax.management.ObjectName;
 
 /**
- * A value class encapsulating a metric's owning class and name.
+ * Provides a name for metrics.
+ * <p>
+ * Typically names are based on a class and method name.
+ * </p>
  */
 public class MetricName implements Comparable<MetricName> {
+
   private final String group;
   private final String type;
   private final String name;
   private final String scope;
+  private final String simpleName;
   private final String mBeanName;
   private final ObjectName mBeanObjectName;
-
-  private ObjectName createObjectName(String name) {
-    try {
-      return new ObjectName(mBeanName);
-    } catch (Exception e) {
-      throw new IllegalArgumentException(e);
-    }
-  }
 
   /**
    * Creates a new {@link MetricName} without a scope.
@@ -107,6 +104,7 @@ public class MetricName implements Comparable<MetricName> {
     this.scope = scope;
     this.mBeanName = mBeanName;
     this.mBeanObjectName = createObjectName(mBeanName);
+    this.simpleName = createSimpleName(group, type, name);
   }
 
   /**
@@ -115,10 +113,28 @@ public class MetricName implements Comparable<MetricName> {
    * Used to create an 'error' mbean name.
    * </p>
    */
-  public MetricName deriveWithNameSuffix(String nameSuffix){
-    return new MetricName(group, type, name+nameSuffix, scope);
+  public MetricName deriveWithNameSuffix(String nameSuffix) {
+    return new MetricName(group, type, name + nameSuffix, scope);
   }
-  
+
+  /**
+   * Create a similar MetricName changing just the name.
+   * <p>
+   * Typically used via MetricNameCache.
+   * </p>
+   */
+  public MetricName deriveWithName(String newName) {
+    return new MetricName(group, type, newName, scope);
+  }
+
+  private ObjectName createObjectName(String name) {
+    try {
+      return new ObjectName(mBeanName);
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
   /**
    * Returns the group to which the {@link TimedMetric} belongs. For class-based
    * metrics, this will be the package name of the {@link Class} to which the
@@ -170,8 +186,15 @@ public class MetricName implements Comparable<MetricName> {
   }
 
   /**
-   * Returns the MBean name for the {@link TimedMetric} identified by this metric
-   * name.
+   * Return a simple java like name.
+   */
+  public String getSimpleName() {
+    return simpleName;
+  }
+
+  /**
+   * Returns the MBean name for the {@link TimedMetric} identified by this
+   * metric name.
    * 
    * @return the MBean name
    */
@@ -202,7 +225,7 @@ public class MetricName implements Comparable<MetricName> {
 
   @Override
   public String toString() {
-    return mBeanName;
+    return simpleName;
   }
 
   @Override
@@ -211,19 +234,24 @@ public class MetricName implements Comparable<MetricName> {
   }
 
   private static String createMBeanName(String group, String type, String name, String scope) {
-    final StringBuilder nameBuilder = new StringBuilder();
-    nameBuilder.append(group);
-    nameBuilder.append(":type=");
-    nameBuilder.append(type);
+    StringBuilder sb = new StringBuilder(80);
+    sb.append(group).append(":type=").append(type);
     if (scope != null) {
-      nameBuilder.append(",scope=");
-      nameBuilder.append(scope);
+      sb.append(",scope=").append(scope);
     }
-    if (name.length() > 0) {
-      nameBuilder.append(",name=");
-      nameBuilder.append(name);
+    if (name != null && name.length() > 0) {
+      sb.append(",name=").append(name);
     }
-    return nameBuilder.toString();
+    return sb.toString();
+  }
+
+  private static String createSimpleName(String group, String type, String name) {
+    StringBuilder sb = new StringBuilder(80);
+    sb.append(group).append(".").append(type);
+    if (name != null && name.length() > 0) {
+      sb.append(".").append(name);
+    }
+    return sb.toString();
   }
 
   /**

@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.avaje.metric.stats.MetricStatsCollector;
+import org.avaje.metric.stats.ValueEventCollector;
 
 /**
- * Measure events that occur with a long value. This could be bytes or rows
- * processed.
+ * Measure events that occur with a long value. This long value could be bytes
+ * or rows processed or time. Typically you would use a TimedMetricEvent for
+ * time based events though.
  */
 public final class ValueMetric implements Metric {
 
@@ -19,13 +20,13 @@ public final class ValueMetric implements Metric {
 
   private final ConcurrentLinkedQueue<ValueMetricEvent> queue = new ConcurrentLinkedQueue<ValueMetricEvent>();
 
-  private final MetricStatsCollector stats;
+  private final ValueEventCollector stats;
 
-  protected ValueMetric(MetricName name, TimeUnit rateUnit) {
+  public ValueMetric(MetricName name, TimeUnit rateUnit) {
 
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
-    this.stats = new MetricStatsCollector(rateToUse, clock);
+    this.stats = new ValueEventCollector(rateToUse, clock);
   }
 
   public MetricStatistics getStatistics() {

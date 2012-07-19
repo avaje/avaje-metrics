@@ -12,7 +12,10 @@ import org.avaje.metric.Clock;
 import org.avaje.metric.EventMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
+import org.avaje.metric.MetricNameCache;
 import org.avaje.metric.TimedMetric;
+import org.avaje.metric.ValueMetric;
+import org.avaje.metric.jvm.GarbageCollectionRateCollection;
 
 public class DefaultMetricManager {
 
@@ -26,11 +29,25 @@ public class DefaultMetricManager {
 
   private final MetricFactory timedMetricFactory = new TimedMetricFactory();
   private final MetricFactory eventMetricFactory = new EventMetricFactory();
+  private final MetricFactory valueMetricFactory = new ValueMetricFactory();
+  
+  
+  private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
   
   public DefaultMetricManager() {
     timer.scheduleAtFixedRate(new UpdateStatisticsTask(), 5 * 1000, 2 * 1000);
   }
 
+  private GarbageCollectionRateCollection gcRate;
+  
+  public void addGcRateCollection() {
+    this.gcRate = null;//new GarbageCollectionRateCollection(timer);
+  }
+  
+  public GarbageCollectionRateCollection getGarbageCollectionRateCollection() {
+    return gcRate;
+  }
+  
   private class UpdateStatisticsTask extends TimerTask {
 
     @Override
@@ -39,6 +56,20 @@ public class DefaultMetricManager {
     }
   }
 
+  public MetricNameCache getMetricNameCache(Class<?> klass) {
+    
+    String key = klass.getName().replaceAll("\\$$", "");
+    MetricNameCache metricNameCache = nameCache.get(key);
+    if (metricNameCache == null){
+      metricNameCache = new MetricNameCache(klass);
+      MetricNameCache oldNameCache = nameCache.putIfAbsent(key, metricNameCache);
+      if (oldNameCache != null) {
+        return oldNameCache;
+      }
+    }
+    return metricNameCache;
+  }
+  
   public void updateStatistics() {
     Collection<Metric> allMetrics = getAllMetrics();
     for (Metric metric : allMetrics) {
@@ -53,6 +84,11 @@ public class DefaultMetricManager {
   public EventMetric getEventMetric(MetricName name, TimeUnit rateUnit) {
     return (EventMetric) getMetric(name, rateUnit, null, eventMetricFactory);
   }
+
+  public ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {
+    return (ValueMetric) getMetric(name, rateUnit, null, valueMetricFactory);
+  }
+  
   
 
   private Metric getMetric(MetricName name, TimeUnit rateUnit, Clock clock, MetricFactory factory) {

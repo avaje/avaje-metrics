@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.EventMetric;
 import org.avaje.metric.MetricManager;
-import org.avaje.metric.MetricRateStatistics;
+import org.avaje.metric.Stats;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class EventMeterTest {
     meter.clearStatistics();
 
     Random random = new Random();
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
       meter.markEvent();
       Thread.sleep(50 + random.nextInt(150));
     }
@@ -56,7 +56,7 @@ public class EventMeterTest {
     // make sure statistics are current, normally this is
     // left to the background timer to update the statistics
     meter.updateStatistics();
-    MetricRateStatistics statistics = meter.getStatistics();
-    System.out.println(statistics);
+    Stats.MovingAverages statistics = meter.getStatistics();
+    System.out.println(meter.getName()+" "+statistics);
   }
 }
