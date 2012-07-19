@@ -9,8 +9,6 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import org.avaje.metric.Stats;
-
 public final class JmxMetricRegister {
 
   private MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -18,7 +16,7 @@ public final class JmxMetricRegister {
   public JmxMetricRegister() {
   }
   
-  private void registerMbean(Object mbean, ObjectName name) {
+  public void registerMbean(Object mbean, ObjectName name) {
     try {
       platformMBeanServer.registerMBean(mbean, name);
 

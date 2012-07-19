@@ -1,10 +1,7 @@
 package org.avaje.metric.stats;
 
-import static java.lang.Math.sqrt;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.avaje.metric.MetricValueEvent;
 import org.avaje.metric.Stats;

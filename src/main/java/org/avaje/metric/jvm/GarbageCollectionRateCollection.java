@@ -68,7 +68,6 @@ public class GarbageCollectionRateCollection {
     
     final GarbageCollectorMXBean garbageCollectorMXBean;
     
-    final String name;
     final LoadMetric gcLoadMetric;
     
     final AtomicLong lastCollectionCount = new AtomicLong();
@@ -76,9 +75,9 @@ public class GarbageCollectionRateCollection {
     
     Collector(GarbageCollectorMXBean garbageCollectorMXBean) {
       this.garbageCollectorMXBean = garbageCollectorMXBean;
-      this.name = garbageCollectorMXBean.getName();
- 
-      MetricName gcCountName = new MetricName("jvm","gc", this.garbageCollectorMXBean.getName().toLowerCase());
+      
+      String name = garbageCollectorMXBean.getName().toLowerCase();
+      MetricName gcCountName = new MetricName("jvm","gc", name);
 
       gcLoadMetric = new LoadMetric(gcCountName, TimeUnit.MINUTES, "gc", "ms");
     }

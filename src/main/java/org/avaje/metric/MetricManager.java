@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.core.DefaultMetricManager;
-import org.avaje.metric.jvm.GarbageCollectionRateCollection;
 
 public class MetricManager {
 

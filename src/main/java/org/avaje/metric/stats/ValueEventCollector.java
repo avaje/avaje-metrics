@@ -49,7 +49,6 @@ public class ValueEventCollector implements MetricStatistics {
         + " max:" + onedp(aggr.getMax())
         + " sum:" + aggr.getSum()
         + " mean:" + onedp(aggr.getMean())
-        + " std:" + onedp(aggr.getStdDev())
         + " 1minWork:" + onedp(workRate.getOneMinuteRate())
         + " 1min:" + onedp(eventRate.getOneMinuteRate())
         + " rateUnit:" + eventRate.getRateUnit();

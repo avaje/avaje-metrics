@@ -1,7 +1,5 @@
 package org.avaje.metric.stats;
 
-import static java.lang.Math.sqrt;
-
 import java.util.List;
 
 import org.avaje.metric.MetricValueEvent;
