@@ -11,18 +11,9 @@ public class TimedMetricFactory implements MetricFactory {
 
 
   @Override
-  public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock, JmxMetricRegister jmxRegistry) {
+  public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
     
-    TimedMetric timedMetric = new TimedMetric(name, rateUnit, clock);
-//    MetricName metricName = timedMetric.getName();
-//    jmxRegistry.register(createMxBean(timedMetric.getSuccessStatistics(), jmxRegistry), metricName.getMBeanObjectName());
-//    jmxRegistry.register(createMxBean(timedMetric.getErrorStatistics(), jmxRegistry), timedMetric.getErrorMBeanName());
-    
-    return timedMetric;
+    return new TimedMetric(name, rateUnit, clock);
   }
-  
-//  private MetricMXBean createMxBean(MetricStatistics stats, JmxMetricRegister jmxRegistry) {
-//    return jmxRegistry.createMetricMXBean(stats);
-//  }
-  
+
 }

@@ -8,13 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.management.ObjectName;
 
-import org.avaje.metric.Clock;
-import org.avaje.metric.EventMetric;
-import org.avaje.metric.Metric;
-import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricNameCache;
-import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueMetric;
+import org.avaje.metric.*;
 import org.avaje.metric.jvm.GarbageCollectionRateCollection;
 
 public class DefaultMetricManager {
@@ -30,24 +24,19 @@ public class DefaultMetricManager {
   private final MetricFactory timedMetricFactory = new TimedMetricFactory();
   private final MetricFactory eventMetricFactory = new EventMetricFactory();
   private final MetricFactory valueMetricFactory = new ValueMetricFactory();
-  
+
+  private final LoadMetric[] gcLoadMetrics;
   
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
   
   public DefaultMetricManager() {
     timer.scheduleAtFixedRate(new UpdateStatisticsTask(), 5 * 1000, 2 * 1000);
+
+    GarbageCollectionRateCollection gc = new GarbageCollectionRateCollection(timer);
+    gcLoadMetrics = gc.getGarbageCollectorsLoadMetrics();
+    registerGcMetrics();
   }
 
-  private GarbageCollectionRateCollection gcRate;
-  
-  public void addGcRateCollection() {
-    this.gcRate = null;//new GarbageCollectionRateCollection(timer);
-  }
-  
-  public GarbageCollectionRateCollection getGarbageCollectionRateCollection() {
-    return gcRate;
-  }
-  
   private class UpdateStatisticsTask extends TimerTask {
 
     @Override
@@ -89,7 +78,13 @@ public class DefaultMetricManager {
     return (ValueMetric) getMetric(name, rateUnit, null, valueMetricFactory);
   }
   
-  
+
+  private void registerGcMetrics() {
+    for (LoadMetric m : gcLoadMetrics) {
+      String cacheKey = m.getName().getMBeanName();
+      concMetricMap.put(cacheKey, m);
+    }
+  }
 
   private Metric getMetric(MetricName name, TimeUnit rateUnit, Clock clock, MetricFactory factory) {
 
@@ -101,7 +96,7 @@ public class DefaultMetricManager {
         // use synchronised block
         metric = concMetricMap.get(cacheKey);
         if (metric == null) {
-          metric = factory.createMetric(name, rateUnit, clock, jmxRegistry);
+          metric = factory.createMetric(name, rateUnit, clock);
           concMetricMap.put(cacheKey, metric);
         }
       }

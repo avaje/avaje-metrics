@@ -12,18 +12,25 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.LoadMetric;
 
+/**
+ * Collect statistics on the rate of garbage collection.
+ */
 public class GarbageCollectionRateCollection {
 
   private final Collector[] collectors;
-  
+  private final LoadMetric[] gcLoadMetrics;
+
   public GarbageCollectionRateCollection(Timer timer) {
     
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
     
     collectors = new Collector[garbageCollectorMXBeans.size()];
+    gcLoadMetrics = new LoadMetric[garbageCollectorMXBeans.size()];
+
     for (int i = 0; i < garbageCollectorMXBeans.size(); i++) {
       GarbageCollectorMXBean garbageCollectorMXBean  = garbageCollectorMXBeans.get(i);      
       collectors[i] = new Collector(garbageCollectorMXBean);
+      gcLoadMetrics[i] = collectors[i].getGCLoadMetric();
     }
     
     timer.scheduleAtFixedRate(new CollectTask(), 10000, 10000);
@@ -31,6 +38,10 @@ public class GarbageCollectionRateCollection {
   
   public String toString() {
     return Arrays.toString(collectors);
+  }
+
+  public LoadMetric[] getGarbageCollectorsLoadMetrics() {
+    return gcLoadMetrics;
   }
 
 
@@ -85,8 +96,6 @@ public class GarbageCollectionRateCollection {
      
       lastCollectionCount.set(collectionCount);
       lastCollectionTime.set(collectionTime);
-          
-      System.out.println("GC: "+name+" "+gcLoadMetric);
     }
     
     public LoadMetric getGCLoadMetric() {

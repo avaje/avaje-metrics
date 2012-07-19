@@ -10,16 +10,9 @@ import org.avaje.metric.MetricName;
 public class EventMetricFactory implements MetricFactory {
 
   @Override
-  public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock, JmxMetricRegister jmxRegistry) {
+  public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
 
-    EventMetric m = new EventMetric(name, rateUnit);
-        
-    RateStatisticsMXBean mxBean = jmxRegistry.createMetricMXBean(m.getStatistics());
-    jmxRegistry.register(mxBean, m.getName().getMBeanObjectName());
-    
-    return m;
+    return new EventMetric(name, rateUnit);
   }
 
-
-  
 }

@@ -10,16 +10,9 @@ import org.avaje.metric.ValueMetric;
 public class ValueMetricFactory implements MetricFactory {
 
   @Override
-  public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock, JmxMetricRegister jmxRegistry) {
+  public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
 
-    ValueMetric m = new ValueMetric(name, rateUnit);
-        
-    //MetricMXBean mxBean = jmxRegistry.createMetricMXBean(m.getStatistics());
-    //jmxRegistry.register(mxBean, m.getName().getMBeanObjectName());
-    
-    return m;
+    return new ValueMetric(name, rateUnit);
   }
 
-
-  
 }
