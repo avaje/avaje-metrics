@@ -57,7 +57,8 @@ public class MetricName implements Comparable<MetricName> {
    *          the scope of the {@link TimedMetric}
    */
   public MetricName(Class<?> klass, String name, String scope) {
-    this(klass.getPackage() == null ? "" : klass.getPackage().getName(), klass.getSimpleName().replaceAll("\\$$", ""), name, scope);
+    this(klass.getPackage() == null ? "" : klass.getPackage().getName(), klass.getSimpleName()
+        .replaceAll("\\$$", ""), name, scope);
   }
 
   /**

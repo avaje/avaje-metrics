@@ -6,7 +6,8 @@ import java.util.concurrent.TimeUnit;
  * A Timed Event typically used to time a SOAP operation or a SQL execution etc.
  * <p>
  * The events can end with either a successful execution or a error / fault
- * execution. The success and error statistics are collected and reported separately.
+ * execution. The success and error statistics are collected and reported
+ * separately.
  * </p>
  */
 public final class TimedMetricEvent implements MetricValueEvent {
@@ -49,7 +50,7 @@ public final class TimedMetricEvent implements MetricValueEvent {
   }
 
   public String toString() {
-    return metric.toString()+" durationMillis:" + getValue();
+    return metric.toString() + " durationMillis:" + getValue();
   }
 
   /**

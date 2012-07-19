@@ -22,9 +22,9 @@ class EWMA {
   private static final int FIFTEEN_MINUTES = 15;
 
   private final double windowDuration;
-  
+
   private final AtomicLong uncountedEvents = new AtomicLong();
-  
+
   private volatile double rate = 0.0;
 
   private long lastUpdateTimeNanos;
@@ -35,7 +35,7 @@ class EWMA {
   public static EWMA sec10EWMA() {
     return new EWMA(0.161616d);
   }
-  
+
   /**
    * Return a new EWMA which is equivalent to the UNIX one minute load average.
    */

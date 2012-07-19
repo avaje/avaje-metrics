@@ -28,7 +28,7 @@ public class StatsSum implements Stats.Summary {
     this.min = min;
     this.mean = calcMean(count, sum);
   }
-  
+
   public StatsSum(Stats.Summary s) {
     this.startTime = s.getStartTime();
     this.count = s.getCount();
@@ -39,16 +39,16 @@ public class StatsSum implements Stats.Summary {
   }
 
   public String toString() {
-    return "count:"+count+" sum:"+sum+" min:"+min+" max:"+max;
+    return "count:" + count + " sum:" + sum + " min:" + min + " max:" + max;
   }
-  
+
   private double calcMean(long count, double sum) {
     if (count > 0) {
       return sum / (double) count;
     }
     return 0.0;
   }
-  
+
   public StatsSum merge(Stats.Summary s) {
     if (s.getCount() == 0) {
       return this;
@@ -56,16 +56,16 @@ public class StatsSum implements Stats.Summary {
     long newCount = count + s.getCount();
     double newSum = sum + s.getSum();
     double newMin = Math.min(min, s.getMin());
-    double newMax = Math.max(max, s.getMax()); 
+    double newMax = Math.max(max, s.getMax());
     long newStartTime = Math.min(startTime, s.getStartTime());
-   
+
     return new StatsSum(newStartTime, newCount, newSum, newMax, newMin);
   }
 
   public long getSinceSeconds() {
-    return (System.currentTimeMillis() - startTime)/1000;
+    return (System.currentTimeMillis() - startTime) / 1000;
   }
-  
+
   @Override
   public long getStartTime() {
     return startTime;

@@ -43,15 +43,10 @@ public class ValueEventCollector implements MetricStatistics {
 
   public String toString() {
     Summary aggr = summaryStats.getAggregate();
-    return "sinceSecs:" + aggr.getSinceSeconds()
-        + " count:" + aggr.getCount() 
-        + " min:" + onedp(aggr.getMin())
-        + " max:" + onedp(aggr.getMax())
-        + " sum:" + aggr.getSum()
-        + " mean:" + onedp(aggr.getMean())
-        + " 1minWork:" + onedp(workRate.getOneMinuteRate())
-        + " 1min:" + onedp(eventRate.getOneMinuteRate())
-        + " rateUnit:" + eventRate.getRateUnit();
+    return "sinceSecs:" + aggr.getSinceSeconds() + " count:" + aggr.getCount() + " min:"
+        + onedp(aggr.getMin()) + " max:" + onedp(aggr.getMax()) + " sum:" + aggr.getSum()
+        + " mean:" + onedp(aggr.getMean()) + " 1minWork:" + onedp(workRate.getOneMinuteRate())
+        + " 1min:" + onedp(eventRate.getOneMinuteRate()) + " rateUnit:" + eventRate.getRateUnit();
   }
 
   @Override
@@ -63,7 +58,7 @@ public class ValueEventCollector implements MetricStatistics {
   public Summary getCurrentSummary() {
     return summaryStats.getCurrent();
   }
-  
+
   public Stats.MovingAverages getEventRate() {
     return eventRate;
   }

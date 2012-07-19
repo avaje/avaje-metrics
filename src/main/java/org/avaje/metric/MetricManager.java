@@ -24,7 +24,8 @@ public class MetricManager {
     return mgr.getMetricNameCache(klass);
   }
 
-  public static TimedMetric getTimedMetric(Class<?> cls, String eventName, String scope, TimeUnit rateUnit) {
+  public static TimedMetric getTimedMetric(Class<?> cls, String eventName, String scope,
+      TimeUnit rateUnit) {
     return getTimedMetric(new MetricName(cls, eventName, scope), rateUnit, null);
   }
 
@@ -36,7 +37,8 @@ public class MetricManager {
     return getEventMetric(cls, eventName, null, rateUnit);
   }
 
-  public static EventMetric getEventMetric(Class<?> cls, String eventName, String scope, TimeUnit rateUnit) {
+  public static EventMetric getEventMetric(Class<?> cls, String eventName, String scope,
+      TimeUnit rateUnit) {
     return mgr.getEventMetric(new MetricName(cls, eventName, scope), rateUnit);
   }
 

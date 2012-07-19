@@ -66,7 +66,7 @@ public class CollectMovingSummary {
     synchronized (this) {
       StatsSum movingAggregate = movingSummary.getMovingAggregate();
       // incorporate the recent data (in the last minute)
-      return movingAggregate.merge( calc());
+      return movingAggregate.merge(calc());
     }
   }
 
@@ -108,7 +108,7 @@ public class CollectMovingSummary {
 
     // get the summary for the last one minute of activity
     StatsSum lastOneMinSummary = calc();
-    
+
     // maintain the long run (daily/hourly etc) aggregate statistics
     longRunSummary = longRunSummary.merge(lastOneMinSummary);
 

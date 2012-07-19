@@ -16,14 +16,16 @@ public class EventMeterTest {
 
   @Before
   public void setUp() throws Exception {
-    this.meter = MetricManager.getEventMetric(EventMeterTest.class, "eventThings", "thingScope", TimeUnit.SECONDS);
+    this.meter = MetricManager.getEventMetric(EventMeterTest.class, "eventThings", "thingScope",
+        TimeUnit.SECONDS);
   }
 
   @Test
   public void aBlankMeter() throws Exception {
-    
+
     Assert.assertEquals("the meter has a count of zero", meter.getStatistics().getCount(), 0L);
-    Assert.assertTrue("the meter has a mean rate of zero", meter.getStatistics().getMeanRate() < 0.001);
+    Assert.assertTrue("the meter has a mean rate of zero",
+        meter.getStatistics().getMeanRate() < 0.001);
   }
 
   @Test
@@ -41,7 +43,6 @@ public class EventMeterTest {
 
   }
 
- 
   @Test
   public void testSomeRandom() throws InterruptedException {
 
@@ -57,6 +58,6 @@ public class EventMeterTest {
     // left to the background timer to update the statistics
     meter.updateStatistics();
     Stats.MovingAverages statistics = meter.getStatistics();
-    System.out.println(meter.getName()+" "+statistics);
+    System.out.println(meter.getName() + " " + statistics);
   }
 }

@@ -17,27 +17,32 @@ public class TimedMeterTest {
 
   @Before
   public void setUp() throws Exception {
-    this.meter = MetricManager.getTimedMetric(TimedMeterTest.class, "things", "thing", TimeUnit.SECONDS);
+    this.meter = MetricManager.getTimedMetric(TimedMeterTest.class, "things", "thing",
+        TimeUnit.SECONDS);
   }
 
   @Test
   public void aBlankMeter() throws Exception {
-    
-    Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics().getSummary().getCount(), 0L);
-    Assert.assertTrue("the meter has a mean rate of zero", meter.getSuccessStatistics().getEventRate().getMeanRate() < 0.001);
+
+    Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics().getSummary()
+        .getCount(), 0L);
+    Assert.assertTrue("the meter has a mean rate of zero", meter.getSuccessStatistics()
+        .getEventRate().getMeanRate() < 0.001);
   }
 
   @Test
   public void aMeterWithThreeEvents() throws Exception {
-    
+
     meter.clearStatistics();
     meter.startEvent().endWithSuccess();
     meter.startEvent().endWithSuccess();
     meter.startEvent().endWithSuccess();
     meter.updateStatistics();
 
-    Assert.assertEquals("the meter has a count of three", meter.getSuccessStatistics().getSummary().getCount(), 3L);
-    Assert.assertEquals("the meter has a error count of 0", meter.getErrorStatistics().getSummary().getCount(), 0L);
+    Assert.assertEquals("the meter has a count of three", meter.getSuccessStatistics().getSummary()
+        .getCount(), 3L);
+    Assert.assertEquals("the meter has a error count of 0", meter.getErrorStatistics().getSummary()
+        .getCount(), 0L);
   }
 
   @Test

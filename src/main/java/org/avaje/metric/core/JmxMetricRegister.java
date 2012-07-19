@@ -15,7 +15,7 @@ public final class JmxMetricRegister {
 
   public JmxMetricRegister() {
   }
-  
+
   public void registerMbean(Object mbean, ObjectName name) {
     try {
       platformMBeanServer.registerMBean(mbean, name);

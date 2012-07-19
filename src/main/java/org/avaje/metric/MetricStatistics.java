@@ -24,7 +24,8 @@ public interface MetricStatistics {
   public Stats.MovingAverages getWorkRate();
 
   /**
-   * Return the moving 5 minute summary statistics (minimum value over the last 5 minutes, maximum value of the last 5 minutes).
+   * Return the moving 5 minute summary statistics (minimum value over the last
+   * 5 minutes, maximum value of the last 5 minutes).
    */
   public Stats.Summary getSummary();
 

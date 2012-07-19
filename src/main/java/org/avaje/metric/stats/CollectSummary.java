@@ -6,12 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.avaje.metric.MetricValueEvent;
 import org.avaje.metric.Stats;
 
-
 public class CollectSummary implements Stats.Summary {
 
   private final AtomicLong min = new AtomicLong();
   private final AtomicLong max = new AtomicLong();
-  private final AtomicLong sum = new AtomicLong();                                                                                         // S
+  private final AtomicLong sum = new AtomicLong(); // S
   private final AtomicLong count = new AtomicLong();
 
   private final long startTime = System.currentTimeMillis();
@@ -20,28 +19,28 @@ public class CollectSummary implements Stats.Summary {
    * Clears all recorded values.
    */
   public void clear() {
-      count.set(0);
-      max.set(Long.MIN_VALUE);
-      min.set(Long.MAX_VALUE);
-      sum.set(0);
+    count.set(0);
+    max.set(Long.MIN_VALUE);
+    min.set(Long.MAX_VALUE);
+    sum.set(0);
   }
-  
+
   public long update(List<? extends MetricValueEvent> events) {
 
     synchronized (this) {
-      
+
       long total = 0;
-      
+
       for (int i = 0, max = events.size(); i < max; i++) {
         MetricValueEvent event = events.get(i);
         total += event.getValue();
         update(event.getValue());
       }
-      
+
       return total;
     }
   }
-  
+
   public void update(long value) {
 
     count.incrementAndGet();
@@ -52,7 +51,7 @@ public class CollectSummary implements Stats.Summary {
 
   @Override
   public long getSinceSeconds() {
-    return (System.currentTimeMillis() - startTime)/1000;
+    return (System.currentTimeMillis() - startTime) / 1000;
   }
 
   @Override

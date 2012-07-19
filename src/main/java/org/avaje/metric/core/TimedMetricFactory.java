@@ -9,10 +9,9 @@ import org.avaje.metric.TimedMetric;
 
 public class TimedMetricFactory implements MetricFactory {
 
-
   @Override
   public Metric createMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
-    
+
     return new TimedMetric(name, rateUnit, clock);
   }
 

@@ -33,37 +33,38 @@ public class CollectMovingAverages implements Stats.MovingAverages {
   private final long startTimeNanos;
   private final TimeUnit rateUnit;
   private final Clock clock;
-  
+
   private final String rateDescriptionSuffix;
-    
+
   public CollectMovingAverages(String rateDescription, TimeUnit rateUnit, Clock clock) {
 
     this.rateUnit = rateUnit;
     this.clock = clock;
     this.startTimeNanos = this.clock.getTickNanos();
-    this.rateDescriptionSuffix = rateDescription+"/"+rateUnit.name().toLowerCase().substring(0, rateUnit.name().length()-1);
+    this.rateDescriptionSuffix = rateDescription + "/"
+        + rateUnit.name().toLowerCase().substring(0, rateUnit.name().length() - 1);
   }
 
   public String toString() {
-    return "count:" + getCount() + " 1min:" +getOneMinuteDisplay()+ " mean:" + onedp(getMeanRate());
+    return "count:" + getCount() + " 1min:" + getOneMinuteDisplay() + " mean:"
+        + onedp(getMeanRate());
   }
 
   @Override
   public TimeUnit getRateUnit() {
     return rateUnit;
   }
-  
+
   public String getOneMinuteDisplay() {
     return getDescription(getOneMinuteRate());
   }
-  
+
   public String getTenSecondRateDisplay() {
     return onedp(getTenSecondRate());
   }
-  
-  
+
   public String getDescription(double value) {
-    return onedp(value)+" "+rateDescriptionSuffix;
+    return onedp(value) + " " + rateDescriptionSuffix;
   }
 
   public void clear() {

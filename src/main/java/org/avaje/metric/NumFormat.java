@@ -14,14 +14,14 @@ public class NumFormat {
   /**
    * Format the number to 1 decimal places.
    */
-  public static String onedp(double number){
+  public static String onedp(double number) {
     return format1.format(number);
   }
 
   /**
    * Format the number to 4 decimal places.
    */
-  public static String fourdp(double number){
+  public static String fourdp(double number) {
     return format4.format(number);
   }
 }

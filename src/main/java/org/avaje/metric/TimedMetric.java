@@ -33,7 +33,7 @@ public final class TimedMetric implements Metric {
 
     Clock clockToUse = (clock == null) ? Clock.defaultClock() : clock;
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
-    
+
     this.name = name;
     this.errorMBeanName = name.deriveWithNameSuffix(".error").getMBeanObjectName();
     this.clock = clockToUse;

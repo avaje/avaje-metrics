@@ -26,9 +26,9 @@ public class DefaultMetricManager {
   private final MetricFactory valueMetricFactory = new ValueMetricFactory();
 
   private final LoadMetric[] gcLoadMetrics;
-  
+
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
-  
+
   public DefaultMetricManager() {
     timer.scheduleAtFixedRate(new UpdateStatisticsTask(), 5 * 1000, 2 * 1000);
 
@@ -46,10 +46,10 @@ public class DefaultMetricManager {
   }
 
   public MetricNameCache getMetricNameCache(Class<?> klass) {
-    
+
     String key = klass.getName().replaceAll("\\$$", "");
     MetricNameCache metricNameCache = nameCache.get(key);
-    if (metricNameCache == null){
+    if (metricNameCache == null) {
       metricNameCache = new MetricNameCache(klass);
       MetricNameCache oldNameCache = nameCache.putIfAbsent(key, metricNameCache);
       if (oldNameCache != null) {
@@ -58,7 +58,7 @@ public class DefaultMetricManager {
     }
     return metricNameCache;
   }
-  
+
   public void updateStatistics() {
     Collection<Metric> allMetrics = getAllMetrics();
     for (Metric metric : allMetrics) {
@@ -69,7 +69,7 @@ public class DefaultMetricManager {
   public TimedMetric getTimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
     return (TimedMetric) getMetric(name, rateUnit, clock, timedMetricFactory);
   }
-  
+
   public EventMetric getEventMetric(MetricName name, TimeUnit rateUnit) {
     return (EventMetric) getMetric(name, rateUnit, null, eventMetricFactory);
   }
@@ -77,7 +77,6 @@ public class DefaultMetricManager {
   public ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {
     return (ValueMetric) getMetric(name, rateUnit, null, valueMetricFactory);
   }
-  
 
   private void registerGcMetrics() {
     for (LoadMetric m : gcLoadMetrics) {
