@@ -23,6 +23,17 @@ public class MetricManager {
   public static MetricNameCache getMetricNameCache(Class<?> klass) {
     return mgr.getMetricNameCache(klass);
   }
+  
+  /**
+   * Return a MetricNameCache for a given base metric name.
+   * <p>
+   * The MetricNameCache can be used to derive MetricName objects dynamically
+   * with relatively less overhead.
+   * </p>
+   */
+  public static MetricNameCache getMetricNameCache(MetricName baseName) {
+    return mgr.getMetricNameCache(baseName);
+  }
 
   public static TimedMetric getTimedMetric(Class<?> cls, String eventName, String scope,
       TimeUnit rateUnit) {

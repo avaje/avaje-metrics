@@ -46,11 +46,15 @@ public class DefaultMetricManager {
   }
 
   public MetricNameCache getMetricNameCache(Class<?> klass) {
-
-    String key = klass.getName().replaceAll("\\$$", "");
+    return getMetricNameCache(new MetricName(klass, null));
+  }
+  
+  public MetricNameCache getMetricNameCache(MetricName baseName) {
+   
+    String key = baseName.getMBeanName();
     MetricNameCache metricNameCache = nameCache.get(key);
     if (metricNameCache == null) {
-      metricNameCache = new MetricNameCache(klass);
+      metricNameCache = new MetricNameCache(baseName);
       MetricNameCache oldNameCache = nameCache.putIfAbsent(key, metricNameCache);
       if (oldNameCache != null) {
         return oldNameCache;
@@ -123,5 +127,7 @@ public class DefaultMetricManager {
       return concMetricMap.values();
     }
   }
+
+
 
 }

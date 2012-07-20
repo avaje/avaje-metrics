@@ -17,10 +17,20 @@ public final class MetricNameCache {
 
   private final ConcurrentHashMap<String, MetricName> cache = new ConcurrentHashMap<String, MetricName>();
 
+  /**
+   * Create basing the name off the Class.
+   */
   public MetricNameCache(Class<?> klass) {
-    baseName = new MetricName(klass, "", null);
+    this(new MetricName(klass, "", null));
   }
 
+  /**
+   * Create providing a base MetricName.
+   */
+  public MetricNameCache(MetricName baseName) {
+    this.baseName = baseName;
+  }
+  
   /**
    * Return the MetricName from the cache creating it if required.
    * <p>
