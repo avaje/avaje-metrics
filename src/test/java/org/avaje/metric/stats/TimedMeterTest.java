@@ -51,7 +51,7 @@ public class TimedMeterTest {
     meter.clearStatistics();
 
     Random random = new Random();
-    for (int i = 0; i < 5000; i++) {
+    for (int i = 0; i < 50; i++) {
       TimedMetricEvent startEvent = meter.startEvent();
       Thread.sleep(50 + random.nextInt(150));
       startEvent.endWithSuccess();
