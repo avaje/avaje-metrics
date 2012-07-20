@@ -24,6 +24,7 @@ public class TimedMeterTest {
   @Test
   public void aBlankMeter() throws Exception {
 
+    meter.clearStatistics();
     Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics().getSummary()
         .getCount(), 0L);
     Assert.assertTrue("the meter has a mean rate of zero", meter.getSuccessStatistics()

@@ -23,6 +23,7 @@ public class EventMeterTest {
   @Test
   public void aBlankMeter() throws Exception {
 
+    meter.clearStatistics();
     Assert.assertEquals("the meter has a count of zero", meter.getStatistics().getCount(), 0L);
     Assert.assertTrue("the meter has a mean rate of zero",
         meter.getStatistics().getMeanRate() < 0.001);
