@@ -17,38 +17,70 @@ public final class EventMetric implements Metric {
 
   private final Clock clock = Clock.defaultClock();
 
-  private final CollectMovingAverages rateMeter;
+  private final CollectMovingAverages eventRate;
 
+  /**
+   * Create the metric with a name and rateUnit.
+   * <p>
+   * The rateUnit should be chosen to 'scale' the statistics in a reasonable
+   * manor - typically events per hour, minute or second.
+   * </p>
+   */
   public EventMetric(MetricName name, TimeUnit rateUnit) {
 
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
-    this.rateMeter = new CollectMovingAverages("events", rateToUse, clock);
+    this.eventRate = new CollectMovingAverages("events", rateToUse, clock);
   }
 
-  public Stats.MovingAverages getStatistics() {
-    return rateMeter;
+  /**
+   * Return the moving average statistics for the rate of events occurring.
+   */
+  public Stats.MovingAverages getEventMovingAverage() {
+    return eventRate;
   }
 
+  /**
+   * Clear the collected statistics.
+   */
   @Override
   public void clearStatistics() {
-    rateMeter.clear();
+    eventRate.clear();
   }
 
+  /**
+   * Called periodically to update the collected statistics.
+   */
   public void updateStatistics() {
-    rateMeter.tick();
+    eventRate.tick();
+  }
+  
+  @Override
+  public void visit(MetricVisitor visitor) {
+    visitor.visitBegin(this);
+    visitor.visitEventRate(eventRate);
+    visitor.visitEnd(this);
   }
 
+  /**
+   * Return the name of the metric.
+   */
   public MetricName getName() {
     return name;
   }
 
+  /**
+   * Mark that 1 event has occurred.
+   */
   public void markEvent() {
     markEvents(1);
   }
 
+  /**
+   * Mark that numberOfEventsOccurred events have occurred.
+   */
   public void markEvents(long numberOfEventsOccurred) {
-    rateMeter.update(numberOfEventsOccurred);
+    eventRate.update(numberOfEventsOccurred);
   }
 
 }

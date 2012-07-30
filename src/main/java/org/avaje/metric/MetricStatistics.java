@@ -4,8 +4,8 @@ package org.avaje.metric;
  * Statistics collected on metrics.
  * <p>
  * The statistics collected are intended to provide a good representation of the
- * metrics current recent activity (10 seconds, 1 minute) as well as longer term
- * activity (5 minute, 15 minute). This enables the user to collect statistics
+ * metrics current activity (10 seconds) as well as relatively recent activity
+ * (1 minute and 5 minute ). This enables the user to collect statistics
  * passively (every 1 minute or every 5 minutes) or view the immediate activity
  * (last 10 seconds).
  * </p>
@@ -24,9 +24,9 @@ public interface MetricStatistics {
   public Stats.MovingAverages getWorkRate();
 
   /**
-   * Return the moving 5 minute summary statistics (minimum value over the last
-   * 5 minutes, maximum value of the last 5 minutes).
+   * Return the one minute and five minute moving summary statistics (minimum
+   * and maximum values over the last 1-2 minutes and 5-6 minutes).
    */
-  public Stats.Summary getSummary();
+  public Stats.MovingSummary getMovingSummary();
 
 }

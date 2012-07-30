@@ -1,6 +1,7 @@
 package org.avaje.metric.stats;
 
 import org.avaje.metric.Stats;
+import org.avaje.metric.Stats.MovingSummary;
 
 public class SummaryMovingBuffer {
 
@@ -24,18 +25,36 @@ public class SummaryMovingBuffer {
     }
   }
 
-  public Stats.Summary getLast() {
-    synchronized (this) {
-      if (position == 0) {
-        return buffer[buffer.length - 1];
-      } else {
-        return buffer[position - 1];
-      }
+  private Stats.Summary getLast() {
+   
+    if (position == 0) {
+      return buffer[buffer.length - 1];
+    } else {
+      return buffer[position - 1];
     }
   }
 
-  public StatsSum getMovingAggregate() {
+  public MovingSummary getMovingSummary(StatsSum current) {
     synchronized (this) {
+      
+      StatsSum fiveMinSummary = getFullBufferAggregate();
+      Stats.Summary oneMinSummary = getLast();
+      
+      fiveMinSummary = current.merge(fiveMinSummary);
+      oneMinSummary = current.merge(oneMinSummary);
+      
+      return new StatsMovingSummary(oneMinSummary, fiveMinSummary);
+    }
+  }
+  
+  protected StatsSum getFiveMinuteSummary() {
+    synchronized (this) {
+      return getFullBufferAggregate();
+    }
+  }
+  
+  private StatsSum getFullBufferAggregate() {
+    
       if (buffer[0] == null) {
         return EMPTY;
       }
@@ -47,5 +66,5 @@ public class SummaryMovingBuffer {
       }
       return sum;
     }
-  }
+  
 }

@@ -22,6 +22,13 @@ public final class ValueMetric implements Metric {
 
   private final ValueEventCollector stats;
 
+  /**
+   * Create with a name and rateUnit.
+   * <p>
+   * The rateUnit should be chosen to 'scale' the statistics in a reasonable
+   * manor - typically events per hour, minute or second.
+   * </p>
+   */
   public ValueMetric(MetricName name, TimeUnit rateUnit) {
 
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
@@ -29,10 +36,26 @@ public final class ValueMetric implements Metric {
     this.stats = new ValueEventCollector(rateToUse, clock);
   }
 
+  /**
+   * Return all the statistics collected.
+   */
   public MetricStatistics getStatistics() {
     return stats;
   }
 
+  @Override
+  public void visit(MetricVisitor visitor) {
+    visitor.visitBegin(this);
+    
+    visitor.visitBegin(this);
+    visitor.visitEventRate(stats.getEventRate());
+    visitor.visitLoadRate(stats.getWorkRate());
+    visitor.visit(stats.getMovingSummary());
+    
+    visitor.visitEnd(this);
+
+  }
+  
   @Override
   public void clearStatistics() {
     stats.clear();

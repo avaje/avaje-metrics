@@ -63,14 +63,39 @@ public final class TimedMetric implements Metric {
     return clock.getTickNanos();
   }
 
+  public void visit(MetricVisitor visitor) {
+    
+    visitor.visitBegin(this);
+    visitor.visitEventRate(successStats.getEventRate());
+    visitor.visitLoadRate(successStats.getWorkRate());
+    visitor.visit(successStats.getMovingSummary());
+    
+    visitor.visitErrorsBegin();
+    visitor.visitEventRate(errorStats.getEventRate());
+    visitor.visitLoadRate(errorStats.getWorkRate());
+    visitor.visit(errorStats.getMovingSummary());
+    visitor.visitErrorsEnd();
+    
+    visitor.visitEnd(this);
+  }
+  
+  /**
+   * Return the statistics collected for all the events that succeeded.
+   */
   public MetricStatistics getSuccessStatistics() {
     return successStats;
   }
 
+  /**
+   * Return the statistics collected for all the events that ended in error.
+   */
   public MetricStatistics getErrorStatistics() {
     return errorStats;
   }
 
+  /**
+   * Updates the collected statistics.
+   */
   public void updateStatistics() {
 
     List<TimedMetricEvent> successEvents = removeEvents(successQueue);
@@ -94,14 +119,28 @@ public final class TimedMetric implements Metric {
     return name;
   }
 
+  /**
+   * Start an event.
+   * <p>
+   * The {@link TimedMetricEvent#endWithSuccess()} or
+   * {@link TimedMetricEvent#endWithSuccess()} are called at the completion of
+   * the timed event.
+   * </p>
+   */
   public TimedMetricEvent startEvent() {
     return new TimedMetricEvent(this);
   }
 
+  /**
+   * Called by {@link TimedMetricEvent#endWithSuccess()}.
+   */
   protected void endWithSuccess(TimedMetricEvent event) {
     successQueue.add(event);
   }
 
+  /**
+   * Called by {@link TimedMetricEvent#endWithError()}.
+   */
   protected void endWithError(TimedMetricEvent event) {
     errorQueue.add(event);
   }

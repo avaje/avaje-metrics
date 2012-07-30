@@ -25,7 +25,7 @@ public class TimedMeterTest {
   public void aBlankMeter() throws Exception {
 
     meter.clearStatistics();
-    Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics().getSummary()
+    Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics().getMovingSummary().getFiveMinuteSummary()
         .getCount(), 0L);
     Assert.assertTrue("the meter has a mean rate of zero", meter.getSuccessStatistics()
         .getEventRate().getMeanRate() < 0.001);
@@ -40,9 +40,9 @@ public class TimedMeterTest {
     meter.startEvent().endWithSuccess();
     meter.updateStatistics();
 
-    Assert.assertEquals("the meter has a count of three", meter.getSuccessStatistics().getSummary()
+    Assert.assertEquals("the meter has a count of three", meter.getSuccessStatistics().getMovingSummary().getFiveMinuteSummary()
         .getCount(), 3L);
-    Assert.assertEquals("the meter has a error count of 0", meter.getErrorStatistics().getSummary()
+    Assert.assertEquals("the meter has a error count of 0", meter.getErrorStatistics().getMovingSummary().getFiveMinuteSummary()
         .getCount(), 0L);
   }
 

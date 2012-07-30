@@ -58,17 +58,23 @@ public class CollectMovingSummary {
     this.longRunSummary = new StatsSum();
   }
 
-  public Stats.Summary getLast() {
-    return movingSummary.getLast();
-  }
+//  public Stats.Summary getLast() {
+//    return movingSummary.getLast();
+//  }
 
-  public Stats.Summary getAggregate() {
+  public Stats.MovingSummary getMovingSummary() {
     synchronized (this) {
-      StatsSum movingAggregate = movingSummary.getMovingAggregate();
-      // incorporate the recent data (in the last minute)
-      return movingAggregate.merge(calc());
+      return movingSummary.getMovingSummary(calc());
     }
   }
+  
+//  public Stats.Summary getAggregate() {
+//    synchronized (this) {
+//      StatsSum movingAggregate = movingSummary.getMovingAggregate();
+//      // incorporate the recent data (in the last minute)
+//      return movingAggregate.merge(calc());
+//    }
+//  }
 
   public Stats.Summary getCurrent() {
     synchronized (this) {
