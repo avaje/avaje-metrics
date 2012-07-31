@@ -50,7 +50,7 @@ public class StatsSum implements Stats.Summary {
   }
 
   public StatsSum merge(Stats.Summary s) {
-    if (s.getCount() == 0) {
+    if (s == null || s.getCount() == 0) {
       return this;
     }
     long newCount = count + s.getCount();
