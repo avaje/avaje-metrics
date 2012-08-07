@@ -1,5 +1,7 @@
 package org.avaje.metric;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A Metric which collects statistics on events.
  */
@@ -9,6 +11,16 @@ public interface Metric {
    * Return the name of the metric.
    */
   public MetricName getName();
+
+  /**
+   * Return the TimeUnit used to measure the rate at which events occur.
+   * <p>
+   * An appropriate TimeUnit is specified for each metric so that the reported
+   * statistics are to a reasonable scale (events per millisecond, events per
+   * second, events per minute, events per hour etc).
+   * </p>
+   */
+  public TimeUnit getRateTimeUnit();
 
   /**
    * Visit the metric typically reading and reporting the underlying statistics.

@@ -23,6 +23,8 @@ public final class LoadMetric implements Metric {
 
   private final MetricName name;
 
+  private final TimeUnit rateUnit;
+  
   private final Clock clock = Clock.defaultClock();
 
   private final LoadCollector stats;
@@ -39,7 +41,13 @@ public final class LoadMetric implements Metric {
 
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
+    this.rateUnit = rateToUse;
     this.stats = new LoadCollector(rateToUse, clock, eventDesc, loadUnits);
+  }
+  
+  @Override
+  public TimeUnit getRateTimeUnit() {
+    return rateUnit;
   }
 
   @Override

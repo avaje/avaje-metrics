@@ -14,6 +14,8 @@ import org.avaje.metric.stats.CollectMovingAverages;
 public final class EventMetric implements Metric {
 
   private final MetricName name;
+  
+  private final TimeUnit rateUnit;
 
   private final Clock clock = Clock.defaultClock();
 
@@ -30,7 +32,13 @@ public final class EventMetric implements Metric {
 
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
+    this.rateUnit = rateToUse;
     this.eventRate = new CollectMovingAverages("events", rateToUse, clock);
+  }
+
+  @Override
+  public TimeUnit getRateTimeUnit() {
+    return rateUnit;
   }
 
   /**

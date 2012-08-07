@@ -20,6 +20,7 @@ import org.avaje.metric.stats.ValueEventCollector;
 public final class TimedMetric implements Metric {
 
   private final MetricName name;
+  private final TimeUnit rateUnit;
   private final Clock clock;
 
   private final ConcurrentLinkedQueue<TimedMetricEvent> successQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
@@ -35,6 +36,7 @@ public final class TimedMetric implements Metric {
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
 
     this.name = name;
+    this.rateUnit = rateToUse;
     this.errorMBeanName = name.deriveWithNameSuffix(".error").getMBeanObjectName();
     this.clock = clockToUse;
     this.successStats = new ValueEventCollector(rateToUse, clockToUse);
@@ -43,6 +45,11 @@ public final class TimedMetric implements Metric {
 
   public String toString() {
     return name.toString();
+  }
+
+  @Override
+  public TimeUnit getRateTimeUnit() {
+    return rateUnit;
   }
 
   @Override

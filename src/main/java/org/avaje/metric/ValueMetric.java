@@ -15,6 +15,8 @@ import org.avaje.metric.stats.ValueEventCollector;
 public final class ValueMetric implements Metric {
 
   private final MetricName name;
+  
+  private final TimeUnit rateUnit;
 
   private final Clock clock = Clock.defaultClock();
 
@@ -33,7 +35,13 @@ public final class ValueMetric implements Metric {
 
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
+    this.rateUnit = rateToUse;
     this.stats = new ValueEventCollector(rateToUse, clock);
+  }
+
+  @Override
+  public TimeUnit getRateTimeUnit() {
+    return rateUnit;
   }
 
   /**
