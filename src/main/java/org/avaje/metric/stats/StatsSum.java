@@ -1,5 +1,7 @@
 package org.avaje.metric.stats;
 
+import java.util.concurrent.TimeUnit;
+
 import org.avaje.metric.Stats;
 
 public class StatsSum implements Stats.Summary {
@@ -66,6 +68,23 @@ public class StatsSum implements Stats.Summary {
     return (System.currentTimeMillis() - startTime) / 1000;
   }
 
+  public double getEventRate() {
+    if (count == 0) {
+      return 0;
+    }
+    long millis = (System.currentTimeMillis() - startTime);
+    return count * 1000d / millis;
+  }
+  
+  public double getEventRate(TimeUnit rateUnit) {
+    if (count == 0) {
+      return 0d;
+    }
+    return count * 1000d / (System.currentTimeMillis() - startTime) * (double) rateUnit.toSeconds(1);    
+  }
+  
+  //double rate = summary.getEventRate(); 
+  
   @Override
   public long getStartTime() {
     return startTime;

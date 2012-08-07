@@ -1,6 +1,7 @@
 package org.avaje.metric.stats;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.avaje.metric.MetricValueEvent;
@@ -53,7 +54,15 @@ public class CollectSummary implements Stats.Summary {
   public long getSinceSeconds() {
     return (System.currentTimeMillis() - startTime) / 1000;
   }
-
+  
+  public double getEventRate(TimeUnit rateUnit) {
+    long cnt = getCount();
+    if (cnt == 0) {
+      return 0d;
+    }
+    return cnt * 1000d / (System.currentTimeMillis() - startTime) * (double) rateUnit.toSeconds(1);    
+  }
+  
   @Override
   public long getStartTime() {
     return startTime;

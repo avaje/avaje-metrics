@@ -30,6 +30,8 @@ public interface Stats {
      * Return the start time for this summary.
      */
     public long getStartTime();
+    
+    public double getEventRate(TimeUnit rateUnit);
 
     /**
      * Return the total count.
