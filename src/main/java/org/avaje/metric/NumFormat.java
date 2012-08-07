@@ -27,13 +27,13 @@ public class NumFormat {
     case 0:
       return zerodp(number);
     case 1:
-      return zerodp(number);
+      return onedp(number);
     case 2:
-      return zerodp(number);
+      return twodp(number);
     case 3:
-      return zerodp(number);
+      return threedp(number);
     case 4:
-      return zerodp(number);
+      return fourdp(number);
 
     default:
       throw new IllegalArgumentException(decimalPlaces + " decimal places not supported");
