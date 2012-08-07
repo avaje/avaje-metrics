@@ -252,7 +252,7 @@ public class MetricName implements Comparable<MetricName> {
     if (name != null && name.length() > 0) {
       sb.append(".").append(name);
     }
-    return sb.toString();
+    return sb.toString().replace(' ', '-');
   }
 
   /**
