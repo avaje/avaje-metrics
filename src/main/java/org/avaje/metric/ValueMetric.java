@@ -24,6 +24,8 @@ public final class ValueMetric implements Metric {
 
   private final ValueEventCollector stats;
 
+  private final String rateUnitAbbr;
+
   /**
    * Create with a name and rateUnit.
    * <p>
@@ -36,12 +38,18 @@ public final class ValueMetric implements Metric {
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
     this.rateUnit = rateToUse;
+    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.stats = new ValueEventCollector(rateToUse, clock);
   }
 
   @Override
   public TimeUnit getRateTimeUnit() {
     return rateUnit;
+  }
+
+  @Override
+  public String getRateUnitAbbreviation() {
+    return rateUnitAbbr;
   }
 
   /**

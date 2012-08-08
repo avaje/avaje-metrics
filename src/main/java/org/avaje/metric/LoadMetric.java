@@ -29,6 +29,8 @@ public final class LoadMetric implements Metric {
 
   private final LoadCollector stats;
 
+  private final String rateUnitAbbr;
+
   /**
    * Create the metric with a name, rateUnit, event description and units for
    * the load.
@@ -42,12 +44,18 @@ public final class LoadMetric implements Metric {
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
     this.rateUnit = rateToUse;
+    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.stats = new LoadCollector(rateToUse, clock, eventDesc, loadUnits);
   }
   
   @Override
   public TimeUnit getRateTimeUnit() {
     return rateUnit;
+  }
+ 
+  @Override
+  public String getRateUnitAbbreviation() {
+    return rateUnitAbbr;
   }
 
   @Override

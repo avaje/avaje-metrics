@@ -21,6 +21,11 @@ public interface Metric {
    * </p>
    */
   public TimeUnit getRateTimeUnit();
+  
+  /**
+   * Return the abbreviation for the rate time unit.
+   */
+  public String getRateUnitAbbreviation();
 
   /**
    * Visit the metric typically reading and reporting the underlying statistics.

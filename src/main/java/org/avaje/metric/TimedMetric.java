@@ -21,6 +21,7 @@ public final class TimedMetric implements Metric {
 
   private final MetricName name;
   private final TimeUnit rateUnit;
+  private final String rateUnitAbbr;
   private final Clock clock;
 
   private final ConcurrentLinkedQueue<TimedMetricEvent> successQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
@@ -37,6 +38,7 @@ public final class TimedMetric implements Metric {
 
     this.name = name;
     this.rateUnit = rateToUse;
+    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.errorMBeanName = name.deriveWithNameSuffix(".error").getMBeanObjectName();
     this.clock = clockToUse;
     this.successStats = new ValueEventCollector(rateToUse, clockToUse);
@@ -50,6 +52,11 @@ public final class TimedMetric implements Metric {
   @Override
   public TimeUnit getRateTimeUnit() {
     return rateUnit;
+  }
+  
+  @Override
+  public String getRateUnitAbbreviation() {
+    return rateUnitAbbr;
   }
 
   @Override

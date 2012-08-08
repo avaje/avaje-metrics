@@ -21,6 +21,8 @@ public final class EventMetric implements Metric {
 
   private final CollectMovingAverages eventRate;
 
+  private final String rateUnitAbbr;
+
   /**
    * Create the metric with a name and rateUnit.
    * <p>
@@ -33,12 +35,18 @@ public final class EventMetric implements Metric {
     TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
     this.rateUnit = rateToUse;
+    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.eventRate = new CollectMovingAverages("events", rateToUse, clock);
   }
 
   @Override
   public TimeUnit getRateTimeUnit() {
     return rateUnit;
+  }
+
+  @Override
+  public String getRateUnitAbbreviation() {
+    return rateUnitAbbr;
   }
 
   /**
