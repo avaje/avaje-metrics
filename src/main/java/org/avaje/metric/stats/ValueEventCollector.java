@@ -23,13 +23,13 @@ public class ValueEventCollector implements MetricStatistics {
   public ValueEventCollector(TimeUnit rateUnit, Clock clock) {
     this.eventRate = new CollectMovingAverages("eventRate", rateUnit, clock);
     this.workRate = new CollectMovingAverages("workRate", rateUnit, clock);
-    this.summaryStats = new CollectMovingSummary();
+    this.summaryStats = new CollectMovingSummary(rateUnit);
   }
 
   public void clear() {
     eventRate.clear();
     workRate.clear();
-    summaryStats.clear();
+    summaryStats.clearStats();
   }
 
   public void update(List<? extends MetricValueEvent> events) {
@@ -42,20 +42,26 @@ public class ValueEventCollector implements MetricStatistics {
   }
 
   public String toString() {
-    Summary aggr = summaryStats.getMovingSummary().getFiveMinuteSummary();
-    return "sinceSecs:" + aggr.getSinceSeconds() + " count:" + aggr.getCount() + " min:"
+    Summary aggr = summaryStats.getSummary();
+    return "sinceSecs:" + aggr.getDuration() + " count:" + aggr.getCount() + " min:"
         + onedp(aggr.getMin()) + " max:" + onedp(aggr.getMax()) + " sum:" + aggr.getSum()
         + " mean:" + onedp(aggr.getMean()) + " 1minWork:" + onedp(workRate.getOneMinuteRate())
         + " 1min:" + onedp(eventRate.getOneMinuteRate()) + " rateUnit:" + eventRate.getRateUnit();
   }
 
-  @Override
-  public Stats.MovingSummary getMovingSummary() {
-    return summaryStats.getMovingSummary();
+//  @Override
+//  public Stats.MovingSummary getMovingSummary() {
+//    return summaryStats.getMovingSummary();
+//  }
+
+ 
+  public Summary getSummary() {
+    return summaryStats.getSummary();
   }
 
-  public Summary getCurrentSummary() {
-    return summaryStats.getCurrent();
+  @Override
+  public Summary getSummary(boolean reset) {
+    return summaryStats.getSummary(reset);
   }
 
   public Stats.MovingAverages getEventRate() {

@@ -1,6 +1,7 @@
 package org.avaje.metric.stats;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.MetricValueEvent;
 import org.avaje.metric.Stats;
@@ -11,74 +12,60 @@ import org.avaje.metric.Stats;
  */
 public class CollectMovingSummary {
 
+  private final TimeUnit rateUnit;
   private long min = Long.MAX_VALUE;
   private long max = Long.MIN_VALUE;
   private long sum;
-
   private long count;
 
-  private final SummaryMovingBuffer movingSummary;
+  private long resetStartTime = System.currentTimeMillis();
 
-  private long lastAggregateTime = System.currentTimeMillis();
-
-  private StatsSum longRunSummary = new StatsSum();
+  private StatsSum lastSummary = new StatsSum();
 
   /**
-   * Create a 5 minute moving summary.
+   * Construct with the given rateUnit (used to determined event rate and load
+   * rate).
    */
-  public CollectMovingSummary() {
-    this(5);
-  }
-
-  /**
-   * Create a moving summary with a specified buffer size in minutes.
-   */
-  public CollectMovingSummary(int bufferSizeInMinutes) {
-    this.movingSummary = new SummaryMovingBuffer(bufferSizeInMinutes);
+  public CollectMovingSummary(TimeUnit rateUnit) {
+    this.rateUnit = rateUnit;
   }
 
   /**
    * Clears all recorded values.
    */
-  public void clear() {
+  protected void clearStats() {
     count = 0;
     sum = 0;
     max = Long.MIN_VALUE;
     min = Long.MAX_VALUE;
-    lastAggregateTime = System.currentTimeMillis();
+    resetStartTime = System.currentTimeMillis();
   }
 
   /**
-   * Reset the long run summary statistics.
+   * Return the Summary potentially resetting the statistics.
    * <p>
-   * This could be done hourly or daily depending on the need.
+   * The reset is typically used when collecting and reporting statistics
+   * periodically (every 1 minute etc).
    * </p>
    */
-  public void resetLongRunSummary() {
-    this.longRunSummary = new StatsSum();
-  }
-
-//  public Stats.Summary getLast() {
-//    return movingSummary.getLast();
-//  }
-
-  public Stats.MovingSummary getMovingSummary() {
+  public Stats.Summary getSummary(boolean reset) {
     synchronized (this) {
-      return movingSummary.getMovingSummary(calc());
+      if (!reset) {
+        return calcMerge();
+      }
+      StatsSum calc = calc();
+      lastSummary = calc;
+      clearStats();
+      return calc;
     }
   }
-  
-//  public Stats.Summary getAggregate() {
-//    synchronized (this) {
-//      StatsSum movingAggregate = movingSummary.getMovingAggregate();
-//      // incorporate the recent data (in the last minute)
-//      return movingAggregate.merge(calc());
-//    }
-//  }
 
-  public Stats.Summary getCurrent() {
+  /**
+   * Return the Summary without reseting the statistics.
+   */
+  public Stats.Summary getSummary() {
     synchronized (this) {
-      return calc();
+      return calcMerge();
     }
   }
 
@@ -98,39 +85,24 @@ public class CollectMovingSummary {
         update(event.getValue());
       }
 
-      if (System.currentTimeMillis() - lastAggregateTime >= 60000) {
-        // aggregate the statistics into the buffer every 1 minute
-        aggregateStatistics();
-      }
-
       return total;
     }
   }
 
-  /**
-   * Aggregate the statistics into the rolling buffer.
-   */
-  private void aggregateStatistics() {
-
-    // get the summary for the last one minute of activity
-    StatsSum lastOneMinSummary = calc();
-
-    // maintain the long run (daily/hourly etc) aggregate statistics
-    longRunSummary = longRunSummary.merge(lastOneMinSummary);
-
-    // put the last 1 minutes summary into the buffer
-    movingSummary.put(lastOneMinSummary);
-
-    // reset the counters for the next minute
-    count = 0;
-    sum = 0;
-    max = Long.MIN_VALUE;
-    min = Long.MAX_VALUE;
-    lastAggregateTime = System.currentTimeMillis();
+  private StatsSum calc() {
+    return new StatsSum(rateUnit, resetStartTime, count, sum, max(), min());
   }
 
-  private StatsSum calc() {
-    return new StatsSum(lastAggregateTime, count, sum, max(), min());
+  private StatsSum calcMerge() {
+    if (lastSummary.getCount() == 0) {
+      return new StatsSum(rateUnit, resetStartTime, count, sum, max(), min());
+    }
+    long newCount = count + lastSummary.getCount();
+    double newSum = sum + lastSummary.getSum();
+    double newMin = Math.min(min, lastSummary.getMin());
+    double newMax = Math.max(max, lastSummary.getMax());
+    long newStartTime = Math.min(resetStartTime, lastSummary.getStartTime());
+    return new StatsSum(rateUnit, newStartTime, newCount, newSum, newMax, newMin);
   }
 
   private void update(long value) {

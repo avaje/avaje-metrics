@@ -2,6 +2,9 @@ package org.avaje.metric;
 
 public interface MetricVisitor {
 
+  
+  public boolean isResetSummaryStatistics();
+  
   /**
    * Start visiting a metric.
    */
@@ -33,7 +36,7 @@ public interface MetricVisitor {
   /**
    * Visit an underlying summary statistics.
    */
-  public void visit(Stats.MovingSummary summary);
+  public void visit(Stats.Summary summary);
   
   /**
    * End of visiting a metric.

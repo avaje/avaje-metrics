@@ -56,10 +56,9 @@ public final class ValueMetric implements Metric {
     visitor.visitBegin(this);
     
     visitor.visitBegin(this);
+    visitor.visit(stats.getSummary(visitor.isResetSummaryStatistics()));
     visitor.visitEventRate(stats.getEventRate());
-    visitor.visitLoadRate(stats.getWorkRate());
-    visitor.visit(stats.getMovingSummary());
-    
+    visitor.visitLoadRate(stats.getWorkRate());    
     visitor.visitEnd(this);
 
   }

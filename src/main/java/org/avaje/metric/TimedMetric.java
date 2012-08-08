@@ -73,14 +73,13 @@ public final class TimedMetric implements Metric {
   public void visit(MetricVisitor visitor) {
     
     visitor.visitBegin(this);
+    visitor.visit(successStats.getSummary(visitor.isResetSummaryStatistics()));
     visitor.visitEventRate(successStats.getEventRate());
     visitor.visitLoadRate(successStats.getWorkRate());
-    visitor.visit(successStats.getMovingSummary());
-    
     visitor.visitErrorsBegin();
+    visitor.visit(errorStats.getSummary(visitor.isResetSummaryStatistics()));
     visitor.visitEventRate(errorStats.getEventRate());
     visitor.visitLoadRate(errorStats.getWorkRate());
-    visitor.visit(errorStats.getMovingSummary());
     visitor.visitErrorsEnd();
     
     visitor.visitEnd(this);

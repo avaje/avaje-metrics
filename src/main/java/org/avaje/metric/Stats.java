@@ -6,17 +6,12 @@ import java.util.concurrent.TimeUnit;
  * Statistics calculated for the Metrics.
  */
 public interface Stats {
-  
+
   /**
    * Summary of values.
    * <p>
    * We are mostly interested in the min and max values which provide the range
    * of values collected (as an alternative to calculating percentiles).
-   * </p>
-   * <p>
-   * Collection of summary values over 1 minute intervals up to 6 minutes
-   * provides us with a reasonable measure of the min and max range of values
-   * over the last 5 minutes.
    * </p>
    */
   public interface Summary {
@@ -24,14 +19,24 @@ public interface Stats {
     /**
      * Return the time to now in seconds this summary has been collected for.
      */
-    public long getSinceSeconds();
+    public long getDuration();
 
     /**
      * Return the start time for this summary.
      */
     public long getStartTime();
-    
-    public double getEventRate(TimeUnit rateUnit);
+
+    /**
+     * Return the rate at which events are occurring (relative to the rateUnit
+     * specified for the metric).
+     */
+    public double getEventRate();
+
+    /**
+     * Return the rate at which load is occurring (relative to the rateUnit
+     * specified for the metric).
+     */
+    public double getLoadRate();
 
     /**
      * Return the total count.
@@ -49,7 +54,7 @@ public interface Stats {
     public double getMax();
 
     /**
-     * Return the minium value.
+     * Return the minimum value.
      */
     public double getMin();
 
@@ -57,26 +62,6 @@ public interface Stats {
      * Return the mean value.
      */
     public double getMean();
-  }
-
-  /**
-   * Moving summary of min/max range of values over short 1-2 minute period and
-   * longer 5-6 minute period.
-   * <p>
-   * This provides something similar to percentiles.
-   * </p>
-   */
-  public interface MovingSummary {
-
-    /**
-     * Return the moving summary over the last 1-2 minutes.
-     */
-    public Summary getOneMinuteSummary();
-
-    /**
-     * Return the moving summary over the last 5-6 minutes.
-     */
-    public Summary getFiveMinuteSummary();
   }
 
   /**
