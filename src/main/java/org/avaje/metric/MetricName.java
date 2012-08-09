@@ -93,11 +93,8 @@ public class MetricName implements Comparable<MetricName> {
    *          the MBean.
    */
   public MetricName(String group, String type, String name, String scope, String mBeanName) {
-    if (group == null || type == null) {
-      throw new IllegalArgumentException("Both group and type need to be specified");
-    }
-    if (name == null) {
-      throw new IllegalArgumentException("Name needs to be specified");
+    if (group == null) {
+      throw new IllegalArgumentException("group needs to be specified");
     }
     this.group = group;
     this.type = type;
@@ -236,7 +233,10 @@ public class MetricName implements Comparable<MetricName> {
 
   private static String createMBeanName(String group, String type, String name, String scope) {
     StringBuilder sb = new StringBuilder(80);
-    sb.append(group).append(":type=").append(type);
+    sb.append(group);
+    if (type != null) {
+      sb.append(":type=").append(type);
+    }
     if (scope != null) {
       sb.append(",scope=").append(scope);
     }
@@ -248,7 +248,10 @@ public class MetricName implements Comparable<MetricName> {
 
   private static String createSimpleName(String group, String type, String name) {
     StringBuilder sb = new StringBuilder(80);
-    sb.append(group).append(".").append(type);
+    sb.append(group);
+    if (type != null) {
+      sb.append(".").append(type);
+    }
     if (name != null && name.length() > 0) {
       sb.append(".").append(name);
     }
