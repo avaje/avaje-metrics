@@ -61,14 +61,21 @@ public final class ValueMetric implements Metric {
 
   @Override
   public void visit(MetricVisitor visitor) {
-    visitor.visitBegin(this);
     
-    visitor.visitBegin(this);
-    visitor.visit(stats.getSummary(visitor.isResetSummaryStatistics()));
-    visitor.visitEventRate(stats.getEventRate());
-    visitor.visitLoadRate(stats.getWorkRate());    
-    visitor.visitEnd(this);
-
+    
+    boolean empty = stats.isSummaryEmpty();
+    if (!visitor.visitBegin(this, empty)) {
+      // skip processing/reporting for empty metric
+      if (empty) {
+        // reset effectively moving the start time
+        stats.resetSummary();
+      }
+    } else {
+      visitor.visit(stats.getSummary(visitor.isResetSummaryStatistics()));
+      visitor.visitEventRate(stats.getEventRate());
+      visitor.visitLoadRate(stats.getWorkRate());    
+      visitor.visitEnd(this);
+    }
   }
   
   @Override

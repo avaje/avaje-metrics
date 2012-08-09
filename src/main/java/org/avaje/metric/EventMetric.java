@@ -73,9 +73,11 @@ public final class EventMetric implements Metric {
   
   @Override
   public void visit(MetricVisitor visitor) {
-    visitor.visitBegin(this);
-    visitor.visitEventRate(eventRate);
-    visitor.visitEnd(this);
+    boolean empty = eventRate.isEmpty(visitor.getCollectionRateSeconds());
+    if (visitor.visitBegin(this, empty)) {
+      visitor.visitEventRate(eventRate);
+      visitor.visitEnd(this);
+    }
   }
 
   /**

@@ -98,6 +98,16 @@ public class CollectMovingAverages implements Stats.MovingAverages {
     m15Rate.tick();
   }
 
+  public boolean isEmpty(int seconds) {
+    if (seconds <= 30) {
+      return getTenSecondRate() < 0.001d;
+    }
+    if (seconds <= 90) {
+      return getOneMinuteRate() < 0.001d;
+    }
+    return getFiveMinuteRate() < 0.001d;
+  }
+  
   @Override
   public long getCount() {
     return count.get();

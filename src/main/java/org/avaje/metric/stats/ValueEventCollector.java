@@ -49,11 +49,19 @@ public class ValueEventCollector implements MetricStatistics {
         + " 1min:" + onedp(eventRate.getOneMinuteRate()) + " rateUnit:" + eventRate.getRateUnit();
   }
 
-//  @Override
-//  public Stats.MovingSummary getMovingSummary() {
-//    return summaryStats.getMovingSummary();
-//  }
-
+  /**
+   * Return true if the summary statistics are empty (no events occurred).
+   */
+  public boolean isSummaryEmpty() {
+    return summaryStats.isEmpty();
+  }
+  
+  /**
+   * Reset the summary statistics effectively moving the resetStartTime.
+   */
+  public void resetSummary() {
+    summaryStats.reset();
+  }
  
   public Summary getSummary() {
     return summaryStats.getSummary();

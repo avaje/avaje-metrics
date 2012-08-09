@@ -24,7 +24,7 @@ public final class LoadMetric implements Metric {
   private final MetricName name;
 
   private final TimeUnit rateUnit;
-  
+
   private final Clock clock = Clock.defaultClock();
 
   private final LoadCollector stats;
@@ -47,12 +47,12 @@ public final class LoadMetric implements Metric {
     this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.stats = new LoadCollector(rateToUse, clock, eventDesc, loadUnits);
   }
-  
+
   @Override
   public TimeUnit getRateTimeUnit() {
     return rateUnit;
   }
- 
+
   @Override
   public String getRateUnitAbbreviation() {
     return rateUnitAbbr;
@@ -96,13 +96,15 @@ public final class LoadMetric implements Metric {
   public Stats.MovingAverages getEventMovingAverage() {
     return stats.getEventMovingAverage();
   }
-  
+
   @Override
   public void visit(MetricVisitor visitor) {
-    visitor.visitBegin(this);
-    visitor.visitEventRate(stats.getEventMovingAverage());
-    visitor.visitLoadRate(stats.getLoadMovingAverage());
-    visitor.visitEnd(this);
+    boolean empty = stats.isEmpty(visitor.getCollectionRateSeconds());
+    if (visitor.visitBegin(this, empty)) {
+      visitor.visitEventRate(stats.getEventMovingAverage());
+      visitor.visitLoadRate(stats.getLoadMovingAverage());
+      visitor.visitEnd(this);
+    }
   }
 
   public String toString() {

@@ -41,7 +41,7 @@ public class LoadCollector {
         + eventRate.getOneMinuteDisplay() + " load.1min: " + loadRate.getOneMinuteDisplay()
         + " load.10sec: " + loadRate.getTenSecondRateDisplay();
   }
-
+  
   public long getTotalCount() {
     return totalCount.get();
   }
@@ -50,6 +50,16 @@ public class LoadCollector {
     return totalLoad.get();
   }
 
+  public boolean isEmpty(int seconds) {
+    if (seconds <= 30) {
+      return eventRate.getTenSecondRate() < 0.001d;
+    }
+    if (seconds <= 90) {
+      return eventRate.getOneMinuteRate() < 0.001d;
+    }
+    return eventRate.getFiveMinuteRate() < 0.001d;
+  }
+  
   public Stats.MovingAverages getEventMovingAverage() {
     return eventRate;
   }

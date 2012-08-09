@@ -60,6 +60,19 @@ public class CollectMovingSummary {
     }
   }
 
+  public void reset() {
+    synchronized (this) {
+      clearStats();
+    }
+  }
+
+  
+  public boolean isEmpty() {
+    synchronized (this) {
+      return count == 0;
+    }
+  }
+  
   /**
    * Return the Summary without reseting the statistics.
    */

@@ -79,17 +79,26 @@ public final class TimedMetric implements Metric {
 
   public void visit(MetricVisitor visitor) {
     
-    visitor.visitBegin(this);
-    visitor.visit(successStats.getSummary(visitor.isResetSummaryStatistics()));
-    visitor.visitEventRate(successStats.getEventRate());
-    visitor.visitLoadRate(successStats.getWorkRate());
-    visitor.visitErrorsBegin();
-    visitor.visit(errorStats.getSummary(visitor.isResetSummaryStatistics()));
-    visitor.visitEventRate(errorStats.getEventRate());
-    visitor.visitLoadRate(errorStats.getWorkRate());
-    visitor.visitErrorsEnd();
-    
-    visitor.visitEnd(this);
+    boolean emptyMetric = successStats.isSummaryEmpty() && errorStats.isSummaryEmpty();
+    if (!visitor.visitBegin(this, emptyMetric)) {
+      // skip processing this metric
+      if (emptyMetric) {
+        // reset effectively moving the resetStartTime to now
+        successStats.resetSummary();
+        errorStats.resetSummary();
+      }
+      
+    } else {
+      visitor.visit(successStats.getSummary(visitor.isResetSummaryStatistics()));
+      visitor.visitEventRate(successStats.getEventRate());
+      visitor.visitLoadRate(successStats.getWorkRate());
+      visitor.visitErrorsBegin();
+      visitor.visit(errorStats.getSummary(visitor.isResetSummaryStatistics()));
+      visitor.visitEventRate(errorStats.getEventRate());
+      visitor.visitLoadRate(errorStats.getWorkRate());
+      visitor.visitErrorsEnd();
+      visitor.visitEnd(this);
+    }
   }
   
   /**
