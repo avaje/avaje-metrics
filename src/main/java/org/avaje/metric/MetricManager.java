@@ -53,8 +53,7 @@ public class MetricManager {
    * Return a TimedMetric using the Class, name and scope to derive the
    * MetricName.
    */
-  public static TimedMetric getTimedMetric(Class<?> cls, String eventName, String scope,
-      TimeUnit rateUnit) {
+  public static TimedMetric getTimedMetric(Class<?> cls, String eventName, String scope, TimeUnit rateUnit) {
     return getTimedMetric(new MetricName(cls, eventName, scope), rateUnit, null);
   }
 
@@ -76,8 +75,7 @@ public class MetricManager {
    * Return a EventMetric using the Class, name and scope to derive the
    * MetricName.
    */
-  public static EventMetric getEventMetric(Class<?> cls, String eventName, String scope,
-      TimeUnit rateUnit) {
+  public static EventMetric getEventMetric(Class<?> cls, String eventName, String scope, TimeUnit rateUnit) {
     return mgr.getEventMetric(new MetricName(cls, eventName, scope), rateUnit);
   }
 
@@ -100,6 +98,46 @@ public class MetricManager {
    */
   public static TimedMetric getTimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
     return mgr.getTimedMetric(name, rateUnit, clock);
+  }
+
+  /**
+   * Return a TimedMetricGroup.
+   * <p>
+   * This is used when a group of TimedMetric's have a common base name,
+   * rateUnit and clock. These TimedMetric's only differ by the name (all share
+   * the same group and type etc).
+   * </p>
+   * 
+   * @param baseName
+   *          the common part of the metric name
+   * @param rateUnit
+   *          the rateUnit for all the TimedMetric's
+   * @param clock
+   *          the clock to use
+   * 
+   * @return the TimedMetricGroup used to create TimedMetric's that have a
+   *         common base name.
+   */
+  public static TimedMetricGroup getTimedMetricGroup(MetricName baseName, TimeUnit rateUnit, Clock clock) {
+    return new TimedMetricGroup(baseName, rateUnit, clock);
+  }
+
+  /**
+   * Return a TimedMetricGroup with a common group and type name.
+   * <p>
+   * This uses the default clock.
+   * </p>
+   * @param group
+   *          the common group name
+   * @param type
+   *          the common type name
+   * @param rateUnit
+   *          the rateUnit used
+   * @return the TimedMetricGroup used to create TimedMetric's that have a
+   *         common base name.
+   */
+  public static TimedMetricGroup getTimedMetricGroup(String group, String type, TimeUnit rateUnit) {
+    return new TimedMetricGroup(new MetricName(group, type, "dummy"), rateUnit, Clock.defaultClock());
   }
 
   /**

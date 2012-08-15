@@ -54,6 +54,17 @@ public final class TimedMetricEvent implements MetricValueEvent {
   }
 
   /**
+   * End specifying whether the event was successful or in error.
+   */
+  public void end(boolean withSuccess) {
+    if (withSuccess) {
+      endWithSuccess();
+    } else {
+      endWithError();
+    }
+  }
+  
+  /**
    * This timed event ended with successful execution (e.g. Successful SOAP
    * Operation or SQL execution).
    */
