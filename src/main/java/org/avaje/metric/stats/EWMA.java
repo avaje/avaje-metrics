@@ -103,6 +103,11 @@ class EWMA {
 
     double alpha2 = 1 - exp(-intervalMillis / windowDuration);
     rate += (alpha2 * (instantRate - rate));
+    
+    if (Double.isNaN(rate)) {
+      // reset rate after operating system resume and such
+      rate = 0.0d;
+    }
   }
 
   /**
