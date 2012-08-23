@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.avaje.metric.Clock;
-import org.avaje.metric.Stats;
+import org.avaje.metric.MovingAverageStatistics;
 
 /**
  * Measures average throughput with one minute, five minute, and fifteen minute
@@ -22,7 +22,7 @@ import org.avaje.metric.Stats;
  * @see <a
  *      href="http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average">EMA</a>
  */
-public class CollectMovingAverages implements Stats.MovingAverages {
+public class CollectMovingAverages implements MovingAverageStatistics {
 
   private final EWMA m1Rate = EWMA.oneMinuteEWMA();
   private final EWMA m5Rate = EWMA.fiveMinuteEWMA();

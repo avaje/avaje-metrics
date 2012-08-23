@@ -2,9 +2,9 @@ package org.avaje.metric.stats;
 
 import java.util.concurrent.TimeUnit;
 
-import org.avaje.metric.Stats;
+import org.avaje.metric.SummaryStatistics;
 
-public class StatsSum implements Stats.Summary {
+public class DSummaryStatistics implements SummaryStatistics {
 
   final TimeUnit rateUnit;
   final long startTime;
@@ -14,12 +14,12 @@ public class StatsSum implements Stats.Summary {
   final double min;
   final double mean;
   
-  long duration;
-  double eventRate;
-  double loadRate;
+  final long duration;
+  final double eventRate;
+  final double loadRate;
   
 
-  public StatsSum() {
+  public DSummaryStatistics() {
     this.rateUnit = null;
     this.startTime = System.currentTimeMillis();
     this.count = 0;
@@ -27,9 +27,12 @@ public class StatsSum implements Stats.Summary {
     this.max = Long.MIN_VALUE;
     this.min = Long.MAX_VALUE;
     this.mean = 0;
+    this.duration = 0;
+    this.eventRate = 0;
+    this.loadRate = 0;
   }
 
-  public StatsSum(TimeUnit rateUnit, long startTime, long count, double sum, double max, double min) {
+  public DSummaryStatistics(TimeUnit rateUnit, long startTime, long count, double sum, double max, double min) {
     this.rateUnit = rateUnit;
     this.startTime = startTime;
     this.count = count;
@@ -47,15 +50,6 @@ public class StatsSum implements Stats.Summary {
     loadRate = (count == 0) ? 0d : sum * 1000d / millisRate; 
   }
 
-//  public StatsSum(Stats.Summary s) {
-//    this.startTime = s.getStartTime();
-//    this.count = s.getCount();
-//    this.sum = s.getSum();
-//    this.max = s.getMax();
-//    this.min = s.getMin();
-//    this.mean = s.getMean();
-//  }
-
   public String toString() {
     return "count:" + count + " sum:" + sum + " min:" + min + " max:" + max;
   }
@@ -67,49 +61,18 @@ public class StatsSum implements Stats.Summary {
     return 0.0;
   }
 
-//  public StatsSum merge(Stats.Summary s) {
-//    if (s == null || s.getCount() == 0) {
-//      return this;
-//    }
-//    long newCount = count + s.getCount();
-//    double newSum = sum + s.getSum();
-//    double newMin = Math.min(min, s.getMin());
-//    double newMax = Math.max(max, s.getMax());
-//    long newStartTime = Math.min(startTime, s.getStartTime());
-//
-//    return new StatsSum(rateUnit, newStartTime, newCount, newSum, newMax, newMin);
-//  }
-
   public long getDuration() {
-    return duration;// Math.round((System.currentTimeMillis() - startTime) / 1000d);
+    return duration;
   }
-
-//  public double getEventRate() {
-//    if (count == 0) {
-//      return 0;
-//    }
-//    long millis = (System.currentTimeMillis() - startTime);
-//    return count * 1000d / millis;
-//  }
   
   public double getEventRate() {
     return eventRate;
-//    if (count == 0) {
-//      return 0d;
-//    }
-//    return count * 1000d / (System.currentTimeMillis() - startTime) * (double) rateUnit.toSeconds(1);    
   }
   
   public double getLoadRate() {
     return loadRate;
-//    if (count == 0) {
-//      return 0d;
-//    }
-//    return sum * 1000d / (System.currentTimeMillis() - startTime) * (double) rateUnit.toSeconds(1);    
   }
-  
-  //double rate = summary.getEventRate(); 
-  
+    
   @Override
   public long getStartTime() {
     return startTime;

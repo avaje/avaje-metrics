@@ -47,6 +47,18 @@ public class MetricName implements Comparable<MetricName> {
   }
 
   /**
+   * Creates a new {@link MetricName} with just a group and name.
+   * 
+   * @param group
+   *          the group to which the {@link TimedMetric} belongs
+   * @param name
+   *          the name of the {@link TimedMetric}
+   */
+  public MetricName(String group, String name) {
+    this(group, null, name, null);
+  }
+  
+  /**
    * Creates a new {@link MetricName} without a scope.
    * 
    * @param klass

@@ -3,9 +3,9 @@ package org.avaje.metric.stats;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.avaje.metric.CounterStatistics;
 import org.avaje.metric.EventMetric;
 import org.avaje.metric.MetricManager;
-import org.avaje.metric.Stats;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,23 +24,21 @@ public class EventMeterTest {
   public void aBlankMeter() throws Exception {
 
     meter.clearStatistics();
-    Assert.assertEquals("the meter has a count of zero", meter.getEventMovingAverage().getCount(), 0L);
-    Assert.assertTrue("the meter has a mean rate of zero",
-        meter.getEventMovingAverage().getMeanRate() < 0.001);
+    Assert.assertEquals("the meter has a count of zero", meter.getCounterStatistics().getCount(), 0L);
   }
 
   @Test
   public void aMeterWithThreeEvents() throws Exception {
 
     meter.clearStatistics();
-    Assert.assertEquals("the meter has a count of 0", meter.getEventMovingAverage().getCount(), 0L);
+    Assert.assertEquals("the meter has a count of 0", meter.getCounterStatistics().getCount(), 0L);
 
     meter.markEvent();
     meter.markEvent();
     meter.markEvent();
     meter.updateStatistics();
 
-    Assert.assertEquals("the meter has a count of three", meter.getEventMovingAverage().getCount(), 3L);
+    Assert.assertEquals("the meter has a count of three", meter.getCounterStatistics().getCount(), 3L);
 
   }
 
@@ -58,7 +56,7 @@ public class EventMeterTest {
     // make sure statistics are current, normally this is
     // left to the background timer to update the statistics
     meter.updateStatistics();
-    Stats.MovingAverages statistics = meter.getEventMovingAverage();
+    CounterStatistics statistics = meter.getCounterStatistics();
     System.out.println(meter.getName() + " " + statistics);
   }
 }

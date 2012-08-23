@@ -1,27 +1,24 @@
 package org.avaje.metric;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.avaje.metric.stats.CollectMovingAverages;
+import org.avaje.metric.stats.CollectCounterEvents;
 
 /**
- * Measure events that occur. This just measures the rate that the events occur
- * so there is no account for the 'load' of each event.
+ * Count events that occur.
  * <p>
- * This could be used to measure things like error events or warning events.
+ * For example, this is used to count the error events and warning events logged
+ * via log4j or logback.
  * </p>
  */
 public final class EventMetric implements Metric {
 
   private final MetricName name;
-  
-  private final TimeUnit rateUnit;
 
-  private final Clock clock = Clock.defaultClock();
+  private final CollectCounterEvents eventRate;
 
-  private final CollectMovingAverages eventRate;
-
-  private final String rateUnitAbbr;
+  private final AtomicLong counter = new AtomicLong(0);
 
   /**
    * Create the metric with a name and rateUnit.
@@ -32,28 +29,22 @@ public final class EventMetric implements Metric {
    */
   public EventMetric(MetricName name, TimeUnit rateUnit) {
 
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
     this.name = name;
-    this.rateUnit = rateToUse;
-    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
-    this.eventRate = new CollectMovingAverages("events", rateToUse, clock);
+    this.eventRate = new CollectCounterEvents();
   }
 
   @Override
   public TimeUnit getRateTimeUnit() {
-    return rateUnit;
+    return null;
   }
 
   @Override
   public String getRateUnitAbbreviation() {
-    return rateUnitAbbr;
+    return "";
   }
 
-  /**
-   * Return the moving average statistics for the rate of events occurring.
-   */
-  public Stats.MovingAverages getEventMovingAverage() {
-    return eventRate;
+  public CounterStatistics getCounterStatistics() {
+    return eventRate.collect(false);
   }
 
   /**
@@ -61,6 +52,7 @@ public final class EventMetric implements Metric {
    */
   @Override
   public void clearStatistics() {
+    counter.set(0);
     eventRate.clear();
   }
 
@@ -68,14 +60,15 @@ public final class EventMetric implements Metric {
    * Called periodically to update the collected statistics.
    */
   public void updateStatistics() {
-    eventRate.tick();
+    long eventCount = counter.getAndSet(0);
+    eventRate.updateAndTick(eventCount);
   }
-  
+
   @Override
   public void visit(MetricVisitor visitor) {
     boolean empty = eventRate.isEmpty(visitor.getCollectionRateSeconds());
     if (visitor.visitBegin(this, empty)) {
-      visitor.visitEventRate(eventRate);
+      visitor.visit(eventRate.collect(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
   }
@@ -91,14 +84,14 @@ public final class EventMetric implements Metric {
    * Mark that 1 event has occurred.
    */
   public void markEvent() {
-    markEvents(1);
+    counter.incrementAndGet();
   }
 
   /**
    * Mark that numberOfEventsOccurred events have occurred.
    */
   public void markEvents(long numberOfEventsOccurred) {
-    eventRate.update(numberOfEventsOccurred);
+    counter.addAndGet(numberOfEventsOccurred);
   }
 
 }

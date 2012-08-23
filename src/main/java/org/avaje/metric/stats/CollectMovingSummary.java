@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.Stats;
+import org.avaje.metric.SummaryStatistics;
 
 /**
  * Collects summary statistics in moving buffer. Typically used to hold
@@ -20,7 +20,7 @@ public class CollectMovingSummary {
 
   private long resetStartTime = System.currentTimeMillis();
 
-  private StatsSum lastSummary = new StatsSum();
+  private DSummaryStatistics lastSummary = new DSummaryStatistics();
 
   /**
    * Construct with the given rateUnit (used to determined event rate and load
@@ -48,12 +48,12 @@ public class CollectMovingSummary {
    * periodically (every 1 minute etc).
    * </p>
    */
-  public Stats.Summary getSummary(boolean reset) {
+  public SummaryStatistics getSummary(boolean reset) {
     synchronized (this) {
       if (!reset) {
         return calcMerge();
       }
-      StatsSum calc = calc();
+      DSummaryStatistics calc = calc();
       lastSummary = calc;
       clearStats();
       return calc;
@@ -76,7 +76,7 @@ public class CollectMovingSummary {
   /**
    * Return the Summary without reseting the statistics.
    */
-  public Stats.Summary getSummary() {
+  public SummaryStatistics getSummary() {
     synchronized (this) {
       return calcMerge();
     }
@@ -102,20 +102,20 @@ public class CollectMovingSummary {
     }
   }
 
-  private StatsSum calc() {
-    return new StatsSum(rateUnit, resetStartTime, count, sum, max(), min());
+  private DSummaryStatistics calc() {
+    return new DSummaryStatistics(rateUnit, resetStartTime, count, sum, max(), min());
   }
 
-  private StatsSum calcMerge() {
-    if (lastSummary.getCount() == 0) {
-      return new StatsSum(rateUnit, resetStartTime, count, sum, max(), min());
+  private DSummaryStatistics calcMerge() {
+    if (lastSummary.getDuration() == 0) {
+      return new DSummaryStatistics(rateUnit, resetStartTime, count, sum, max(), min());
     }
     long newCount = count + lastSummary.getCount();
     double newSum = sum + lastSummary.getSum();
     double newMin = Math.min(min, lastSummary.getMin());
     double newMax = Math.max(max, lastSummary.getMax());
     long newStartTime = Math.min(resetStartTime, lastSummary.getStartTime());
-    return new StatsSum(rateUnit, newStartTime, newCount, newSum, newMax, newMin);
+    return new DSummaryStatistics(rateUnit, newStartTime, newCount, newSum, newMax, newMin);
   }
 
   private void update(long value) {

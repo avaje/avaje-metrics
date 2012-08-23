@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.avaje.metric.Clock;
 import org.avaje.metric.MetricStatistics;
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.Stats;
-import org.avaje.metric.Stats.Summary;
+import org.avaje.metric.MovingAverageStatistics;
+import org.avaje.metric.SummaryStatistics;
 
 /**
  * Collects statistics for ValueMetics.
@@ -42,7 +42,7 @@ public class ValueEventCollector implements MetricStatistics {
   }
 
   public String toString() {
-    Summary aggr = summaryStats.getSummary();
+    SummaryStatistics aggr = summaryStats.getSummary();
     return "sinceSecs:" + aggr.getDuration() + " count:" + aggr.getCount() + " min:"
         + onedp(aggr.getMin()) + " max:" + onedp(aggr.getMax()) + " sum:" + aggr.getSum()
         + " mean:" + onedp(aggr.getMean()) + " 1minWork:" + onedp(workRate.getOneMinuteRate())
@@ -63,20 +63,20 @@ public class ValueEventCollector implements MetricStatistics {
     summaryStats.reset();
   }
  
-  public Summary getSummary() {
+  public SummaryStatistics getSummary() {
     return summaryStats.getSummary();
   }
 
   @Override
-  public Summary getSummary(boolean reset) {
+  public SummaryStatistics getSummary(boolean reset) {
     return summaryStats.getSummary(reset);
   }
 
-  public Stats.MovingAverages getEventRate() {
+  public MovingAverageStatistics getEventRate() {
     return eventRate;
   }
 
-  public Stats.MovingAverages getWorkRate() {
+  public MovingAverageStatistics getWorkRate() {
     return workRate;
   }
 

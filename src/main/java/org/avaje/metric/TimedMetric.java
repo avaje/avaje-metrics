@@ -34,7 +34,7 @@ public final class TimedMetric implements Metric {
   public TimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
 
     Clock clockToUse = (clock == null) ? Clock.defaultClock() : clock;
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
+    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.MINUTES : rateUnit;
 
     this.name = name;
     this.rateUnit = rateToUse;
@@ -89,11 +89,11 @@ public final class TimedMetric implements Metric {
       }
       
     } else {
-      visitor.visit(successStats.getSummary(visitor.isResetSummaryStatistics()));
+      visitor.visit(successStats.getSummary(visitor.isResetStatistics()));
       visitor.visitEventRate(successStats.getEventRate());
       visitor.visitLoadRate(successStats.getWorkRate());
       visitor.visitErrorsBegin();
-      visitor.visit(errorStats.getSummary(visitor.isResetSummaryStatistics()));
+      visitor.visit(errorStats.getSummary(visitor.isResetStatistics()));
       visitor.visitEventRate(errorStats.getEventRate());
       visitor.visitLoadRate(errorStats.getWorkRate());
       visitor.visitErrorsEnd();

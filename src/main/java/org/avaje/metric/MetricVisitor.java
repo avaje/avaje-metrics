@@ -5,12 +5,15 @@ package org.avaje.metric;
  */
 public interface MetricVisitor {
 
+  /**
+   * Return the rate in seconds the statistics are collected.
+   */
   public int getCollectionRateSeconds();
   
   /**
-   * Return true if summary statistics should be reset after being visited.
+   * Return true if statistics should be reset after being visited.
    */
-  public boolean isResetSummaryStatistics();
+  public boolean isResetStatistics();
 
   /**
    * Start visiting a metric with a flag indicating if the metric currently has
@@ -40,17 +43,23 @@ public interface MetricVisitor {
   /**
    * Visit the moving average for the rate of events occurring.
    */
-  public void visitEventRate(Stats.MovingAverages eventRate);
+  public void visit(CounterStatistics counterStatistics);
+
+  
+  /**
+   * Visit the moving average for the rate of events occurring.
+   */
+  public void visitEventRate(MovingAverageStatistics eventRate);
 
   /**
    * Visit the moving average for the rate of load/work occurring.
    */
-  public void visitLoadRate(Stats.MovingAverages loadRate);
+  public void visitLoadRate(MovingAverageStatistics loadRate);
 
   /**
    * Visit an underlying summary statistics.
    */
-  public void visit(Stats.Summary summary);
+  public void visit(SummaryStatistics summary);
 
   /**
    * End of visiting a metric.

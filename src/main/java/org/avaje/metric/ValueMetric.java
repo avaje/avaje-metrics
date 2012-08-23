@@ -35,7 +35,7 @@ public final class ValueMetric implements Metric {
    */
   public ValueMetric(MetricName name, TimeUnit rateUnit) {
 
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
+    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.MINUTES : rateUnit;
     this.name = name;
     this.rateUnit = rateToUse;
     this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
@@ -62,7 +62,6 @@ public final class ValueMetric implements Metric {
   @Override
   public void visit(MetricVisitor visitor) {
     
-    
     boolean empty = stats.isSummaryEmpty();
     if (!visitor.visitBegin(this, empty)) {
       // skip processing/reporting for empty metric
@@ -71,7 +70,7 @@ public final class ValueMetric implements Metric {
         stats.resetSummary();
       }
     } else {
-      visitor.visit(stats.getSummary(visitor.isResetSummaryStatistics()));
+      visitor.visit(stats.getSummary(visitor.isResetStatistics()));
       visitor.visitEventRate(stats.getEventRate());
       visitor.visitLoadRate(stats.getWorkRate());    
       visitor.visitEnd(this);

@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.avaje.metric.Clock;
-import org.avaje.metric.Stats;
+import org.avaje.metric.MovingAverageStatistics;
 
 /**
  * Maintains moving averages of loads.
@@ -60,11 +60,11 @@ public class LoadCollector {
     return eventRate.getFiveMinuteRate() < 0.001d;
   }
   
-  public Stats.MovingAverages getEventMovingAverage() {
+  public MovingAverageStatistics getEventMovingAverage() {
     return eventRate;
   }
 
-  public Stats.MovingAverages getLoadMovingAverage() {
+  public MovingAverageStatistics getLoadMovingAverage() {
     return loadRate;
   }
 

@@ -41,7 +41,7 @@ public final class LoadMetric implements Metric {
    */
   public LoadMetric(MetricName name, TimeUnit rateUnit, String eventDesc, String loadUnits) {
 
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.SECONDS : rateUnit;
+    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.MINUTES : rateUnit;
     this.name = name;
     this.rateUnit = rateToUse;
     this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
@@ -86,14 +86,14 @@ public final class LoadMetric implements Metric {
   /**
    * Return the moving averages for the rate of load occurring.
    */
-  public Stats.MovingAverages getLoadMovingAverage() {
+  public MovingAverageStatistics getLoadMovingAverage() {
     return stats.getLoadMovingAverage();
   }
 
   /**
    * Return the moving averages for the rate that the events are occurring.
    */
-  public Stats.MovingAverages getEventMovingAverage() {
+  public MovingAverageStatistics getEventMovingAverage() {
     return stats.getEventMovingAverage();
   }
 
