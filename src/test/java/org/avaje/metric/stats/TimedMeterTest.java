@@ -1,7 +1,6 @@
 package org.avaje.metric.stats;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.MetricStatistics;
@@ -17,8 +16,7 @@ public class TimedMeterTest {
 
   @Before
   public void setUp() throws Exception {
-    this.meter = MetricManager.getTimedMetric(TimedMeterTest.class, "things", "thing",
-        TimeUnit.SECONDS);
+    this.meter = MetricManager.getTimedMetric(TimedMeterTest.class, "things");
   }
 
   @Test

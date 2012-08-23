@@ -28,6 +28,18 @@ public class MetricManager {
   }
 
   /**
+   * Returns a MetricBuilder to get metrics using extra parameters such as
+   * rateUnit and clock.
+   * <p>
+   * This will not expected to be used very often with reasonable default
+   * rateUnit of Minutes and the default clock.
+   * </p>
+   */
+  public static MetricBuilder build() {
+    return new DefaultMetricBuilder();
+  }
+
+  /**
    * Return a MetricNameCache for the given class.
    * <p>
    * The MetricNameCache can be used to derive MetricName objects dynamically
@@ -50,14 +62,6 @@ public class MetricManager {
   }
 
   /**
-   * Return a TimedMetric using the Class, name and scope to derive the
-   * MetricName.
-   */
-  public static TimedMetric getTimedMetric(Class<?> cls, String eventName, String scope, TimeUnit rateUnit) {
-    return getTimedMetric(new MetricName(cls, eventName, scope), rateUnit, null);
-  }
-
-  /**
    * Return a TimedMetric given its metricName.
    */
   public static TimedMetric getTimedMetric(MetricName metricName) {
@@ -65,18 +69,17 @@ public class MetricManager {
   }
 
   /**
-   * Return a CounterMetric using the Class and name to derive the MetricName.
+   * Return a TimedMetric using the Class, name to derive the MetricName.
    */
-  public static CounterMetric getCounterMetric(Class<?> cls, String eventName) {
-    return getCounterMetric(cls, eventName, null);
+  public static TimedMetric getTimedMetric(Class<?> cls, String eventName) {
+    return getTimedMetric(new MetricName(cls, eventName), null, null);
   }
 
   /**
-   * Return a CounterMetric using the Class, name and scope to derive the
-   * MetricName.
+   * Return a TimedMetric given the name, rateUnit and clock.
    */
-  public static CounterMetric getCounterMetric(Class<?> cls, String eventName, String scope) {
-    return mgr.getCounterMetric(new MetricName(cls, eventName, scope));
+  protected static TimedMetric getTimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
+    return mgr.getTimedMetric(name, rateUnit, clock);
   }
 
   /**
@@ -87,17 +90,45 @@ public class MetricManager {
   }
 
   /**
-   * Return a ValueMetric given the name, rateUnit.
+   * Return a CounterMetric using the Class and name to derive the MetricName.
    */
-  public static ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {
-    return mgr.getValueMetric(name, rateUnit);
+  public static CounterMetric getCounterMetric(Class<?> cls, String eventName) {
+    return getCounterMetric(new MetricName(cls, eventName));
   }
 
   /**
-   * Return a TimedMetric given the name, rateUnit and clock.
+   * Return a LoadMetric given the name.
    */
-  public static TimedMetric getTimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
-    return mgr.getTimedMetric(name, rateUnit, clock);
+  public static LoadMetric getLoadMetric(MetricName name) {
+    return mgr.getLoadMetric(name);
+  }
+
+  /**
+   * Return a LoadMetric using the Class and name to derive the MetricName.
+   */
+  public static LoadMetric getLoadMetric(Class<?> cls, String eventName) {
+    return getLoadMetric(new MetricName(cls, eventName));
+  }
+
+  /**
+   * Return a ValueMetric given the name, rateUnit.
+   */
+  public static ValueMetric getValueMetric(MetricName name) {
+    return mgr.getValueMetric(name, null);
+  }
+
+  /**
+   * Return a ValueMetric using the Class and name to derive the MetricName.
+   */
+  public static ValueMetric getValueMetric(Class<?> cls, String eventName) {
+    return getValueMetric(new MetricName(cls, eventName));
+  }
+
+  /**
+   * Return a ValueMetric given the name, rateUnit.
+   */
+  protected static ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {
+    return mgr.getValueMetric(name, rateUnit);
   }
 
   /**
@@ -127,6 +158,7 @@ public class MetricManager {
    * <p>
    * This uses the default clock.
    * </p>
+   * 
    * @param group
    *          the common group name
    * @param type

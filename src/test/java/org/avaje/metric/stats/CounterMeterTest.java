@@ -15,7 +15,13 @@ public class CounterMeterTest {
 
   @Before
   public void setUp() throws Exception {
-    this.meter = MetricManager.getCounterMetric(CounterMeterTest.class, "eventThings", "thingScope");
+    this.meter = MetricManager.build().setName(CounterMeterTest.class, "eventThings").getCounterMetric();
+  }
+  
+  @Test
+  public void matchesOther() {
+    CounterMetric normalAccess = MetricManager.getCounterMetric(CounterMeterTest.class, "eventThings");
+    Assert.assertSame(meter, normalAccess);
   }
 
   @Test
