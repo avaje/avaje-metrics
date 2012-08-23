@@ -82,7 +82,7 @@ public class MetricManager {
   /**
    * Return a CounterMetric given the name.
    */
-  public static CounterMetric getEventMetric(MetricName name) {
+  public static CounterMetric getCounterMetric(MetricName name) {
     return mgr.getCounterMetric(name);
   }
 

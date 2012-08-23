@@ -45,18 +45,6 @@ public class MetricName implements Comparable<MetricName> {
   public MetricName(String group, String type, String name) {
     this(group, type, name, null);
   }
-
-  /**
-   * Creates a new {@link MetricName} with just a group and name.
-   * 
-   * @param group
-   *          the group to which the {@link TimedMetric} belongs
-   * @param name
-   *          the name of the {@link TimedMetric}
-   */
-  public MetricName(String group, String name) {
-    this(group, null, name, null);
-  }
   
   /**
    * Creates a new {@link MetricName} without a scope.
@@ -107,6 +95,9 @@ public class MetricName implements Comparable<MetricName> {
   public MetricName(String group, String type, String name, String scope, String mBeanName) {
     if (group == null) {
       throw new IllegalArgumentException("group needs to be specified");
+    }
+    if (type == null) {
+      throw new IllegalArgumentException("type needs to be specified for JMX bean name support");
     }
     this.group = group;
     this.type = type;
