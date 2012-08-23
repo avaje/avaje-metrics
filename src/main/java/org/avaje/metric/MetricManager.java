@@ -65,25 +65,25 @@ public class MetricManager {
   }
 
   /**
-   * Return a EventMetric using the Class and name to derive the MetricName.
+   * Return a CounterMetric using the Class and name to derive the MetricName.
    */
-  public static EventMetric getEventMetric(Class<?> cls, String eventName, TimeUnit rateUnit) {
-    return getEventMetric(cls, eventName, null, rateUnit);
+  public static CounterMetric getCounterMetric(Class<?> cls, String eventName) {
+    return getCounterMetric(cls, eventName, null);
   }
 
   /**
-   * Return a EventMetric using the Class, name and scope to derive the
+   * Return a CounterMetric using the Class, name and scope to derive the
    * MetricName.
    */
-  public static EventMetric getEventMetric(Class<?> cls, String eventName, String scope, TimeUnit rateUnit) {
-    return mgr.getEventMetric(new MetricName(cls, eventName, scope), rateUnit);
+  public static CounterMetric getCounterMetric(Class<?> cls, String eventName, String scope) {
+    return mgr.getCounterMetric(new MetricName(cls, eventName, scope));
   }
 
   /**
-   * Return a EventMetric given the name and rateUnit.
+   * Return a CounterMetric given the name.
    */
-  public static EventMetric getEventMetric(MetricName name, TimeUnit rateUnit) {
-    return mgr.getEventMetric(name, rateUnit);
+  public static CounterMetric getEventMetric(MetricName name) {
+    return mgr.getCounterMetric(name);
   }
 
   /**

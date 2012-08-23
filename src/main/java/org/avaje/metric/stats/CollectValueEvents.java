@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.avaje.metric.Clock;
 import org.avaje.metric.MetricStatistics;
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.SummaryStatistics;
+import org.avaje.metric.ValueStatistics;
 
 /**
  * Collects statistics for ValueMetics.
@@ -31,7 +31,7 @@ public class CollectValueEvents implements MetricStatistics {
   }
 
   public String toString() {
-    SummaryStatistics aggr = summaryStats.getSummary();
+    ValueStatistics aggr = summaryStats.getSummary();
     return "dur:" + aggr.getDuration() + " count:" + aggr.getCount() + " min:" + onedp(aggr.getMin()) + " avg:"
         + onedp(aggr.getMean()) + " max:" + onedp(aggr.getMax()) + " sum:" + aggr.getSum();
   }
@@ -50,12 +50,12 @@ public class CollectValueEvents implements MetricStatistics {
     summaryStats.reset();
   }
 
-  public SummaryStatistics getSummary() {
+  public ValueStatistics getSummary() {
     return summaryStats.getSummary();
   }
 
   @Override
-  public SummaryStatistics getSummary(boolean reset) {
+  public ValueStatistics getSummary(boolean reset) {
     return summaryStats.getSummaryStatistics(reset);
   }
 

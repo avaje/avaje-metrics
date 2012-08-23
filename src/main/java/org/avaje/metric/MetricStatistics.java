@@ -16,7 +16,7 @@ public interface MetricStatistics {
    * Return the one minute and five minute moving summary statistics (minimum
    * and maximum values over the last 1-2 minutes and 5-6 minutes).
    */
-  public SummaryStatistics getSummary(boolean reset);
+  public ValueStatistics getSummary(boolean reset);
 
-  public SummaryStatistics getSummary();
+  public ValueStatistics getSummary();
 }

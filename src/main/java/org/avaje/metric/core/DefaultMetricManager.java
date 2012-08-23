@@ -22,7 +22,7 @@ public class DefaultMetricManager {
   private final JmxMetricRegister jmxRegistry = new JmxMetricRegister();
 
   private final MetricFactory timedMetricFactory = new TimedMetricFactory();
-  private final MetricFactory eventMetricFactory = new EventMetricFactory();
+  private final MetricFactory eventMetricFactory = new CounterMetricFactory();
   private final MetricFactory valueMetricFactory = new ValueMetricFactory();
 
   private final LoadMetric[] gcLoadMetrics;
@@ -74,8 +74,8 @@ public class DefaultMetricManager {
     return (TimedMetric) getMetric(name, rateUnit, clock, timedMetricFactory);
   }
 
-  public EventMetric getEventMetric(MetricName name, TimeUnit rateUnit) {
-    return (EventMetric) getMetric(name, rateUnit, null, eventMetricFactory);
+  public CounterMetric getCounterMetric(MetricName name) {
+    return (CounterMetric) getMetric(name, null, null, eventMetricFactory);
   }
 
   public ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {

@@ -53,7 +53,7 @@ public interface MetricVisitor {
   /**
    * Visit summary statistics.
    */
-  public void visit(SummaryStatistics summary);
+  public void visit(ValueStatistics summary);
 
   /**
    * End of visiting a metric.

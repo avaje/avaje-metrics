@@ -7,7 +7,7 @@ package org.avaje.metric;
  * these will be collected and reported every minute or so.
  * </p>
  */
-public interface SummaryStatistics extends Statistics {
+public interface ValueStatistics extends Statistics {
 
   /**
    * Return the start time these aggregate statistics were started to be collected.

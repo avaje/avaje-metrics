@@ -1,23 +1,21 @@
 package org.avaje.metric.stats;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
+import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.EventMetric;
 import org.avaje.metric.MetricManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EventMeterTest {
+public class CounterMeterTest {
 
-  private EventMetric meter;
+  private CounterMetric meter;
 
   @Before
   public void setUp() throws Exception {
-    this.meter = MetricManager.getEventMetric(EventMeterTest.class, "eventThings", "thingScope",
-        TimeUnit.SECONDS);
+    this.meter = MetricManager.getCounterMetric(CounterMeterTest.class, "eventThings", "thingScope");
   }
 
   @Test

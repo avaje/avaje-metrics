@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.MetricValueEvent;
-import org.avaje.metric.SummaryStatistics;
+import org.avaje.metric.ValueStatistics;
 
 /**
  * Collects summary statistics in moving buffer. Typically used to hold
@@ -48,7 +48,7 @@ public class CollectMovingSummary {
    * periodically (every 1 minute etc).
    * </p>
    */
-  public SummaryStatistics getSummaryStatistics(boolean reset) {
+  public ValueStatistics getSummaryStatistics(boolean reset) {
     synchronized (this) {
       if (!reset) {
         return calcMerge();
@@ -76,7 +76,7 @@ public class CollectMovingSummary {
   /**
    * Return the Summary without reseting the statistics.
    */
-  public SummaryStatistics getSummary() {
+  public ValueStatistics getSummary() {
     synchronized (this) {
       return calcMerge();
     }

@@ -12,7 +12,7 @@ import org.avaje.metric.stats.CollectCounterEvents;
  * via log4j or logback.
  * </p>
  */
-public final class EventMetric implements Metric {
+public final class CounterMetric implements Metric {
 
   private final MetricName name;
 
@@ -27,7 +27,7 @@ public final class EventMetric implements Metric {
    * manor - typically events per hour, minute or second.
    * </p>
    */
-  public EventMetric(MetricName name, TimeUnit rateUnit) {
+  public CounterMetric(MetricName name) {
 
     this.name = name;
     this.eventRate = new CollectCounterEvents();

@@ -2,9 +2,9 @@ package org.avaje.metric.stats;
 
 import java.util.concurrent.TimeUnit;
 
-import org.avaje.metric.SummaryStatistics;
+import org.avaje.metric.ValueStatistics;
 
-public class DSummaryStatistics implements SummaryStatistics {
+public class DSummaryStatistics implements ValueStatistics {
 
   final TimeUnit rateUnit;
   final long startTime;
