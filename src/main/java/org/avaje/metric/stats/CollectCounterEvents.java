@@ -36,7 +36,7 @@ public class CollectCounterEvents {
   }
 
   public boolean isEmpty() {
-    return counter.get() > 0;
+    return counter.get() == 0;
   }
 
   public CounterStatistics getCounterStatistics(boolean reset) {
