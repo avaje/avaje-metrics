@@ -9,17 +9,17 @@ public class DCounterStatistics implements CounterStatistics {
 
   private final long count;
   private final long duration;
-  private final long durationMillis;
+  private final long startTime;
   
   public DCounterStatistics() {
     this.count = 0;
-    this.durationMillis = 0;
+    this.startTime = 0; 
     this.duration = 0;
   }
   
-  public DCounterStatistics(long count, long durationMillis) {
+  public DCounterStatistics(long count, long durationMillis, long startTime) {
     this.count = count;
-    this.durationMillis = durationMillis;
+    this.startTime = startTime;
     this.duration =  Math.round(durationMillis / 1000d);
   }
 
@@ -38,20 +38,16 @@ public class DCounterStatistics implements CounterStatistics {
   }
   
   @Override
-  public long getDurationMillis() {
-    return durationMillis;
-  }  
-  
-  public DCounterStatistics merge(DCounterStatistics other) {
-    return merge(other.getCount(), other.getDuration());
+  public long getStartTime() {
+    return startTime;
   }
-  
+
   public DCounterStatistics merge(long extraCount, long extraDuration) {
     
     long totalCount = count + extraCount;
     long totalDuration = duration + extraDuration;
     
-    return new DCounterStatistics(totalCount, totalDuration);
+    return new DCounterStatistics(totalCount, totalDuration, startTime);
   }
   
 }

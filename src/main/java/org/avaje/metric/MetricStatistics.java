@@ -13,17 +13,6 @@ package org.avaje.metric;
 public interface MetricStatistics {
 
   /**
-   * Return the moving averages for the rate events are occurring.
-   */
-  public MovingAverageStatistics getEventRate();
-
-  /**
-   * Return the moving averages for the rate that load (execution time, bytes,
-   * rows etc) is occurring.
-   */
-  public MovingAverageStatistics getWorkRate();
-
-  /**
    * Return the one minute and five minute moving summary statistics (minimum
    * and maximum values over the last 1-2 minutes and 5-6 minutes).
    */

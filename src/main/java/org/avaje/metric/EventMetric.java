@@ -44,7 +44,7 @@ public final class EventMetric implements Metric {
   }
 
   public CounterStatistics getCounterStatistics() {
-    return eventRate.collect(false);
+    return eventRate.getCounterStatistics(false);
   }
 
   /**
@@ -66,9 +66,9 @@ public final class EventMetric implements Metric {
 
   @Override
   public void visit(MetricVisitor visitor) {
-    boolean empty = eventRate.isEmpty(visitor.getCollectionRateSeconds());
+    boolean empty = eventRate.isEmpty();
     if (visitor.visitBegin(this, empty)) {
-      visitor.visit(eventRate.collect(visitor.isResetStatistics()));
+      visitor.visit(eventRate.getCounterStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
   }

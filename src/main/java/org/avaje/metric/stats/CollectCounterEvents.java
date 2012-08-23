@@ -2,6 +2,8 @@ package org.avaje.metric.stats;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.avaje.metric.CounterStatistics;
+
 /**
  * Collect counts (AtomicLong) but pair with a duration over which the counts
  * have been collected.
@@ -33,19 +35,19 @@ public class CollectCounterEvents {
     }
   }
 
-  public boolean isEmpty(int secs) {
+  public boolean isEmpty() {
     return counter.get() > 0;
   }
 
-  public DCounterStatistics collect(boolean reset) {
+  public CounterStatistics getCounterStatistics(boolean reset) {
     synchronized (this) {
       if (reset) {
         // return the current results and reset
         long count = counter.getAndSet(0);
         long durMillis = System.currentTimeMillis() - startTime;
 
+        lastCounterStats = new DCounterStatistics(count, durMillis, startTime);
         startTime = System.currentTimeMillis();
-        lastCounterStats = new DCounterStatistics(count, durMillis);
         return lastCounterStats;
 
       } else {
@@ -55,7 +57,7 @@ public class CollectCounterEvents {
         long count = counter.get();
         long durMillis = System.currentTimeMillis() - startTime;
         if (lastCounterStats.getDuration() == 0) {
-          return new DCounterStatistics(count, durMillis);
+          return new DCounterStatistics(count, durMillis, startTime);
         } else {
           return lastCounterStats.merge(count, durMillis);
         }

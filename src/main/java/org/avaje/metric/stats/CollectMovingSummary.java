@@ -48,7 +48,7 @@ public class CollectMovingSummary {
    * periodically (every 1 minute etc).
    * </p>
    */
-  public SummaryStatistics getSummary(boolean reset) {
+  public SummaryStatistics getSummaryStatistics(boolean reset) {
     synchronized (this) {
       if (!reset) {
         return calcMerge();

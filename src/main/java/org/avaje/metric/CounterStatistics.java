@@ -6,18 +6,18 @@ package org.avaje.metric;
 public interface CounterStatistics extends Statistics {
 
   /**
-   * Return the count of events.
+   * Return the time these statistics started being collected.
    */
-  public long getCount();
-
+  public long getStartTime();
+  
   /**
    * Return the duration in seconds.
    */
   public long getDuration();
   
   /**
-   * Return the duration in milliseconds.
+   * Return the count of events.
    */
-  public long getDurationMillis();
+  public long getCount();
   
 }

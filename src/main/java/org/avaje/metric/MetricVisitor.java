@@ -41,23 +41,17 @@ public interface MetricVisitor {
   public void visitErrorsEnd();
 
   /**
-   * Visit the moving average for the rate of events occurring.
+   * Visit the load statistics.
+   */
+  public void visit(LoadStatistics loadStatistics);
+  
+  /**
+   * Visit the counter statistics.
    */
   public void visit(CounterStatistics counterStatistics);
 
-  
   /**
-   * Visit the moving average for the rate of events occurring.
-   */
-  public void visitEventRate(MovingAverageStatistics eventRate);
-
-  /**
-   * Visit the moving average for the rate of load/work occurring.
-   */
-  public void visitLoadRate(MovingAverageStatistics loadRate);
-
-  /**
-   * Visit an underlying summary statistics.
+   * Visit summary statistics.
    */
   public void visit(SummaryStatistics summary);
 

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.management.ObjectName;
 
-import org.avaje.metric.stats.ValueEventCollector;
+import org.avaje.metric.stats.CollectValueEvents;
 
 /**
  * Designed to capture the duration of timed events.
@@ -27,8 +27,8 @@ public final class TimedMetric implements Metric {
   private final ConcurrentLinkedQueue<TimedMetricEvent> successQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
   private final ConcurrentLinkedQueue<TimedMetricEvent> errorQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
 
-  private final ValueEventCollector successStats;
-  private final ValueEventCollector errorStats;
+  private final CollectValueEvents successStats;
+  private final CollectValueEvents errorStats;
   private ObjectName errorMBeanName;
 
   public TimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
@@ -41,8 +41,8 @@ public final class TimedMetric implements Metric {
     this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.errorMBeanName = name.deriveWithNameSuffix(".error").getMBeanObjectName();
     this.clock = clockToUse;
-    this.successStats = new ValueEventCollector(rateToUse, clockToUse);
-    this.errorStats = new ValueEventCollector(rateToUse, clockToUse);
+    this.successStats = new CollectValueEvents(rateToUse, clockToUse);
+    this.errorStats = new CollectValueEvents(rateToUse, clockToUse);
   }
 
   public String toString() {
@@ -90,12 +90,8 @@ public final class TimedMetric implements Metric {
       
     } else {
       visitor.visit(successStats.getSummary(visitor.isResetStatistics()));
-      visitor.visitEventRate(successStats.getEventRate());
-      visitor.visitLoadRate(successStats.getWorkRate());
       visitor.visitErrorsBegin();
       visitor.visit(errorStats.getSummary(visitor.isResetStatistics()));
-      visitor.visitEventRate(errorStats.getEventRate());
-      visitor.visitLoadRate(errorStats.getWorkRate());
       visitor.visitErrorsEnd();
       visitor.visitEnd(this);
     }

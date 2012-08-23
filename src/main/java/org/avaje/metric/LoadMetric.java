@@ -2,60 +2,42 @@ package org.avaje.metric;
 
 import java.util.concurrent.TimeUnit;
 
-import org.avaje.metric.stats.LoadCollector;
+import org.avaje.metric.stats.CollectLoadEvents;
 
 /**
  * Measure 'aggregate' count and load events.
  * <p>
  * Compared with ValueMetric this takes an aggregation of count and load rather
  * than individual events. This means that min/max statistics are not collected
- * and instead just the MovingAverages for the event rate and the load rate.
+ * and instead LoadStatistics which just have the count and load (no min, max,
+ * average etc).
  * </p>
  * <p>
- * Also note that the statistics are collected in the foreground thread rather
- * than queued and calculated later.
- * </p>
- * <p>
- * This can be used to measure Garbage Collection.
+ * This can be used to measure Garbage Collection rates.
  * </p>
  */
 public final class LoadMetric implements Metric {
 
   private final MetricName name;
 
-  private final TimeUnit rateUnit;
-
-  private final Clock clock = Clock.defaultClock();
-
-  private final LoadCollector stats;
-
-  private final String rateUnitAbbr;
+  private final CollectLoadEvents stats;
 
   /**
-   * Create the metric with a name, rateUnit, event description and units for
-   * the load.
-   * <p>
-   * The rateUnit should be chosen to 'scale' the statistics in a reasonable
-   * manor - typically events per hour, minute or second.
-   * </p>
+   * Create the metric.
    */
-  public LoadMetric(MetricName name, TimeUnit rateUnit, String eventDesc, String loadUnits) {
-
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.MINUTES : rateUnit;
+  public LoadMetric(MetricName name) {
     this.name = name;
-    this.rateUnit = rateToUse;
-    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
-    this.stats = new LoadCollector(rateToUse, clock, eventDesc, loadUnits);
+    this.stats = new CollectLoadEvents();
   }
 
   @Override
   public TimeUnit getRateTimeUnit() {
-    return rateUnit;
+    return null;
   }
 
   @Override
   public String getRateUnitAbbreviation() {
-    return rateUnitAbbr;
+    return "";
   }
 
   @Override
@@ -84,25 +66,17 @@ public final class LoadMetric implements Metric {
   }
 
   /**
-   * Return the moving averages for the rate of load occurring.
+   * Return the load statistics.
    */
-  public MovingAverageStatistics getLoadMovingAverage() {
-    return stats.getLoadMovingAverage();
-  }
-
-  /**
-   * Return the moving averages for the rate that the events are occurring.
-   */
-  public MovingAverageStatistics getEventMovingAverage() {
-    return stats.getEventMovingAverage();
+  public LoadStatistics getLoadStatistics(boolean reset) {
+    return stats.getLoadStatistics(reset);
   }
 
   @Override
   public void visit(MetricVisitor visitor) {
-    boolean empty = stats.isEmpty(visitor.getCollectionRateSeconds());
+    boolean empty = stats.isEmpty();
     if (visitor.visitBegin(this, empty)) {
-      visitor.visitEventRate(stats.getEventMovingAverage());
-      visitor.visitLoadRate(stats.getLoadMovingAverage());
+      visitor.visit(stats.getLoadStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
   }

@@ -6,11 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.avaje.metric.MetricName;
 import org.avaje.metric.LoadMetric;
+import org.avaje.metric.MetricName;
 
 /**
  * Collect statistics on the rate of garbage collection.
@@ -78,7 +77,7 @@ public class GarbageCollectionRateCollection {
       String name = garbageCollectorMXBean.getName().toLowerCase();
       MetricName gcCountName = new MetricName("jvm", "gc", name);
 
-      gcLoadMetric = new LoadMetric(gcCountName, TimeUnit.MINUTES, "gc", "ms");
+      gcLoadMetric = new LoadMetric(gcCountName);
     }
 
     private void collect() {
@@ -90,7 +89,6 @@ public class GarbageCollectionRateCollection {
       long gcDurationMillisSince = collectionTime - lastCollectionTime.get();
 
       gcLoadMetric.addEvent(gcCountSince, gcDurationMillisSince);
-      // System.out.println("GC - "+gcLoadMetric);
 
       lastCollectionCount.set(collectionCount);
       lastCollectionTime.set(collectionTime);

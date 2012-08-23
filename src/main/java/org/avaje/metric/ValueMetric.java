@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.avaje.metric.stats.ValueEventCollector;
+import org.avaje.metric.stats.CollectValueEvents;
 
 /**
  * Measure events that occur with a long value. This long value could be bytes
@@ -22,7 +22,7 @@ public final class ValueMetric implements Metric {
 
   private final ConcurrentLinkedQueue<ValueMetricEvent> queue = new ConcurrentLinkedQueue<ValueMetricEvent>();
 
-  private final ValueEventCollector stats;
+  private final CollectValueEvents stats;
 
   private final String rateUnitAbbr;
 
@@ -39,7 +39,7 @@ public final class ValueMetric implements Metric {
     this.name = name;
     this.rateUnit = rateToUse;
     this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
-    this.stats = new ValueEventCollector(rateToUse, clock);
+    this.stats = new CollectValueEvents(rateToUse, clock);
   }
 
   @Override
@@ -70,9 +70,7 @@ public final class ValueMetric implements Metric {
         stats.resetSummary();
       }
     } else {
-      visitor.visit(stats.getSummary(visitor.isResetStatistics()));
-      visitor.visitEventRate(stats.getEventRate());
-      visitor.visitLoadRate(stats.getWorkRate());    
+      visitor.visit(stats.getSummary(visitor.isResetStatistics()));   
       visitor.visitEnd(this);
     }
   }

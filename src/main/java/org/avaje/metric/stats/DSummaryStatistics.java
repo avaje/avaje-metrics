@@ -13,11 +13,10 @@ public class DSummaryStatistics implements SummaryStatistics {
   final double max;
   final double min;
   final double mean;
-  
+
   final long duration;
   final double eventRate;
   final double loadRate;
-  
 
   public DSummaryStatistics() {
     this.rateUnit = null;
@@ -40,14 +39,14 @@ public class DSummaryStatistics implements SummaryStatistics {
     this.max = max;
     this.min = min;
     this.mean = calcMean(count, sum);
-    
+
     long millis = System.currentTimeMillis() - startTime;
-    duration =  Math.round(millis / 1000d);
-    
+    duration = Math.round(millis / 1000d);
+
     double millisRate = (millis) * (double) rateUnit.toSeconds(1);
-    
-    eventRate = (count == 0) ? 0d : count * 1000d / millisRate;    
-    loadRate = (count == 0) ? 0d : sum * 1000d / millisRate; 
+
+    eventRate = (count == 0) ? 0d : count * 1000d / millisRate;
+    loadRate = (count == 0) ? 0d : sum * 1000d / millisRate;
   }
 
   public String toString() {
@@ -61,21 +60,21 @@ public class DSummaryStatistics implements SummaryStatistics {
     return 0.0;
   }
 
-  public long getDuration() {
-    return duration;
-  }
-  
-  public double getEventRate() {
-    return eventRate;
-  }
-  
-  public double getLoadRate() {
-    return loadRate;
-  }
-    
   @Override
   public long getStartTime() {
     return startTime;
+  }
+
+  public long getDuration() {
+    return duration;
+  }
+
+  public double getEventRate() {
+    return eventRate;
+  }
+
+  public double getLoadRate() {
+    return loadRate;
   }
 
   @Override
