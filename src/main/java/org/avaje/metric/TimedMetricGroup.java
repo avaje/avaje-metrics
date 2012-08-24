@@ -30,6 +30,13 @@ public class TimedMetricGroup {
   private final MetricNameCache metricNameCache;
 
   /**
+   * Create the TimedMetricGroup with per minute rateUnit and the default clock.
+   */
+  public TimedMetricGroup(MetricName baseName) {
+    this(baseName, TimeUnit.MINUTES, Clock.defaultClock());
+  }
+  
+  /**
    * Create the TimedMetricGroup.
    */
   public TimedMetricGroup(MetricName baseName, TimeUnit rateUnit, Clock clock) {

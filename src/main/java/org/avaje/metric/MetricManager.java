@@ -132,6 +132,13 @@ public class MetricManager {
   }
 
   /**
+   * Return the TimedMetricGroup with default rateUnit of Minutes and using the default clock.
+   */
+  public static TimedMetricGroup getTimedMetricGroup(MetricName baseName) {
+    return new TimedMetricGroup(baseName);
+  }
+  
+  /**
    * Return a TimedMetricGroup.
    * <p>
    * This is used when a group of TimedMetric's have a common base name,
