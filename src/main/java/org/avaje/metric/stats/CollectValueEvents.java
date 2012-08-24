@@ -21,17 +21,13 @@ public class CollectValueEvents implements MetricStatistics {
     this.summaryStats = new CollectMovingSummary(rateUnit);
   }
 
-  public void clear() {
-    summaryStats.clearStats();
-  }
-
   public void update(List<? extends MetricValueEvent> events) {
 
     summaryStats.update(events);
   }
 
   public String toString() {
-    ValueStatistics aggr = summaryStats.getSummary();
+    ValueStatistics aggr = summaryStats.getValueStatistics();
     return "dur:" + aggr.getDuration() + " count:" + aggr.getCount() + " min:" + onedp(aggr.getMin()) + " avg:"
         + onedp(aggr.getMean()) + " max:" + onedp(aggr.getMax()) + " sum:" + aggr.getSum();
   }
@@ -39,24 +35,24 @@ public class CollectValueEvents implements MetricStatistics {
   /**
    * Return true if the summary statistics are empty (no events occurred).
    */
-  public boolean isSummaryEmpty() {
+  public boolean isEmpty() {
     return summaryStats.isEmpty();
   }
 
   /**
    * Reset the summary statistics effectively moving the resetStartTime.
    */
-  public void resetSummary() {
+  public void reset() {
     summaryStats.reset();
   }
 
-  public ValueStatistics getSummary() {
-    return summaryStats.getSummary();
+  public ValueStatistics getValueStatistics() {
+    return summaryStats.getValueStatistics();
   }
 
   @Override
-  public ValueStatistics getSummary(boolean reset) {
-    return summaryStats.getSummaryStatistics(reset);
+  public ValueStatistics getValueStatistics(boolean reset) {
+    return summaryStats.getValueStatistics(reset);
   }
 
 }

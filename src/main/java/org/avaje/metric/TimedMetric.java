@@ -61,8 +61,8 @@ public final class TimedMetric implements Metric {
 
   @Override
   public void clearStatistics() {
-    successStats.clear();
-    errorStats.clear();
+    successStats.reset();
+    errorStats.reset();
   }
 
   public ObjectName getErrorMBeanName() {
@@ -79,19 +79,19 @@ public final class TimedMetric implements Metric {
 
   public void visit(MetricVisitor visitor) {
     
-    boolean emptyMetric = successStats.isSummaryEmpty() && errorStats.isSummaryEmpty();
+    boolean emptyMetric = successStats.isEmpty() && errorStats.isEmpty();
     if (!visitor.visitBegin(this, emptyMetric)) {
       // skip processing this metric
       if (emptyMetric) {
         // reset effectively moving the resetStartTime to now
-        successStats.resetSummary();
-        errorStats.resetSummary();
+        successStats.reset();
+        errorStats.reset();
       }
       
     } else {
-      visitor.visit(successStats.getSummary(visitor.isResetStatistics()));
+      visitor.visit(successStats.getValueStatistics(visitor.isResetStatistics()));
       visitor.visitErrorsBegin();
-      visitor.visit(errorStats.getSummary(visitor.isResetStatistics()));
+      visitor.visit(errorStats.getValueStatistics(visitor.isResetStatistics()));
       visitor.visitErrorsEnd();
       visitor.visitEnd(this);
     }

@@ -28,7 +28,7 @@ public class CollectCounterEvents {
     counter.addAndGet(eventCount);
   }
 
-  public void clear() {
+  public void reset() {
     synchronized (this) {
       counter.set(0);
       startTime = System.currentTimeMillis();

@@ -19,7 +19,7 @@ public class CollectLoadEvents {
   public CollectLoadEvents() {
   }
 
-  public void clear() {
+  public void reset() {
     synchronized (this) {
       counter.set(0);
       loadCounter.set(0);

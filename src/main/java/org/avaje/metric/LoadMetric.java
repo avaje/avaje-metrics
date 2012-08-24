@@ -42,7 +42,7 @@ public final class LoadMetric implements Metric {
 
   @Override
   public void clearStatistics() {
-    stats.clear();
+    stats.reset();
   }
 
   public void updateStatistics() {
@@ -75,7 +75,12 @@ public final class LoadMetric implements Metric {
   @Override
   public void visit(MetricVisitor visitor) {
     boolean empty = stats.isEmpty();
-    if (visitor.visitBegin(this, empty)) {
+    if (!visitor.visitBegin(this, empty)) {
+      if (empty) {
+        // effectively reset the startTime
+        stats.reset();
+      }
+    } else {
       visitor.visit(stats.getLoadStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }

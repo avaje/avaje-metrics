@@ -33,7 +33,7 @@ public class CollectMovingSummary {
   /**
    * Clears all recorded values.
    */
-  protected void clearStats() {
+  private void resetInternal() {
     count = 0;
     sum = 0;
     max = Long.MIN_VALUE;
@@ -41,28 +41,9 @@ public class CollectMovingSummary {
     resetStartTime = System.currentTimeMillis();
   }
 
-  /**
-   * Return the Summary potentially resetting the statistics.
-   * <p>
-   * The reset is typically used when collecting and reporting statistics
-   * periodically (every 1 minute etc).
-   * </p>
-   */
-  public ValueStatistics getSummaryStatistics(boolean reset) {
-    synchronized (this) {
-      if (!reset) {
-        return calcMerge();
-      }
-      DSummaryStatistics calc = calc();
-      lastSummary = calc;
-      clearStats();
-      return calc;
-    }
-  }
-
   public void reset() {
     synchronized (this) {
-      clearStats();
+      resetInternal();
     }
   }
 
@@ -74,9 +55,28 @@ public class CollectMovingSummary {
   }
   
   /**
+   * Return the Summary potentially resetting the statistics.
+   * <p>
+   * The reset is typically used when collecting and reporting statistics
+   * periodically (every 1 minute etc).
+   * </p>
+   */
+  public ValueStatistics getValueStatistics(boolean reset) {
+    synchronized (this) {
+      if (!reset) {
+        return calcMerge();
+      }
+      DSummaryStatistics calc = calc();
+      lastSummary = calc;
+      resetInternal();
+      return calc;
+    }
+  }
+  
+  /**
    * Return the Summary without reseting the statistics.
    */
-  public ValueStatistics getSummary() {
+  public ValueStatistics getValueStatistics() {
     synchronized (this) {
       return calcMerge();
     }

@@ -53,7 +53,7 @@ public final class CounterMetric implements Metric {
   @Override
   public void clearStatistics() {
     counter.set(0);
-    eventRate.clear();
+    eventRate.reset();
   }
 
   /**
@@ -66,11 +66,17 @@ public final class CounterMetric implements Metric {
 
   @Override
   public void visit(MetricVisitor visitor) {
-    boolean empty = eventRate.isEmpty();
-    if (visitor.visitBegin(this, empty)) {
+    boolean emptyMetric = eventRate.isEmpty();
+    if (!visitor.visitBegin(this, emptyMetric)) {
+      if (emptyMetric) {
+        // effectively reset the start time
+        eventRate.reset();
+      }      
+    } else {
       visitor.visit(eventRate.getCounterStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
+    
   }
 
   /**
