@@ -24,19 +24,23 @@ public class CollectCounterEvents {
 
   private long startTime = System.currentTimeMillis();
 
-  public void updateAndTick(long eventCount) {
+  public void add(long eventCount) {
     counter.addAndGet(eventCount);
   }
 
+  public void increment() {
+    counter.incrementAndGet();
+  }
+
+  public boolean isEmpty() {
+    return counter.get() == 0;
+  }
+  
   public void reset() {
     synchronized (this) {
       counter.set(0);
       startTime = System.currentTimeMillis();
     }
-  }
-
-  public boolean isEmpty() {
-    return counter.get() == 0;
   }
 
   public CounterStatistics getCounterStatistics(boolean reset) {
@@ -61,7 +65,6 @@ public class CollectCounterEvents {
         } else {
           return lastCounterStats.merge(count, durMillis);
         }
-
       }
     }
   }

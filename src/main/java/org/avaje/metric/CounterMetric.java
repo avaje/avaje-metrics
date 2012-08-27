@@ -1,7 +1,5 @@
 package org.avaje.metric;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.avaje.metric.stats.CollectCounterEvents;
 
 /**
@@ -15,9 +13,7 @@ public final class CounterMetric implements Metric {
 
   private final MetricName name;
 
-  private final CollectCounterEvents eventRate;
-
-  private final AtomicLong counter = new AtomicLong(0);
+  private final CollectCounterEvents counter;
 
   /**
    * Create the metric with a name and rateUnit.
@@ -27,13 +23,12 @@ public final class CounterMetric implements Metric {
    * </p>
    */
   public CounterMetric(MetricName name) {
-
     this.name = name;
-    this.eventRate = new CollectCounterEvents();
+    this.counter = new CollectCounterEvents();
   }
 
   public CounterStatistics getCounterStatistics() {
-    return eventRate.getCounterStatistics(false);
+    return counter.getCounterStatistics(false);
   }
 
   /**
@@ -41,31 +36,28 @@ public final class CounterMetric implements Metric {
    */
   @Override
   public void clearStatistics() {
-    counter.set(0);
-    eventRate.reset();
+    counter.reset();
   }
 
   /**
    * Called periodically to update the collected statistics.
    */
   public void updateStatistics() {
-    long eventCount = counter.getAndSet(0);
-    eventRate.updateAndTick(eventCount);
+    // Nothing to do
   }
 
   @Override
   public void visit(MetricVisitor visitor) {
-    boolean emptyMetric = eventRate.isEmpty();
+    boolean emptyMetric = counter.isEmpty();
     if (!visitor.visitBegin(this, emptyMetric)) {
       if (emptyMetric) {
         // effectively reset the start time
-        eventRate.reset();
+        counter.reset();
       }      
     } else {
-      visitor.visit(eventRate.getCounterStatistics(visitor.isResetStatistics()));
+      visitor.visit(counter.getCounterStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
-    
   }
 
   /**
@@ -79,14 +71,14 @@ public final class CounterMetric implements Metric {
    * Mark that 1 event has occurred.
    */
   public void markEvent() {
-    counter.incrementAndGet();
+    counter.increment();
   }
 
   /**
    * Mark that numberOfEventsOccurred events have occurred.
    */
   public void markEvents(long numberOfEventsOccurred) {
-    counter.addAndGet(numberOfEventsOccurred);
+    counter.add(numberOfEventsOccurred);
   }
 
 }

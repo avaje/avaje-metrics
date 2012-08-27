@@ -101,10 +101,14 @@ public final class TimedMetric implements Metric {
   public void updateStatistics() {
 
     List<TimedMetricEvent> successEvents = removeEvents(successQueue);
-    successStats.update(successEvents);
+    if (!successEvents.isEmpty()) {
+      successStats.update(successEvents);
+    }
 
     List<TimedMetricEvent> errorEvents = removeEvents(errorQueue);
-    errorStats.update(errorEvents);
+    if (!errorEvents.isEmpty()) {
+      errorStats.update(errorEvents);
+    }
   }
 
   private List<TimedMetricEvent> removeEvents(ConcurrentLinkedQueue<TimedMetricEvent> queue) {

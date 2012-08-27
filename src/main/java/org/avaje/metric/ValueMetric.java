@@ -8,8 +8,8 @@ import org.avaje.metric.stats.CollectValueEvents;
 
 /**
  * Measure events that occur with a long value. This long value could be bytes
- * or rows processed or time. Typically you would use a TimedMetricEvent for
- * time based events though.
+ * or rows processed or time. Typically you would use TimedMetric for time based
+ * events though.
  */
 public final class ValueMetric implements Metric {
 
@@ -17,7 +17,7 @@ public final class ValueMetric implements Metric {
 
   private final Clock clock = Clock.defaultClock();
 
-  private final ConcurrentLinkedQueue<ValueMetricEvent> queue = new ConcurrentLinkedQueue<ValueMetricEvent>();
+  private final ConcurrentLinkedQueue<MetricValueEvent> queue = new ConcurrentLinkedQueue<MetricValueEvent>();
 
   private final CollectValueEvents stats;
 
@@ -42,7 +42,7 @@ public final class ValueMetric implements Metric {
 
   @Override
   public void visit(MetricVisitor visitor) {
-    
+
     boolean empty = stats.isEmpty();
     if (!visitor.visitBegin(this, empty)) {
       // skip processing/reporting for empty metric
@@ -51,11 +51,11 @@ public final class ValueMetric implements Metric {
         stats.reset();
       }
     } else {
-      visitor.visit(stats.getValueStatistics(visitor.isResetStatistics()));   
+      visitor.visit(stats.getValueStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
   }
-  
+
   @Override
   public void clearStatistics() {
     stats.reset();
@@ -63,15 +63,17 @@ public final class ValueMetric implements Metric {
 
   public void updateStatistics() {
 
-    List<ValueMetricEvent> successEvents = removeEvents(queue);
-    stats.update(successEvents);
+    List<MetricValueEvent> successEvents = removeEvents(queue);
+    if (!successEvents.isEmpty()) {
+      stats.update(successEvents);
+    }
   }
 
-  private List<ValueMetricEvent> removeEvents(ConcurrentLinkedQueue<ValueMetricEvent> queue) {
+  private List<MetricValueEvent> removeEvents(ConcurrentLinkedQueue<MetricValueEvent> queue) {
 
-    ArrayList<ValueMetricEvent> events = new ArrayList<ValueMetricEvent>();
+    ArrayList<MetricValueEvent> events = new ArrayList<MetricValueEvent>();
     while (!queue.isEmpty()) {
-      ValueMetricEvent metricEvent = queue.remove();
+      MetricValueEvent metricEvent = queue.remove();
       events.add(metricEvent);
     }
     return events;
@@ -82,7 +84,11 @@ public final class ValueMetric implements Metric {
   }
 
   public void addEvent(long value) {
-    queue.add(new ValueMetricEvent(clock.getTimeMillis(), value));
+    addEvent(new ValueMetricEvent(clock.getTimeMillis(), value));
+  }
+
+  public void addEvent(MetricValueEvent event) {
+    queue.add(event);
   }
 
   private static final class ValueMetricEvent implements MetricValueEvent {

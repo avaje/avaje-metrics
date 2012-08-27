@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.avaje.metric.LoadStatistics;
 
 /**
- * Maintains moving averages of loads.
+ * Maintains load events statistics.
  */
 public class CollectLoadEvents {
 
@@ -19,17 +19,7 @@ public class CollectLoadEvents {
   public CollectLoadEvents() {
   }
 
-  public void reset() {
-    synchronized (this) {
-      counter.set(0);
-      loadCounter.set(0);
-      lastStats = new DLoadStatistics();
-      startTime = System.currentTimeMillis();
-    }
-  }
-
   public void update(long additionalEventCount, long additionalLoad) {
-
     counter.addAndGet(additionalEventCount);
     loadCounter.addAndGet(additionalLoad);
   }
@@ -49,10 +39,18 @@ public class CollectLoadEvents {
   public boolean isEmpty() {
     return counter.get() == 0;
   }
+
+  public void reset() {
+    synchronized (this) {
+      counter.set(0);
+      loadCounter.set(0);
+      lastStats = new DLoadStatistics();
+      startTime = System.currentTimeMillis();
+    }
+  }
   
   public LoadStatistics getLoadStatistics(boolean reset) {
     synchronized (this) {
-      
       if (reset) {
         // return the current results and reset
         long count = counter.getAndSet(0);
@@ -75,11 +73,8 @@ public class CollectLoadEvents {
         } else {
           return lastStats.merge(count, load, durMillis);
         }
-
       }
     }
   }
-  
-  
 
 }

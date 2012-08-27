@@ -15,7 +15,7 @@ public class CounterMeterTest {
 
   @Before
   public void setUp() throws Exception {
-    this.meter = MetricManager.build().setName(CounterMeterTest.class, "eventThings").getCounterMetric();
+    this.meter = MetricManager.getCounterMetric(CounterMeterTest.class, "eventThings");
   }
   
   @Test

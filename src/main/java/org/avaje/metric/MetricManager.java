@@ -25,19 +25,7 @@ public class MetricManager {
   public static void updateStatistics() {
     mgr.updateStatistics();
   }
-
-  /**
-   * Returns a MetricBuilder to get metrics using extra parameters such as
-   * rateUnit and clock.
-   * <p>
-   * This will not expected to be used very often with reasonable default
-   * rateUnit of Minutes and the default clock.
-   * </p>
-   */
-  public static MetricBuilder build() {
-    return new DefaultMetricBuilder();
-  }
-
+  
   /**
    * Return a MetricNameCache for the given class.
    * <p>
