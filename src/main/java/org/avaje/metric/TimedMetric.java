@@ -3,7 +3,6 @@ package org.avaje.metric;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 import javax.management.ObjectName;
 
@@ -20,8 +19,6 @@ import org.avaje.metric.stats.CollectValueEvents;
 public final class TimedMetric implements Metric {
 
   private final MetricName name;
-  private final TimeUnit rateUnit;
-  private final String rateUnitAbbr;
   private final Clock clock;
 
   private final ConcurrentLinkedQueue<TimedMetricEvent> successQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
@@ -31,32 +28,19 @@ public final class TimedMetric implements Metric {
   private final CollectValueEvents errorStats;
   private ObjectName errorMBeanName;
 
-  public TimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
+  public TimedMetric(MetricName name, Clock clock) {
 
     Clock clockToUse = (clock == null) ? Clock.defaultClock() : clock;
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.MINUTES : rateUnit;
 
     this.name = name;
-    this.rateUnit = rateToUse;
-    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
     this.errorMBeanName = name.deriveWithNameSuffix(".error").getMBeanObjectName();
     this.clock = clockToUse;
-    this.successStats = new CollectValueEvents(rateToUse, clockToUse);
-    this.errorStats = new CollectValueEvents(rateToUse, clockToUse);
+    this.successStats = new CollectValueEvents(clockToUse);
+    this.errorStats = new CollectValueEvents(clockToUse);
   }
 
   public String toString() {
     return name.toString();
-  }
-
-  @Override
-  public TimeUnit getRateTimeUnit() {
-    return rateUnit;
-  }
-  
-  @Override
-  public String getRateUnitAbbreviation() {
-    return rateUnitAbbr;
   }
 
   @Override

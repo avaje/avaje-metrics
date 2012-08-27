@@ -1,7 +1,6 @@
 package org.avaje.metric.stats;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.MetricValueEvent;
 import org.avaje.metric.ValueStatistics;
@@ -12,7 +11,6 @@ import org.avaje.metric.ValueStatistics;
  */
 public class CollectMovingSummary {
 
-  private final TimeUnit rateUnit;
   private long min = Long.MAX_VALUE;
   private long max = Long.MIN_VALUE;
   private long sum;
@@ -23,11 +21,9 @@ public class CollectMovingSummary {
   private DSummaryStatistics lastSummary = new DSummaryStatistics();
 
   /**
-   * Construct with the given rateUnit (used to determined event rate and load
-   * rate).
+   * Construct the CollectMovingSummary.
    */
-  public CollectMovingSummary(TimeUnit rateUnit) {
-    this.rateUnit = rateUnit;
+  public CollectMovingSummary() {
   }
 
   /**
@@ -103,19 +99,19 @@ public class CollectMovingSummary {
   }
 
   private DSummaryStatistics calc() {
-    return new DSummaryStatistics(rateUnit, resetStartTime, count, sum, max(), min());
+    return new DSummaryStatistics(resetStartTime, count, sum, max(), min());
   }
 
   private DSummaryStatistics calcMerge() {
     if (lastSummary.getDuration() == 0) {
-      return new DSummaryStatistics(rateUnit, resetStartTime, count, sum, max(), min());
+      return new DSummaryStatistics(resetStartTime, count, sum, max(), min());
     }
     long newCount = count + lastSummary.getCount();
     double newSum = sum + lastSummary.getSum();
     double newMin = Math.min(min, lastSummary.getMin());
     double newMax = Math.max(max, lastSummary.getMax());
     long newStartTime = Math.min(resetStartTime, lastSummary.getStartTime());
-    return new DSummaryStatistics(rateUnit, newStartTime, newCount, newSum, newMax, newMin);
+    return new DSummaryStatistics(newStartTime, newCount, newSum, newMax, newMin);
   }
 
   private void update(long value) {

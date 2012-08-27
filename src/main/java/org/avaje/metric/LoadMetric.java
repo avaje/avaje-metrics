@@ -1,7 +1,5 @@
 package org.avaje.metric;
 
-import java.util.concurrent.TimeUnit;
-
 import org.avaje.metric.stats.CollectLoadEvents;
 
 /**
@@ -28,16 +26,6 @@ public final class LoadMetric implements Metric {
   public LoadMetric(MetricName name) {
     this.name = name;
     this.stats = new CollectLoadEvents();
-  }
-
-  @Override
-  public TimeUnit getRateTimeUnit() {
-    return null;
-  }
-
-  @Override
-  public String getRateUnitAbbreviation() {
-    return "";
   }
 
   @Override

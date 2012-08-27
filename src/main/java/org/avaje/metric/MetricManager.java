@@ -1,7 +1,6 @@
 package org.avaje.metric;
 
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.core.DefaultMetricManager;
 
@@ -65,21 +64,21 @@ public class MetricManager {
    * Return a TimedMetric given its metricName.
    */
   public static TimedMetric getTimedMetric(MetricName metricName) {
-    return getTimedMetric(metricName, null, null);
+    return getTimedMetric(metricName, null);
   }
 
   /**
    * Return a TimedMetric using the Class, name to derive the MetricName.
    */
   public static TimedMetric getTimedMetric(Class<?> cls, String eventName) {
-    return getTimedMetric(new MetricName(cls, eventName), null, null);
+    return getTimedMetric(new MetricName(cls, eventName), null);
   }
 
   /**
    * Return a TimedMetric given the name, rateUnit and clock.
    */
-  protected static TimedMetric getTimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
-    return mgr.getTimedMetric(name, rateUnit, clock);
+  public static TimedMetric getTimedMetric(MetricName name, Clock clock) {
+    return mgr.getTimedMetric(name, clock);
   }
 
   /**
@@ -111,13 +110,6 @@ public class MetricManager {
   }
 
   /**
-   * Return a ValueMetric given the name, rateUnit.
-   */
-  public static ValueMetric getValueMetric(MetricName name) {
-    return mgr.getValueMetric(name, null);
-  }
-
-  /**
    * Return a ValueMetric using the Class and name to derive the MetricName.
    */
   public static ValueMetric getValueMetric(Class<?> cls, String eventName) {
@@ -125,10 +117,10 @@ public class MetricManager {
   }
 
   /**
-   * Return a ValueMetric given the name, rateUnit.
+   * Return a ValueMetric given the name.
    */
-  protected static ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {
-    return mgr.getValueMetric(name, rateUnit);
+  public static ValueMetric getValueMetric(MetricName name) {
+    return mgr.getValueMetric(name);
   }
 
   /**
@@ -156,8 +148,8 @@ public class MetricManager {
    * @return the TimedMetricGroup used to create TimedMetric's that have a
    *         common base name.
    */
-  public static TimedMetricGroup getTimedMetricGroup(MetricName baseName, TimeUnit rateUnit, Clock clock) {
-    return new TimedMetricGroup(baseName, rateUnit, clock);
+  public static TimedMetricGroup getTimedMetricGroup(MetricName baseName, Clock clock) {
+    return new TimedMetricGroup(baseName, clock);
   }
 
   /**
@@ -175,8 +167,8 @@ public class MetricManager {
    * @return the TimedMetricGroup used to create TimedMetric's that have a
    *         common base name.
    */
-  public static TimedMetricGroup getTimedMetricGroup(String group, String type, TimeUnit rateUnit) {
-    return new TimedMetricGroup(new MetricName(group, type, "dummy"), rateUnit, Clock.defaultClock());
+  public static TimedMetricGroup getTimedMetricGroup(String group, String type) {
+    return new TimedMetricGroup(new MetricName(group, type, "dummy"), Clock.defaultClock());
   }
 
   /**

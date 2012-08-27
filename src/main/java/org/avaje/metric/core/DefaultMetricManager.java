@@ -4,11 +4,17 @@ import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.management.ObjectName;
 
-import org.avaje.metric.*;
+import org.avaje.metric.Clock;
+import org.avaje.metric.CounterMetric;
+import org.avaje.metric.LoadMetric;
+import org.avaje.metric.Metric;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.MetricNameCache;
+import org.avaje.metric.TimedMetric;
+import org.avaje.metric.ValueMetric;
 import org.avaje.metric.jvm.GarbageCollectionRateCollection;
 
 public class DefaultMetricManager {
@@ -71,20 +77,20 @@ public class DefaultMetricManager {
     }
   }
 
-  public TimedMetric getTimedMetric(MetricName name, TimeUnit rateUnit, Clock clock) {
-    return (TimedMetric) getMetric(name, rateUnit, clock, timedMetricFactory);
+  public TimedMetric getTimedMetric(MetricName name, Clock clock) {
+    return (TimedMetric) getMetric(name, clock, timedMetricFactory);
   }
 
   public CounterMetric getCounterMetric(MetricName name) {
-    return (CounterMetric) getMetric(name, null, null, counterMetricFactory);
+    return (CounterMetric) getMetric(name, null, counterMetricFactory);
   }
   
   public LoadMetric getLoadMetric(MetricName name) {
-    return (LoadMetric) getMetric(name, null, null, loadMetricFactory);
+    return (LoadMetric) getMetric(name, null, loadMetricFactory);
   }
 
-  public ValueMetric getValueMetric(MetricName name, TimeUnit rateUnit) {
-    return (ValueMetric) getMetric(name, rateUnit, null, valueMetricFactory);
+  public ValueMetric getValueMetric(MetricName name) {
+    return (ValueMetric) getMetric(name, null, valueMetricFactory);
   }
 
   private void registerGcMetrics() {
@@ -94,7 +100,7 @@ public class DefaultMetricManager {
     }
   }
 
-  private Metric getMetric(MetricName name, TimeUnit rateUnit, Clock clock, MetricFactory factory) {
+  private Metric getMetric(MetricName name, Clock clock, MetricFactory factory) {
 
     String cacheKey = name.getMBeanName();
     // try lock free get first
@@ -104,7 +110,7 @@ public class DefaultMetricManager {
         // use synchronised block
         metric = concMetricMap.get(cacheKey);
         if (metric == null) {
-          metric = factory.createMetric(name, rateUnit, clock);
+          metric = factory.createMetric(name, clock);
           concMetricMap.put(cacheKey, metric);
         }
       }

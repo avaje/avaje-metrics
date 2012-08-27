@@ -27,18 +27,6 @@ public interface ValueStatistics extends Statistics {
    * Return the total count of events since the last reset.
    */
   public long getCount();
-  
-  /**
-   * Return the rate at which events are occurring (relative to the rateUnit
-   * specified for the metric).
-   */
-  public double getEventRate();
-
-  /**
-   * Return the rate at which load is occurring (relative to the rateUnit
-   * specified for the metric).
-   */
-  public double getLoadRate();
 
   /**
    * Return the total sum value.

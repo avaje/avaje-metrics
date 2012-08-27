@@ -3,7 +3,6 @@ package org.avaje.metric.stats;
 import static org.avaje.metric.NumFormat.onedp;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.Clock;
 import org.avaje.metric.MetricStatistics;
@@ -17,8 +16,8 @@ public class CollectValueEvents implements MetricStatistics {
 
   private final CollectMovingSummary summaryStats;
 
-  public CollectValueEvents(TimeUnit rateUnit, Clock clock) {
-    this.summaryStats = new CollectMovingSummary(rateUnit);
+  public CollectValueEvents(Clock clock) {
+    this.summaryStats = new CollectMovingSummary();
   }
 
   public void update(List<? extends MetricValueEvent> events) {

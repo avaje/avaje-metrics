@@ -3,7 +3,6 @@ package org.avaje.metric;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.stats.CollectValueEvents;
 
@@ -15,16 +14,12 @@ import org.avaje.metric.stats.CollectValueEvents;
 public final class ValueMetric implements Metric {
 
   private final MetricName name;
-  
-  private final TimeUnit rateUnit;
 
   private final Clock clock = Clock.defaultClock();
 
   private final ConcurrentLinkedQueue<ValueMetricEvent> queue = new ConcurrentLinkedQueue<ValueMetricEvent>();
 
   private final CollectValueEvents stats;
-
-  private final String rateUnitAbbr;
 
   /**
    * Create with a name and rateUnit.
@@ -33,23 +28,9 @@ public final class ValueMetric implements Metric {
    * manor - typically events per hour, minute or second.
    * </p>
    */
-  public ValueMetric(MetricName name, TimeUnit rateUnit) {
-
-    TimeUnit rateToUse = (rateUnit == null) ? TimeUnit.MINUTES : rateUnit;
+  public ValueMetric(MetricName name) {
     this.name = name;
-    this.rateUnit = rateToUse;
-    this.rateUnitAbbr = TimeUnitAbbreviation.toAbbr(rateToUse);
-    this.stats = new CollectValueEvents(rateToUse, clock);
-  }
-
-  @Override
-  public TimeUnit getRateTimeUnit() {
-    return rateUnit;
-  }
-
-  @Override
-  public String getRateUnitAbbreviation() {
-    return rateUnitAbbr;
+    this.stats = new CollectValueEvents(clock);
   }
 
   /**

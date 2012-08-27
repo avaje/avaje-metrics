@@ -1,6 +1,5 @@
 package org.avaje.metric;
 
-import java.util.concurrent.TimeUnit;
 
 /**
  * Used when many TimedMetric's share a common base name (group, type etc) and
@@ -12,12 +11,6 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 public class TimedMetricGroup {
-
-  /**
-   * The rateUnit used to scale the metrics (events per second, minute, hour
-   * etc).
-   */
-  private final TimeUnit rateUnit;
 
   /**
    * The clock to use - defaults to use {@link System#currentTimeMillis()}.
@@ -33,15 +26,14 @@ public class TimedMetricGroup {
    * Create the TimedMetricGroup with per minute rateUnit and the default clock.
    */
   public TimedMetricGroup(MetricName baseName) {
-    this(baseName, TimeUnit.MINUTES, Clock.defaultClock());
+    this(baseName, Clock.defaultClock());
   }
   
   /**
    * Create the TimedMetricGroup.
    */
-  public TimedMetricGroup(MetricName baseName, TimeUnit rateUnit, Clock clock) {
+  public TimedMetricGroup(MetricName baseName, Clock clock) {
     this.metricNameCache = MetricManager.getMetricNameCache(baseName);
-    this.rateUnit = rateUnit;
     this.clock = clock;
   }
 
@@ -61,7 +53,7 @@ public class TimedMetricGroup {
   public TimedMetricEvent start(String name) {
 
     MetricName m = metricNameCache.get(name);
-    TimedMetric timedMetric = MetricManager.getTimedMetric(m, rateUnit, clock);
+    TimedMetric timedMetric = MetricManager.getTimedMetric(m, clock);
     return timedMetric.startEvent();
   }
 
@@ -71,7 +63,7 @@ public class TimedMetricGroup {
   public TimedMetric getTimedMetric(String name) {
 
     MetricName m = metricNameCache.get(name);
-    return MetricManager.getTimedMetric(m, rateUnit, clock);
+    return MetricManager.getTimedMetric(m, clock);
   }
 
 }

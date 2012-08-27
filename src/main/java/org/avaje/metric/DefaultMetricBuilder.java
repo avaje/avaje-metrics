@@ -1,6 +1,5 @@
 package org.avaje.metric;
 
-import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation of the MetricBuilder.
@@ -9,15 +8,7 @@ class DefaultMetricBuilder implements MetricBuilder {
 
   private MetricName name;
   
-  private TimeUnit rateUnit = TimeUnit.MINUTES;
-  
   private Clock clock = Clock.defaultClock();
-
-  @Override
-  public MetricBuilder setRateUnit(TimeUnit rateUnit) {
-    this.rateUnit = rateUnit;
-    return this;
-  }
 
   @Override
   public MetricBuilder setName(MetricName name) {
@@ -59,13 +50,13 @@ class DefaultMetricBuilder implements MetricBuilder {
   @Override
   public TimedMetric getTimedMetric() {
     nameRequired();
-    return MetricManager.getTimedMetric(name, rateUnit, clock);
+    return MetricManager.getTimedMetric(name, clock);
   }
 
   @Override
   public ValueMetric getValueMetric() {
     nameRequired();
-    return MetricManager.getValueMetric(name, rateUnit);
+    return MetricManager.getValueMetric(name);
   }
   
   private void nameRequired() {

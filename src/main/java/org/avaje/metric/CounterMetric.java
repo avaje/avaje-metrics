@@ -1,6 +1,5 @@
 package org.avaje.metric;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.avaje.metric.stats.CollectCounterEvents;
@@ -31,16 +30,6 @@ public final class CounterMetric implements Metric {
 
     this.name = name;
     this.eventRate = new CollectCounterEvents();
-  }
-
-  @Override
-  public TimeUnit getRateTimeUnit() {
-    return null;
-  }
-
-  @Override
-  public String getRateUnitAbbreviation() {
-    return "";
   }
 
   public CounterStatistics getCounterStatistics() {

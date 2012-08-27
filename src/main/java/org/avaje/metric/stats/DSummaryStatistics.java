@@ -1,25 +1,19 @@
 package org.avaje.metric.stats;
 
-import java.util.concurrent.TimeUnit;
-
 import org.avaje.metric.ValueStatistics;
 
 public class DSummaryStatistics implements ValueStatistics {
 
-  final TimeUnit rateUnit;
-  final long startTime;
-  final long count;
-  final double sum;
-  final double max;
-  final double min;
-  final double mean;
+  private final long startTime;
+  private final long count;
+  private final double sum;
+  private final double max;
+  private final double min;
+  private final double mean;
 
-  final long duration;
-  final double eventRate;
-  final double loadRate;
+  private final long duration;
 
   public DSummaryStatistics() {
-    this.rateUnit = null;
     this.startTime = System.currentTimeMillis();
     this.count = 0;
     this.sum = 0;
@@ -27,12 +21,10 @@ public class DSummaryStatistics implements ValueStatistics {
     this.min = Long.MAX_VALUE;
     this.mean = 0;
     this.duration = 0;
-    this.eventRate = 0;
-    this.loadRate = 0;
   }
 
-  public DSummaryStatistics(TimeUnit rateUnit, long startTime, long count, double sum, double max, double min) {
-    this.rateUnit = rateUnit;
+  public DSummaryStatistics(long startTime, long count, double sum, double max, double min) {
+
     this.startTime = startTime;
     this.count = count;
     this.sum = sum;
@@ -42,11 +34,6 @@ public class DSummaryStatistics implements ValueStatistics {
 
     long millis = System.currentTimeMillis() - startTime;
     duration = Math.round(millis / 1000d);
-
-    double millisRate = (millis) * (double) rateUnit.toSeconds(1);
-
-    eventRate = (count == 0) ? 0d : count * 1000d / millisRate;
-    loadRate = (count == 0) ? 0d : sum * 1000d / millisRate;
   }
 
   public String toString() {
@@ -67,14 +54,6 @@ public class DSummaryStatistics implements ValueStatistics {
 
   public long getDuration() {
     return duration;
-  }
-
-  public double getEventRate() {
-    return eventRate;
-  }
-
-  public double getLoadRate() {
-    return loadRate;
   }
 
   @Override
