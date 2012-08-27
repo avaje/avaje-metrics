@@ -3,7 +3,7 @@ package org.avaje.metric;
 /**
  * Counter statistics.
  */
-public interface LoadStatistics extends Statistics {
+public interface LoadStatistics {
 
   /**
    * Return the time these statistics started being collected.

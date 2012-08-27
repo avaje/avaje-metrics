@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @see <a href="http://www.teamquest.com/pdfs/whitepaper/ldavg2.pdf">UNIX Load
  *      Average Part 2: Not Your Average Average</a> </p>
  */
-public interface MovingAverageStatistics extends Statistics {
+public interface MovingAverageStatistics {
 
   /**
    * Return the Timeunit used to scale the rates (per hour, minute, second etc).
