@@ -107,9 +107,9 @@ public class CollectMovingSummary {
       return new DSummaryStatistics(resetStartTime, count, sum, max(), min());
     }
     long newCount = count + lastSummary.getCount();
-    double newSum = sum + lastSummary.getSum();
-    double newMin = Math.min(min, lastSummary.getMin());
-    double newMax = Math.max(max, lastSummary.getMax());
+    long newSum = sum + lastSummary.getSum();
+    long newMin = Math.min(min, lastSummary.getMin());
+    long newMax = Math.max(max, lastSummary.getMax());
     long newStartTime = Math.min(resetStartTime, lastSummary.getStartTime());
     return new DSummaryStatistics(newStartTime, newCount, newSum, newMax, newMin);
   }
@@ -122,18 +122,18 @@ public class CollectMovingSummary {
     setMin(value);
   }
 
-  private double max() {
+  private long max() {
     if (count > 0) {
       return max;
     }
-    return 0.0;
+    return 0;
   }
 
-  private double min() {
+  private long min() {
     if (count > 0) {
       return min;
     }
-    return 0.0;
+    return 0;
   }
 
   private void setMax(long potentialMax) {

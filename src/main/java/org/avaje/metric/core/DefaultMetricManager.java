@@ -5,43 +5,60 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.management.ObjectName;
-
 import org.avaje.metric.Clock;
 import org.avaje.metric.CounterMetric;
+import org.avaje.metric.GaugeMetricGroup;
 import org.avaje.metric.LoadMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueMetric;
-import org.avaje.metric.jvm.GarbageCollectionRateCollection;
+import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
+import org.avaje.metric.jvm.JvmMemoryMetricGroup;
+import org.avaje.metric.jvm.JvmThreadMetricGroup;
 
 public class DefaultMetricManager {
 
   private final String monitor = new String();
 
-  private final ConcurrentHashMap<String, Metric> concMetricMap = new ConcurrentHashMap<String, Metric>();
+  private final ConcurrentHashMap<String, Metric> visitOnlyMetrics = new ConcurrentHashMap<String, Metric>();
+
+  private final ConcurrentHashMap<String, Metric> metricsMap = new ConcurrentHashMap<String, Metric>();
 
   private final Timer timer = new Timer("MetricManager", true);
 
-  private final JmxMetricRegister jmxRegistry = new JmxMetricRegister();
+  //private final JmxMetricRegister jmxRegistry = new JmxMetricRegister();
 
   private final MetricFactory timedMetricFactory = new TimedMetricFactory();
   private final MetricFactory counterMetricFactory = new CounterMetricFactory();
   private final MetricFactory loadMetricFactory = new LoadMetricFactory();
   private final MetricFactory valueMetricFactory = new ValueMetricFactory();
 
-  private final LoadMetric[] gcLoadMetrics;
 
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
 
   public DefaultMetricManager() {
+    
     timer.scheduleAtFixedRate(new UpdateStatisticsTask(), 5 * 1000, 2 * 1000);
-
-    GarbageCollectionRateCollection gc = new GarbageCollectionRateCollection(timer);
-    gcLoadMetrics = gc.getGarbageCollectorsLoadMetrics();
-    registerGcMetrics();
+    
+    registerJvmMetrics();
+  }
+  
+  private void registerJvmMetrics() {
+    
+    JvmMemoryMetricGroup jvmMem = new JvmMemoryMetricGroup();
+    registerVisitOnly(jvmMem.getHeapGroup());
+    registerVisitOnly(jvmMem.getNonHeapGroup());
+    
+    JvmGarbageCollectionMetricGroup jvmGc = new JvmGarbageCollectionMetricGroup();
+    GaugeMetricGroup[] gaugeMetricGroups = jvmGc.getGaugeMetricGroups();
+    for (GaugeMetricGroup gaugeMetricGroup : gaugeMetricGroups) {
+      registerVisitOnly(gaugeMetricGroup);
+    }
+    
+    JvmThreadMetricGroup jvmThreads = new JvmThreadMetricGroup();
+    registerVisitOnly(jvmThreads.getGaugeMetricGroup());
   }
 
   private class UpdateStatisticsTask extends TimerTask {
@@ -71,7 +88,7 @@ public class DefaultMetricManager {
   }
 
   public void updateStatistics() {
-    Collection<Metric> allMetrics = getAllMetrics();
+    Collection<Metric> allMetrics = getMetrics();
     for (Metric metric : allMetrics) {
       metric.updateStatistics();
     }
@@ -92,26 +109,31 @@ public class DefaultMetricManager {
   public ValueMetric getValueMetric(MetricName name) {
     return (ValueMetric) getMetric(name, null, valueMetricFactory);
   }
-
-  private void registerGcMetrics() {
-    for (LoadMetric m : gcLoadMetrics) {
-      String cacheKey = m.getName().getMBeanName();
-      concMetricMap.put(cacheKey, m);
-    }
+  
+  public void registerVisitOnly(Metric m) {
+    String cacheKey = m.getName().getMBeanName();
+    visitOnlyMetrics.put(cacheKey, m);
   }
+  
+//  private void registerGcMetrics() {
+//    for (LoadMetric m : gcLoadMetrics) {
+//      String cacheKey = m.getName().getMBeanName();
+//      metricsMap.put(cacheKey, m);
+//    }
+//  }
 
   private Metric getMetric(MetricName name, Clock clock, MetricFactory factory) {
 
     String cacheKey = name.getMBeanName();
     // try lock free get first
-    Metric metric = concMetricMap.get(cacheKey);
+    Metric metric = metricsMap.get(cacheKey);
     if (metric == null) {
       synchronized (monitor) {
         // use synchronised block
-        metric = concMetricMap.get(cacheKey);
+        metric = metricsMap.get(cacheKey);
         if (metric == null) {
           metric = factory.createMetric(name, clock);
-          concMetricMap.put(cacheKey, metric);
+          metricsMap.put(cacheKey, metric);
         }
       }
     }
@@ -120,25 +142,18 @@ public class DefaultMetricManager {
 
   public void clear() {
     synchronized (monitor) {
-      Collection<Metric> values = concMetricMap.values();
-      for (Metric metric : values) {
-        jmxRegistry.unregister(metric.getName().getMBeanObjectName());
-        if (metric instanceof TimedMetric) {
-          ObjectName errorMBeanName = ((TimedMetric) metric).getErrorMBeanName();
-          jmxRegistry.unregister(errorMBeanName);
-        }
-
-      }
-      concMetricMap.clear();
+      metricsMap.clear();
     }
   }
 
-  public Collection<Metric> getAllMetrics() {
+  public Collection<Metric> getMetrics() {
     synchronized (monitor) {
-      return concMetricMap.values();
+      return metricsMap.values();
     }
   }
-
-
+  
+  public Collection<Metric> getVisitOnlyMetrics() {
+    return visitOnlyMetrics.values();
+  }
 
 }

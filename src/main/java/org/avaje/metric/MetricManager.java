@@ -156,9 +156,16 @@ public class MetricManager {
    *         common base name.
    */
   public static TimedMetricGroup getTimedMetricGroup(String group, String type) {
-    return new TimedMetricGroup(new MetricName(group, type, "dummy"), Clock.defaultClock());
+    return new TimedMetricGroup(MetricName.createBaseName(group, type), Clock.defaultClock());
   }
 
+  /**
+   * Register a visit only metric with the MetricManager.
+   */
+  public static void registerVisitOnly(Metric metric) {
+    mgr.registerVisitOnly(metric);
+  }
+  
   /**
    * Clear the registered metrics.
    */
@@ -169,16 +176,28 @@ public class MetricManager {
   /**
    * Return all the metrics registered.
    */
-  public static Collection<Metric> getAllMetrics() {
-    return mgr.getAllMetrics();
+  public static Collection<Metric> getMetrics() {
+    return mgr.getMetrics();
   }
 
+  /**
+   * Return all the metrics registered.
+   */
+  public static Collection<Metric> getVisitOnlyMetrics() {
+    return mgr.getVisitOnlyMetrics();
+  }
+  
   /**
    * Visit all the metrics.
    */
   public static void visitAll(MetricVisitor visitor) {
 
-    Collection<Metric> metrics = mgr.getAllMetrics();
+    Collection<Metric> visitOnlyMetrics = mgr.getVisitOnlyMetrics();
+    for (Metric metric : visitOnlyMetrics) {
+      metric.visit(visitor);
+    }
+    
+    Collection<Metric> metrics = mgr.getMetrics();
     for (Metric metric : metrics) {
       metric.visit(visitor);
     }
@@ -189,7 +208,7 @@ public class MetricManager {
    */
   public static void visit(MetricMatcher matcher, MetricVisitor visitor) {
 
-    Collection<Metric> metrics = mgr.getAllMetrics();
+    Collection<Metric> metrics = mgr.getMetrics();
     for (Metric metric : metrics) {
       if (matcher.isMatch(metric)) {
         metric.visit(visitor);

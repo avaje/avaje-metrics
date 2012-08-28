@@ -5,13 +5,12 @@ import org.avaje.metric.ValueStatistics;
 public class DSummaryStatistics implements ValueStatistics {
 
   private final long startTime;
-  private final long count;
-  private final double sum;
-  private final double max;
-  private final double min;
-  private final double mean;
-
   private final long duration;
+  private final long count;
+  private final long sum;
+  private final long max;
+  private final long min;
+  private final double mean;
 
   public DSummaryStatistics() {
     this.startTime = System.currentTimeMillis();
@@ -23,7 +22,7 @@ public class DSummaryStatistics implements ValueStatistics {
     this.duration = 0;
   }
 
-  public DSummaryStatistics(long startTime, long count, double sum, double max, double min) {
+  public DSummaryStatistics(long startTime, long count, long sum, long max, long min) {
 
     this.startTime = startTime;
     this.count = count;
@@ -62,17 +61,17 @@ public class DSummaryStatistics implements ValueStatistics {
   }
 
   @Override
-  public double getSum() {
+  public long getSum() {
     return sum;
   }
 
   @Override
-  public double getMax() {
+  public long getMax() {
     return max;
   }
 
   @Override
-  public double getMin() {
+  public long getMin() {
     return min;
   }
 

@@ -21,6 +21,14 @@ public class MetricName implements Comparable<MetricName> {
   private final ObjectName mBeanObjectName;
 
   /**
+   * Create a base name with a group and type but no name.  
+   */
+  public static MetricName createBaseName(String group, String type) {
+    return new MetricName(group, type, null, null);
+  }
+  
+  
+  /**
    * Creates a new {@link MetricName} without a scope.
    * 
    * @param klass

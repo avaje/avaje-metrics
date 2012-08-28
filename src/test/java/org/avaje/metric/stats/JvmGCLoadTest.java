@@ -1,11 +1,12 @@
 package org.avaje.metric.stats;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.avaje.metric.jvm.GarbageCollectionRateCollection;
+import org.avaje.metric.GaugeMetricGroup;
+import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
 import org.junit.Test;
 
 public class JvmGCLoadTest {
@@ -13,10 +14,21 @@ public class JvmGCLoadTest {
   @Test
   public void test() throws InterruptedException {
 
-    long start = System.currentTimeMillis();
-    Timer timer = new Timer();
-    GarbageCollectionRateCollection gc = new GarbageCollectionRateCollection(timer);
+ 
+    JvmGarbageCollectionMetricGroup gc = new JvmGarbageCollectionMetricGroup();
+    GaugeMetricGroup[] gaugeMetricGroups = gc.getGaugeMetricGroups();
+    
+    for (int i = 0; i < 10; i++) {
+      doSomething(gaugeMetricGroups);      
+    }
 
+    Thread.sleep(10000);
+  }
+
+  private void doSomething(GaugeMetricGroup[] gaugeMetricGroups) {
+    
+    long start = System.currentTimeMillis();
+    
     for (int i = 0; i < 15; i++) {
 
       createSomeGarbage();
@@ -24,11 +36,9 @@ public class JvmGCLoadTest {
 
     long exe = System.currentTimeMillis() - start;
     System.out.println("Duration " + exe + " millis");
-    System.out.println("" + gc);
-
-    Thread.sleep(10000);
+    System.out.println("" + Arrays.toString(gaugeMetricGroups));
   }
-
+  
   private void createSomeGarbage() {
 
     Map<String, String> m = new ConcurrentHashMap<String, String>();

@@ -31,17 +31,17 @@ public interface ValueStatistics {
   /**
    * Return the total sum value.
    */
-  public double getSum();
+  public long getSum();
 
   /**
    * Return the maximum value.
    */
-  public double getMax();
+  public long getMax();
 
   /**
    * Return the minimum value.
    */
-  public double getMin();
+  public long getMin();
 
   /**
    * Return the mean value.

@@ -51,10 +51,21 @@ public interface MetricVisitor {
   public void visit(CounterStatistics counterStatistics);
 
   /**
-   * Visit summary statistics.
+   * Visit value statistics.
    */
-  public void visit(ValueStatistics summary);
+  public void visit(ValueStatistics valueStatistics);
 
+  /**
+   * Visit a GaugeMetricGroup.
+   */
+  public void visit(GaugeMetricGroup gaugeMetricGroup);
+
+  /**
+   * Visit an individual GaugeMetric.
+   */
+  public void visit(GaugeMetric gaugeMetric);
+
+  
   /**
    * End of visiting a metric.
    */
