@@ -16,13 +16,11 @@ public final class JvmGarbageCollectionMetricGroup {
 
   private static String[] names = { "count", "time" };
 
-  private final GaugeMetricGroup[] metricGroups;
-
-  public JvmGarbageCollectionMetricGroup() {
+  public static GaugeMetricGroup[] createGauges() {
 
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
-    this.metricGroups = new GaugeMetricGroup[garbageCollectorMXBeans.size()];
+    GaugeMetricGroup[] metricGroups = new GaugeMetricGroup[garbageCollectorMXBeans.size()];
 
     for (int i = 0; i < garbageCollectorMXBeans.size(); i++) {
       GarbageCollectorMXBean gcMXBean = garbageCollectorMXBeans.get(i);
@@ -44,9 +42,6 @@ public final class JvmGarbageCollectionMetricGroup {
       metricGroups[i] = new GaugeMetricGroup(baseName, group);
     }
 
-  }
-
-  public GaugeMetricGroup[] getGaugeMetricGroups() {
     return metricGroups;
   }
 

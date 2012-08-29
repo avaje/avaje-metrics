@@ -1,7 +1,6 @@
 package org.avaje.metric.jvm;
 
 import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
 import org.avaje.metric.Gauge;
@@ -15,37 +14,24 @@ public final class JvmMemoryMetricGroup {
   
   private static final double MEGABYTES = 1024*1024;
   
-  private final GaugeMetricGroup heapGroup;
-  
-  private final GaugeMetricGroup nonHeapGroup;
-  
-  public JvmMemoryMetricGroup() {
+  public static GaugeMetricGroup createHeapGroup() {
     
-    MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-
     MetricName heapName = MetricName.createBaseName("jvm","memory.heap");   
-    heapGroup = createGroup(heapName, memoryMXBean.getHeapMemoryUsage());
-    
-    MetricName nonHeapName = MetricName.createBaseName("jvm","memory.nonheap");
-    nonHeapGroup = createGroup(nonHeapName, memoryMXBean.getNonHeapMemoryUsage());
-    
+    return createGroup(heapName, ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
   }
  
-  public GaugeMetricGroup getHeapGroup() {
-    return heapGroup;
+  public static GaugeMetricGroup createNonHeapGroup() {
+    MetricName nonHeapName = MetricName.createBaseName("jvm","memory.nonheap");
+    return createGroup(nonHeapName, ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage());
   }
 
-  public GaugeMetricGroup getNonHeapGroup() {
-    return nonHeapGroup;
-  }
-
-  private GaugeMetricGroup createGroup(MetricName baseName,  MemoryUsage memoryUsage) {
+  private static GaugeMetricGroup createGroup(MetricName baseName,  MemoryUsage memoryUsage) {
     Gauge[] gauges = createGauges(memoryUsage);
     GaugeMetric[] group = createGroup(baseName, gauges);
     return new GaugeMetricGroup(baseName, group);
   }
   
-  private GaugeMetric[] createGroup(MetricName baseName,  Gauge[] gauges) {
+  private static GaugeMetric[] createGroup(MetricName baseName,  Gauge[] gauges) {
     GaugeMetric[] group = new GaugeMetric[gauges.length];
     for (int i = 0; i < gauges.length; i++) {
       group[i] = createGaugeMetric(baseName, names[i], gauges[i]);
@@ -53,17 +39,17 @@ public final class JvmMemoryMetricGroup {
     return group;
   }
   
-  private GaugeMetric createGaugeMetric(MetricName baseName, String name, Gauge gauge) {
+  private static GaugeMetric createGaugeMetric(MetricName baseName, String name, Gauge gauge) {
     MetricName specificName = baseName.deriveWithName(name);
     return new GaugeMetric(specificName, gauge, false);
   }
   
  
-  private Gauge[] createGauges(MemoryUsage memoryUsage) {
+  private static Gauge[] createGauges(MemoryUsage memoryUsage) {
     return new MemUsageGauages(memoryUsage).getGauges();
   }
   
-  class MemUsageGauages {
+  static class MemUsageGauages {
     private final MemoryUsage memoryUsage;
     private final Gauge[] gauges;
     

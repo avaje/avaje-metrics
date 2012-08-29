@@ -40,7 +40,21 @@ public class GaugeMetric implements Metric {
     this.gauge = gauge;
     this.wholeNumber = wholeNumber;
   }
+  
+  /**
+   * Create as a non-whole number (double).
+   */
+  public GaugeMetric(MetricName name, Gauge gauge) {
+    this(name, gauge, false);
+  }
 
+  /**
+   * Create as a non whole number and using group, type and name as the metric name.
+   */
+  public GaugeMetric(String group, String type, String name, Gauge gauge) {
+    this(new MetricName(group, type, name), gauge, false);
+  }
+  
   @Override
   public MetricName getName() {
     return name;

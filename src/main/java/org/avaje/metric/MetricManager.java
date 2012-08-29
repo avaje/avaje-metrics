@@ -160,13 +160,6 @@ public class MetricManager {
   }
 
   /**
-   * Register a visit only metric with the MetricManager.
-   */
-  public static void registerVisitOnly(Metric metric) {
-    mgr.registerVisitOnly(metric);
-  }
-  
-  /**
    * Clear the registered metrics.
    */
   protected static void clear() {
@@ -174,17 +167,17 @@ public class MetricManager {
   }
 
   /**
-   * Return all the metrics registered.
+   * Return the non-jvm registered metrics.
    */
   public static Collection<Metric> getMetrics() {
     return mgr.getMetrics();
   }
 
   /**
-   * Return all the metrics registered.
+   * Return the core JVM metrics.
    */
-  public static Collection<Metric> getVisitOnlyMetrics() {
-    return mgr.getVisitOnlyMetrics();
+  public static Collection<Metric> getJvmMetrics() {
+    return mgr.getJvmMetrics();
   }
   
   /**
@@ -192,7 +185,7 @@ public class MetricManager {
    */
   public static void visitAll(MetricVisitor visitor) {
 
-    Collection<Metric> visitOnlyMetrics = mgr.getVisitOnlyMetrics();
+    Collection<Metric> visitOnlyMetrics = mgr.getJvmMetrics();
     for (Metric metric : visitOnlyMetrics) {
       metric.visit(visitor);
     }
@@ -208,6 +201,11 @@ public class MetricManager {
    */
   public static void visit(MetricMatcher matcher, MetricVisitor visitor) {
 
+    Collection<Metric> visitOnlyMetrics = mgr.getJvmMetrics();
+    for (Metric metric : visitOnlyMetrics) {
+      metric.visit(visitor);
+    }
+    
     Collection<Metric> metrics = mgr.getMetrics();
     for (Metric metric : metrics) {
       if (matcher.isMatch(metric)) {

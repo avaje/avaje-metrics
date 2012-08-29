@@ -10,9 +10,7 @@ import org.avaje.metric.MetricName;
 
 public final class JvmThreadMetricGroup {
 
-  private final GaugeMetricGroup group;
-
-  public JvmThreadMetricGroup() {
+  public static GaugeMetricGroup createThreadMetricGroup() {
     
     Gauge[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
 
@@ -22,17 +20,14 @@ public final class JvmThreadMetricGroup {
     metrics[1] = new GaugeMetric(baseName.deriveWithName("peak"), gauges[1], true);
     metrics[2] = new GaugeMetric(baseName.deriveWithName("daemon"), gauges[2], true);
 
-    group = new GaugeMetricGroup(baseName, metrics);
+    return new GaugeMetricGroup(baseName, metrics);
   }
 
-  public GaugeMetricGroup getGaugeMetricGroup() {
-    return group;
-  }
 
-  class ThreadGauges {
+  private static class ThreadGauges {
     
-    final ThreadMXBean threadMXBean;
-    final Gauge[] gauges = new Gauge[3];
+    private final ThreadMXBean threadMXBean;
+    private final Gauge[] gauges = new Gauge[3];
 
     ThreadGauges(ThreadMXBean threadMXBean) {
       this.threadMXBean = threadMXBean;
@@ -41,7 +36,7 @@ public final class JvmThreadMetricGroup {
       gauges[2] = new Daemon();
     }
 
-    public Gauge[] getGauges() {
+    Gauge[] getGauges() {
       return gauges;
     }
 
