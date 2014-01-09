@@ -21,13 +21,4 @@ public interface Metric {
    */
   public void clearStatistics();
 
-  /**
-   * Force the statistics to be updated.
-   * <p>
-   * Typically events are queued and the statistics are calculated in a
-   * background thread automatically. This forces the statistics to be
-   * calculated.
-   * </p>
-   */
-  public void updateStatistics();
 }

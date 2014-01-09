@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.avaje.metric.GaugeMetricGroup;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
+import org.avaje.metric.jvm.JvmMemoryMetricGroup;
 import org.junit.Test;
 
 public class JvmGCLoadTest {
@@ -15,6 +16,8 @@ public class JvmGCLoadTest {
   public void test() throws InterruptedException {
 
     GaugeMetricGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
+    
+    
     
     for (int i = 0; i < 10; i++) {
       doSomething(gaugeMetricGroups);      

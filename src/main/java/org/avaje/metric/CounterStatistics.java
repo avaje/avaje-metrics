@@ -1,23 +1,37 @@
 package org.avaje.metric;
 
 /**
- * Counter statistics.
+ * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-public interface CounterStatistics {
+public class CounterStatistics {
+
+  protected final long startTime;
+  
+  protected final long count;
 
   /**
-   * Return the time these statistics started being collected.
+   * Construct for Counter which doesn't collect time or high water mark.
    */
-  public long getStartTime();
+  public CounterStatistics(long collectionStart, long count) {
+    this.startTime = collectionStart;
+    this.count = count;
+  }
+
+  public String toString() {
+    return "count:"+count;
+  }
   
   /**
-   * Return the duration in seconds.
+   * Return the time the counter started statistics collection.
    */
-  public long getDuration();
-  
+  public long getStartTime() {
+    return startTime;
+  }
+
   /**
-   * Return the count of events.
+   * Return the count of values collected.
    */
-  public long getCount();
-  
+  public long getCount() {
+    return count;
+  }
 }

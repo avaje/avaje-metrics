@@ -1,12 +1,5 @@
 package org.avaje.metric;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.management.ObjectName;
-
-import org.avaje.metric.stats.CollectValueEvents;
 
 /**
  * Designed to capture the duration of timed events.
@@ -19,107 +12,100 @@ import org.avaje.metric.stats.CollectValueEvents;
 public final class TimedMetric implements Metric {
 
   private final MetricName name;
-  private final Clock clock;
 
-  private final ConcurrentLinkedQueue<TimedMetricEvent> successQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
-  private final ConcurrentLinkedQueue<TimedMetricEvent> errorQueue = new ConcurrentLinkedQueue<TimedMetricEvent>();
-
-  private final CollectValueEvents successStats;
-  private final CollectValueEvents errorStats;
-  private ObjectName errorMBeanName;
-
-  public TimedMetric(MetricName name, Clock clock) {
-
-    Clock clockToUse = (clock == null) ? Clock.defaultClock() : clock;
-
+  private final ValueCounter successCounter = new ValueCounter(true);
+  
+  private final ValueCounter errorCounter = new ValueCounter(true);
+  
+  public TimedMetric(MetricName name) {
     this.name = name;
-    this.errorMBeanName = name.deriveWithNameSuffix(".error").getMBeanObjectName();
-    this.clock = clockToUse;
-    this.successStats = new CollectValueEvents(clockToUse);
-    this.errorStats = new CollectValueEvents(clockToUse);
   }
 
   public String toString() {
     return name.toString();
   }
 
+  public ValueStatistics getSuccessStatistics(boolean reset) {
+    return successCounter.getStatistics(reset);
+  }
+  
+  public ValueStatistics getErrorStatistics(boolean reset) {
+    return errorCounter.getStatistics(reset);
+  }
+  
   @Override
   public void clearStatistics() {
-    successStats.reset();
-    errorStats.reset();
-  }
-
-  public ObjectName getErrorMBeanName() {
-    return errorMBeanName;
+    successCounter.reset();
+    errorCounter.reset();
   }
 
   protected long getTimeMillis() {
-    return clock.getTimeMillis();
+    return System.currentTimeMillis();
   }
 
   protected long getTickNanos() {
-    return clock.getTickNanos();
+    return System.nanoTime();
   }
 
   public void visit(MetricVisitor visitor) {
     
-    boolean emptyMetric = successStats.isEmpty() && errorStats.isEmpty();
+    boolean emptyMetric = successCounter.isEmpty() && errorCounter.isEmpty();
     if (!visitor.visitBegin(this, emptyMetric)) {
       // skip processing this metric
       if (emptyMetric) {
         // reset effectively moving the resetStartTime to now
-        successStats.reset();
-        errorStats.reset();
+        successCounter.reset();
+        errorCounter.reset();
       }
       
     } else {
-      visitor.visit(successStats.getValueStatistics(visitor.isResetStatistics()));
+      visitor.visit(this, successCounter.getStatistics(visitor.isResetStatistics()));
       visitor.visitErrorsBegin();
-      visitor.visit(errorStats.getValueStatistics(visitor.isResetStatistics()));
+      visitor.visit(this, errorCounter.getStatistics(visitor.isResetStatistics()));
       visitor.visitErrorsEnd();
       visitor.visitEnd(this);
     }
   }
   
-  /**
-   * Return the statistics collected for all the events that succeeded.
-   */
-  public MetricStatistics getSuccessStatistics() {
-    return successStats;
-  }
-
-  /**
-   * Return the statistics collected for all the events that ended in error.
-   */
-  public MetricStatistics getErrorStatistics() {
-    return errorStats;
-  }
+//  /**
+//   * Return the statistics collected for all the events that succeeded.
+//   */
+//  public MetricStatistics getSuccessStatistics() {
+//    return successStats;
+//  }
+//
+//  /**
+//   * Return the statistics collected for all the events that ended in error.
+//   */
+//  public MetricStatistics getErrorStatistics() {
+//    return errorStats;
+//  }
 
   /**
    * Updates the collected statistics.
    */
-  public void updateStatistics() {
+  public void updateStatistics2() {
 
-    List<TimedMetricEvent> successEvents = removeEvents(successQueue);
-    if (!successEvents.isEmpty()) {
-      successStats.update(successEvents);
-    }
-
-    List<TimedMetricEvent> errorEvents = removeEvents(errorQueue);
-    if (!errorEvents.isEmpty()) {
-      errorStats.update(errorEvents);
-    }
+//    List<TimedMetricEvent> successEvents = removeEvents(successQueue);
+//    if (!successEvents.isEmpty()) {
+//      successStats.update(successEvents);
+//    }
+//
+//    List<TimedMetricEvent> errorEvents = removeEvents(errorQueue);
+//    if (!errorEvents.isEmpty()) {
+//      errorStats.update(errorEvents);
+//    }
   }
 
-  private List<TimedMetricEvent> removeEvents(ConcurrentLinkedQueue<TimedMetricEvent> queue) {
-
-    ArrayList<TimedMetricEvent> events = new ArrayList<TimedMetricEvent>();
-    while (!queue.isEmpty()) {
-      TimedMetricEvent metricEvent = queue.remove();
-      events.add(metricEvent);
-    }
-    return events;
-  }
+//  private List<TimedMetricEvent> removeEvents(ConcurrentLinkedQueue<TimedMetricEvent> queue) {
+//
+//    ArrayList<TimedMetricEvent> events = new ArrayList<TimedMetricEvent>();
+//    while (!queue.isEmpty()) {
+//      TimedMetricEvent metricEvent = queue.remove();
+//      events.add(metricEvent);
+//    }
+//    return events;
+//  }
 
   public MetricName getName() {
     return name;
@@ -141,14 +127,14 @@ public final class TimedMetric implements Metric {
    * Called by {@link TimedMetricEvent#endWithSuccess()}.
    */
   protected void endWithSuccess(TimedMetricEvent event) {
-    successQueue.add(event);
+    successCounter.add(event.getValue());
   }
 
   /**
    * Called by {@link TimedMetricEvent#endWithError()}.
    */
   protected void endWithError(TimedMetricEvent event) {
-    errorQueue.add(event);
+    errorCounter.add(event.getValue());
   }
 
 }

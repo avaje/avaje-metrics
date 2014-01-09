@@ -13,28 +13,15 @@ package org.avaje.metric;
 public class TimedMetricGroup {
 
   /**
-   * The clock to use - defaults to use {@link System#currentTimeMillis()}.
-   */
-  private final Clock clock;
-
-  /**
    * The metric name cache.
    */
   private final MetricNameCache metricNameCache;
 
   /**
-   * Create the TimedMetricGroup with per minute rateUnit and the default clock.
-   */
-  public TimedMetricGroup(MetricName baseName) {
-    this(baseName, Clock.defaultClock());
-  }
-  
-  /**
    * Create the TimedMetricGroup.
    */
-  public TimedMetricGroup(MetricName baseName, Clock clock) {
+  public TimedMetricGroup(MetricName baseName) {
     this.metricNameCache = MetricManager.getMetricNameCache(baseName);
-    this.clock = clock;
   }
 
   /**
@@ -52,8 +39,7 @@ public class TimedMetricGroup {
    */
   public TimedMetricEvent start(String name) {
 
-    MetricName m = metricNameCache.get(name);
-    TimedMetric timedMetric = MetricManager.getTimedMetric(m, clock);
+    TimedMetric timedMetric = getTimedMetric(name);
     return timedMetric.startEvent();
   }
 
@@ -63,7 +49,7 @@ public class TimedMetricGroup {
   public TimedMetric getTimedMetric(String name) {
 
     MetricName m = metricNameCache.get(name);
-    return MetricManager.getTimedMetric(m, clock);
+    return MetricManager.getTimedMetric(m);
   }
 
 }

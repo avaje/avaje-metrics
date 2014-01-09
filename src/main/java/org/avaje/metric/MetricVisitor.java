@@ -1,5 +1,6 @@
 package org.avaje.metric;
 
+
 /**
  * Visitor for the statistics held by a metric.
  */
@@ -30,7 +31,7 @@ public interface MetricVisitor {
   /**
    * Start visiting error statistics.
    * <p>
-   * All MovingAverages and Summary statistics after this are for error events.
+   * All statistics after this are for error events.
    * </p>
    */
   public void visitErrorsBegin();
@@ -40,20 +41,9 @@ public interface MetricVisitor {
    */
   public void visitErrorsEnd();
 
-  /**
-   * Visit the load statistics.
-   */
-  public void visit(LoadStatistics loadStatistics);
-  
-  /**
-   * Visit the counter statistics.
-   */
-  public void visit(CounterStatistics counterStatistics);
+  public void visit(Metric metric, ValueStatistics statistics);
 
-  /**
-   * Visit value statistics.
-   */
-  public void visit(ValueStatistics valueStatistics);
+  public void visit(Metric metric, CounterStatistics statistics);
 
   /**
    * Visit a GaugeMetricGroup.

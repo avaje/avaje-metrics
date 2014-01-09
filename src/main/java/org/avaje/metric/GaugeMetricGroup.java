@@ -51,10 +51,4 @@ public class GaugeMetricGroup implements Metric {
   public void clearStatistics() {
     // nothing to do
   }
-
-  @Override
-  public void updateStatistics() {
-    // nothing to do
-  }
-  
 }

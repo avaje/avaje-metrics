@@ -28,21 +28,20 @@ public class CounterMeterTest {
   public void aBlankMeter() throws Exception {
 
     meter.clearStatistics();
-    Assert.assertEquals("the meter has a count of zero", meter.getCounterStatistics().getCount(), 0L);
+    Assert.assertEquals("the meter has a count of zero", meter.getStatistics(false).getCount(), 0L);
   }
 
   @Test
   public void aMeterWithThreeEvents() throws Exception {
 
     meter.clearStatistics();
-    Assert.assertEquals("the meter has a count of 0", meter.getCounterStatistics().getCount(), 0L);
+    Assert.assertEquals("the meter has a count of 0", meter.getStatistics(false).getCount(), 0L);
 
     meter.markEvent();
     meter.markEvent();
     meter.markEvent();
-    meter.updateStatistics();
 
-    Assert.assertEquals("the meter has a count of three", meter.getCounterStatistics().getCount(), 3L);
+    Assert.assertEquals("the meter has a count of three", meter.getStatistics(false).getCount(), 3L);
 
   }
 
@@ -59,8 +58,8 @@ public class CounterMeterTest {
 
     // make sure statistics are current, normally this is
     // left to the background timer to update the statistics
-    meter.updateStatistics();
-    CounterStatistics statistics = meter.getCounterStatistics();
+
+    CounterStatistics statistics = meter.getStatistics(false);
     System.out.println(meter.getName() + " " + statistics);
   }
 }

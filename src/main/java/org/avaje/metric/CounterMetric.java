@@ -1,6 +1,5 @@
 package org.avaje.metric;
 
-import org.avaje.metric.stats.CollectCounterEvents;
 
 /**
  * Count events that occur.
@@ -13,7 +12,7 @@ public final class CounterMetric implements Metric {
 
   private final MetricName name;
 
-  private final CollectCounterEvents counter;
+  private final Counter counter = new Counter();
 
   /**
    * Create the metric with a name and rateUnit.
@@ -24,26 +23,18 @@ public final class CounterMetric implements Metric {
    */
   public CounterMetric(MetricName name) {
     this.name = name;
-    this.counter = new CollectCounterEvents();
   }
 
-  public CounterStatistics getCounterStatistics() {
-    return counter.getCounterStatistics(false);
+  public CounterStatistics getStatistics(boolean reset) {
+    return counter.getStatistics(reset);
   }
-
+  
   /**
    * Clear the collected statistics.
    */
   @Override
   public void clearStatistics() {
     counter.reset();
-  }
-
-  /**
-   * Called periodically to update the collected statistics.
-   */
-  public void updateStatistics() {
-    // Nothing to do
   }
 
   @Override
@@ -55,7 +46,7 @@ public final class CounterMetric implements Metric {
         counter.reset();
       }      
     } else {
-      visitor.visit(counter.getCounterStatistics(visitor.isResetStatistics()));
+      visitor.visit(this, counter.getStatistics(visitor.isResetStatistics()));
       visitor.visitEnd(this);
     }
   }

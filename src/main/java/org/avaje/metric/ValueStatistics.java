@@ -1,51 +1,68 @@
 package org.avaje.metric;
 
 /**
- * Summary of values.
- * <p>
- * Provides typical aggregate statistics min, average, max, count etc. Typically
- * these will be collected and reported every minute or so.
- * </p>
+ * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-public interface ValueStatistics {
+public class ValueStatistics {
+
+  protected final long startTime;
+  
+  protected final long count;
+  
+  protected final long total;
+
+  protected final long max;
 
   /**
-   * Return the start time these aggregate statistics were started to be collected.
+   * Construct for Counter which doesn't collect time or high water mark.
    */
-  public long getStartTime();
+  public ValueStatistics(long collectionStart, long count) {
+    this.startTime = collectionStart;
+    this.count = count;
+    this.total = 0;
+    this.max = 0;
+  }
   
   /**
-   * Return the time in seconds over which this summary was collected.
-   * <p>
-   * Typically the statistics will be collected/reported every 60 seconds so
-   * this would be 60 in that case.
-   * </p>
+   * Construct for TimeCounter.
    */
-  public long getDuration();
+  public ValueStatistics(long collectionStart, long count, long total, long max) {
+    this.startTime = collectionStart;
+    this.count = count;
+    this.total = total;
+    this.max = max;
+  }
+
+  public String toString() {
+    return "count:"+count+" total:"+total+" max:"+max;
+  }
+  
+  /**
+   * Return the time the counter started statistics collection.
+   */
+  public long getStartTime() {
+    return startTime;
+  }
 
   /**
-   * Return the total count of events since the last reset.
+   * Return the count of values collected.
    */
-  public long getCount();
+  public long getCount() {
+    return count;
+  }
 
   /**
-   * Return the total sum value.
+   * Return the total of all the values.
    */
-  public long getSum();
+  public long getTotal() {
+    return total;
+  }
 
   /**
-   * Return the maximum value.
+   * Return the Max value collected.
    */
-  public long getMax();
-
-  /**
-   * Return the minimum value.
-   */
-  public long getMin();
-
-  /**
-   * Return the mean value.
-   */
-  public double getMean();
+  public long getMax() {
+    return max;
+  }
 
 }

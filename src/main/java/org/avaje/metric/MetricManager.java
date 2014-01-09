@@ -15,16 +15,6 @@ public class MetricManager {
 
   private static final DefaultMetricManager mgr = new DefaultMetricManager();
 
-  /**
-   * Force the statistics to be updated.
-   * <p>
-   * Typically this is not called but left to the underlying MetricManager to
-   * update the statistics periodically using a background thread.
-   * </p>
-   */
-  public static void updateStatistics() {
-    mgr.updateStatistics();
-  }
   
   /**
    * Return a MetricNameCache for the given class.
@@ -48,25 +38,19 @@ public class MetricManager {
     return mgr.getMetricNameCache(baseName);
   }
 
-  /**
-   * Return a TimedMetric given its metricName.
-   */
-  public static TimedMetric getTimedMetric(MetricName metricName) {
-    return getTimedMetric(metricName, null);
-  }
 
   /**
    * Return a TimedMetric using the Class, name to derive the MetricName.
    */
   public static TimedMetric getTimedMetric(Class<?> cls, String eventName) {
-    return getTimedMetric(new MetricName(cls, eventName), null);
+    return getTimedMetric(new MetricName(cls, eventName));
   }
 
   /**
-   * Return a TimedMetric given the name, rateUnit and clock.
+   * Return a TimedMetric given the name.
    */
-  public static TimedMetric getTimedMetric(MetricName name, Clock clock) {
-    return mgr.getTimedMetric(name, clock);
+  public static TimedMetric getTimedMetric(MetricName name) {
+    return mgr.getTimedMetric(name);
   }
 
   /**
@@ -81,20 +65,6 @@ public class MetricManager {
    */
   public static CounterMetric getCounterMetric(Class<?> cls, String eventName) {
     return getCounterMetric(new MetricName(cls, eventName));
-  }
-
-  /**
-   * Return a LoadMetric given the name.
-   */
-  public static LoadMetric getLoadMetric(MetricName name) {
-    return mgr.getLoadMetric(name);
-  }
-
-  /**
-   * Return a LoadMetric using the Class and name to derive the MetricName.
-   */
-  public static LoadMetric getLoadMetric(Class<?> cls, String eventName) {
-    return getLoadMetric(new MetricName(cls, eventName));
   }
 
   /**
@@ -117,46 +87,19 @@ public class MetricManager {
   public static TimedMetricGroup getTimedMetricGroup(MetricName baseName) {
     return new TimedMetricGroup(baseName);
   }
-  
-  /**
-   * Return a TimedMetricGroup.
-   * <p>
-   * This is used when a group of TimedMetric's have a common base name,
-   * rateUnit and clock. These TimedMetric's only differ by the name (all share
-   * the same group and type etc).
-   * </p>
-   * 
-   * @param baseName
-   *          the common part of the metric name
-   * @param rateUnit
-   *          the rateUnit for all the TimedMetric's
-   * @param clock
-   *          the clock to use
-   * 
-   * @return the TimedMetricGroup used to create TimedMetric's that have a
-   *         common base name.
-   */
-  public static TimedMetricGroup getTimedMetricGroup(MetricName baseName, Clock clock) {
-    return new TimedMetricGroup(baseName, clock);
-  }
-
+ 
   /**
    * Return a TimedMetricGroup with a common group and type name.
-   * <p>
-   * This uses the default clock.
-   * </p>
    * 
    * @param group
    *          the common group name
    * @param type
    *          the common type name
-   * @param rateUnit
-   *          the rateUnit used
    * @return the TimedMetricGroup used to create TimedMetric's that have a
    *         common base name.
    */
   public static TimedMetricGroup getTimedMetricGroup(String group, String type) {
-    return new TimedMetricGroup(MetricName.createBaseName(group, type), Clock.defaultClock());
+    return new TimedMetricGroup(MetricName.createBaseName(group, type));
   }
 
   /**

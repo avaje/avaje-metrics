@@ -5,7 +5,6 @@ import static org.avaje.metric.NumFormat.onedp;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.avaje.metric.Clock;
 import org.avaje.metric.MovingAverageStatistics;
 
 /**
@@ -32,15 +31,13 @@ public class CollectMovingAverages implements MovingAverageStatistics {
   private final AtomicLong count = new AtomicLong();
   private final long startTimeNanos;
   private final TimeUnit rateUnit;
-  private final Clock clock;
 
   private final String rateDescriptionSuffix;
 
-  public CollectMovingAverages(String rateDescription, TimeUnit rateUnit, Clock clock) {
+  public CollectMovingAverages(String rateDescription, TimeUnit rateUnit) {
 
     this.rateUnit = rateUnit;
-    this.clock = clock;
-    this.startTimeNanos = this.clock.getTickNanos();
+    this.startTimeNanos = System.nanoTime();
     this.rateDescriptionSuffix = rateDescription + "/"
         + rateUnit.name().toLowerCase().substring(0, rateUnit.name().length() - 1);
   }
@@ -138,7 +135,7 @@ public class CollectMovingAverages implements MovingAverageStatistics {
     if (getCount() == 0) {
       return 0.0;
     } else {
-      final long elapsed = (clock.getTickNanos() - startTimeNanos);
+      final long elapsed = (System.nanoTime() - startTimeNanos);
       return convertNsRate(getCount() / (double) elapsed);
     }
   }

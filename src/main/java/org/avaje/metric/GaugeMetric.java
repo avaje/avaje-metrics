@@ -101,11 +101,6 @@ public class GaugeMetric implements Metric {
     // No need to do anything - direct to gauge
   }
 
-  @Override
-  public void updateStatistics() {
-    // No need to do anything - direct to gauge
-  }
-
   /**
    * Supports monotonically increasing gauges.
    */

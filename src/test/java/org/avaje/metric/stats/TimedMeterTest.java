@@ -3,7 +3,6 @@ package org.avaje.metric.stats;
 import java.util.Random;
 
 import org.avaje.metric.MetricManager;
-import org.avaje.metric.MetricStatistics;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricEvent;
 import org.junit.Assert;
@@ -23,8 +22,7 @@ public class TimedMeterTest {
   public void aBlankMeter() throws Exception {
 
     meter.clearStatistics();
-    Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics().getValueStatistics()
-        .getCount(), 0L);
+    Assert.assertEquals("the meter has a count of zero", meter.getSuccessStatistics(false).getCount(), 0L);
   }
 
   @Test
@@ -34,12 +32,9 @@ public class TimedMeterTest {
     meter.startEvent().endWithSuccess();
     meter.startEvent().endWithSuccess();
     meter.startEvent().endWithSuccess();
-    meter.updateStatistics();
 
-    Assert.assertEquals("the meter has a count of three", meter.getSuccessStatistics().getValueStatistics()
-        .getCount(), 3L);
-    Assert.assertEquals("the meter has a error count of 0", meter.getErrorStatistics().getValueStatistics()
-        .getCount(), 0L);
+    Assert.assertEquals("the meter has a count of three", meter.getSuccessStatistics(false).getCount(), 3L);
+    Assert.assertEquals("the meter has a error count of 0", meter.getErrorStatistics(false).getCount(), 0L);
   }
 
   @Test
@@ -56,8 +51,6 @@ public class TimedMeterTest {
 
     // make sure statistics are current, normally this is
     // left to the background timer to update the statistics
-    meter.updateStatistics();
-    MetricStatistics successStatistics = meter.getSuccessStatistics();
-    System.out.println(successStatistics);
+    System.out.println(meter.getSuccessStatistics(false));
   }
 }
