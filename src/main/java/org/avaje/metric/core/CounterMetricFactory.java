@@ -1,13 +1,12 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.CounterMetric;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 
-public class CounterMetricFactory implements MetricFactory {
+public class CounterMetricFactory implements MetricFactory<CounterMetric> {
 
   @Override
-  public Metric createMetric(MetricName name) {
+  public CounterMetric createMetric(MetricName name) {
 
     return new CounterMetric(name);
   }

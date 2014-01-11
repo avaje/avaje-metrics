@@ -1,5 +1,7 @@
 package org.avaje.metric;
 
+import org.avaje.metric.report.MetricVisitor;
+
 
 /**
  * Count events that occur.
@@ -14,6 +16,8 @@ public final class CounterMetric implements Metric {
 
   private final Counter counter = new Counter();
 
+  private CounterStatistics collectedStatistics;
+
   /**
    * Create the metric with a name and rateUnit.
    * <p>
@@ -25,10 +29,20 @@ public final class CounterMetric implements Metric {
     this.name = name;
   }
 
+  /**
+   * Return the current statistics.
+   */
   public CounterStatistics getStatistics(boolean reset) {
     return counter.getStatistics(reset);
   }
-  
+
+  /**
+   * Return the collected statistics. This is used by reporting objects.
+   */
+  public CounterStatistics getCollectedStatistics() {
+    return collectedStatistics;
+  }
+
   /**
    * Clear the collected statistics.
    */
@@ -37,18 +51,18 @@ public final class CounterMetric implements Metric {
     counter.reset();
   }
 
+  /**
+   * Collect the statistics returning true if there are non-zero statistics on this metric.
+   */
   @Override
-  public void visit(MetricVisitor visitor) {
-    boolean emptyMetric = counter.isEmpty();
-    if (!visitor.visitBegin(this, emptyMetric)) {
-      if (emptyMetric) {
-        // effectively reset the start time
-        counter.reset();
-      }      
-    } else {
-      visitor.visit(this, counter.getStatistics(visitor.isResetStatistics()));
-      visitor.visitEnd(this);
-    }
+  public boolean collectStatistics() {
+    this.collectedStatistics = counter.collectStatistics();
+    return collectedStatistics != null;
+  }
+  
+  @Override
+  public void visitCollectedStatistics(MetricVisitor visitor) {
+    visitor.visit(this);
   }
 
   /**

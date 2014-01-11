@@ -2,6 +2,8 @@ package org.avaje.metric;
 
 import java.util.Arrays;
 
+import org.avaje.metric.report.MetricVisitor;
+
 /**
  * A group of {@link GaugeMetric} that have a common base name.
  */
@@ -34,17 +36,16 @@ public class GaugeMetricGroup implements Metric {
   public GaugeMetric[] getGaugeMetrics() {
     return metrics;
   }
+  
+  @Override
+  public boolean collectStatistics() {
+    // Considered to never be empty and nothing to reset
+    return true;
+  }
 
   @Override
-  public void visit(MetricVisitor visitor) {
-    //boolean empty = stats.isEmpty();
-    if (!visitor.visitBegin(this, false)) {
-      // skip processing/reporting for empty metric
-      // but nothing to reset on gauges
-    } else {
-      visitor.visit(this);
-      visitor.visitEnd(this);
-    }
+  public void visitCollectedStatistics(MetricVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

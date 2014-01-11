@@ -1,7 +1,9 @@
 package org.avaje.metric.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.avaje.metric.CounterMetric;
@@ -26,9 +28,9 @@ public class DefaultMetricManager {
   
   private final ConcurrentHashMap<String, Metric> metricsMap = new ConcurrentHashMap<String, Metric>();
 
-  private final MetricFactory timedMetricFactory = new TimedMetricFactory();
-  private final MetricFactory counterMetricFactory = new CounterMetricFactory();
-  private final MetricFactory valueMetricFactory = new ValueMetricFactory();
+  private final MetricFactory<TimedMetric> timedMetricFactory = new TimedMetricFactory();
+  private final MetricFactory<CounterMetric> counterMetricFactory = new CounterMetricFactory();
+  private final MetricFactory<ValueMetric> valueMetricFactory = new ValueMetricFactory();
 
 
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
@@ -93,7 +95,7 @@ public class DefaultMetricManager {
     return (ValueMetric) getMetric(name, valueMetricFactory);
   }
 
-  private Metric getMetric(MetricName name, MetricFactory factory) {
+  private Metric getMetric(MetricName name, MetricFactory<?> factory) {
 
     String cacheKey = name.getMBeanName();
     // try lock free get first
@@ -117,6 +119,21 @@ public class DefaultMetricManager {
     }
   }
 
+  public Collection<Metric> collectNonEmptyMetrics() {
+    synchronized (monitor) {
+      List<Metric> list = new ArrayList<Metric>();
+      Collection<Metric> values = metricsMap.values();
+      for (Metric metric : values) {
+        if (!metric.collectStatistics()) {
+          list.add(metric);
+        }
+      }
+      
+      return Collections.unmodifiableList(list);
+    }
+  }
+  
+  
   public Collection<Metric> getMetrics() {
     synchronized (monitor) {
       return Collections.unmodifiableCollection(metricsMap.values());

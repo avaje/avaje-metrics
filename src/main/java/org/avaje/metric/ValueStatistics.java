@@ -1,14 +1,15 @@
 package org.avaje.metric;
 
+
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
 public class ValueStatistics {
 
   protected final long startTime;
-  
+
   protected final long count;
-  
+
   protected final long total;
 
   protected final long max;
@@ -22,7 +23,7 @@ public class ValueStatistics {
     this.total = 0;
     this.max = 0;
   }
-  
+
   /**
    * Construct for TimeCounter.
    */
@@ -34,9 +35,9 @@ public class ValueStatistics {
   }
 
   public String toString() {
-    return "count:"+count+" total:"+total+" max:"+max;
+    return "count:" + count + " total:" + total + " max:" + max;
   }
-  
+
   /**
    * Return the time the counter started statistics collection.
    */
@@ -63,6 +64,13 @@ public class ValueStatistics {
    */
   public long getMax() {
     return max;
+  }
+
+  /**
+   * Return the mean value rounded up.
+   */
+  public long getMean() {
+    return (count < 1) ? 0l : Math.round((double)(total / count));
   }
 
 }

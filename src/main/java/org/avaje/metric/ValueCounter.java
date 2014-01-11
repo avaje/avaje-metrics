@@ -21,7 +21,7 @@ public class ValueCounter {
   protected final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
 
   protected final boolean collectMax;
-
+  
   public ValueCounter(boolean collectMax) {
     this.collectMax = collectMax;
   }
@@ -42,20 +42,45 @@ public class ValueCounter {
     return count.sum() == 0;
   }
   
+  public ValueStatistics collectStatistics() {
+    boolean empty = isEmpty();
+    if (empty) {
+      startTime.set(System.currentTimeMillis());
+      return null;
+    } else {
+      return getStatistics(true);
+    }
+  }
+
   /**
    * Return the current statistics reseting the internal values if reset is true.
    */
   public ValueStatistics getStatistics(boolean reset) {
     
     if (reset) {
-      long now = System.currentTimeMillis();
-      return new ValueStatistics(startTime.getAndSet(now), count.sumThenReset(), total.sumThenReset(), max.getAndSet(0));
+      // Note these values are not guaranteed to be consistent wrt each other
+      // but should be reasonably consistent (small time between count and total)
+      final long startTimeVal = startTime.getAndSet(System.currentTimeMillis());
+      final long countVal = count.sumThenReset();
+      final long totalVal = total.sumThenReset();
+      final long maxVal = max.getAndSet(0);
+      return new ValueStatistics(startTimeVal, countVal, totalVal, maxVal);
       
     } else {
       return new ValueStatistics(startTime.get(), count.sum(), total.sum(), max.get());
     }
   }
+
+  /**
+   * Reset just the start time.
+   */
+  public void resetStartTime() {
+    startTime.set(System.currentTimeMillis());
+  }
   
+  /**
+   * Reset all the internal counters and start time.
+   */
   public void reset() {
     startTime.set(System.currentTimeMillis());
     max.set(0);
@@ -63,18 +88,30 @@ public class ValueCounter {
     total.reset();
   }
   
+  /**
+   * Return the start time.
+   */
   public long getStartTime() {
     return startTime.get();
   }
   
+  /**
+   * Return the count of values.
+   */
   public long getCount() {
     return count.sum();
   }
   
+  /**
+   * Return the total of values.
+   */
   public long getTotal() {
     return total.sum();
   }
 
+  /**
+   * Return the max value.
+   */
   public long getMax() {
     return max.get();
   }

@@ -1,5 +1,7 @@
 package org.avaje.metric;
 
+import org.avaje.metric.report.MetricVisitor;
+
 /**
  * A Metric that gets its value from a Gauge.
  * <p>
@@ -86,14 +88,14 @@ public class GaugeMetric implements Metric {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
-     boolean empty = gauge.getValue() == 0;
-     if (!visitor.visitBegin(this, empty)) {
-       // skip processing/reporting for empty metric
-     } else {
-       visitor.visit(this);
-       visitor.visitEnd(this);
-     }
+  public boolean collectStatistics() {
+    // There is no 'reset' of startTime required here
+    return gauge.getValue() == 0;
+  }
+
+  @Override
+  public void visitCollectedStatistics(MetricVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

@@ -1,6 +1,5 @@
 package org.avaje.metric;
 
-import java.util.concurrent.TimeUnit;
 
 /**
  * A Timed Event typically used to time a SOAP operation or a SQL execution etc.
@@ -10,19 +9,16 @@ import java.util.concurrent.TimeUnit;
  * separately.
  * </p>
  */
-public final class TimedMetricEvent implements MetricValueEvent {
+public final class TimedMetricEvent {
 
   private final TimedMetric metric;
-  private final long timeMillis;
   private final long startNanos;
-  private long durationMillis;
 
   /**
    * Create a TimedMetricEvent.
    */
   protected TimedMetricEvent(TimedMetric metric) {
     this.metric = metric;
-    this.timeMillis = metric.getTimeMillis();
     this.startNanos = metric.getTickNanos();
   }
 
@@ -33,35 +29,15 @@ public final class TimedMetricEvent implements MetricValueEvent {
     return metric;
   }
 
-  /**
-   * Return the time the event occurred.
-   */
-  @Override
-  public long getEventTime() {
-    return timeMillis;
-  }
-
-  /**
-   * Return the durationMillis of the timed event.
-   */
-  @Override
-  public long getValue() {
-    return durationMillis;
-  }
-
   public String toString() {
-    return metric.toString() + " durationMillis:" + getValue();
+    return metric.toString() + " durationMillis:" + getDuration();
   }
 
   /**
    * End specifying whether the event was successful or in error.
    */
   public void end(boolean withSuccess) {
-    if (withSuccess) {
-      endWithSuccess();
-    } else {
-      endWithError();
-    }
+    metric.addEventDuration(withSuccess, getDuration());
   }
   
   /**
@@ -69,8 +45,7 @@ public final class TimedMetricEvent implements MetricValueEvent {
    * Operation or SQL execution).
    */
   public void endWithSuccess() {
-    this.durationMillis = TimeUnit.NANOSECONDS.toMillis(metric.getTickNanos() - startNanos);
-    metric.endWithSuccess(this);
+    end(true);
   }
 
   /**
@@ -78,8 +53,15 @@ public final class TimedMetricEvent implements MetricValueEvent {
    * SQL exception).
    */
   public void endWithError() {
-    this.durationMillis = TimeUnit.NANOSECONDS.toMillis(metric.getTickNanos() - startNanos);
-    metric.endWithError(this);
+    end(false);
+  }
+
+
+  /**
+   * Return the duration in nanos.
+   */
+  private long getDuration() {
+    return metric.getTickNanos() - startNanos;
   }
 
 }

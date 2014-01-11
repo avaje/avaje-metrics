@@ -6,11 +6,11 @@ import org.avaje.metric.MetricName;
 /**
  * Factory for creating metrics.
  */
-public interface MetricFactory {
+public interface MetricFactory<T extends Metric> {
 
   /**
    * Create the metric.
    */
-  public Metric createMetric(MetricName name);
+  public T createMetric(MetricName name);
 
 }

@@ -110,51 +110,24 @@ public class MetricManager {
   }
 
   /**
-   * Return the non-jvm registered metrics.
+   * Return all the non-jvm registered metrics.
    */
   public static Collection<Metric> getMetrics() {
     return mgr.getMetrics();
   }
 
   /**
+   * Return all the non-jvm registered metrics that are not empty.
+   */
+  public static Collection<Metric> collectNonEmptyMetrics() {
+    return mgr.collectNonEmptyMetrics();
+  }
+  
+  /**
    * Return the core JVM metrics.
    */
   public static Collection<Metric> getJvmMetrics() {
     return mgr.getJvmMetrics();
-  }
-  
-  /**
-   * Visit all the metrics.
-   */
-  public static void visitAll(MetricVisitor visitor) {
-
-    Collection<Metric> visitOnlyMetrics = mgr.getJvmMetrics();
-    for (Metric metric : visitOnlyMetrics) {
-      metric.visit(visitor);
-    }
-    
-    Collection<Metric> metrics = mgr.getMetrics();
-    for (Metric metric : metrics) {
-      metric.visit(visitor);
-    }
-  }
-
-  /**
-   * Visit all the metrics that match the matcher.
-   */
-  public static void visit(MetricMatcher matcher, MetricVisitor visitor) {
-
-    Collection<Metric> visitOnlyMetrics = mgr.getJvmMetrics();
-    for (Metric metric : visitOnlyMetrics) {
-      metric.visit(visitor);
-    }
-    
-    Collection<Metric> metrics = mgr.getMetrics();
-    for (Metric metric : metrics) {
-      if (matcher.isMatch(metric)) {
-        metric.visit(visitor);
-      }
-    }
   }
 
 }

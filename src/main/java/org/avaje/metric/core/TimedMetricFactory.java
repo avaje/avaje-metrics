@@ -1,13 +1,12 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
 
-public class TimedMetricFactory implements MetricFactory {
+public class TimedMetricFactory implements MetricFactory<TimedMetric> {
 
   @Override
-  public Metric createMetric(MetricName name) {
+  public TimedMetric createMetric(MetricName name) {
     return new TimedMetric(name);
   }
 

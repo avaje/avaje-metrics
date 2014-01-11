@@ -1,13 +1,12 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.ValueMetric;
 
-public class ValueMetricFactory implements MetricFactory {
+public class ValueMetricFactory implements MetricFactory<ValueMetric> {
 
   @Override
-  public Metric createMetric(MetricName name) {
+  public ValueMetric createMetric(MetricName name) {
     return new ValueMetric(name);
   }
 

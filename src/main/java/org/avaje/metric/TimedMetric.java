@@ -1,5 +1,9 @@
 package org.avaje.metric;
 
+import java.util.concurrent.TimeUnit;
+
+import org.avaje.metric.report.MetricVisitor;
+
 
 /**
  * Designed to capture the duration of timed events.
@@ -16,6 +20,10 @@ public final class TimedMetric implements Metric {
   private final ValueCounter successCounter = new ValueCounter(true);
   
   private final ValueCounter errorCounter = new ValueCounter(true);
+
+  private ValueStatistics collectedSuccessStatistics;
+
+  private ValueStatistics collectedErrorStatistics;
   
   public TimedMetric(MetricName name) {
     this.name = name;
@@ -23,6 +31,14 @@ public final class TimedMetric implements Metric {
 
   public String toString() {
     return name.toString();
+  }
+
+  public ValueStatistics getCollectedSuccessStatistics() {
+    return collectedSuccessStatistics;
+  }
+
+  public ValueStatistics getCollectedErrorStatistics() {
+    return collectedErrorStatistics;
   }
 
   public ValueStatistics getSuccessStatistics(boolean reset) {
@@ -46,67 +62,26 @@ public final class TimedMetric implements Metric {
   protected long getTickNanos() {
     return System.nanoTime();
   }
-
-  public void visit(MetricVisitor visitor) {
-    
-    boolean emptyMetric = successCounter.isEmpty() && errorCounter.isEmpty();
-    if (!visitor.visitBegin(this, emptyMetric)) {
-      // skip processing this metric
-      if (emptyMetric) {
-        // reset effectively moving the resetStartTime to now
-        successCounter.reset();
-        errorCounter.reset();
-      }
-      
+  
+  @Override
+  public boolean collectStatistics() {
+    boolean empty = successCounter.isEmpty() && errorCounter.isEmpty();
+    if (empty) {
+      // just reset the start time
+      successCounter.resetStartTime();
+      errorCounter.resetStartTime();
     } else {
-      visitor.visit(this, successCounter.getStatistics(visitor.isResetStatistics()));
-      visitor.visitErrorsBegin();
-      visitor.visit(this, errorCounter.getStatistics(visitor.isResetStatistics()));
-      visitor.visitErrorsEnd();
-      visitor.visitEnd(this);
+      // get a snapshot of the statistics and reset the underlying counters
+      this.collectedSuccessStatistics = successCounter.getStatistics(true);
+      this.collectedErrorStatistics = errorCounter.getStatistics(true);
     }
+    return empty;
+  }
+
+  public void visitCollectedStatistics(MetricVisitor visitor) {
+    visitor.visit(this);
   }
   
-//  /**
-//   * Return the statistics collected for all the events that succeeded.
-//   */
-//  public MetricStatistics getSuccessStatistics() {
-//    return successStats;
-//  }
-//
-//  /**
-//   * Return the statistics collected for all the events that ended in error.
-//   */
-//  public MetricStatistics getErrorStatistics() {
-//    return errorStats;
-//  }
-
-  /**
-   * Updates the collected statistics.
-   */
-  public void updateStatistics2() {
-
-//    List<TimedMetricEvent> successEvents = removeEvents(successQueue);
-//    if (!successEvents.isEmpty()) {
-//      successStats.update(successEvents);
-//    }
-//
-//    List<TimedMetricEvent> errorEvents = removeEvents(errorQueue);
-//    if (!errorEvents.isEmpty()) {
-//      errorStats.update(errorEvents);
-//    }
-  }
-
-//  private List<TimedMetricEvent> removeEvents(ConcurrentLinkedQueue<TimedMetricEvent> queue) {
-//
-//    ArrayList<TimedMetricEvent> events = new ArrayList<TimedMetricEvent>();
-//    while (!queue.isEmpty()) {
-//      TimedMetricEvent metricEvent = queue.remove();
-//      events.add(metricEvent);
-//    }
-//    return events;
-//  }
-
   public MetricName getName() {
     return name;
   }
@@ -124,17 +99,17 @@ public final class TimedMetric implements Metric {
   }
 
   /**
-   * Called by {@link TimedMetricEvent#endWithSuccess()}.
+   * Add an event duration in nanoseconds noting if it was a success or failure result.
+   * <p>
+   * Success and failure statistics are kept separately.
+   * </p>
    */
-  protected void endWithSuccess(TimedMetricEvent event) {
-    successCounter.add(event.getValue());
-  }
-
-  /**
-   * Called by {@link TimedMetricEvent#endWithError()}.
-   */
-  protected void endWithError(TimedMetricEvent event) {
-    errorCounter.add(event.getValue());
+  public void addEventDuration(boolean success, long durationNanos) {
+    if (success) {
+      successCounter.add(TimeUnit.NANOSECONDS.toMicros(durationNanos));
+    } else {
+      errorCounter.add(TimeUnit.NANOSECONDS.toMicros(durationNanos));
+    }
   }
 
 }
