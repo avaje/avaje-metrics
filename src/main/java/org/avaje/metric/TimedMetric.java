@@ -111,5 +111,12 @@ public final class TimedMetric implements Metric {
       errorCounter.add(TimeUnit.NANOSECONDS.toMicros(durationNanos));
     }
   }
+  
+  /**
+   * Add an event duration with opCode indicating success or failure.
+   */
+  public void addEventDuration(long durationNanos, int opCode) {
+    addEventDuration(opCode == 177, durationNanos);
+  }
 
 }
