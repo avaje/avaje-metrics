@@ -37,10 +37,18 @@ public class MetricReportManager {
   
   protected final MetricReporter remoteReporter;
   
+  public MetricReportManager(int freqInSeconds, MetricReporter reporter) {
+    this(new Timer("MetricReporter", true), freqInSeconds, reporter, null);
+  }
+  
   public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
     this(new Timer("MetricReporter", true), freqInSeconds, localReporter, remoteReporter);
   }
-  
+
+  public MetricReportManager(Timer timer, int freqInSeconds, MetricReporter reporter) {
+    this(timer, freqInSeconds, reporter, null);
+  }
+
   /**
    * Create specifying a write frequency, base directory and base file name.
    */
