@@ -12,10 +12,14 @@ import javax.management.ObjectName;
  */
 public class MetricName implements Comparable<MetricName> {
 
+  /**
+   * Group used when it is undefined in {@link #parse(String)}.
+   */
+  public static final String UNDEFINED_GROUP = "o";
+  
   private final String group;
   private final String type;
   private final String name;
-  private final String scope;
   private final String simpleName;
   private final String mBeanName;
   private final ObjectName mBeanObjectName;
@@ -27,19 +31,29 @@ public class MetricName implements Comparable<MetricName> {
     return new MetricName(group, type, null, null);
   }
   
-  
   /**
-   * Creates a new {@link MetricName} without a scope.
-   * 
-   * @param klass
-   *          the {@link Class} to which the {@link TimedMetric} belongs
-   * @param name
-   *          the name of the {@link TimedMetric}
+   * Parse and return a MetricName based on dot notation.
+   * <p>
+   * This is expecting "package.type.name" format.
+   * </p>
    */
-  public MetricName(Class<?> klass, String name) {
-    this(klass, name, null);
+  public static MetricName parse(String rawName) {
+    int lastDot = rawName.lastIndexOf('.');
+    if (lastDot < 1) {
+      return new MetricName(null, null, rawName);
+    }
+    int secLastDot = rawName.lastIndexOf('.', lastDot-1);
+    if (secLastDot > 0) {
+      String name = rawName.substring(lastDot+1);
+      String type = rawName.substring(secLastDot+1, lastDot); 
+      String group = rawName.substring(0, secLastDot);
+      return new MetricName(group, type, name);
+    }
+    String name = rawName.substring(lastDot+1);
+    String type = rawName.substring(0, lastDot); 
+    return new MetricName(UNDEFINED_GROUP, type, name);
   }
-
+  
   /**
    * Creates a new {@link MetricName} without a scope.
    * 
@@ -61,16 +75,14 @@ public class MetricName implements Comparable<MetricName> {
    *          the {@link Class} to which the {@link TimedMetric} belongs
    * @param name
    *          the name of the {@link TimedMetric}
-   * @param scope
-   *          the scope of the {@link TimedMetric}
    */
-  public MetricName(Class<?> klass, String name, String scope) {
+  public MetricName(Class<?> klass, String name) {
     this(klass.getPackage() == null ? "" : klass.getPackage().getName(), klass.getSimpleName()
-        .replaceAll("\\$$", ""), name, scope);
+        .replaceAll("\\$$", ""), name);
   }
 
   /**
-   * Creates a new {@link MetricName} without a scope.
+   * Creates a new {@link MetricName}.
    * 
    * @param group
    *          the group to which the {@link TimedMetric} belongs
@@ -78,8 +90,6 @@ public class MetricName implements Comparable<MetricName> {
    *          the type to which the {@link TimedMetric} belongs
    * @param name
    *          the name of the {@link TimedMetric}
-   * @param scope
-   *          the scope of the {@link TimedMetric}
    */
   public MetricName(String group, String type, String name, String scope) {
     this(group, type, name, scope, createMBeanName(group, type, name, scope));
@@ -94,8 +104,6 @@ public class MetricName implements Comparable<MetricName> {
    *          the type to which the {@link TimedMetric} belongs
    * @param name
    *          the name of the {@link TimedMetric}
-   * @param scope
-   *          the scope of the {@link TimedMetric}
    * @param mBeanName
    *          the 'ObjectName', represented as a string, to use when registering
    *          the MBean.
@@ -110,7 +118,6 @@ public class MetricName implements Comparable<MetricName> {
     this.group = group;
     this.type = type;
     this.name = name;
-    this.scope = scope;
     this.mBeanName = mBeanName;
     this.mBeanObjectName = createObjectName(mBeanName);
     this.simpleName = createSimpleName(group, type, name);
@@ -123,7 +130,7 @@ public class MetricName implements Comparable<MetricName> {
    * </p>
    */
   public MetricName deriveWithNameSuffix(String nameSuffix) {
-    return new MetricName(group, type, name + nameSuffix, scope);
+    return new MetricName(group, type, name + nameSuffix);
   }
 
   /**
@@ -133,7 +140,7 @@ public class MetricName implements Comparable<MetricName> {
    * </p>
    */
   public MetricName deriveWithName(String newName) {
-    return new MetricName(group, type, newName, scope);
+    return new MetricName(group, type, newName);
   }
 
   private ObjectName createObjectName(String name) {
@@ -173,25 +180,6 @@ public class MetricName implements Comparable<MetricName> {
    */
   public String getName() {
     return name;
-  }
-
-  /**
-   * Returns the scope of the {@link TimedMetric}.
-   * 
-   * @return the scope of the {@link TimedMetric}
-   */
-  public String getScope() {
-    return scope;
-  }
-
-  /**
-   * Returns {@code true} if the {@link TimedMetric} has a scope, {@code false}
-   * otherwise.
-   * 
-   * @return {@code true} if the {@link TimedMetric} has a scope
-   */
-  public boolean hasScope() {
-    return scope != null;
   }
 
   /**

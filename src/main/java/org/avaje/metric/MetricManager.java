@@ -54,6 +54,13 @@ public class MetricManager {
   }
 
   /**
+   * Return a TimedMetric given the name.
+   */
+  public static TimedMetric getTimedMetric(String name) {
+    return mgr.getTimedMetric(name);
+  }
+  
+  /**
    * Return a CounterMetric given the name.
    */
   public static CounterMetric getCounterMetric(MetricName name) {

@@ -114,8 +114,9 @@ public final class TimedMetric implements Metric {
   
   /**
    * Add an event duration with opCode indicating success or failure.
+   * This is intended for use by enhanced code and not general use.
    */
-  public void addEventDuration(long durationNanos, int opCode) {
+  public void operationEnd(long durationNanos, int opCode) {
     addEventDuration(opCode == 177, durationNanos);
   }
 

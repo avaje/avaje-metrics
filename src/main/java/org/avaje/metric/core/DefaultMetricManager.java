@@ -83,6 +83,10 @@ public class DefaultMetricManager {
     return metricNameCache;
   }
 
+  public TimedMetric getTimedMetric(String name) {
+    return (TimedMetric) getMetric(MetricName.parse(name), timedMetricFactory);
+  }
+  
   public TimedMetric getTimedMetric(MetricName name) {
     return (TimedMetric) getMetric(name, timedMetricFactory);
   }

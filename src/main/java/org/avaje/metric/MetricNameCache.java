@@ -21,7 +21,7 @@ public final class MetricNameCache {
    * Create basing the name off the Class.
    */
   public MetricNameCache(Class<?> klass) {
-    this(new MetricName(klass, "", null));
+    this(new MetricName(klass, ""));
   }
 
   /**
