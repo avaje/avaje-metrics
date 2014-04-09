@@ -117,7 +117,7 @@ public final class TimedMetric implements Metric {
    * This is intended for use by enhanced code and not general use.
    */
   public void operationEnd(long durationNanos, int opCode) {
-    addEventDuration(opCode == 177, durationNanos);
+    addEventDuration(opCode == 176, durationNanos);
   }
 
 }
