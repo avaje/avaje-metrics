@@ -9,7 +9,7 @@
 
   <groupId>org.avaje.metric</groupId>
   <artifactId>avaje-metric-core</artifactId>
-  <version>2.1.1-SNAPSHOT</version>
+  <version>2.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>avaje-metric-core</name>
@@ -36,19 +36,20 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:https://github.com/rbygrave/avaje-metric-core.git</connection>
-		<developerConnection>scm:git:https://github.com/rbygrave/avaje-metric-core.git</developerConnection>
-		<url>https://github.com/rbygrave/avaje-metric-core.git</url>
+		<connection>scm:git:https://github.com/avaje-metric/avaje-metric-core.git</connection>
+		<developerConnection>scm:git:https://github.com/avaje-metric/avaje-metric-core.git</developerConnection>
+		<url>https://github.com/avaje-metric/avaje-metric-core.git</url>
 	</scm>
 
   <dependencies>
 
+<!-- 
     <dependency>
         <groupId>org.glassfish</groupId>
         <artifactId>javax.json</artifactId>
         <version>1.0.4</version>
     </dependency>
-
+ -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
