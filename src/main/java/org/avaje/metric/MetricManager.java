@@ -57,7 +57,6 @@ public class MetricManager {
    * Return a TimedMetric given the name.
    */
   public static TimedMetric getTimedMetric(String name) {
-    System.out.println("------------------------------------------- "+name);
     return mgr.getTimedMetric(name);
   }
   
