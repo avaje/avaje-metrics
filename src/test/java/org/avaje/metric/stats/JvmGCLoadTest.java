@@ -7,10 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.avaje.metric.GaugeMetricGroup;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class JvmGCLoadTest {
 
+  @Ignore
   @Test
   public void test() throws InterruptedException {
 
