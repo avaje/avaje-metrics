@@ -7,7 +7,7 @@ public class ValueMetricFactory implements MetricFactory<ValueMetric> {
 
   @Override
   public ValueMetric createMetric(MetricName name) {
-    return new ValueMetric(name);
+    return new DefaultValueMetric(name);
   }
 
 }

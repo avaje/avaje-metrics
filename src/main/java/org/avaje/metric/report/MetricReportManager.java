@@ -15,7 +15,7 @@ import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
 
 /**
- * Writes the collected metrics to a file.
+ * Writes the collected metrics to registered reporters.
  * <p>
  * Typically you configure the frequency in seconds in which statistics are
  * collected and reported as well as a base directory where the metric files go.

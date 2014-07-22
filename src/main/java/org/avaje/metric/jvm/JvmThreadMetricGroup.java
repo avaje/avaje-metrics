@@ -3,31 +3,33 @@ package org.avaje.metric.jvm;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 
-import org.avaje.metric.Gauge;
-import org.avaje.metric.GaugeMetric;
-import org.avaje.metric.GaugeMetricGroup;
-import org.avaje.metric.MetricName;
+import org.avaje.metric.GaugeCounter;
+import org.avaje.metric.GaugeCounterMetric;
+import org.avaje.metric.GaugeCounterMetricGroup;
+import org.avaje.metric.core.DefaultGaugeCounterMetric;
+import org.avaje.metric.core.DefaultGaugeCounterMetricGroup;
+import org.avaje.metric.core.DefaultMetricName;
 
 public final class JvmThreadMetricGroup {
 
-  public static GaugeMetricGroup createThreadMetricGroup() {
+  public static GaugeCounterMetricGroup createThreadMetricGroup() {
     
-    Gauge[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
+    GaugeCounter[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
 
-    MetricName baseName = MetricName.createBaseName("jvm", "threads");
-    GaugeMetric[] metrics = new GaugeMetric[3];
-    metrics[0] = new GaugeMetric(baseName.deriveWithName("current"), gauges[0], true);
-    metrics[1] = new GaugeMetric(baseName.deriveWithName("peak"), gauges[1], true);
-    metrics[2] = new GaugeMetric(baseName.deriveWithName("daemon"), gauges[2], true);
+    DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm", "threads");
+    GaugeCounterMetric[] metrics = new GaugeCounterMetric[3];
+    metrics[0] = new DefaultGaugeCounterMetric(baseName.deriveWithName("current"), gauges[0]);
+    metrics[1] = new DefaultGaugeCounterMetric(baseName.deriveWithName("peak"), gauges[1]);
+    metrics[2] = new DefaultGaugeCounterMetric(baseName.deriveWithName("daemon"), gauges[2]);
 
-    return new GaugeMetricGroup(baseName, metrics);
+    return new DefaultGaugeCounterMetricGroup(baseName, metrics);
   }
 
 
   private static class ThreadGauges {
     
     private final ThreadMXBean threadMXBean;
-    private final Gauge[] gauges = new Gauge[3];
+    private final GaugeCounter[] gauges = new GaugeCounter[3];
 
     ThreadGauges(ThreadMXBean threadMXBean) {
       this.threadMXBean = threadMXBean;
@@ -36,20 +38,20 @@ public final class JvmThreadMetricGroup {
       gauges[2] = new Daemon();
     }
 
-    Gauge[] getGauges() {
+    GaugeCounter[] getGauges() {
       return gauges;
     }
 
-    class Count implements Gauge {
+    class Count implements GaugeCounter {
       @Override
-      public double getValue() {
+      public long getValue() {
         return threadMXBean.getThreadCount();
       }
     }
 
-    class Peak implements Gauge {
+    class Peak implements GaugeCounter {
       @Override
-      public double getValue() {
+      public long getValue() {
         // read and reset the peak
         int peakThreadCount = threadMXBean.getPeakThreadCount();
         threadMXBean.resetPeakThreadCount(); 
@@ -57,9 +59,9 @@ public final class JvmThreadMetricGroup {
       }
     }
 
-    class Daemon implements Gauge {
+    class Daemon implements GaugeCounter {
       @Override
-      public double getValue() {
+      public long getValue() {
         return threadMXBean.getDaemonThreadCount();
       }
     }

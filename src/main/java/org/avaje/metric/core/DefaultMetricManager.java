@@ -7,32 +7,63 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.avaje.metric.CounterMetric;
+import org.avaje.metric.Gauge;
+import org.avaje.metric.GaugeCounter;
+import org.avaje.metric.GaugeCounterMetric;
+import org.avaje.metric.GaugeCounterMetricGroup;
 import org.avaje.metric.GaugeMetric;
-import org.avaje.metric.GaugeMetricGroup;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
 import org.avaje.metric.TimedMetric;
+import org.avaje.metric.TimedMetricGroup;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
 import org.avaje.metric.jvm.JvmMemoryMetricGroup;
 import org.avaje.metric.jvm.JvmSystemMetricGroup;
 import org.avaje.metric.jvm.JvmThreadMetricGroup;
+import org.avaje.metric.spi.PluginMetricManager;
 
-public class DefaultMetricManager {
+/**
+ * Default implementation of the PluginMetricManager.
+ */
+public class DefaultMetricManager implements PluginMetricManager {
 
-  private final String monitor = new String();
+  private final Object monitor = new Object();
 
+  /**
+   * Cache of the code JVM metrics.
+   */
   private final ConcurrentHashMap<String, Metric> coreJvmMetrics = new ConcurrentHashMap<String, Metric>();
+  
+  /**
+   * Derived collection of the core jvm metrics.
+   */
   private final Collection<Metric> coreJvmMetricCollection;
   
-  private final ConcurrentHashMap<String, Metric> metricsMap = new ConcurrentHashMap<String, Metric>();
+  /**
+   * Cache of the created metrics (excluding JVM metrics).
+   */
+  private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<String, Metric>();
 
+  /**
+   * Factory for creating TimedMetrics.
+   */
   private final MetricFactory<TimedMetric> timedMetricFactory = new TimedMetricFactory();
+  
+  /**
+   * Factory for creating CounterMetrics.
+   */
   private final MetricFactory<CounterMetric> counterMetricFactory = new CounterMetricFactory();
+  
+  /**
+   * Factory for creating ValueMetrics.
+   */
   private final MetricFactory<ValueMetric> valueMetricFactory = new ValueMetricFactory();
 
-
+  /**
+   * Cache of the metric names.
+   */
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
 
   public DefaultMetricManager() {
@@ -41,20 +72,23 @@ public class DefaultMetricManager {
     this.coreJvmMetricCollection = Collections.unmodifiableCollection(coreJvmMetrics.values()); 
   }
   
+  /**
+   * Register the standard jvm metrics.
+   */
   private void registerStandardJvmMetrics() {
     
     registerJvmMetric(JvmMemoryMetricGroup.createHeapGroup());
     registerJvmMetric(JvmMemoryMetricGroup.createNonHeapGroup());
     
-    GaugeMetricGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
-    for (GaugeMetricGroup gaugeMetricGroup : gaugeMetricGroups) {
+    GaugeCounterMetricGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
+    for (GaugeCounterMetricGroup gaugeMetricGroup : gaugeMetricGroups) {
       registerJvmMetric(gaugeMetricGroup);
     }
     
     registerJvmMetric(JvmThreadMetricGroup.createThreadMetricGroup());
     registerJvmMetric(JvmSystemMetricGroup.getUptime());
     
-    GaugeMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
+    DefaultGaugeMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
@@ -62,19 +96,36 @@ public class DefaultMetricManager {
   }
 
   private void registerJvmMetric(Metric m) {
-    coreJvmMetrics.put(m.getName().getMBeanName(), m);
+    coreJvmMetrics.put(m.getName().getSimpleName(), m);
   }
 
+  @Override
+  public MetricName nameParse(String name) {
+    return DefaultMetricName.parse(name);
+  }
+
+  @Override
+  public MetricName name(String group, String type, String name) {
+    return new DefaultMetricName(group, type, name);
+  }
+
+  @Override
+  public MetricName name(Class<?> cls, String name) {
+    return new DefaultMetricName(cls, name);
+  }
+
+  @Override
   public MetricNameCache getMetricNameCache(Class<?> klass) {
-    return getMetricNameCache(new MetricName(klass, null));
+    return getMetricNameCache(name(klass, null));
   }
   
+  @Override
   public MetricNameCache getMetricNameCache(MetricName baseName) {
    
-    String key = baseName.getMBeanName();
+    String key = baseName.getSimpleName();
     MetricNameCache metricNameCache = nameCache.get(key);
     if (metricNameCache == null) {
-      metricNameCache = new MetricNameCache(baseName);
+      metricNameCache = new DefaultMetricNameCache(baseName);
       MetricNameCache oldNameCache = nameCache.putIfAbsent(key, metricNameCache);
       if (oldNameCache != null) {
         return oldNameCache;
@@ -82,53 +133,84 @@ public class DefaultMetricManager {
     }
     return metricNameCache;
   }
-
-  public TimedMetric getTimedMetric(String name) {
-    return (TimedMetric) getMetric(MetricName.parse(name), timedMetricFactory);
+  
+  @Override
+  public TimedMetricGroup getTimedMetricGroup(MetricName baseName) {
+    return new DefaultTimedMetricGroup(baseName);
   }
   
+  @Override
+  public TimedMetric getTimedMetric(String name) {
+    return getTimedMetric(DefaultMetricName.parse(name));
+  }
+  
+  @Override
   public TimedMetric getTimedMetric(MetricName name) {
     return (TimedMetric) getMetric(name, timedMetricFactory);
   }
 
+  @Override
   public CounterMetric getCounterMetric(MetricName name) {
     return (CounterMetric) getMetric(name, counterMetricFactory);
   }
   
+  @Override
   public ValueMetric getValueMetric(MetricName name) {
     return (ValueMetric) getMetric(name, valueMetricFactory);
   }
 
   private Metric getMetric(MetricName name, MetricFactory<?> factory) {
 
-    String cacheKey = name.getMBeanName();
+    String cacheKey = name.getSimpleName();
     // try lock free get first
-    Metric metric = metricsMap.get(cacheKey);
+    Metric metric = metricsCache.get(cacheKey);
     if (metric == null) {
       synchronized (monitor) {
         // use synchronised block
-        metric = metricsMap.get(cacheKey);
+        metric = metricsCache.get(cacheKey);
         if (metric == null) {
           metric = factory.createMetric(name);
-          metricsMap.put(cacheKey, metric);
+          metricsCache.put(cacheKey, metric);
         }
       }
     }
     return metric;
   }
+  
+  
 
+  @Override
+  public GaugeMetric registerGauge(MetricName name, Gauge gauge) {
+    
+    DefaultGaugeMetric metric = new DefaultGaugeMetric(name, gauge);
+    metricsCache.put(name.getSimpleName(), metric); 
+    return metric;
+  }
+  
+  @Override
+  public GaugeCounterMetric registerGauge(MetricName name, GaugeCounter gauge) {
+    
+    DefaultGaugeCounterMetric metric = new DefaultGaugeCounterMetric(name, gauge);
+    metricsCache.put(name.getSimpleName(), metric); 
+    return metric;
+  }
+
+  @Override
   public void clear() {
     synchronized (monitor) {
-      metricsMap.clear();
+      metricsCache.clear();
     }
   }
 
+  @Override
   public Collection<Metric> collectNonEmptyMetrics() {
     synchronized (monitor) {
-      List<Metric> list = new ArrayList<Metric>();
-      Collection<Metric> values = metricsMap.values();
+      
+      Collection<Metric> values = metricsCache.values();
+      List<Metric> list = new ArrayList<Metric>(values.size());
+      
       for (Metric metric : values) {
-        if (!metric.collectStatistics()) {
+        if (metric.collectStatistics()) {
           list.add(metric);
         }
       }
@@ -137,13 +219,14 @@ public class DefaultMetricManager {
     }
   }
   
-  
+  @Override
   public Collection<Metric> getMetrics() {
     synchronized (monitor) {
-      return Collections.unmodifiableCollection(metricsMap.values());
+      return Collections.unmodifiableCollection(metricsCache.values());
     }
   }
   
+  @Override
   public Collection<Metric> getJvmMetrics() {
     return coreJvmMetricCollection;
   }

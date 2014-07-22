@@ -86,7 +86,7 @@ public class FileReporter implements MetricReporter {
       TextFileWriteVisitor visitor = new TextFileWriteVisitor(writer);
    
       for (Metric metric : metrics) {
-        metric.visitCollectedStatistics(visitor);
+        metric.visit(visitor);
       }
       
     } catch (Exception e) {

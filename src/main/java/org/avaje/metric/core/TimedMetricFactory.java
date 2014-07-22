@@ -7,7 +7,7 @@ public class TimedMetricFactory implements MetricFactory<TimedMetric> {
 
   @Override
   public TimedMetric createMetric(MetricName name) {
-    return new TimedMetric(name);
+    return new DefaultTimedMetric(name);
   }
 
 }

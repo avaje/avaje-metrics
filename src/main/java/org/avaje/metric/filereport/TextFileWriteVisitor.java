@@ -9,19 +9,29 @@ import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
 import org.avaje.metric.GaugeMetric;
 import org.avaje.metric.GaugeMetricGroup;
+import org.avaje.metric.GaugeCounterMetric;
+import org.avaje.metric.GaugeCounterMetricGroup;
 import org.avaje.metric.Metric;
+import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
-import org.avaje.metric.report.MetricVisitor;
 
+/**
+ * A visitor that is aimed to write a space formatted file.
+ * <p>
+ * This format is aimed at writing to the local file system to provide simple low tech reporting of
+ * the collected metrics.
+ */
 public class TextFileWriteVisitor implements MetricVisitor {
 
   protected final SimpleDateFormat timeFormat;
 
+  protected final long collectTime;
+
   protected final int decimalPlaces;
   
-  protected final int gaugePadding;
+  protected final int columnWidth;
 
   protected final Writer writer;
 
@@ -32,11 +42,15 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
 
   public TextFileWriteVisitor(Writer writer, String timeNowFormat) {
+    this(writer, timeNowFormat, 16, 2);
+  }
+  
+  public TextFileWriteVisitor(Writer writer, String timeNowFormat, int columnWidth, int decimalPlaces) {
+    this.collectTime = System.currentTimeMillis();
     this.writer = writer;
     this.timeFormat = new SimpleDateFormat(timeNowFormat);
-    this.decimalPlaces = 2;
-    this.gaugePadding = decimalPlaces+4;
-    
+    this.decimalPlaces = decimalPlaces;
+    this.columnWidth = columnWidth;
     initialiseNewLine();
   }
 
@@ -90,12 +104,8 @@ public class TextFileWriteVisitor implements MetricVisitor {
     try {
       writeMetricName(metric);
       CounterStatistics counterStatistics = metric.getCollectedStatistics();
-      writer.write("count=");
-      writer.write(String.valueOf(counterStatistics.getCount()));
-      writer.write(" ");
-      writer.write("dur=");
-      writer.write(String.valueOf(getDuration(counterStatistics.getStartTime())));
-      writer.write(" ");
+      write("count", counterStatistics.getCount());
+      write("dur", getDuration(counterStatistics.getStartTime()));
       writeMetricEnd(metric);
       
     } catch (IOException e) {
@@ -110,10 +120,7 @@ public class TextFileWriteVisitor implements MetricVisitor {
       GaugeMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
       writeMetricName(gaugeMetricGroup);
       for (GaugeMetric m : gaugeMetrics) {
-        writer.write(m.getName().getName());
-        writer.write("=");
-        writeWithPadding(m.getFormattedValue(decimalPlaces), gaugePadding);
-        writer.write(" ");
+        write(m.getName().getName(), formattedValue(m.getValue()));
       }
       writeMetricEnd(gaugeMetricGroup);
     } catch (IOException e) {
@@ -125,49 +132,67 @@ public class TextFileWriteVisitor implements MetricVisitor {
   public void visit(GaugeMetric metric) {
     try {
       writeMetricName(metric);
-      writer.write("value=");
-      writer.write(metric.getFormattedValue(decimalPlaces));
-      writer.write(" ");
+      write("value", formattedValue(metric.getValue()));
       writeMetricEnd(metric);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  public String formattedValue(double value) {
+    return NumFormat.dp(decimalPlaces, value);
+  }
+  
+  @Override
+  public void visit(GaugeCounterMetric metric) {
+    try {
+      writeMetricName(metric);
+      write("value", metric.getValue());
+      writeMetricEnd(metric);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  @Override
+  public void visit(GaugeCounterMetricGroup gaugeMetricGroup) {
+
+    try {
+      GaugeCounterMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+      writeMetricName(gaugeMetricGroup);
+      for (GaugeCounterMetric m : gaugeMetrics) {
+        write(m.getName().getName(), m.getValue());
+      }
+      writeMetricEnd(gaugeMetricGroup);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   protected void writeSummary(String prefix, ValueStatistics valueStats) {
+    
     try {
 
       long count = valueStats.getCount();
-      writePrefix(prefix);
-      writer.write("count=");
-      writer.write(String.valueOf(count));
-      writer.write(" ");
+      write(prefix, "count", count);
       if (count == 0) {
         return;
       }
-
-      writePrefix(prefix);
-      writer.write("avg=");
-      writer.write(String.valueOf(valueStats.getMean()));
-      writer.write(" ");
-      writePrefix(prefix);
-      writer.write("max=");
-      writer.write(String.valueOf(valueStats.getMax()));
-      writer.write(" ");
-      writePrefix(prefix);
-      writer.write("sum=");
-      writer.write(String.valueOf(valueStats.getTotal()));
-      writer.write(" ");
-      writePrefix(prefix);
-      writer.write("dur=");
-      writer.write(String.valueOf(getDuration(valueStats.getStartTime())));
-      writer.write(" ");
+      write(prefix, "avg", valueStats.getMean());
+      write(prefix, "max", valueStats.getMax());
+      write(prefix, "sum", valueStats.getTotal());
+      write(prefix, "dur", getDuration(valueStats.getStartTime()));
      
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  protected void write(String prefix, String name, long value) throws IOException {
+    writePrefix(prefix);
+    write(name, value);
+  }
+  
   protected void writePrefix(String prefix) {
     try {
       if (errors) {
@@ -175,13 +200,24 @@ public class TextFileWriteVisitor implements MetricVisitor {
       }
       if (!prefix.isEmpty()) {
         writer.write(prefix);
-        // writer.write(".");
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  protected void write(String name, long value) throws IOException {
+    write(name, String.valueOf(value));
+  }
+  
+  protected void write(String name, String value) throws IOException {
+
+    writer.write(name);
+    writer.write("=");
+    writeWithPadding(value, columnWidth - name.length());
+    writer.write(" ");
+  }  
+  
   protected void writeWithPadding(String text, int padTo) throws IOException {
     writer.write(text);
     writePadding(text, padTo);
@@ -201,7 +237,7 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
 
   protected long getDuration(long startTime) {
-    return Math.round((System.currentTimeMillis() - startTime)/1000d);
+    return Math.round((collectTime - startTime)/1000d);
   }
 
 }

@@ -8,7 +8,7 @@ public class CounterMetricFactory implements MetricFactory<CounterMetric> {
   @Override
   public CounterMetric createMetric(MetricName name) {
 
-    return new CounterMetric(name);
+    return new DefaultCounterMetric(name);
   }
 
 }
