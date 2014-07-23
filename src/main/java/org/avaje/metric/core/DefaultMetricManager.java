@@ -73,7 +73,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
   
   /**
-   * Register the standard jvm metrics.
+   * Register the standard JVM metrics.
    */
   private void registerStandardJvmMetrics() {
     
@@ -195,7 +195,6 @@ public class DefaultMetricManager implements PluginMetricManager {
     return metric;
   }
 
-  @Override
   public void clear() {
     synchronized (monitor) {
       metricsCache.clear();
