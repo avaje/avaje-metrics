@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 /**
  * Utility for formatting numbers.
  */
-class NumFormat {
+public class NumFormat {
 
   private static DecimalFormat format4 = new DecimalFormat("0.0###");
   private static DecimalFormat format3 = new DecimalFormat("0.0##");

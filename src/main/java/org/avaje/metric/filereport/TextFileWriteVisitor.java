@@ -32,6 +32,10 @@ public class TextFileWriteVisitor implements MetricVisitor {
   protected final int decimalPlaces;
   
   protected final int columnWidth;
+  
+  protected final String delimitPrefix;
+  
+  protected final String delimitSuffix;
 
   protected final Writer writer;
 
@@ -42,22 +46,25 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
 
   public TextFileWriteVisitor(Writer writer, String timeNowFormat) {
-    this(writer, timeNowFormat, 16, 2);
+    this(writer, timeNowFormat, 16, 2, "", ", ");
   }
   
-  public TextFileWriteVisitor(Writer writer, String timeNowFormat, int columnWidth, int decimalPlaces) {
+  public TextFileWriteVisitor(Writer writer, String timeNowFormat, int columnWidth, int decimalPlaces, String delimitPrefix, String delimitSuffix) {
     this.collectTime = System.currentTimeMillis();
     this.writer = writer;
     this.timeFormat = new SimpleDateFormat(timeNowFormat);
     this.decimalPlaces = decimalPlaces;
     this.columnWidth = columnWidth;
+    this.delimitPrefix = "";
+    this.delimitSuffix = ", ";
     initialiseNewLine();
   }
 
   protected void initialiseNewLine() {
     try {
       writer.write(getNowString());
-      writer.write(" -\n");
+      writer.write(delimitSuffix);
+      writer.write("-\n");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -65,9 +72,8 @@ public class TextFileWriteVisitor implements MetricVisitor {
 
   protected void writeMetricName(Metric metric) throws IOException {
     writer.write(getNowString());
-    writer.write(" ");
+    writer.write(delimitSuffix);
     writeWithPadding(metric.getName().getSimpleName(), 30);
-    writer.write(" ");
   }
 
   protected void writeMetricEnd(Metric metric) throws IOException {
@@ -215,11 +221,11 @@ public class TextFileWriteVisitor implements MetricVisitor {
     writer.write(name);
     writer.write("=");
     writeWithPadding(value, columnWidth - name.length());
-    writer.write(" ");
   }  
   
   protected void writeWithPadding(String text, int padTo) throws IOException {
     writer.write(text);
+    writer.write(delimitSuffix);
     writePadding(text, padTo);
   }
 
