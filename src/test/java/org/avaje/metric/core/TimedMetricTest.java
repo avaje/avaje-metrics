@@ -72,6 +72,22 @@ public class TimedMetricTest {
 
   }
   
+  @Test
+  public void addEventSince() {
+      
+      TimedMetric metric = MetricManager.getTimedMetric(new DefaultMetricName("org", "test", "mytimed.since"));
+      
+       
+      metric.clearStatistics();
+      
+      metric.addEventSince(true, System.nanoTime() - 950000);
+      ValueStatistics valueStatistics = metric.getSuccessStatistics(false);
+      Assert.assertEquals(1, valueStatistics.getCount());
+      System.out.println("Should be close to 1000: "+valueStatistics.getTotal());
+      Assert.assertTrue(valueStatistics.getTotal() > 0);
+      Assert.assertTrue(valueStatistics.getTotal() < 1000);
+      Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
+  }
   
   @Test
   public void startEvent() {

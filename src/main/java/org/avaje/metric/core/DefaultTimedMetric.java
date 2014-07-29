@@ -120,6 +120,15 @@ public final class DefaultTimedMetric implements TimedMetric {
     }
   }
 
+  
+  /**
+   * Add an event with duration calculated based on startNanos. 
+   */
+  @Override
+  public void addEventSince(boolean success, long startNanos) {
+    addEventDuration(success, System.nanoTime() - startNanos);
+  }
+
   /**
    * Add an event duration with opCode indicating success or failure. This is intended for use by
    * enhanced code and not general use.
