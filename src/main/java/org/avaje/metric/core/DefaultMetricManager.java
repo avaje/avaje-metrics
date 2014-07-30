@@ -18,6 +18,9 @@ import org.avaje.metric.MetricNameCache;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricGroup;
 import org.avaje.metric.ValueMetric;
+import org.avaje.metric.core.noop.NoopCounterMetricFactory;
+import org.avaje.metric.core.noop.NoopTimedMetricFactory;
+import org.avaje.metric.core.noop.NoopValueMetricFactory;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
 import org.avaje.metric.jvm.JvmMemoryMetricGroup;
 import org.avaje.metric.jvm.JvmSystemMetricGroup;
@@ -49,27 +52,61 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Factory for creating TimedMetrics.
    */
-  private final MetricFactory<TimedMetric> timedMetricFactory = new TimedMetricFactory();
+  private final MetricFactory<TimedMetric> timedMetricFactory;
   
   /**
    * Factory for creating CounterMetrics.
    */
-  private final MetricFactory<CounterMetric> counterMetricFactory = new CounterMetricFactory();
+  private final MetricFactory<CounterMetric> counterMetricFactory;
   
   /**
    * Factory for creating ValueMetrics.
    */
-  private final MetricFactory<ValueMetric> valueMetricFactory = new ValueMetricFactory();
+  private final MetricFactory<ValueMetric> valueMetricFactory;
 
   /**
    * Cache of the metric names.
    */
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
 
+  final boolean disableCollection;
+  
   public DefaultMetricManager() {
+    this("true".equalsIgnoreCase(System.getProperty("metrics.collection.disable")));
+  }
+  
+  public DefaultMetricManager(boolean disableCollection) {
     
-    registerStandardJvmMetrics();
+    this.disableCollection = disableCollection;
+    this.timedMetricFactory = initTimedMetricFactory(disableCollection);
+    this.valueMetricFactory = initValueMetricFactory(disableCollection);
+    this.counterMetricFactory = initCounterMetricFactory(disableCollection);
+    
+    if (!disableCollection) {
+      registerStandardJvmMetrics();
+    }
     this.coreJvmMetricCollection = Collections.unmodifiableCollection(coreJvmMetrics.values()); 
+  }
+  
+  /**
+   * Return the factory used to create TimedMetric instances.
+   */
+  protected MetricFactory<TimedMetric> initTimedMetricFactory(boolean disableCollection) {
+    return (disableCollection) ? new NoopTimedMetricFactory() : new TimedMetricFactory();
+  }
+  
+  /**
+   * Return the factory used to create CounterMetric instances.
+   */
+  protected MetricFactory<CounterMetric> initCounterMetricFactory(boolean disableCollection) {
+    return (disableCollection) ? new NoopCounterMetricFactory() : new CounterMetricFactory();
+  }
+
+  /**
+   * Return the factory used to create ValueMetric instances.
+   */
+  protected MetricFactory<ValueMetric> initValueMetricFactory(boolean disableCollection) {
+    return (disableCollection) ? new NoopValueMetricFactory() : new ValueMetricFactory();
   }
   
   /**
