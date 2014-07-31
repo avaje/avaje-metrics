@@ -1,5 +1,7 @@
 package org.avaje.metric.core;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
@@ -18,6 +20,8 @@ import org.avaje.metric.TimedMetricGroup;
  * </p>
  */
 public class DefaultTimedMetricGroup implements TimedMetricGroup {
+
+  private final ConcurrentHashMap<String, TimedMetric> cache = new ConcurrentHashMap<String, TimedMetric>();
 
   /**
    * The metric name cache.
@@ -57,8 +61,19 @@ public class DefaultTimedMetricGroup implements TimedMetricGroup {
   @Override
   public TimedMetric getTimedMetric(String name) {
 
+    // try local cache first to try and avoid the name parse
+    TimedMetric found = cache.get(name);
+    if (found != null) {
+      return found;
+    }
+
+    // parse name and find/create using MetricManager
     MetricName m = metricNameCache.get(name);
-    return MetricManager.getTimedMetric(m);
+    
+    // this is safe in that it is single threaded on construction/put
+    TimedMetric timedMetric = MetricManager.getTimedMetric(m);
+    cache.putIfAbsent(name, timedMetric);
+    return timedMetric;
   }
 
 }

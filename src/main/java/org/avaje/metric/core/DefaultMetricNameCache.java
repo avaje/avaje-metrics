@@ -54,16 +54,6 @@ public final class DefaultMetricNameCache implements MetricNameCache {
     return metricName;
   }
 
-//  /**
-//   * Create a MetricName with the nameSuffix appended to the original name.
-//   * <p>
-//   * Used to create an 'error' mbean name.
-//   * </p>
-//   */
-//  private MetricName deriveWithNameSuffix(String nameSuffix) {
-//    return new DefaultMetricName(baseName.getGroup(), baseName.getType(), baseName.getName() + nameSuffix);
-//  }
-
   /**
    * Create a similar MetricName changing just the name.
    * <p>
