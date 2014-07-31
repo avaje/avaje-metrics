@@ -9,7 +9,15 @@ public class DisableCollectionTest {
   @Test
   public void test() {
     
-    DefaultMetricManager mgr = new DefaultMetricManager(true);
+    System.clearProperty(DefaultMetricManager.METRICS_COLLECTION_DISABLE);
+    DefaultMetricManager mgr = new DefaultMetricManager();
+    Assert.assertFalse(mgr.disable);
+    
+    
+    System.setProperty(DefaultMetricManager.METRICS_COLLECTION_DISABLE, "true");
+    mgr = new DefaultMetricManager();
+    Assert.assertTrue(mgr.disable);
+    
     
     TimedMetric timedMetric = mgr.getTimedMetric("check.disabled.timed1");
     Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
@@ -31,7 +39,7 @@ public class DisableCollectionTest {
     System.setProperty("metrics.collection.disable", "true");
 
     DefaultMetricManager mgr = new DefaultMetricManager();
-    Assert.assertTrue(mgr.disableCollection);
+    Assert.assertTrue(mgr.disable);
     
     TimedMetric timedMetric = mgr.getTimedMetric("check.disabled.timed1");
     Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
