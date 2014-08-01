@@ -1,4 +1,4 @@
-package org.avaje.metric.filereport;
+package org.avaje.metric.report;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,13 +23,15 @@ import org.avaje.metric.ValueStatistics;
  * This format is aimed at writing to the local file system to provide simple low tech reporting of
  * the collected metrics.
  */
-public class TextFileWriteVisitor implements MetricVisitor {
+public class CsvWriteVisitor implements MetricVisitor {
 
   protected final SimpleDateFormat timeFormat;
 
   protected final long collectTime;
 
   protected final int decimalPlaces;
+  
+  protected final int nameWidth;
   
   protected final int columnWidth;
   
@@ -41,19 +43,20 @@ public class TextFileWriteVisitor implements MetricVisitor {
 
   protected boolean errors;
 
-  public TextFileWriteVisitor(Writer writer) {
+  public CsvWriteVisitor(Writer writer) {
     this(writer, "HH:mm:ss");
   }
 
-  public TextFileWriteVisitor(Writer writer, String timeNowFormat) {
-    this(writer, timeNowFormat, 16, 2, "", ", ");
+  public CsvWriteVisitor(Writer writer, String timeNowFormat) {
+    this(writer, timeNowFormat, 30, 16, 2, "", ", ");
   }
   
-  public TextFileWriteVisitor(Writer writer, String timeNowFormat, int columnWidth, int decimalPlaces, String delimitPrefix, String delimitSuffix) {
+  public CsvWriteVisitor(Writer writer, String timeNowFormat, int nameWidth, int columnWidth, int decimalPlaces, String delimitPrefix, String delimitSuffix) {
     this.collectTime = System.currentTimeMillis();
     this.writer = writer;
     this.timeFormat = new SimpleDateFormat(timeNowFormat);
     this.decimalPlaces = decimalPlaces;
+    this.nameWidth = nameWidth;
     this.columnWidth = columnWidth;
     this.delimitPrefix = "";
     this.delimitSuffix = ", ";
@@ -73,7 +76,7 @@ public class TextFileWriteVisitor implements MetricVisitor {
   protected void writeMetricName(Metric metric) throws IOException {
     writer.write(getNowString());
     writer.write(delimitSuffix);
-    writeWithPadding(metric.getName().getSimpleName(), 30);
+    writeWithPadding(metric.getName().getSimpleName(), nameWidth);
   }
 
   protected void writeMetricEnd(Metric metric) throws IOException {

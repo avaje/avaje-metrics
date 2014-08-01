@@ -1,15 +1,19 @@
-package org.avaje.metric.filereport;
+package org.avaje.metric.report;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.avaje.metric.Metric;
-import org.avaje.metric.report.MetricReporter;
 
 /**
  * Writes the collected metrics to a file.
@@ -20,9 +24,9 @@ import org.avaje.metric.report.MetricReporter;
  * 'metric.directory' and otherwise defaults to the current directory.
  * </p>
  */
-public class FileReporter implements MetricReporter {
+public class CsvFileReporter implements MetricReporter {
 
-  private static final Logger logger = Logger.getLogger(FileReporter.class.getName());
+  private static final Logger logger = Logger.getLogger(CsvFileReporter.class.getName());
 
   protected static final int DEFAULT_NUM_FILES_TO_KEEP = 20;
 
@@ -39,28 +43,28 @@ public class FileReporter implements MetricReporter {
   /**
    * Create with a freqInSeconds of 60 and using the default base directory.
    */
-  public FileReporter() {
+  public CsvFileReporter() {
     this(null);
   }
 
   /**
    * Create specifying a base directory where the metrics files should go.
    */
-  public FileReporter(String baseDirectory) {
+  public CsvFileReporter(String baseDirectory) {
     this(baseDirectory, null);
   }
 
   /**
    * Create specifying a write frequency, base directory and base file name.
    */
-  public FileReporter(String baseDirectory, String baseFileName) {
+  public CsvFileReporter(String baseDirectory, String baseFileName) {
     this(baseDirectory, baseFileName, -1);
   }
 
   /**
    * Create specifying a write frequency, base directory and base file name.
    */
-  public FileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep) {
+  public CsvFileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep) {
 
     this.numberOfFilesToKeep = getNumberOfFilesToKeep(numberOfFilesToKeep);
     this.baseDirectory = getBaseDirectory(baseDirectory);
@@ -78,12 +82,13 @@ public class FileReporter implements MetricReporter {
       // disabled via system property - metric.writeToFile
       return;
     }
+    String name = getFileName(baseFileName, new Date());
     
-    FileOutput fo = new FileOutput(baseDirectory, baseFileName);
+    FileOutput fo = new FileOutput(baseDirectory, name);
     try {
       Writer writer = fo.getWriter();
 
-      TextFileWriteVisitor visitor = new TextFileWriteVisitor(writer);
+      CsvWriteVisitor visitor = new CsvWriteVisitor(writer);
    
       for (Metric metric : metrics) {
         metric.visit(visitor);
@@ -119,7 +124,7 @@ public class FileReporter implements MetricReporter {
 
     try {
 
-      final String minFileName = FileOutput.getFileName(baseFileName, numberOfFilesToKeep);
+      final String minFileName = getFileName(baseFileName, numberOfFilesToKeep);
 
       File dir = new File(baseDirectory);
       String[] delFileNames = dir.list(new FilenameFilter() {
@@ -199,5 +204,66 @@ public class FileReporter implements MetricReporter {
     return baseFileName;
   }
 
+
+  protected static String getFileName(String baseFileName, Date forDate) {
+    String todayString = new SimpleDateFormat("yyyyMMdd").format(forDate);
+    return baseFileName+"-" + todayString + ".txt";
+  }
+
+  public static String getFileName(String baseFileName, int daysAgo) {
+    
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.DATE, daysAgo * -1);
+    Date daysAgoDate = c.getTime();
+    
+    return getFileName(baseFileName, daysAgoDate);    
+  }
+  
+  /**
+   * A helper class for FileReporter that handles the file directory, name and
+   * writer etc.
+   */
+  public class FileOutput {
+
+    protected Writer writer;
+
+    public FileOutput(String baseDirectory, String baseFileName) {
+
+      File f = new File(getDirectory(baseDirectory), baseFileName);
+      File parentFile = f.getParentFile();
+      if (parentFile != null && !parentFile.exists()) {
+        parentFile.mkdirs();
+      }
+      try {
+        FileWriter fileWriter = new FileWriter(f, true);
+        writer = new BufferedWriter(fileWriter, 4096);
+
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public Writer getWriter() {
+      return writer;
+    }
+
+    public void close() {
+      try {
+        writer.flush();
+      } catch (IOException e) {
+        logger.log(Level.SEVERE, "Failed to flush metric file writer", e);
+      }
+      try {
+        writer.close();
+      } catch (IOException e) {
+        logger.log(Level.SEVERE, "Failed to close metric file writer", e);
+      }
+    }
+
+    protected File getDirectory(String baseDirectory) {
+      return new File(baseDirectory);
+    }
+
+  }
 
 }

@@ -1,4 +1,4 @@
-package org.avaje.metric.filereport;
+package org.avaje.metric.report;
 
 import java.text.DecimalFormat;
 

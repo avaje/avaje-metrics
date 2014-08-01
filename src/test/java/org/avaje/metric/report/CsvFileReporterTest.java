@@ -7,16 +7,15 @@ import org.avaje.metric.MetricManager;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.core.DefaultMetricName;
-import org.avaje.metric.filereport.FileReporter;
 import org.avaje.metric.report.MetricReportManager;
 import org.junit.Test;
 
-public class FileReporterTest {
+public class CsvFileReporterTest {
 
   @Test
   public void testMe() throws InterruptedException, IOException {
     
-    FileReporter fileReporter = new FileReporter(".", "metric-test");
+    CsvFileReporter fileReporter = new CsvFileReporter(".", "metric-test");
     MetricReportManager report = new MetricReportManager(2, fileReporter, null);
     report.toString();
     
