@@ -4,8 +4,8 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
-import org.avaje.metric.GaugeCounter;
-import org.avaje.metric.GaugeCounterMetricGroup;
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.core.DefaultGaugeCounterMetric;
 import org.avaje.metric.core.DefaultGaugeCounterMetricGroup;
@@ -18,7 +18,7 @@ public final class JvmGarbageCollectionMetricGroup {
 
   private static String[] names = { "count", "time" };
 
-  public static GaugeCounterMetricGroup[] createGauges() {
+  public static GaugeLongGroup[] createGauges() {
 
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
@@ -33,7 +33,7 @@ public final class JvmGarbageCollectionMetricGroup {
       
       DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm.gc", gcName);
 
-      GaugeCounter[] gauges = new Collector(gcMXBean).getGauges();
+      GaugeLong[] gauges = new Collector(gcMXBean).getGauges();
       DefaultGaugeCounterMetric[] group = new DefaultGaugeCounterMetric[gauges.length];
 
       for (int j = 0; j < gauges.length; j++) {
@@ -53,25 +53,25 @@ public final class JvmGarbageCollectionMetricGroup {
   private static class Collector {
 
     final GarbageCollectorMXBean gcMXBean;
-    final GaugeCounter[] gauges;
+    final GaugeLong[] gauges;
 
     Collector(GarbageCollectorMXBean gcMXBean) {
       this.gcMXBean = gcMXBean;
-      this.gauges = new GaugeCounter[]{new Count(), new Time()};
+      this.gauges = new GaugeLong[]{new Count(), new Time()};
     }
 
-    public GaugeCounter[] getGauges() {
+    public GaugeLong[] getGauges() {
       return gauges;
     }
 
-    class Count implements GaugeCounter {
+    class Count implements GaugeLong {
       @Override
       public long getValue() {
         return gcMXBean.getCollectionCount();
       }
     }
 
-    class Time implements GaugeCounter {
+    class Time implements GaugeLong {
       @Override
       public long getValue() {
         return gcMXBean.getCollectionTime();

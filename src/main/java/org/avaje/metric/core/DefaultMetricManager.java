@@ -8,11 +8,11 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.avaje.metric.CounterMetric;
-import org.avaje.metric.Gauge;
-import org.avaje.metric.GaugeCounter;
-import org.avaje.metric.GaugeCounterMetric;
-import org.avaje.metric.GaugeCounterMetricGroup;
-import org.avaje.metric.GaugeMetric;
+import org.avaje.metric.GaugeDouble;
+import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.GaugeLongGroup;
+import org.avaje.metric.GaugeLongMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
@@ -140,8 +140,8 @@ public class DefaultMetricManager implements PluginMetricManager {
     registerJvmMetric(JvmMemoryMetricGroup.createHeapGroup());
     registerJvmMetric(JvmMemoryMetricGroup.createNonHeapGroup());
 
-    GaugeCounterMetricGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
-    for (GaugeCounterMetricGroup gaugeMetricGroup : gaugeMetricGroups) {
+    GaugeLongGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
+    for (GaugeLongGroup gaugeMetricGroup : gaugeMetricGroups) {
       registerJvmMetric(gaugeMetricGroup);
     }
 
@@ -160,7 +160,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public MetricName nameParse(String name) {
+  public MetricName name(String name) {
     return DefaultMetricName.parse(name);
   }
 
@@ -215,8 +215,54 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
+  public CounterMetric getCounterMetric(String name) {
+    return getCounterMetric(name(name));
+  }
+
+  @Override
+  public CounterMetric getCounterMetric(Class<?> cls, String eventName) {
+    return getCounterMetric(name(cls, eventName));
+  }
+  
+  @Override
   public ValueMetric getValueMetric(MetricName name) {
     return (ValueMetric) getMetric(name, valueMetricFactory);
+  }
+  
+  @Override
+  public ValueMetric getValueMetric(String name) {
+    return getValueMetric(name(name));
+  }
+
+  @Override
+  public ValueMetric getValueMetric(Class<?> cls, String eventName) {
+    return getValueMetric(name(cls, eventName));
+  }
+
+  @Override
+  public GaugeDoubleMetric registerGauge(MetricName name, GaugeDouble gauge) {
+
+    DefaultGaugeMetric metric = new DefaultGaugeMetric(name, gauge);
+    metricsCache.put(name.getSimpleName(), metric);
+    return metric;
+  }
+
+  @Override
+  public GaugeLongMetric registerGauge(MetricName name, GaugeLong gauge) {
+
+    DefaultGaugeCounterMetric metric = new DefaultGaugeCounterMetric(name, gauge);
+    metricsCache.put(name.getSimpleName(), metric);
+    return metric;
+  }
+  
+  @Override
+  public GaugeDoubleMetric registerGauge(String name, GaugeDouble gauge) {
+    return registerGauge(name(name), gauge);
+  }
+
+  @Override
+  public GaugeLongMetric registerGauge(String name, GaugeLong gauge) {
+    return registerGauge(name(name), gauge);
   }
 
   private Metric getMetric(MetricName name, MetricFactory<?> factory) {
@@ -236,23 +282,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     }
     return metric;
   }
-
-  @Override
-  public GaugeMetric registerGauge(MetricName name, Gauge gauge) {
-
-    DefaultGaugeMetric metric = new DefaultGaugeMetric(name, gauge);
-    metricsCache.put(name.getSimpleName(), metric);
-    return metric;
-  }
-
-  @Override
-  public GaugeCounterMetric registerGauge(MetricName name, GaugeCounter gauge) {
-
-    DefaultGaugeCounterMetric metric = new DefaultGaugeCounterMetric(name, gauge);
-    metricsCache.put(name.getSimpleName(), metric);
-    return metric;
-  }
-
+  
   public void clear() {
     synchronized (monitor) {
       metricsCache.clear();

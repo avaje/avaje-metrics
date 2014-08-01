@@ -1,7 +1,7 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.GaugeCounter;
-import org.avaje.metric.GaugeCounterMetric;
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.GaugeLongMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
@@ -13,11 +13,11 @@ import org.avaje.metric.MetricVisitor;
  * GaugeMetric can be put into groups via {@link DefaultGaugeMetricGroup}.
  * </p>
  */
-public class DefaultGaugeCounterMetric implements GaugeCounterMetric {
+public class DefaultGaugeCounterMetric implements GaugeLongMetric {
 
   protected final MetricName name;
 
-  protected final GaugeCounter gauge;
+  protected final GaugeLong gauge;
 
   /**
    * Create where the Gauge is a monotonically increasing value.
@@ -26,7 +26,7 @@ public class DefaultGaugeCounterMetric implements GaugeCounterMetric {
    * for the value.
    * </p>
    */
-  public static DefaultGaugeCounterMetric incrementing(MetricName name, GaugeCounter gauge) {
+  public static DefaultGaugeCounterMetric incrementing(MetricName name, GaugeLong gauge) {
     return new Incrementing(name, gauge);
   }
 
@@ -38,7 +38,7 @@ public class DefaultGaugeCounterMetric implements GaugeCounterMetric {
    * @param gauge
    *          the gauge used to get the value.
     */
-  public DefaultGaugeCounterMetric(MetricName name, GaugeCounter gauge) {
+  public DefaultGaugeCounterMetric(MetricName name, GaugeLong gauge) {
     this.name = name;
     this.gauge = gauge;
   }
@@ -46,7 +46,7 @@ public class DefaultGaugeCounterMetric implements GaugeCounterMetric {
   /**
    * Create as a non whole number and using group, type and name as the metric name.
    */
-  public DefaultGaugeCounterMetric(String group, String type, String name, GaugeCounter gauge) {
+  public DefaultGaugeCounterMetric(String group, String type, String name, GaugeLong gauge) {
     this(new DefaultMetricName(group, type, name), gauge);
   }
   
@@ -90,7 +90,7 @@ public class DefaultGaugeCounterMetric implements GaugeCounterMetric {
 
     private long runningValue;
 
-    Incrementing(MetricName name, GaugeCounter gauge) {
+    Incrementing(MetricName name, GaugeLong gauge) {
       super(name, gauge);
     }
 

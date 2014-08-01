@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.avaje.metric.GaugeCounterMetricGroup;
+import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
 import org.junit.Test;
 
@@ -15,7 +15,7 @@ public class JvmGCLoadTest {
   @Test
   public void test() throws InterruptedException {
 
-    GaugeCounterMetricGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
+    GaugeLongGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
     
     for (int i = 0; i < 3; i++) {
       doSomething(gaugeMetricGroups);      
@@ -24,7 +24,7 @@ public class JvmGCLoadTest {
     Thread.sleep(3000);
   }
 
-  private void doSomething(GaugeCounterMetricGroup[] gaugeMetricGroups) {
+  private void doSomething(GaugeLongGroup[] gaugeMetricGroups) {
     
     long start = System.currentTimeMillis();
     

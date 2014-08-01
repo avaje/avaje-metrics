@@ -1,6 +1,6 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.Gauge;
+import org.avaje.metric.GaugeDouble;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class DefaultGaugeMetricTest {
 
   }
 
-  class MyGauge implements Gauge {
+  class MyGauge implements GaugeDouble {
 
     double value;
 

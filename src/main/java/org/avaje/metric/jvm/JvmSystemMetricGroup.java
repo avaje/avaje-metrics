@@ -4,23 +4,23 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 
-import org.avaje.metric.Gauge;
+import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.core.DefaultGaugeMetric;
 import org.avaje.metric.core.DefaultMetricName;
 
 public class JvmSystemMetricGroup {
 
   public static DefaultGaugeMetric getUptime() {
-    Gauge uptime = new UptimeGauge(ManagementFactory.getRuntimeMXBean());
+    GaugeDouble uptime = new UptimeGauge(ManagementFactory.getRuntimeMXBean());
     return new DefaultGaugeMetric(new DefaultMetricName("jvm", "system", "uptime"), uptime);
   }
   
   public static DefaultGaugeMetric getOsLoadAvgMetric() {
-    Gauge osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()); 
+    GaugeDouble osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()); 
     return new DefaultGaugeMetric(new DefaultMetricName("jvm", "os", "loadAverage"), osLoadAvg);
   }
 
-  private static class UptimeGauge implements Gauge {
+  private static class UptimeGauge implements GaugeDouble {
     
     private final RuntimeMXBean runtimeMXBean;
     
@@ -36,7 +36,7 @@ public class JvmSystemMetricGroup {
     }
   }
   
-  private static class OsLoadGauge implements Gauge {
+  private static class OsLoadGauge implements GaugeDouble {
     
     private final OperatingSystemMXBean osMXbean;
     

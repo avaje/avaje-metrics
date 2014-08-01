@@ -7,10 +7,10 @@ import java.util.Date;
 
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.GaugeMetric;
-import org.avaje.metric.GaugeMetricGroup;
-import org.avaje.metric.GaugeCounterMetric;
-import org.avaje.metric.GaugeCounterMetricGroup;
+import org.avaje.metric.GaugeDoubleGroup;
+import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.GaugeLongGroup;
+import org.avaje.metric.GaugeLongMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedMetric;
@@ -120,12 +120,12 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
 
   @Override
-  public void visit(GaugeMetricGroup gaugeMetricGroup) {
+  public void visit(GaugeDoubleGroup gaugeMetricGroup) {
 
     try {
-      GaugeMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+      GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
       writeMetricName(gaugeMetricGroup);
-      for (GaugeMetric m : gaugeMetrics) {
+      for (GaugeDoubleMetric m : gaugeMetrics) {
         write(m.getName().getName(), formattedValue(m.getValue()));
       }
       writeMetricEnd(gaugeMetricGroup);
@@ -135,7 +135,7 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
   
   @Override
-  public void visit(GaugeMetric metric) {
+  public void visit(GaugeDoubleMetric metric) {
     try {
       writeMetricName(metric);
       write("value", formattedValue(metric.getValue()));
@@ -150,7 +150,7 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
   
   @Override
-  public void visit(GaugeCounterMetric metric) {
+  public void visit(GaugeLongMetric metric) {
     try {
       writeMetricName(metric);
       write("value", metric.getValue());
@@ -161,12 +161,12 @@ public class TextFileWriteVisitor implements MetricVisitor {
   }
   
   @Override
-  public void visit(GaugeCounterMetricGroup gaugeMetricGroup) {
+  public void visit(GaugeLongGroup gaugeMetricGroup) {
 
     try {
-      GaugeCounterMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+      GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
       writeMetricName(gaugeMetricGroup);
-      for (GaugeCounterMetric m : gaugeMetrics) {
+      for (GaugeLongMetric m : gaugeMetrics) {
         write(m.getName().getName(), m.getValue());
       }
       writeMetricEnd(gaugeMetricGroup);

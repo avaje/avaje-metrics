@@ -4,9 +4,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
-import org.avaje.metric.Gauge;
-import org.avaje.metric.GaugeMetric;
-import org.avaje.metric.GaugeMetricGroup;
+import org.avaje.metric.GaugeDouble;
+import org.avaje.metric.GaugeDoubleGroup;
+import org.avaje.metric.GaugeDoubleMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.core.DefaultGaugeMetric;
 import org.avaje.metric.core.DefaultGaugeMetricGroup;
@@ -54,7 +54,7 @@ public final class JvmMemoryMetricGroup {
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  public static GaugeMetricGroup createHeapGroup() {
+  public static GaugeDoubleGroup createHeapGroup() {
     
     DefaultMetricName heapName = DefaultMetricName.createBaseName("jvm","memory.heap");   
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
@@ -62,51 +62,51 @@ public final class JvmMemoryMetricGroup {
   }
  
   /**
-   * Create the NonHeap Memory based GaugeMetricGroup.
+   * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  public static GaugeMetricGroup createNonHeapGroup() {
+  public static GaugeDoubleGroup createNonHeapGroup() {
     DefaultMetricName nonHeapName = DefaultMetricName.createBaseName("jvm","memory.nonheap");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(nonHeapName, source);
   }
 
-  private static GaugeMetricGroup createGroup(DefaultMetricName baseName, MemoryUsageSource source) {
-    Gauge[] gauges = createGauges(source);
-    GaugeMetric[] group = createGroup(baseName, gauges);
+  private static GaugeDoubleGroup createGroup(DefaultMetricName baseName, MemoryUsageSource source) {
+    GaugeDouble[] gauges = createGauges(source);
+    GaugeDoubleMetric[] group = createGroup(baseName, gauges);
     return new DefaultGaugeMetricGroup(baseName, group);
   }
   
-  private static GaugeMetric[] createGroup(DefaultMetricName baseName,  Gauge[] gauges) {
-    GaugeMetric[] group = new GaugeMetric[gauges.length];
+  private static GaugeDoubleMetric[] createGroup(DefaultMetricName baseName,  GaugeDouble[] gauges) {
+    GaugeDoubleMetric[] group = new GaugeDoubleMetric[gauges.length];
     for (int i = 0; i < gauges.length; i++) {
       group[i] = createGaugeMetric(baseName, names[i], gauges[i]);
     }
     return group;
   }
   
-  private static GaugeMetric createGaugeMetric(DefaultMetricName baseName, String name, Gauge gauge) {
+  private static GaugeDoubleMetric createGaugeMetric(DefaultMetricName baseName, String name, GaugeDouble gauge) {
     MetricName specificName = baseName.deriveWithName(name);
     return new DefaultGaugeMetric(specificName, gauge);
   }
   
  
-  private static Gauge[] createGauges(MemoryUsageSource source) {
+  private static GaugeDouble[] createGauges(MemoryUsageSource source) {
     return new MemUsageGauages(source).getGauges();
   }
   
   static class MemUsageGauages {
-    private final Gauge[] gauges;
+    private final GaugeDouble[] gauges;
     
     private MemUsageGauages(MemoryUsageSource source) {
       this.gauges = createGauges(source);
     }
     
-    public Gauge[] getGauges() {
+    public GaugeDouble[] getGauges() {
       return gauges;
     }
     
-    private Gauge[] createGauges(MemoryUsageSource source) {
-      Gauge[] ga = new Gauge[5];
+    private GaugeDouble[] createGauges(MemoryUsageSource source) {
+      GaugeDouble[] ga = new GaugeDouble[5];
       ga[0] = new Pct(source);
       ga[1] = new Init(source);
       ga[2] = new Used(source);
@@ -121,7 +121,7 @@ public final class JvmMemoryMetricGroup {
         this.source = source;
       }
     }
-    private class Init extends Base implements Gauge {
+    private class Init extends Base implements GaugeDouble {
       Init(MemoryUsageSource source) {
         super(source);
       }
@@ -131,7 +131,7 @@ public final class JvmMemoryMetricGroup {
       }
     }
     
-    private class Used extends Base implements Gauge {
+    private class Used extends Base implements GaugeDouble {
       Used(MemoryUsageSource source) {
         super(source);
       }
@@ -141,7 +141,7 @@ public final class JvmMemoryMetricGroup {
       }
     }
     
-    private class Committed extends Base implements Gauge {
+    private class Committed extends Base implements GaugeDouble {
       Committed(MemoryUsageSource source) {
         super(source);
       }
@@ -151,7 +151,7 @@ public final class JvmMemoryMetricGroup {
       }
     }
     
-    private class Max extends Base implements Gauge {
+    private class Max extends Base implements GaugeDouble {
       Max(MemoryUsageSource source) {
         super(source);
       }
@@ -161,7 +161,7 @@ public final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Pct extends Base implements Gauge {
+    private class Pct extends Base implements GaugeDouble {
       Pct(MemoryUsageSource source) {
         super(source);
       }

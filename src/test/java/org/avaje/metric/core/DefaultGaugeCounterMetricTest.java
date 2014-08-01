@@ -2,7 +2,7 @@ package org.avaje.metric.core;
 
 
 
-import org.avaje.metric.GaugeCounter;
+import org.avaje.metric.GaugeLong;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class DefaultGaugeCounterMetricTest {
 
   }
 
-  class MyGauge implements GaugeCounter {
+  class MyGauge implements GaugeLong {
 
     long value;
 
