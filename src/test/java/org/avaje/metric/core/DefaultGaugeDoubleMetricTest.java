@@ -4,13 +4,13 @@ import org.avaje.metric.GaugeDouble;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DefaultGaugeMetricTest {
+public class DefaultGaugeDoubleMetricTest {
 
   @Test
   public void test() {
 
     MyGauge myGauge = new MyGauge();
-    DefaultGaugeMetric metric = new DefaultGaugeMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
+    DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
 
     Assert.assertTrue(0d == metric.getValue());
     Assert.assertFalse(metric.collectStatistics());
@@ -19,7 +19,7 @@ public class DefaultGaugeMetricTest {
     Assert.assertTrue(100d == metric.getValue());
     Assert.assertTrue(metric.collectStatistics());
 
-    DefaultGaugeMetric incrementing = DefaultGaugeMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
+    DefaultGaugeDoubleMetric incrementing = DefaultGaugeDoubleMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
 
     myGauge.value = 100d;
     Assert.assertTrue(100d == incrementing.getValue());

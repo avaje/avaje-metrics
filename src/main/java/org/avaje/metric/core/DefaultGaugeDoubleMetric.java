@@ -1,23 +1,23 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.GaugeLong;
-import org.avaje.metric.GaugeLongMetric;
+import org.avaje.metric.GaugeDouble;
+import org.avaje.metric.GaugeDoubleMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
 
 
 /**
- * A Metric that gets its value from a Gauge.
+ * A Metric that gets its value from a GaugeDouble.
  * <p>
- * GaugeMetric can be put into groups via {@link DefaultGaugeMetricGroup}.
+ * GaugeDoubleMetric can be put into groups via {@link DefaultGaugeDoubleGroup}.
  * </p>
  */
-public class DefaultGaugeCounterMetric implements GaugeLongMetric {
+public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final MetricName name;
 
-  protected final GaugeLong gauge;
+  protected final GaugeDouble gauge;
 
   /**
    * Create where the Gauge is a monotonically increasing value.
@@ -26,7 +26,7 @@ public class DefaultGaugeCounterMetric implements GaugeLongMetric {
    * for the value.
    * </p>
    */
-  public static DefaultGaugeCounterMetric incrementing(MetricName name, GaugeLong gauge) {
+  public static DefaultGaugeDoubleMetric incrementing(MetricName name, GaugeDouble gauge) {
     return new Incrementing(name, gauge);
   }
 
@@ -37,17 +37,10 @@ public class DefaultGaugeCounterMetric implements GaugeLongMetric {
    *          the name of the metric.
    * @param gauge
    *          the gauge used to get the value.
-    */
-  public DefaultGaugeCounterMetric(MetricName name, GaugeLong gauge) {
+   */
+  public DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
     this.name = name;
     this.gauge = gauge;
-  }
-  
-  /**
-   * Create as a non whole number and using group, type and name as the metric name.
-   */
-  public DefaultGaugeCounterMetric(String group, String type, String name, GaugeLong gauge) {
-    this(new DefaultMetricName(group, type, name), gauge);
   }
   
   @Override
@@ -63,7 +56,7 @@ public class DefaultGaugeCounterMetric implements GaugeLongMetric {
    * Return the value.
    */
   @Override
-  public long getValue() {
+  public double getValue() {
     return gauge.getValue();
   }
 
@@ -86,21 +79,21 @@ public class DefaultGaugeCounterMetric implements GaugeLongMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  private static class Incrementing extends DefaultGaugeCounterMetric {
+  private static class Incrementing extends DefaultGaugeDoubleMetric {
 
-    private long runningValue;
+    private double runningValue;
 
-    Incrementing(MetricName name, GaugeLong gauge) {
+    Incrementing(MetricName name, GaugeDouble gauge) {
       super(name, gauge);
     }
 
     @Override
-    public long getValue() {
+    public double getValue() {
 
       synchronized (this) {
 
-        long nowValue = super.getValue();
-        long diffValue = nowValue - runningValue;
+        double nowValue = super.getValue();
+        double diffValue = nowValue - runningValue;
         runningValue = nowValue;
         return diffValue;
       }

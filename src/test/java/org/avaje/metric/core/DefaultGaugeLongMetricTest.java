@@ -6,13 +6,13 @@ import org.avaje.metric.GaugeLong;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DefaultGaugeCounterMetricTest {
+public class DefaultGaugeLongMetricTest {
 
   @Test
   public void test() {
 
     MyGauge myGauge = new MyGauge();
-    DefaultGaugeCounterMetric metric = new DefaultGaugeCounterMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
+    DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
 
     Assert.assertEquals(0, metric.getValue());
     Assert.assertFalse(metric.collectStatistics());
@@ -21,7 +21,7 @@ public class DefaultGaugeCounterMetricTest {
     Assert.assertEquals(100, metric.getValue());
     Assert.assertTrue(metric.collectStatistics());
 
-    DefaultGaugeCounterMetric incrementing = DefaultGaugeCounterMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
+    DefaultGaugeLongMetric incrementing = DefaultGaugeLongMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
 
     myGauge.value = 100;
     Assert.assertEquals(100, incrementing.getValue());

@@ -8,8 +8,8 @@ import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleGroup;
 import org.avaje.metric.GaugeDoubleMetric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.core.DefaultGaugeMetric;
-import org.avaje.metric.core.DefaultGaugeMetricGroup;
+import org.avaje.metric.core.DefaultGaugeDoubleMetric;
+import org.avaje.metric.core.DefaultGaugeDoubleGroup;
 import org.avaje.metric.core.DefaultMetricName;
 
 public final class JvmMemoryMetricGroup {
@@ -73,7 +73,7 @@ public final class JvmMemoryMetricGroup {
   private static GaugeDoubleGroup createGroup(DefaultMetricName baseName, MemoryUsageSource source) {
     GaugeDouble[] gauges = createGauges(source);
     GaugeDoubleMetric[] group = createGroup(baseName, gauges);
-    return new DefaultGaugeMetricGroup(baseName, group);
+    return new DefaultGaugeDoubleGroup(baseName, group);
   }
   
   private static GaugeDoubleMetric[] createGroup(DefaultMetricName baseName,  GaugeDouble[] gauges) {
@@ -86,7 +86,7 @@ public final class JvmMemoryMetricGroup {
   
   private static GaugeDoubleMetric createGaugeMetric(DefaultMetricName baseName, String name, GaugeDouble gauge) {
     MetricName specificName = baseName.deriveWithName(name);
-    return new DefaultGaugeMetric(specificName, gauge);
+    return new DefaultGaugeDoubleMetric(specificName, gauge);
   }
   
  

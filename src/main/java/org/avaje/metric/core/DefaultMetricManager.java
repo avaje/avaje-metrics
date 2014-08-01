@@ -148,7 +148,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     registerJvmMetric(JvmThreadMetricGroup.createThreadMetricGroup());
     registerJvmMetric(JvmSystemMetricGroup.getUptime());
 
-    DefaultGaugeMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
+    DefaultGaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
@@ -242,7 +242,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   @Override
   public GaugeDoubleMetric registerGauge(MetricName name, GaugeDouble gauge) {
 
-    DefaultGaugeMetric metric = new DefaultGaugeMetric(name, gauge);
+    DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(name, gauge);
     metricsCache.put(name.getSimpleName(), metric);
     return metric;
   }
@@ -250,7 +250,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   @Override
   public GaugeLongMetric registerGauge(MetricName name, GaugeLong gauge) {
 
-    DefaultGaugeCounterMetric metric = new DefaultGaugeCounterMetric(name, gauge);
+    DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(name, gauge);
     metricsCache.put(name.getSimpleName(), metric);
     return metric;
   }

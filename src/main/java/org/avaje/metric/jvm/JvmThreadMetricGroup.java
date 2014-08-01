@@ -6,8 +6,8 @@ import java.lang.management.ThreadMXBean;
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.GaugeLongMetric;
-import org.avaje.metric.core.DefaultGaugeCounterMetric;
-import org.avaje.metric.core.DefaultGaugeCounterMetricGroup;
+import org.avaje.metric.core.DefaultGaugeLongMetric;
+import org.avaje.metric.core.DefaultGaugeLongGroup;
 import org.avaje.metric.core.DefaultMetricName;
 
 public final class JvmThreadMetricGroup {
@@ -18,11 +18,11 @@ public final class JvmThreadMetricGroup {
 
     DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm", "threads");
     GaugeLongMetric[] metrics = new GaugeLongMetric[3];
-    metrics[0] = new DefaultGaugeCounterMetric(baseName.deriveWithName("current"), gauges[0]);
-    metrics[1] = new DefaultGaugeCounterMetric(baseName.deriveWithName("peak"), gauges[1]);
-    metrics[2] = new DefaultGaugeCounterMetric(baseName.deriveWithName("daemon"), gauges[2]);
+    metrics[0] = new DefaultGaugeLongMetric(baseName.deriveWithName("current"), gauges[0]);
+    metrics[1] = new DefaultGaugeLongMetric(baseName.deriveWithName("peak"), gauges[1]);
+    metrics[2] = new DefaultGaugeLongMetric(baseName.deriveWithName("daemon"), gauges[2]);
 
-    return new DefaultGaugeCounterMetricGroup(baseName, metrics);
+    return new DefaultGaugeLongGroup(baseName, metrics);
   }
 
 

@@ -5,19 +5,19 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 
 import org.avaje.metric.GaugeDouble;
-import org.avaje.metric.core.DefaultGaugeMetric;
+import org.avaje.metric.core.DefaultGaugeDoubleMetric;
 import org.avaje.metric.core.DefaultMetricName;
 
 public class JvmSystemMetricGroup {
 
-  public static DefaultGaugeMetric getUptime() {
+  public static DefaultGaugeDoubleMetric getUptime() {
     GaugeDouble uptime = new UptimeGauge(ManagementFactory.getRuntimeMXBean());
-    return new DefaultGaugeMetric(new DefaultMetricName("jvm", "system", "uptime"), uptime);
+    return new DefaultGaugeDoubleMetric(new DefaultMetricName("jvm", "system", "uptime"), uptime);
   }
   
-  public static DefaultGaugeMetric getOsLoadAvgMetric() {
+  public static DefaultGaugeDoubleMetric getOsLoadAvgMetric() {
     GaugeDouble osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()); 
-    return new DefaultGaugeMetric(new DefaultMetricName("jvm", "os", "loadAverage"), osLoadAvg);
+    return new DefaultGaugeDoubleMetric(new DefaultMetricName("jvm", "os", "loadAverage"), osLoadAvg);
   }
 
   private static class UptimeGauge implements GaugeDouble {

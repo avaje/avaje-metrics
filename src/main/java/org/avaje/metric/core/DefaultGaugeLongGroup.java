@@ -2,25 +2,24 @@ package org.avaje.metric.core;
 
 import java.util.Arrays;
 
-import org.avaje.metric.GaugeDoubleGroup;
-import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.Metric;
+import org.avaje.metric.GaugeLongMetric;
+import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
 /**
- * A group of {@link DefaultGaugeMetric} that have a common base name.
+ * A group of {@link DefaultGaugeDoubleMetric} that have a common base name.
  */
-public class DefaultGaugeMetricGroup implements Metric, GaugeDoubleGroup {
+public class DefaultGaugeLongGroup implements GaugeLongGroup {
   
   protected final MetricName baseName;
   
-  protected final GaugeDoubleMetric[] metrics;
+  protected final GaugeLongMetric[] metrics;
   
   /**
    * Create with a base name and list of metrics.
    */
-  public DefaultGaugeMetricGroup(MetricName baseName, GaugeDoubleMetric... metrics) {
+  public DefaultGaugeLongGroup(MetricName baseName, GaugeLongMetric... metrics) {
     this.baseName = baseName;
     this.metrics = metrics;
   }
@@ -35,10 +34,10 @@ public class DefaultGaugeMetricGroup implements Metric, GaugeDoubleGroup {
   }
   
   /**
-   * Return the GaugeDoubleMetric's in this group.
+   * Return the GaugeMetric's in this group.
    */
   @Override
-  public GaugeDoubleMetric[] getGaugeMetrics() {
+  public GaugeLongMetric[] getGaugeMetrics() {
     return metrics;
   }
   
