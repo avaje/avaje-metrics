@@ -37,7 +37,7 @@ public final class JvmGarbageCollectionMetricGroup {
       DefaultGaugeLongMetric[] group = new DefaultGaugeLongMetric[gauges.length];
 
       for (int j = 0; j < gauges.length; j++) {
-        MetricName metricName = baseName.deriveWithName(names[j]);
+        MetricName metricName = baseName.withName(names[j]);
         group[j] = DefaultGaugeLongMetric.incrementing(metricName, gauges[j]);
       }
 

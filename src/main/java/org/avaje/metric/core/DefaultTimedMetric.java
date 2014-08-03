@@ -134,9 +134,9 @@ public final class DefaultTimedMetric implements TimedMetric {
    * enhanced code and not general use.
    */
   @Override
-  public void operationEnd(long durationNanos, int opCode) {
+  public void operationEnd(int opCode, long startNanos) {
     // OpCodes.ATHROW = 191
-    addEventDuration(opCode != 191, durationNanos);
+    addEventSince(opCode != 191, startNanos);
   }
 
 }

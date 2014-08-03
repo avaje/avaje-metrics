@@ -19,7 +19,7 @@ public class DisableCollectionTest {
     Assert.assertTrue(mgr.disable);
     
     
-    TimedMetric timedMetric = mgr.getTimedMetric("check.disabled.timed1");
+    TimedMetric timedMetric = mgr.getTimedMetric(mgr.name("check.disabled.timed1"));
     Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
     
@@ -41,7 +41,7 @@ public class DisableCollectionTest {
     DefaultMetricManager mgr = new DefaultMetricManager();
     Assert.assertTrue(mgr.disable);
     
-    TimedMetric timedMetric = mgr.getTimedMetric("check.disabled.timed1");
+    TimedMetric timedMetric = mgr.getTimedMetric(mgr.name("check.disabled.timed1"));
     Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
     

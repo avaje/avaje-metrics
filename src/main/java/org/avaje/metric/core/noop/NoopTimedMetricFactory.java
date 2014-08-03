@@ -7,7 +7,7 @@ import org.avaje.metric.core.MetricFactory;
 public class NoopTimedMetricFactory implements MetricFactory<TimedMetric> {
 
   @Override
-  public TimedMetric createMetric(MetricName name) {
+  public TimedMetric createMetric(MetricName name, int[] bucketRanges) {
     return new NoopTimedMetric(name);
   }
 

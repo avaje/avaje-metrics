@@ -17,10 +17,9 @@ import org.avaje.metric.MetricManager;
 /**
  * Writes the collected metrics to registered reporters.
  * <p>
- * Typically you configure the frequency in seconds in which statistics are
- * collected and reported as well as a base directory where the metric files go.
- * By default the base directory will be read from a system property
- * 'metric.directory' and otherwise defaults to the current directory.
+ * Typically you configure the frequency in seconds in which statistics are collected and reported
+ * as well as a base directory where the metric files go. By default the base directory will be read
+ * from a system property 'metric.directory' and otherwise defaults to the current directory.
  * </p>
  */
 public class MetricReportManager {
@@ -34,23 +33,40 @@ public class MetricReportManager {
   protected final int freqInSeconds;
 
   protected final MetricReporter localReporter;
-  
+
   protected final MetricReporter remoteReporter;
-  
+
+  /**
+   * Create specifying the reporting frequency and a reporter.
+   * <p>
+   * This will create a Timer to execute the reporting periodically.
+   */
   public MetricReportManager(int freqInSeconds, MetricReporter reporter) {
     this(new Timer("MetricReporter", true), freqInSeconds, reporter, null);
   }
-  
+
+  /**
+   * Create specifying a second reporter.
+   * <p>
+   * Having 2 reporters can be useful if you want to store to a local file system and report the
+   * metrics to a central repository.
+   */
   public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
     this(new Timer("MetricReporter", true), freqInSeconds, localReporter, remoteReporter);
   }
 
+  /**
+   * Create specifying the Timer to use.
+   */
   public MetricReportManager(Timer timer, int freqInSeconds, MetricReporter reporter) {
     this(timer, freqInSeconds, reporter, null);
   }
 
   /**
-   * Create specifying a write frequency, base directory and base file name.
+   * Create specifying a Timer, reporting frequency and 2 reporters.
+   * <p>
+   * Having 2 reporters can be useful if you want to store to a local file system and report the
+   * metrics to a central repository.
    */
   public MetricReportManager(Timer timer, int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
 
@@ -63,10 +79,9 @@ public class MetricReportManager {
     if (freqMillis > 0) {
       // Create the Timer and schedule the WriteTask
       this.timer.scheduleAtFixedRate(new WriteTask(), freqMillis, freqMillis);
-    } 
+    }
 
   }
-
 
   protected class WriteTask extends TimerTask {
 
@@ -88,7 +103,12 @@ public class MetricReportManager {
       }
     }
   }
-  
+
+  /**
+   * Perform periodic (defaults to every 8 hours) cleanup.
+   * <p>
+   * This is used by file reporters to limit the number of metrics files held.
+   */
   protected void periodicCleanUp() {
     if (localReporter != null) {
       localReporter.cleanup();
@@ -97,50 +117,57 @@ public class MetricReportManager {
       remoteReporter.cleanup();
     }
   }
-  
+
   /**
-   * Write all the metrics appending to the appropriate file.
+   * Report all the metrics.
+   * <p>
+   * This typically means appending the metrics to a file or sending over a network.
    */
   protected void reportMetrics() throws IOException {
 
-    List<Metric> metrics2 = collectMetrics();
-    
-    report(metrics2, localReporter);
-    report(metrics2, remoteReporter);    
+    List<Metric> metrics = collectMetrics();
+
+    report(metrics, localReporter);
+    report(metrics, remoteReporter);
   }
 
-  private List<Metric> collectMetrics() {
+  /**
+   * Collect all the non-empty metrics and return them for reporting.
+   */
+  protected List<Metric> collectMetrics() {
     List<Metric> metrics = sort(MetricManager.getJvmMetrics());
     List<Metric> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
     metrics.addAll(otherMetrics);
     return metrics;
   }
-  
-  private List<Metric> sort(Collection<Metric> metrics) {
+
+  /**
+   * Sort the metrics into name order.
+   */
+  protected List<Metric> sort(Collection<Metric> metrics) {
     ArrayList<Metric> ar = new ArrayList<Metric>(metrics);
     Collections.sort(ar, new NameComp());
     return ar;
   }
-  
+
   /**
    * Visit the metrics sorted by name.
    */
-  private void report(List<Metric> allMetrics, MetricReporter reporter) {
+  protected void report(List<Metric> allMetrics, MetricReporter reporter) {
 
     if (reporter != null) {
       try {
         reporter.report(allMetrics);
-      } catch(Exception e) {
+      } catch (Exception e) {
         logger.log(Level.SEVERE, "Error trying to report metrics", e);
       }
     }
-    
   }
 
   /**
    * Compare Metrics by name for sorting purposes.
    */
-  private static class NameComp implements Comparator<Metric> {
+  protected static class NameComp implements Comparator<Metric> {
 
     @Override
     public int compare(Metric o1, Metric o2) {

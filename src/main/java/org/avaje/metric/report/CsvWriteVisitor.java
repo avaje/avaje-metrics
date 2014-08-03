@@ -60,17 +60,6 @@ public class CsvWriteVisitor implements MetricVisitor {
     this.columnWidth = columnWidth;
     this.delimitPrefix = "";
     this.delimitSuffix = ", ";
-    initialiseNewLine();
-  }
-
-  protected void initialiseNewLine() {
-    try {
-      writer.write(getNowString());
-      writer.write(delimitSuffix);
-      writer.write("-\n");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   protected void writeMetricName(Metric metric) throws IOException {

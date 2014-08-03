@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
@@ -19,6 +20,7 @@ import org.avaje.metric.MetricNameCache;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricGroup;
 import org.avaje.metric.ValueMetric;
+import org.avaje.metric.core.noop.NoopBucketTimedFactory;
 import org.avaje.metric.core.noop.NoopCounterMetricFactory;
 import org.avaje.metric.core.noop.NoopTimedMetricFactory;
 import org.avaje.metric.core.noop.NoopValueMetricFactory;
@@ -58,6 +60,11 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Factory for creating TimedMetrics.
    */
+  private final MetricFactory<BucketTimedMetric> bucketTimedMetricFactory;
+
+  /**
+   * Factory for creating TimedMetrics.
+   */
   private final MetricFactory<TimedMetric> timedMetricFactory;
 
   /**
@@ -83,7 +90,8 @@ public class DefaultMetricManager implements PluginMetricManager {
   public DefaultMetricManager() {
 
     this.disable = isDisableCollection();
-    
+
+    this.bucketTimedMetricFactory = initBucketTimedFactory(disable);
     this.timedMetricFactory = initTimedMetricFactory(disable);
     this.valueMetricFactory = initValueMetricFactory(disable);
     this.counterMetricFactory = initCounterMetricFactory(disable);
@@ -110,7 +118,14 @@ public class DefaultMetricManager implements PluginMetricManager {
 
     return "true".equalsIgnoreCase(disable);
   }
-
+  
+  /**
+   * Return the factory used to create TimedMetric instances.
+   */
+  protected MetricFactory<BucketTimedMetric> initBucketTimedFactory(boolean disableCollection) {
+    return (disableCollection) ? new NoopBucketTimedFactory() : new BucketTimedMetricFactory();
+  }
+  
   /**
    * Return the factory used to create TimedMetric instances.
    */
@@ -200,13 +215,14 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public TimedMetric getTimedMetric(String name) {
-    return getTimedMetric(DefaultMetricName.parse(name));
-  }
-
-  @Override
   public TimedMetric getTimedMetric(MetricName name) {
     return (TimedMetric) getMetric(name, timedMetricFactory);
+  }
+
+  
+  @Override
+  public BucketTimedMetric getBucketTimedMetric(MetricName name, int... bucketRanges) {
+    return (BucketTimedMetric) getMetric(name, bucketTimedMetricFactory, bucketRanges);
   }
 
   @Override
@@ -215,28 +231,8 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public CounterMetric getCounterMetric(String name) {
-    return getCounterMetric(name(name));
-  }
-
-  @Override
-  public CounterMetric getCounterMetric(Class<?> cls, String eventName) {
-    return getCounterMetric(name(cls, eventName));
-  }
-  
-  @Override
   public ValueMetric getValueMetric(MetricName name) {
     return (ValueMetric) getMetric(name, valueMetricFactory);
-  }
-  
-  @Override
-  public ValueMetric getValueMetric(String name) {
-    return getValueMetric(name(name));
-  }
-
-  @Override
-  public ValueMetric getValueMetric(Class<?> cls, String eventName) {
-    return getValueMetric(name(cls, eventName));
   }
 
   @Override
@@ -255,27 +251,21 @@ public class DefaultMetricManager implements PluginMetricManager {
     return metric;
   }
   
-  @Override
-  public GaugeDoubleMetric registerGauge(String name, GaugeDouble gauge) {
-    return registerGauge(name(name), gauge);
-  }
-
-  @Override
-  public GaugeLongMetric registerGauge(String name, GaugeLong gauge) {
-    return registerGauge(name(name), gauge);
-  }
-
   private Metric getMetric(MetricName name, MetricFactory<?> factory) {
+    return getMetric(name, factory, null);
+  }
+  
+  private Metric getMetric(MetricName name, MetricFactory<?> factory, int[] bucketRanges) {
 
     String cacheKey = name.getSimpleName();
     // try lock free get first
     Metric metric = metricsCache.get(cacheKey);
     if (metric == null) {
       synchronized (monitor) {
-        // use synchronised block
+        // use synchronized block
         metric = metricsCache.get(cacheKey);
         if (metric == null) {
-          metric = factory.createMetric(name);
+          metric = factory.createMetric(name, bucketRanges);
           metricsCache.put(cacheKey, metric);
         }
       }

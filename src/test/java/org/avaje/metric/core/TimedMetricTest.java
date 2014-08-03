@@ -155,18 +155,18 @@ public class TimedMetricTest {
     int SUCCESS_OPCODE = 1;
     int ERROR_OPCODE = 191;
     
-    metric.operationEnd(TimeUnit.MICROSECONDS.toNanos(1000), SUCCESS_OPCODE);
+    metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(1000));
     Assert.assertEquals(1, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(1000, metric.getSuccessStatistics(false).getTotal());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
     
-    metric.operationEnd(TimeUnit.MICROSECONDS.toNanos(2000), SUCCESS_OPCODE);
+    metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(2000));
     Assert.assertEquals(2, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(3000, metric.getSuccessStatistics(false).getTotal());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getTotal());
 
-    metric.operationEnd(TimeUnit.MICROSECONDS.toNanos(5000), ERROR_OPCODE);
+    metric.operationEnd(ERROR_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(5000));
     Assert.assertEquals(2, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(3000, metric.getSuccessStatistics(false).getTotal());
     Assert.assertEquals(1, metric.getErrorStatistics(false).getCount());

@@ -6,7 +6,7 @@ import org.avaje.metric.TimedMetric;
 public class TimedMetricFactory implements MetricFactory<TimedMetric> {
 
   @Override
-  public TimedMetric createMetric(MetricName name) {
+  public TimedMetric createMetric(MetricName name, int[] bucketRanges) {
     return new DefaultTimedMetric(name);
   }
 

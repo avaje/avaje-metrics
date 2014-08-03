@@ -81,16 +81,13 @@ public class DefaultMetricName implements MetricName {
     this.simpleName = createSimpleName(group, type, name);
   }
 
-//  /**
-//   * Create a MetricName with the nameSuffix appended to the original name.
-//   * <p>
-//   * Used to create an 'error' mbean name.
-//   * </p>
-//   */
-//  public MetricName deriveWithNameSuffix(String nameSuffix) {
-//    return new DefaultMetricName(group, type, name + nameSuffix);
-//  }
-//
+  /**
+   * Create a MetricName with the nameSuffix appended to the original name.
+   */
+  public MetricName withSuffix(String nameSuffix) {
+    return new DefaultMetricName(group, type, name + nameSuffix);
+  }
+
   
   /**
    * Create a similar MetricName changing just the name.
@@ -98,7 +95,7 @@ public class DefaultMetricName implements MetricName {
    * Typically used via MetricNameCache.
    * </p>
    */
-  public DefaultMetricName deriveWithName(String newName) {
+  public DefaultMetricName withName(String newName) {
     return new DefaultMetricName(group, type, newName);
   }
 

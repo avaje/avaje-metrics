@@ -7,7 +7,7 @@ import org.avaje.metric.core.MetricFactory;
 public class NoopCounterMetricFactory implements MetricFactory<CounterMetric> {
 
   @Override
-  public CounterMetric createMetric(MetricName name) {
+  public CounterMetric createMetric(MetricName name, int[] bucketRanges) {
     return new NoopCounterMetric(name);
   }
 

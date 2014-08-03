@@ -11,6 +11,6 @@ public interface MetricFactory<T extends Metric> {
   /**
    * Create the metric.
    */
-  public T createMetric(MetricName name);
+  public T createMetric(MetricName name, int[] bucketRanges);
 
 }

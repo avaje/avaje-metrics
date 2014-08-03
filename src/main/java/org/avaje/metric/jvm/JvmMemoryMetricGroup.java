@@ -85,7 +85,7 @@ public final class JvmMemoryMetricGroup {
   }
   
   private static GaugeDoubleMetric createGaugeMetric(DefaultMetricName baseName, String name, GaugeDouble gauge) {
-    MetricName specificName = baseName.deriveWithName(name);
+    MetricName specificName = baseName.withName(name);
     return new DefaultGaugeDoubleMetric(specificName, gauge);
   }
   

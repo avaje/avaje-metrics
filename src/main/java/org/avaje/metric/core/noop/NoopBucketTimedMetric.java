@@ -1,26 +1,29 @@
 package org.avaje.metric.core.noop;
 
+import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueStatistics;
 
-public class NoopTimedMetric implements TimedMetric {
+public class NoopBucketTimedMetric implements BucketTimedMetric {
 
+  private static final int[] noRange = {};
+
+  private static final TimedMetric[] noBuckets = new TimedMetric[0];
+  
   private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
   
-  private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
+  private final MetricName name;
+
   
-  protected final MetricName metricName;
-  
-  public NoopTimedMetric(MetricName metricName) {
-    this.metricName = metricName;
+  public NoopBucketTimedMetric(MetricName name) {
+    this.name = name;
   }
   
   @Override
   public MetricName getName() {
-    return metricName;
+    return name;
   }
 
   @Override
@@ -39,23 +42,13 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public ValueStatistics getCollectedSuccessStatistics() {
-    return NOOP_STATS;
+  public int[] getBucketRanges() {
+    return noRange;
   }
 
   @Override
-  public ValueStatistics getCollectedErrorStatistics() {
-    return NOOP_STATS;
-  }
-
-  @Override
-  public ValueStatistics getSuccessStatistics(boolean reset) {
-    return NOOP_STATS;
-  }
-
-  @Override
-  public ValueStatistics getErrorStatistics(boolean reset) {
-    return NOOP_STATS;
+  public TimedMetric[] getBuckets() {
+    return noBuckets;
   }
 
   @Override
@@ -75,7 +68,7 @@ public class NoopTimedMetric implements TimedMetric {
 
   @Override
   public void operationEnd(int opCode, long startNanos) {
-    // do nothing    
+    // do nothing
   }
-  
+
 }

@@ -6,7 +6,7 @@ import org.avaje.metric.MetricName;
 public class CounterMetricFactory implements MetricFactory<CounterMetric> {
 
   @Override
-  public CounterMetric createMetric(MetricName name) {
+  public CounterMetric createMetric(MetricName name, int[] bucketRanges) {
 
     return new DefaultCounterMetric(name);
   }

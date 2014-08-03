@@ -18,9 +18,9 @@ public final class JvmThreadMetricGroup {
 
     DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm", "threads");
     GaugeLongMetric[] metrics = new GaugeLongMetric[3];
-    metrics[0] = new DefaultGaugeLongMetric(baseName.deriveWithName("current"), gauges[0]);
-    metrics[1] = new DefaultGaugeLongMetric(baseName.deriveWithName("peak"), gauges[1]);
-    metrics[2] = new DefaultGaugeLongMetric(baseName.deriveWithName("daemon"), gauges[2]);
+    metrics[0] = new DefaultGaugeLongMetric(baseName.withName("current"), gauges[0]);
+    metrics[1] = new DefaultGaugeLongMetric(baseName.withName("peak"), gauges[1]);
+    metrics[2] = new DefaultGaugeLongMetric(baseName.withName("daemon"), gauges[2]);
 
     return new DefaultGaugeLongGroup(baseName, metrics);
   }
