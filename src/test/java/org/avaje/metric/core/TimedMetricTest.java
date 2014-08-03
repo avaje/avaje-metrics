@@ -14,7 +14,7 @@ public class TimedMetricTest {
   @Test
   public void addEventDuration() {
     
-    TimedMetric metric = MetricManager.getTimedMetric(new DefaultMetricName("org", "test", "mytimed"));
+    TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed");
     
     Assert.assertEquals("org",metric.getName().getGroup());
     Assert.assertEquals("test",metric.getName().getType());
@@ -75,7 +75,7 @@ public class TimedMetricTest {
   @Test
   public void addEventSince() {
       
-      TimedMetric metric = MetricManager.getTimedMetric(new DefaultMetricName("org", "test", "mytimed.since"));
+      TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed.since");
       
        
       metric.clearStatistics();
@@ -92,7 +92,7 @@ public class TimedMetricTest {
   @Test
   public void startEvent() {
     
-    TimedMetric metric = MetricManager.getTimedMetric(new DefaultMetricName("org", "test", "mytimed"));
+    TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed");
      
     metric.clearStatistics();
     Assert.assertEquals(0, metric.getSuccessStatistics(false).getCount());
@@ -142,7 +142,7 @@ public class TimedMetricTest {
   @Test
   public void operationEnd() {
     
-    TimedMetric metric = MetricManager.getTimedMetric(new DefaultMetricName("org", "test", "mytimed"));
+    TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed");
          
     metric.clearStatistics();
     Assert.assertEquals(0, metric.getSuccessStatistics(false).getCount());
@@ -157,23 +157,17 @@ public class TimedMetricTest {
     
     metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(1000));
     Assert.assertEquals(1, metric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(1000, metric.getSuccessStatistics(false).getTotal());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
     
     metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(2000));
     Assert.assertEquals(2, metric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(3000, metric.getSuccessStatistics(false).getTotal());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getTotal());
 
     metric.operationEnd(ERROR_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(5000));
     Assert.assertEquals(2, metric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(3000, metric.getSuccessStatistics(false).getTotal());
     Assert.assertEquals(1, metric.getErrorStatistics(false).getCount());
-    Assert.assertEquals(5000, metric.getErrorStatistics(false).getTotal());
 
-    Assert.assertEquals(1500, metric.getSuccessStatistics(false).getMean());
-    Assert.assertEquals(5000, metric.getErrorStatistics(false).getMean());
 
     
     Assert.assertTrue(metric.collectStatistics());
@@ -182,13 +176,9 @@ public class TimedMetricTest {
     ValueStatistics collectedErrorStatistics = metric.getCollectedErrorStatistics();
 
     Assert.assertEquals(2, collectedSuccessStatistics.getCount());
-    Assert.assertEquals(3000, collectedSuccessStatistics.getTotal());
+    Assert.assertTrue(collectedSuccessStatistics.getTotal() > 3000);
     Assert.assertEquals(1, collectedErrorStatistics.getCount());
-    Assert.assertEquals(5000, collectedErrorStatistics.getTotal());
-
-    Assert.assertEquals(1500, collectedSuccessStatistics.getMean());
-    Assert.assertEquals(5000, collectedErrorStatistics.getMean());
-
+    Assert.assertTrue(collectedErrorStatistics.getTotal() > 5000);
 
     Assert.assertEquals(0, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, metric.getSuccessStatistics(false).getTotal());

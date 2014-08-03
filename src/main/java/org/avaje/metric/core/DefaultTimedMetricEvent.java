@@ -1,7 +1,6 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.TimedEvent;
-import org.avaje.metric.TimedMetric;
 
 
 /**
@@ -15,6 +14,7 @@ import org.avaje.metric.TimedMetric;
 public final class DefaultTimedMetricEvent implements TimedEvent {
 
   private final DefaultTimedMetric metric;
+  
   private final long startNanos;
 
   /**
@@ -23,13 +23,6 @@ public final class DefaultTimedMetricEvent implements TimedEvent {
   protected DefaultTimedMetricEvent(DefaultTimedMetric metric) {
     this.metric = metric;
     this.startNanos = metric.getTickNanos();
-  }
-
-  /**
-   * Return the metric this event is for.
-   */
-  public TimedMetric getMetric() {
-    return metric;
   }
 
   public String toString() {

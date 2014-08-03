@@ -80,11 +80,13 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
 
   @Override
   public boolean collectStatistics() {
-    boolean collected = false;
+    int nonEmptyBuckets = 0;
     for (int i = 0; i < buckets.length; i++) {
-      collected &= buckets[i].collectStatistics();
+      if (buckets[i].collectStatistics()) {
+        nonEmptyBuckets++;
+      }
     }
-    return collected;
+    return nonEmptyBuckets > 0;
   }
 
   @Override
@@ -113,13 +115,6 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
     protected DefaultTimedMetricEvent(DefaultBucketTimedMetric metric) {
       this.metric = metric;
       this.startNanos = System.nanoTime();
-    }
-
-    /**
-     * Return the metric this event is for.
-     */
-    public TimedMetric getMetric() {
-      throw new RuntimeException("This method is not supported for a BucketTimedMetric");
     }
 
     public String toString() {

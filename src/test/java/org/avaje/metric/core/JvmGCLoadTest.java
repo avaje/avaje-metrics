@@ -21,7 +21,7 @@ public class JvmGCLoadTest {
       doSomething(gaugeMetricGroups);      
     }
 
-    Thread.sleep(3000);
+    Thread.sleep(500);
   }
 
   private void doSomething(GaugeLongGroup[] gaugeMetricGroups) {

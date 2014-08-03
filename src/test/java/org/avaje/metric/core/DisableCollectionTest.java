@@ -32,6 +32,7 @@ public class DisableCollectionTest {
     Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
     
+    System.clearProperty(DefaultMetricManager.METRICS_COLLECTION_DISABLE);
   }
   
   public static void main(String[] args) {

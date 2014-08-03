@@ -171,6 +171,11 @@ public class CsvWriteVisitor implements MetricVisitor {
     
     try {
 
+      if (valueStats == null) {
+        // Buckets that are empty
+        write(prefix, "count", 0);
+        return;        
+      }
       long count = valueStats.getCount();
       write(prefix, "count", count);
       if (count == 0) {
