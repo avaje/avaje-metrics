@@ -23,8 +23,6 @@ public class ValueCounter {
   protected final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
   
   public ValueCounter() {
-    // set zero as the initial value as we don't care about negative values
-    max.update(0);
   }
   
   /**

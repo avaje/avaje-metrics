@@ -236,7 +236,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public GaugeDoubleMetric registerGauge(MetricName name, GaugeDouble gauge) {
+  public GaugeDoubleMetric register(MetricName name, GaugeDouble gauge) {
 
     DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(name, gauge);
     metricsCache.put(name.getSimpleName(), metric);
@@ -244,7 +244,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public GaugeLongMetric registerGauge(MetricName name, GaugeLong gauge) {
+  public GaugeLongMetric register(MetricName name, GaugeLong gauge) {
 
     DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(name, gauge);
     metricsCache.put(name.getSimpleName(), metric);
