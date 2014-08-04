@@ -1,10 +1,10 @@
 package org.avaje.metric.report;
 
 /**
- * Information that is typically sent with the collected metrics to a repository.
+ * Information that is common across all the metrics collected on a specific JVM.
  * <p>
- * This information includes values which identify the Application, Environment and specific server
- * that the metrics were collected for.
+ * Typically this information is sent with the collected metrics to a repository to identify the specific
+ * Application, Environment and server instance that the metrics were collected on.
  */
 public class HeaderInfo {
 

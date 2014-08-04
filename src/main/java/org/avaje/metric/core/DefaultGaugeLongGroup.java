@@ -1,5 +1,6 @@
 package org.avaje.metric.core;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.avaje.metric.GaugeLongMetric;
@@ -48,7 +49,7 @@ public class DefaultGaugeLongGroup implements GaugeLongGroup {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void visit(MetricVisitor visitor) throws IOException {
     visitor.visit(this);
   }
 

@@ -1,5 +1,6 @@
 package org.avaje.metric.core;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.avaje.metric.GaugeDoubleGroup;
@@ -49,7 +50,7 @@ public class DefaultGaugeDoubleGroup implements Metric, GaugeDoubleGroup {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void visit(MetricVisitor visitor) throws IOException {
     visitor.visit(this);
   }
 

@@ -6,6 +6,8 @@ import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 
+import java.io.IOException;
+
 /**
  * Default implementation of BucketTimedMetric.
  */
@@ -90,10 +92,8 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
-    for (int i = 0; i < buckets.length; i++) {
-      buckets[i].visit(visitor);
-    }
+  public void visit(MetricVisitor visitor) throws IOException {
+    visitor.visit(this);
   }
 
   @Override

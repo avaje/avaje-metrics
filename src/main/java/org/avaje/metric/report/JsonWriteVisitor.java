@@ -1,21 +1,12 @@
 package org.avaje.metric.report;
 
+
+import org.avaje.metric.*;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
-
-import org.avaje.metric.CounterMetric;
-import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.GaugeDoubleGroup;
-import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.GaugeLongGroup;
-import org.avaje.metric.GaugeLongMetric;
-import org.avaje.metric.Metric;
-import org.avaje.metric.MetricVisitor;
-import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueMetric;
-import org.avaje.metric.ValueStatistics;
 
 /**
  * Writes the metric information as JSON to a buffer for sending.
@@ -96,120 +87,117 @@ public class JsonWriteVisitor implements MetricVisitor {
   }
 
   @Override
-  public void visit(TimedMetric metric) {
+  public void visit(TimedMetric metric) throws IOException {
 
-    try {
-      writeMetricStart("timed", metric);
-      writeSummary("n", metric.getCollectedSuccessStatistics());
-      buffer.append(",");
-      writeSummary("e", metric.getCollectedErrorStatistics());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
-    }
+    writeMetricStart("timed", metric);
+    writeSummary("n", metric.getCollectedSuccessStatistics());
+    buffer.append(",");
+    writeSummary("e", metric.getCollectedErrorStatistics());
+    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(ValueMetric metric) {
+  public void visit(BucketTimedMetric metric) throws IOException {
 
-    try {
-      writeMetricStart("value", metric);
-      writeSummary("n", metric.getCollectedStatistics());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
-    }
-  }
+    writeMetricStart("bucketTimed", metric);
+    writeKeyString("bucketRanges", commaDelimited(metric.getBucketRanges()));
+    buffer.append(",");
 
-  @Override
-  public void visit(CounterMetric metric) {
+    // write the buckets as JSON array
+    writeKey("buckets");
+    buffer.append("[\n");
 
-    try {
-      writeMetricStart("counter", metric);
-      CounterStatistics counterStatistics = metric.getCollectedStatistics();
-      writeKeyNumber("count", counterStatistics.getCount());
-      buffer.append(",");
-      writeKeyNumber("dur", getDuration(counterStatistics.getStartTime()));
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
-    }
-  }
-
-  @Override
-  public void visit(GaugeDoubleGroup gaugeMetricGroup) {
-
-    try {
-      GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-      writeMetricStart("gaugeGroup", gaugeMetricGroup);
-      writeKey("group");
-      buffer.append("[");
-      for (int i = 0; i < gaugeMetrics.length; i++) {
-        if (i > 0) {
-          buffer.append(", ");
-        }
-        GaugeDoubleMetric m = gaugeMetrics[i];
-        writeKeyNumber(m.getName().getName(), format(m.getValue()));
+    TimedMetric[] buckets = metric.getBuckets();
+    for (int i = 0; i < buckets.length; i++) {
+      if (i > 0) {
+        buffer.append(",\n");
       }
-      buffer.append("]");
-      writeMetricEnd(gaugeMetricGroup);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
+      buffer.append("         ");
+      visit(buckets[i]);
     }
+    buffer.append("]");
+    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(GaugeDoubleMetric metric) {
+  public void visit(ValueMetric metric) throws IOException {
 
-    try {
-      writeMetricStart("gauge", metric);
-      writeKeyNumber("value", format(metric.getValue()));
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
-    }
+    writeMetricStart("value", metric);
+    writeSummary("n", metric.getCollectedStatistics());
+    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(GaugeLongMetric metric) {
-    try {
-      writeMetricStart("gaugeCounter", metric);
-      writeKeyNumber("value", metric.getValue());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
-    }
+  public void visit(CounterMetric metric) throws IOException {
+
+    writeMetricStart("counter", metric);
+    CounterStatistics counterStatistics = metric.getCollectedStatistics();
+    writeKeyNumber("count", counterStatistics.getCount());
+    buffer.append(",");
+    writeKeyNumber("dur", getDuration(counterStatistics.getStartTime()));
+    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(GaugeLongGroup gaugeMetricGroup) {
+  public void visit(GaugeDoubleGroup gaugeMetricGroup) throws IOException {
 
-    try {
-      GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-      writeMetricStart("gaugeCounterGroup", gaugeMetricGroup);
-      writeKey("group");
-      buffer.append("[");
-      for (int i = 0; i < gaugeMetrics.length; i++) {
-        if (i > 0) {
-          buffer.append(", ");
-        }
-        GaugeLongMetric m = gaugeMetrics[i];
-        writeKeyNumber(m.getName().getName(), m.getValue());
+    GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+    writeMetricStart("gaugeGroup", gaugeMetricGroup);
+    writeKey("group");
+    buffer.append("[");
+    for (int i = 0; i < gaugeMetrics.length; i++) {
+      if (i > 0) {
+        buffer.append(", ");
       }
-      buffer.append("]");
-      writeMetricEnd(gaugeMetricGroup);
-    } catch (IOException e) {
-      throw new WrappedIOException(e);
+      GaugeDoubleMetric m = gaugeMetrics[i];
+      writeKeyNumber(m.getName().getName(), format(m.getValue()));
     }
+    buffer.append("]");
+    writeMetricEnd(gaugeMetricGroup);
+  }
+
+  @Override
+  public void visit(GaugeDoubleMetric metric) throws IOException {
+
+    writeMetricStart("gauge", metric);
+    writeKeyNumber("value", format(metric.getValue()));
+    writeMetricEnd(metric);
+  }
+
+  @Override
+  public void visit(GaugeLongMetric metric) throws IOException {
+
+    writeMetricStart("gaugeCounter", metric);
+    writeKeyNumber("value", metric.getValue());
+    writeMetricEnd(metric);
+  }
+
+  @Override
+  public void visit(GaugeLongGroup gaugeMetricGroup) throws IOException {
+
+    GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+    writeMetricStart("gaugeCounterGroup", gaugeMetricGroup);
+    writeKey("group");
+    buffer.append("[");
+    for (int i = 0; i < gaugeMetrics.length; i++) {
+      if (i > 0) {
+        buffer.append(", ");
+      }
+      GaugeLongMetric m = gaugeMetrics[i];
+      writeKeyNumber(m.getName().getName(), m.getValue());
+    }
+    buffer.append("]");
+    writeMetricEnd(gaugeMetricGroup);
   }
   
   protected void writeSummary(String prefix, ValueStatistics valueStats) throws IOException {
 
-    long count = valueStats.getCount();
+    // valueStats == null when BucketTimedMetric and the bucket is empty
+    long count = (valueStats == null) ? 0 : valueStats.getCount();
+    
     writeKey(prefix);
     buffer.append("{");
     writeKeyNumber("count", count);
-
     if (count != 0) {
       buffer.append(",");
       writeKeyNumber("avg", valueStats.getMean());
@@ -237,6 +225,11 @@ public class JsonWriteVisitor implements MetricVisitor {
     writeNumberValue(numberValue);
   }
 
+  protected void writeKeyString(String key, String value) throws IOException {
+    writeKey(key);
+    writeValue(value);
+  }
+
   public void writeHeader(String key, String value) throws IOException {
     writeKey(key);
     writeValue(value);
@@ -259,6 +252,24 @@ public class JsonWriteVisitor implements MetricVisitor {
     buffer.append("\"");
     buffer.append(val);
     buffer.append("\"");
+  }
+
+  /**
+   * Return the bucket ranges as a comma delimited list.
+   */
+  protected String commaDelimited(int[] a) {
+
+    if (a == null) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < a.length ; i++) {
+      if (i > 0) {
+        sb.append(",");
+      }
+      sb.append(a[i]);
+    }
+    return sb.toString();
   }
 
   protected void writeNumberValue(String val) throws IOException {

@@ -5,6 +5,7 @@ import org.avaje.metric.GaugeLongMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
+import java.io.IOException;
 
 
 /**
@@ -74,7 +75,7 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void visit(MetricVisitor visitor) throws IOException {
     visitor.visit(this);
   }
 

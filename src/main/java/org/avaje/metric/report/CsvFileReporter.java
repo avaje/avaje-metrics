@@ -30,8 +30,6 @@ public class CsvFileReporter implements MetricReporter {
 
   protected static final int DEFAULT_NUM_FILES_TO_KEEP = 20;
 
-  protected final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-
   protected final int numberOfFilesToKeep;
 
   protected final String baseDirectory;
@@ -93,7 +91,7 @@ public class CsvFileReporter implements MetricReporter {
       for (Metric metric : metrics) {
         metric.visit(visitor);
       }
-      
+
     } catch (Exception e) {
       logger.log(Level.SEVERE, "Error trying to write metrics to file", e);
       
@@ -131,10 +129,7 @@ public class CsvFileReporter implements MetricReporter {
 
         @Override
         public boolean accept(File dir, String name) {
-          if (name.startsWith(baseFileName) && name.compareTo(minFileName) < 0) {
-            return true;
-          }
-          return false;
+          return (name.startsWith(baseFileName) && name.compareTo(minFileName) < 0);
         }
       });
 
@@ -155,11 +150,7 @@ public class CsvFileReporter implements MetricReporter {
    */
   protected boolean isWriteToFile() {
     String value = System.getProperty("metric.writeToFile");
-    if (value != null && value.trim().toLowerCase().equals("false")) {
-      // explicitly disabled metric writing to file
-      return false;
-    }
-    return true;
+    return (value == null || !value.trim().toLowerCase().equals("false"));
   }
 
   protected static int getNumberOfFilesToKeep(int value) {

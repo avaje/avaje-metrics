@@ -1,5 +1,6 @@
 package org.avaje.metric.core;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.MetricName;
@@ -85,7 +86,7 @@ public final class DefaultTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void visit(MetricVisitor visitor) throws IOException {
     visitor.visit(this);
   }
 

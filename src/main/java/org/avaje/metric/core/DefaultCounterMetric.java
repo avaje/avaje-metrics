@@ -6,6 +6,7 @@ import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
+import java.io.IOException;
 
 
 /**
@@ -68,7 +69,7 @@ public final class DefaultCounterMetric implements Metric, CounterMetric {
   }
   
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void visit(MetricVisitor visitor) throws IOException {
     visitor.visit(this);
   }
 

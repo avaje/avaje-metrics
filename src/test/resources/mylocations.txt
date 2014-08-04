@@ -2,8 +2,6 @@
 ## List of locations to find application properties files
 ##
 
-src/test/resources/subdir/dummy.properties
-
-${user.home}/config/dummy.properties
-
+classpath:subdir/dummy.properties
+file:${user.home}/config/dummy.properties
 classpath:subdir/extra.dummy.properties

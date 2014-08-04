@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
 import org.avaje.metric.GaugeDoubleGroup;
@@ -73,68 +74,59 @@ public class CsvWriteVisitor implements MetricVisitor {
   }
   
   @Override
-  public void visit(TimedMetric metric) {
+  public void visit(TimedMetric metric) throws IOException {
    
-    try {
-      writeMetricName(metric);
-      writeSummary("", metric.getCollectedSuccessStatistics());
-      writeSummary("err.", metric.getCollectedErrorStatistics());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    writeMetricName(metric);
+    writeSummary("", metric.getCollectedSuccessStatistics());
+    writeSummary("err.", metric.getCollectedErrorStatistics());
+    writeMetricEnd(metric);
+  }
+
+  @Override
+  public void visit(BucketTimedMetric metric) throws IOException {
+
+    // Simply visit each of the internal buckets
+    TimedMetric[] buckets = metric.getBuckets();
+    for (int i = 0; i < buckets.length; i++) {
+      visit(buckets[i]);
     }
   }
 
   @Override
-  public void visit(ValueMetric metric) {
-    try {
-      writeMetricName(metric);
-      writeSummary("", metric.getCollectedStatistics());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public void visit(ValueMetric metric) throws IOException {
+
+    writeMetricName(metric);
+    writeSummary("", metric.getCollectedStatistics());
+    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(CounterMetric metric) {
+  public void visit(CounterMetric metric) throws IOException {
 
-    try {
-      writeMetricName(metric);
-      CounterStatistics counterStatistics = metric.getCollectedStatistics();
-      write("count", counterStatistics.getCount());
-      write("dur", getDuration(counterStatistics.getStartTime()));
-      writeMetricEnd(metric);
-      
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    writeMetricName(metric);
+    CounterStatistics counterStatistics = metric.getCollectedStatistics();
+    write("count", counterStatistics.getCount());
+    write("dur", getDuration(counterStatistics.getStartTime()));
+    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(GaugeDoubleGroup gaugeMetricGroup) {
+  public void visit(GaugeDoubleGroup gaugeMetricGroup) throws IOException {
 
-    try {
-      GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-      writeMetricName(gaugeMetricGroup);
-      for (GaugeDoubleMetric m : gaugeMetrics) {
-        write(m.getName().getName(), formattedValue(m.getValue()));
-      }
-      writeMetricEnd(gaugeMetricGroup);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+    writeMetricName(gaugeMetricGroup);
+    for (GaugeDoubleMetric m : gaugeMetrics) {
+      write(m.getName().getName(), formattedValue(m.getValue()));
     }
+    writeMetricEnd(gaugeMetricGroup);
   }
   
   @Override
-  public void visit(GaugeDoubleMetric metric) {
-    try {
-      writeMetricName(metric);
-      write("value", formattedValue(metric.getValue()));
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public void visit(GaugeDoubleMetric metric) throws IOException {
+
+    writeMetricName(metric);
+    write("value", formattedValue(metric.getValue()));
+    writeMetricEnd(metric);
   }
 
   public String formattedValue(double value) {
@@ -142,53 +134,36 @@ public class CsvWriteVisitor implements MetricVisitor {
   }
   
   @Override
-  public void visit(GaugeLongMetric metric) {
-    try {
-      writeMetricName(metric);
-      write("value", metric.getValue());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public void visit(GaugeLongMetric metric) throws IOException {
+
+    writeMetricName(metric);
+    write("value", metric.getValue());
+    writeMetricEnd(metric);
   }
   
   @Override
-  public void visit(GaugeLongGroup gaugeMetricGroup) {
+  public void visit(GaugeLongGroup gaugeMetricGroup) throws IOException {
 
-    try {
-      GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-      writeMetricName(gaugeMetricGroup);
-      for (GaugeLongMetric m : gaugeMetrics) {
-        write(m.getName().getName(), m.getValue());
-      }
-      writeMetricEnd(gaugeMetricGroup);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
+    writeMetricName(gaugeMetricGroup);
+    for (GaugeLongMetric m : gaugeMetrics) {
+      write(m.getName().getName(), m.getValue());
     }
+    writeMetricEnd(gaugeMetricGroup);
   }
   
-  protected void writeSummary(String prefix, ValueStatistics valueStats) {
-    
-    try {
+  protected void writeSummary(String prefix, ValueStatistics valueStats) throws IOException {
 
-      if (valueStats == null) {
-        // Buckets that are empty
-        write(prefix, "count", 0);
-        return;        
-      }
-      long count = valueStats.getCount();
-      write(prefix, "count", count);
-      if (count == 0) {
-        return;
-      }
-      write(prefix, "avg", valueStats.getMean());
-      write(prefix, "max", valueStats.getMax());
-      write(prefix, "sum", valueStats.getTotal());
-      write(prefix, "dur", getDuration(valueStats.getStartTime()));
-     
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    // valueStats will be null for a BucketTimedMetric with an empty TimedMetric bucket
+    long count = (valueStats == null) ? 0 : valueStats.getCount();
+    write(prefix, "count", count);
+    if (count == 0) {
+      return;
     }
+    write(prefix, "avg", valueStats.getMean());
+    write(prefix, "max", valueStats.getMax());
+    write(prefix, "sum", valueStats.getTotal());
+    write(prefix, "dur", getDuration(valueStats.getStartTime()));
   }
 
   protected void write(String prefix, String name, long value) throws IOException {
@@ -196,16 +171,12 @@ public class CsvWriteVisitor implements MetricVisitor {
     write(name, value);
   }
   
-  protected void writePrefix(String prefix) {
-    try {
-      if (errors) {
-        writer.write("err.");
-      }
-      if (!prefix.isEmpty()) {
-        writer.write(prefix);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+  protected void writePrefix(String prefix) throws IOException {
+    if (errors) {
+      writer.write("err.");
+    }
+    if (!prefix.isEmpty()) {
+      writer.write(prefix);
     }
   }
 

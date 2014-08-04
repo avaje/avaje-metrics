@@ -6,6 +6,7 @@ import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
 
+import java.io.IOException;
 
 
 /**
@@ -42,8 +43,7 @@ public final class DefaultValueMetric implements Metric, ValueMetric {
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
-
+  public void visit(MetricVisitor visitor) throws IOException {
     visitor.visit(this);
   }
 
