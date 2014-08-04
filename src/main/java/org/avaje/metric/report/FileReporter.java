@@ -9,8 +9,9 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writes the collected metrics to a file.
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class FileReporter implements MetricReporter {
 
-  private static final Logger logger = Logger.getLogger(FileReporter.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FileReporter.class);
 
   protected static final int DEFAULT_NUM_FILES_TO_KEEP = 20;
 
@@ -36,12 +37,12 @@ public class FileReporter implements MetricReporter {
   protected final boolean enabled;
 
   /**
-   * Default to use the CSV format.
+   * The format that is written to the file.
    */
-  protected ReportWriter reportWriter = new CsvReportWriter();
+  protected ReportWriter reportWriter;
   
   /**
-   * Create with the defaults for base directory, file name and numberOfFilesToKeep of 20.
+   * Create with the defaults for base directory, file name, numberOfFilesToKeep and CsvReportWriter.
    */
   public FileReporter() {
     this(null);
@@ -55,24 +56,34 @@ public class FileReporter implements MetricReporter {
   }
 
   /**
-   * Create specifying a write frequency, base directory and base file name.
+   * Create specifying a base directory and file name.
    */
   public FileReporter(String baseDirectory, String baseFileName) {
-    this(baseDirectory, baseFileName, -1);
+    this(baseDirectory, baseFileName, -1, null);
   }
-
+  
+  /**
+   * Construct specifying a base directory, file name and report writer.
+   */
+  public FileReporter(String baseDirectory, String baseFileName, ReportWriter reportWriter) {
+    this(baseDirectory, baseFileName, -1, reportWriter);
+  }
+  
   /**
    * Create specifying a write frequency, base directory and base file name.
    */
-  public FileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep) {
+  public FileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep, ReportWriter reportWriter) {
 
     this.numberOfFilesToKeep = getNumberOfFilesToKeep(numberOfFilesToKeep);
     this.baseDirectory = getBaseDirectory(baseDirectory);
     this.baseFileName = getBaseFileName(baseFileName);
+    this.reportWriter = (reportWriter != null) ? reportWriter : new CsvReportWriter();
 
     cleanup();
     
     this.enabled = isWriteToFile();
+    
+    logger.debug("enabled:{} directory:{} name:{} numberOfFilesToKeep:{}", enabled, baseDirectory, baseFileName, numberOfFilesToKeep);
   }
 
   /**
@@ -88,22 +99,26 @@ public class FileReporter implements MetricReporter {
   @Override
   public void report(ReportMetrics reportMetrics) {
 
-    if (!enabled) {
-      // disabled via system property - metric.writeToFile
+    if (!enabled || reportWriter == null) {
+      logger.debug("Not writing any metrics - disabled or reportWriter is not set");
       return;
     }
-    String name = getFileName(baseFileName, new Date());
     
-    FileOutput fo = new FileOutput(baseDirectory, name);
+    // Determine the file we should be writing to 
+    String name = getFileName(baseFileName, new Date());
+    File file = new File(new File(baseDirectory), name);
+    
+    if (logger.isTraceEnabled()) {
+      logger.trace("... write to file: {}", file.getAbsolutePath());
+    }
+    
+    FileOutput fo = new FileOutput(file);
     try {
       Writer writer = fo.getWriter();
-
-      if (reportWriter != null) {
-        reportWriter.write(writer, reportMetrics);
-      }
+      reportWriter.write(writer, reportMetrics);
 
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Error trying to write metrics to file", e);
+      logger.error("Error trying to write metrics to file", e);
       
     } finally {
       fo.close();
@@ -132,26 +147,32 @@ public class FileReporter implements MetricReporter {
 
     try {
 
+      // determine the minimum file name based on todays date and numberOfFilesToKeep
       final String minFileName = getFileName(baseFileName, numberOfFilesToKeep);
 
       File dir = new File(baseDirectory);
+      
       String[] delFileNames = dir.list(new FilenameFilter() {
-
         @Override
         public boolean accept(File dir, String name) {
           return (name.startsWith(baseFileName) && name.compareTo(minFileName) < 0);
         }
       });
 
+      
+      logger.debug("cleaning up [{}] old metrics files", delFileNames.length);
+      
       for (int i = 0; i < delFileNames.length; i++) {
         File f = new File(dir, delFileNames[i]);
         if (f.exists()) {
-          f.delete();
+          if (!f.delete()) {
+            logger.warn("Unable to delete old metric file: {}", f.getAbsoluteFile());
+          }
         }
       }
 
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Error trying to cleanup old metric files", e);
+      logger.error("Error trying to cleanup old metric files", e);
     }
   }
 
@@ -224,18 +245,19 @@ public class FileReporter implements MetricReporter {
    * A helper class for FileReporter that handles the file directory, name and
    * writer etc.
    */
-  public class FileOutput {
+  class FileOutput {
 
-    protected Writer writer;
+    Writer writer;
 
-    public FileOutput(String baseDirectory, String baseFileName) {
+    FileOutput(File f) {
 
-      File f = new File(getDirectory(baseDirectory), baseFileName);
       File parentFile = f.getParentFile();
       if (parentFile != null && !parentFile.exists()) {
-        parentFile.mkdirs();
+        if (!parentFile.mkdirs()) {
+          logger.warn("Was unable to make parent directories for file: "+f.getAbsolutePath());
+        }
       }
-      System.out.println(f.getAbsolutePath());
+
       try {
         FileWriter fileWriter = new FileWriter(f, true);
         writer = new BufferedWriter(fileWriter, 4096);
@@ -253,18 +275,15 @@ public class FileReporter implements MetricReporter {
       try {
         writer.flush();
       } catch (IOException e) {
-        logger.log(Level.SEVERE, "Failed to flush metric file writer", e);
+        logger.error("Failed to flush metric file writer", e);
       }
       try {
         writer.close();
       } catch (IOException e) {
-        logger.log(Level.SEVERE, "Failed to close metric file writer", e);
+        logger.error("Failed to close metric file writer", e);
       }
     }
 
-    protected File getDirectory(String baseDirectory) {
-      return new File(baseDirectory);
-    }
 
   }
 

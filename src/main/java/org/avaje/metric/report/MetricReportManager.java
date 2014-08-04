@@ -8,11 +8,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writes the collected metrics to registered reporters.
@@ -24,7 +24,7 @@ import org.avaje.metric.MetricManager;
  */
 public class MetricReportManager {
 
-  private static final Logger logger = Logger.getLogger(MetricReportManager.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(MetricReportManager.class.getName());
 
   private static final int EIGHT_HOURS = 60 * 60 * 8;
 
@@ -124,7 +124,7 @@ public class MetricReportManager {
         }
 
       } catch (IOException e) {
-        logger.log(Level.SEVERE, "", e);
+        logger.error("Error writing metrics", e);
       }
     }
   }
@@ -153,6 +153,8 @@ public class MetricReportManager {
     long collectionTime = System.currentTimeMillis();
     List<Metric> metrics = collectMetrics();
 
+    logger.trace("reporting [{}] metrics", metrics.size());
+    
     ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics);
     
     report(reportMetrics, localReporter);
@@ -187,7 +189,7 @@ public class MetricReportManager {
       try {
         reporter.report(reportMetrics);
       } catch (Exception e) {
-        logger.log(Level.SEVERE, "Error trying to report metrics", e);
+        logger.error("Error trying to report metrics", e);
       }
     }
   }
