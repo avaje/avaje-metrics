@@ -3,6 +3,9 @@
 Please read the main documentation at:
 https://github.com/avaje-metric/avaje-metric-api
 
+
+# Maven dependency
+
 ```xml
     <dependency>
       <groupId>org.avaje.metric</groupId>
