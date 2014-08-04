@@ -55,6 +55,19 @@ public class DefaultTimedMetricGroup implements TimedMetricGroup {
     return timedMetric.startEvent();
   }
 
+
+  @Override
+  public void addEventSince(String name, boolean success, long startNanos) {
+    long durationNanos = System.nanoTime() - startNanos;
+    addEventDuration(name, success, durationNanos);
+  }
+
+  @Override
+  public void addEventDuration(String name, boolean success, long durationNanos) {
+    TimedMetric timedMetric = getTimedMetric(name);
+    timedMetric.addEventDuration(success, durationNanos);
+  }
+
   /**
    * Return the TimedMetric for the specific name.
    */
