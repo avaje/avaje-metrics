@@ -33,9 +33,11 @@ public class DefaultValueStatistics implements ValueStatistics {
     this.startTime = collectionStart;
     this.count = count;
     this.total = total;
-    this.max = max;
+    // collection is racy so sanitize the max value if it has not been set
+    // this most likely would happen when count = 1 so max = mean
+    this.max = max != Long.MIN_VALUE ? max : (count < 1 ? 0 : Math.round((double)(total / count)));
   }
-
+  
   public String toString() {
     return "count:" + count + " total:" + total + " max:" + max;
   }
