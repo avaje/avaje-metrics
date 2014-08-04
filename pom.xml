@@ -9,7 +9,7 @@
 
   <groupId>org.avaje.metric</groupId>
   <artifactId>avaje-metric-core</artifactId>
-  <version>3.3.1-SNAPSHOT</version>
+  <version>3.3.1</version>
   <packaging>jar</packaging>
 
   <name>avaje-metric-core</name>
