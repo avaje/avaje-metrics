@@ -2,8 +2,6 @@ package org.avaje.metric.report;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
@@ -19,43 +17,106 @@ import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
 
 /**
- * A visitor that is aimed to write a space formatted file.
+ * A visitor that is aimed to write the metrics out in CSV format with different numbers of columns
+ * depending on the metric type. Also note that columns contain name=value pairs.
  * <p>
- * This format is aimed at writing to the local file system to provide simple low tech reporting of
- * the collected metrics.
+ * This format is aimed at writing to the local file system to provide simple mechanism for
+ * reporting of the collected metrics.
  */
 public class CsvWriteVisitor implements MetricVisitor {
 
-  protected final SimpleDateFormat timeFormat;
+  /**
+   * Code for GaugeLongGroup.
+   */
+  private static final String TYPE_LONG_GROUP = "lg";
 
+  /**
+   * Code for GaugeLongMetric.
+   */
+  private static final String TYPE_LONG_METRIC = "lm";
+
+  /**
+   * Code for GaugeDoubleMetric.
+   */
+  private static final String TYPE_DOUBLE_METRIC = "dm";
+
+  /**
+   * Code for GaugeDoubleGroup.
+   */
+  private static final String TYPE_DOUBLE_GROUP = "dg";
+
+  /**
+   * Code for CounterMetric.
+   */
+  private static final String TYPE_COUNTER_METRIC = "cm";
+
+  /**
+   * Code for ValueMetric.
+   */
+  private static final String TYPE_VALUE_METRIC = "vm";
+
+  /**
+   * The collection time which is typically HH:mm:ss format.
+   */
+  protected final String collectTimeFormatted;
+
+  /**
+   * The time used to calculate metric duration.
+   */
   protected final long collectTime;
 
+  /**
+   * The number of decimal places to format double values to.
+   */
   protected final int decimalPlaces;
-  
+
+  /**
+   * Padding defined for the metric names.
+   */
   protected final int nameWidth;
-  
+
+  /**
+   * Padding defined for the column name=value pairs.
+   */
   protected final int columnWidth;
-  
+
+  /**
+   * Prefix between delimiters.
+   */
   protected final String delimitPrefix;
-  
+
+  /**
+   * Suffix between delimiters.
+   */
   protected final String delimitSuffix;
 
+  /**
+   * The writer that we are writing to.
+   */
   protected final Writer writer;
 
+  /**
+   * Set to true when reporting error metrics (to get the "err." prefix on the metric name). 
+   */
   protected boolean errors;
 
-  public CsvWriteVisitor(Writer writer) {
-    this(writer, "HH:mm:ss");
+
+  /**
+   * Construct with some whitespace padding for metric names and columns.
+   */
+  public CsvWriteVisitor(Writer writer, String timeNowFormat) {
+    this(writer, timeNowFormat, 45, 16, 2, "", ", ");
   }
 
-  public CsvWriteVisitor(Writer writer, String timeNowFormat) {
-    this(writer, timeNowFormat, 30, 16, 2, "", ", ");
-  }
-  
-  public CsvWriteVisitor(Writer writer, String timeNowFormat, int nameWidth, int columnWidth, int decimalPlaces, String delimitPrefix, String delimitSuffix) {
+  /**
+   * Construct with all the format options.
+   */
+  public CsvWriteVisitor(Writer writer, String collectTime, int nameWidth, int columnWidth, int decimalPlaces,
+      String delimitPrefix, String delimitSuffix) {
+    
     this.collectTime = System.currentTimeMillis();
     this.writer = writer;
-    this.timeFormat = new SimpleDateFormat(timeNowFormat);
+    this.collectTimeFormatted = collectTime;
     this.decimalPlaces = decimalPlaces;
     this.nameWidth = nameWidth;
     this.columnWidth = columnWidth;
@@ -63,8 +124,17 @@ public class CsvWriteVisitor implements MetricVisitor {
     this.delimitSuffix = ", ";
   }
 
-  protected void writeMetricName(Metric metric) throws IOException {
+  public void write(ReportMetrics reportMetrics) throws IOException {
+
+    for (Metric metric : reportMetrics.getMetrics()) {
+      metric.visit(this);
+    }
+  }
+
+  protected void writeMetricName(Metric metric, String type) throws IOException {
     writer.write(getNowString());
+    writer.write(delimitSuffix);
+    writer.write(type);
     writer.write(delimitSuffix);
     writeWithPadding(metric.getName().getSimpleName(), nameWidth);
   }
@@ -72,11 +142,11 @@ public class CsvWriteVisitor implements MetricVisitor {
   protected void writeMetricEnd(Metric metric) throws IOException {
     writer.write("\n");
   }
-  
+
   @Override
   public void visit(TimedMetric metric) throws IOException {
-   
-    writeMetricName(metric);
+
+    writeMetricName(metric, "tm");
     writeSummary("", metric.getCollectedSuccessStatistics());
     writeSummary("err.", metric.getCollectedErrorStatistics());
     writeMetricEnd(metric);
@@ -95,7 +165,7 @@ public class CsvWriteVisitor implements MetricVisitor {
   @Override
   public void visit(ValueMetric metric) throws IOException {
 
-    writeMetricName(metric);
+    writeMetricName(metric, TYPE_VALUE_METRIC);
     writeSummary("", metric.getCollectedStatistics());
     writeMetricEnd(metric);
   }
@@ -103,7 +173,7 @@ public class CsvWriteVisitor implements MetricVisitor {
   @Override
   public void visit(CounterMetric metric) throws IOException {
 
-    writeMetricName(metric);
+    writeMetricName(metric, TYPE_COUNTER_METRIC);
     CounterStatistics counterStatistics = metric.getCollectedStatistics();
     write("count", counterStatistics.getCount());
     write("dur", getDuration(counterStatistics.getStartTime()));
@@ -114,17 +184,17 @@ public class CsvWriteVisitor implements MetricVisitor {
   public void visit(GaugeDoubleGroup gaugeMetricGroup) throws IOException {
 
     GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-    writeMetricName(gaugeMetricGroup);
+    writeMetricName(gaugeMetricGroup, TYPE_DOUBLE_GROUP);
     for (GaugeDoubleMetric m : gaugeMetrics) {
       write(m.getName().getName(), formattedValue(m.getValue()));
     }
     writeMetricEnd(gaugeMetricGroup);
   }
-  
+
   @Override
   public void visit(GaugeDoubleMetric metric) throws IOException {
 
-    writeMetricName(metric);
+    writeMetricName(metric, TYPE_DOUBLE_METRIC);
     write("value", formattedValue(metric.getValue()));
     writeMetricEnd(metric);
   }
@@ -132,26 +202,26 @@ public class CsvWriteVisitor implements MetricVisitor {
   public String formattedValue(double value) {
     return NumFormat.dp(decimalPlaces, value);
   }
-  
+
   @Override
   public void visit(GaugeLongMetric metric) throws IOException {
 
-    writeMetricName(metric);
+    writeMetricName(metric, TYPE_LONG_METRIC);
     write("value", metric.getValue());
     writeMetricEnd(metric);
   }
-  
+
   @Override
   public void visit(GaugeLongGroup gaugeMetricGroup) throws IOException {
 
     GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-    writeMetricName(gaugeMetricGroup);
+    writeMetricName(gaugeMetricGroup, TYPE_LONG_GROUP);
     for (GaugeLongMetric m : gaugeMetrics) {
       write(m.getName().getName(), m.getValue());
     }
     writeMetricEnd(gaugeMetricGroup);
   }
-  
+
   protected void writeSummary(String prefix, ValueStatistics valueStats) throws IOException {
 
     // valueStats will be null for a BucketTimedMetric with an empty TimedMetric bucket
@@ -170,7 +240,7 @@ public class CsvWriteVisitor implements MetricVisitor {
     writePrefix(prefix);
     write(name, value);
   }
-  
+
   protected void writePrefix(String prefix) throws IOException {
     if (errors) {
       writer.write("err.");
@@ -183,14 +253,14 @@ public class CsvWriteVisitor implements MetricVisitor {
   protected void write(String name, long value) throws IOException {
     write(name, String.valueOf(value));
   }
-  
+
   protected void write(String name, String value) throws IOException {
 
     writer.write(name);
     writer.write("=");
     writeWithPadding(value, columnWidth - name.length());
-  }  
-  
+  }
+
   protected void writeWithPadding(String text, int padTo) throws IOException {
     writer.write(text);
     writer.write(delimitSuffix);
@@ -207,11 +277,11 @@ public class CsvWriteVisitor implements MetricVisitor {
   }
 
   protected String getNowString() {
-    return timeFormat.format(new Date());
+    return collectTimeFormatted;
   }
 
   protected long getDuration(long startTime) {
-    return Math.round((collectTime - startTime)/1000d);
+    return Math.round((collectTime - startTime) / 1000d);
   }
 
 }

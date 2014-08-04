@@ -30,7 +30,7 @@ public class CsvWriteVisitorTest {
   public void testCounter() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer);
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
     
     CounterMetric counter = createCounterMetric();
     
@@ -47,7 +47,7 @@ public class CsvWriteVisitorTest {
   public void testGaugeMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer);
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
 
     GaugeDoubleMetric metric = createGaugeMetric();
     
@@ -62,7 +62,7 @@ public class CsvWriteVisitorTest {
   public void testValueMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer);
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
      
     ValueMetric metric = createValueMetric();
     
@@ -82,7 +82,7 @@ public class CsvWriteVisitorTest {
   public void testTimedMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer);
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
     
     TimedMetric metric = createTimedMetric();
     
@@ -115,7 +115,7 @@ public class CsvWriteVisitorTest {
   public void testBucketTimedMetricFull() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer);
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
     
     BucketTimedMetric metric = createBucketTimedMetricFull();
     
@@ -154,7 +154,7 @@ public class CsvWriteVisitorTest {
   public void testBucketTimedMetricPartial() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer);
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
       
 
     BucketTimedMetric metric = createBucketTimedMetricPartial();

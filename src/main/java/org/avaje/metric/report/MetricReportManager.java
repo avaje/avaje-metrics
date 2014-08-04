@@ -28,14 +28,32 @@ public class MetricReportManager {
 
   private static final int EIGHT_HOURS = 60 * 60 * 8;
 
+  /**
+   * Timer used to periodically execute the metrics collection and reporting.
+   */
   protected final Timer timer;
 
+  /**
+   * Frequency in seconds of which the reporting will execute.
+   */
   protected final int freqInSeconds;
 
+  /**
+   * Optional first reporter.
+   */
   protected final MetricReporter localReporter;
 
+  /**
+   * Optional second reporter.
+   */
   protected final MetricReporter remoteReporter;
 
+  /**
+   * The headerInfo which identifies the application, environment and server etc that these metrics
+   * are collected for.
+   */
+  protected HeaderInfo headerInfo;
+  
   /**
    * Create specifying the reporting frequency and a reporter.
    * <p>
@@ -80,8 +98,15 @@ public class MetricReportManager {
       // Create the Timer and schedule the WriteTask
       this.timer.scheduleAtFixedRate(new WriteTask(), freqMillis, freqMillis);
     }
-
   }
+  
+  /**
+   * Set the associated HeaderInfo.
+   */
+  public void setHeaderInfo(HeaderInfo headerInfo) {
+    this.headerInfo = headerInfo;
+  }
+
 
   protected class WriteTask extends TimerTask {
 
@@ -125,10 +150,13 @@ public class MetricReportManager {
    */
   protected void reportMetrics() throws IOException {
 
+    long collectionTime = System.currentTimeMillis();
     List<Metric> metrics = collectMetrics();
 
-    report(metrics, localReporter);
-    report(metrics, remoteReporter);
+    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics);
+    
+    report(reportMetrics, localReporter);
+    report(reportMetrics, remoteReporter);
   }
 
   /**
@@ -153,11 +181,11 @@ public class MetricReportManager {
   /**
    * Visit the metrics sorted by name.
    */
-  protected void report(List<Metric> allMetrics, MetricReporter reporter) {
+  protected void report(ReportMetrics reportMetrics, MetricReporter reporter) {
 
     if (reporter != null) {
       try {
-        reporter.report(allMetrics);
+        reporter.report(reportMetrics);
       } catch (Exception e) {
         logger.log(Level.SEVERE, "Error trying to report metrics", e);
       }

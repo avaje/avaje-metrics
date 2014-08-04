@@ -12,7 +12,7 @@ public class ValueCounterTest {
     
     Assert.assertEquals(0, counter.getCount());
     Assert.assertEquals(0, counter.getTotal());
-    Assert.assertEquals(0, counter.getMax());
+    Assert.assertEquals(Long.MIN_VALUE, counter.getMax());
 
     counter.add(100);
     Assert.assertEquals(1, counter.getCount());
@@ -33,6 +33,11 @@ public class ValueCounterTest {
     Assert.assertEquals(4, counter.getCount());
     Assert.assertEquals(370, counter.getTotal());
     Assert.assertEquals(200, counter.getMax());
-
+    
+    counter.reset();
+    Assert.assertEquals(0, counter.getCount());
+    Assert.assertEquals(0, counter.getTotal());
+    Assert.assertEquals(Long.MIN_VALUE, counter.getMax());
+    
   }
 }

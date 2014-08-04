@@ -9,11 +9,8 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.avaje.metric.Metric;
 
 /**
  * Writes the collected metrics to a file.
@@ -24,9 +21,9 @@ import org.avaje.metric.Metric;
  * 'metric.directory' and otherwise defaults to the current directory.
  * </p>
  */
-public class CsvFileReporter implements MetricReporter {
+public class FileReporter implements MetricReporter {
 
-  private static final Logger logger = Logger.getLogger(CsvFileReporter.class.getName());
+  private static final Logger logger = Logger.getLogger(FileReporter.class.getName());
 
   protected static final int DEFAULT_NUM_FILES_TO_KEEP = 20;
 
@@ -39,30 +36,35 @@ public class CsvFileReporter implements MetricReporter {
   protected final boolean enabled;
 
   /**
-   * Create with a freqInSeconds of 60 and using the default base directory.
+   * Default to use the CSV format.
    */
-  public CsvFileReporter() {
+  protected ReportWriter reportWriter = new CsvReportWriter();
+  
+  /**
+   * Create with the defaults for base directory, file name and numberOfFilesToKeep of 20.
+   */
+  public FileReporter() {
     this(null);
   }
 
   /**
    * Create specifying a base directory where the metrics files should go.
    */
-  public CsvFileReporter(String baseDirectory) {
+  public FileReporter(String baseDirectory) {
     this(baseDirectory, null);
   }
 
   /**
    * Create specifying a write frequency, base directory and base file name.
    */
-  public CsvFileReporter(String baseDirectory, String baseFileName) {
+  public FileReporter(String baseDirectory, String baseFileName) {
     this(baseDirectory, baseFileName, -1);
   }
 
   /**
    * Create specifying a write frequency, base directory and base file name.
    */
-  public CsvFileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep) {
+  public FileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep) {
 
     this.numberOfFilesToKeep = getNumberOfFilesToKeep(numberOfFilesToKeep);
     this.baseDirectory = getBaseDirectory(baseDirectory);
@@ -73,8 +75,18 @@ public class CsvFileReporter implements MetricReporter {
     this.enabled = isWriteToFile();
   }
 
+  /**
+   * Set the ReportWriter to use when writing the collected metrics.
+   */
+  public void setReportWriter(ReportWriter reportWriter) {
+    this.reportWriter = reportWriter;
+  }
+
+  /**
+   * Write the collected metrics to a file.
+   */
   @Override
-  public void report(List<Metric> metrics) {
+  public void report(ReportMetrics reportMetrics) {
 
     if (!enabled) {
       // disabled via system property - metric.writeToFile
@@ -86,10 +98,8 @@ public class CsvFileReporter implements MetricReporter {
     try {
       Writer writer = fo.getWriter();
 
-      CsvWriteVisitor visitor = new CsvWriteVisitor(writer);
-   
-      for (Metric metric : metrics) {
-        metric.visit(visitor);
+      if (reportWriter != null) {
+        reportWriter.write(writer, reportMetrics);
       }
 
     } catch (Exception e) {
@@ -225,6 +235,7 @@ public class CsvFileReporter implements MetricReporter {
       if (parentFile != null && !parentFile.exists()) {
         parentFile.mkdirs();
       }
+      System.out.println(f.getAbsolutePath());
       try {
         FileWriter fileWriter = new FileWriter(f, true);
         writer = new BufferedWriter(fileWriter, 4096);

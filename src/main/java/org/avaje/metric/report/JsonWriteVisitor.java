@@ -1,12 +1,22 @@
 package org.avaje.metric.report;
 
 
-import org.avaje.metric.*;
-
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
+
+import org.avaje.metric.BucketTimedMetric;
+import org.avaje.metric.CounterMetric;
+import org.avaje.metric.CounterStatistics;
+import org.avaje.metric.GaugeDoubleGroup;
+import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.GaugeLongGroup;
+import org.avaje.metric.GaugeLongMetric;
+import org.avaje.metric.Metric;
+import org.avaje.metric.MetricVisitor;
+import org.avaje.metric.TimedMetric;
+import org.avaje.metric.ValueMetric;
+import org.avaje.metric.ValueStatistics;
 
 /**
  * Writes the metric information as JSON to a buffer for sending.
@@ -17,36 +27,40 @@ public class JsonWriteVisitor implements MetricVisitor {
 
   protected final Writer buffer;
 
-  protected long collectionTime;
+  protected final long collectionTime;
 
-  public JsonWriteVisitor(long collectionTime) {
-    this(collectionTime, 1000);
+  protected final ReportMetrics reportMetrics;
+
+  /**
+   * Construct with default formatting of 2 decimal places.
+   */
+  public JsonWriteVisitor(Writer writer, ReportMetrics reportMetrics) {
+    this(2, writer, reportMetrics);
+  }
+  
+  public JsonWriteVisitor(int decimalPlaces, Writer writer, ReportMetrics reportMetrics) {
+    this.decimalPlaces = decimalPlaces;
+    this.buffer = writer;
+    this.reportMetrics = reportMetrics;
+    this.collectionTime = reportMetrics.getCollectionTime();
   }
 
-  public JsonWriteVisitor(long collectionTime, int bufferSize) {
-    this(collectionTime, new StringWriter(bufferSize));
-  }
-
-  public JsonWriteVisitor(long collectionTime, Writer buffer) {
-    this.collectionTime = collectionTime;
-    this.buffer = buffer;
-    this.decimalPlaces = 2;
-  }
-
-  public String buildJson(HeaderInfo headerInfo, List<Metric> metrics) throws IOException {
+  public void write() throws IOException {
 
     buffer.append("{");
-    appendHeader(headerInfo);
+    appendHeader();
     writeKey("metrics");
     buffer.append("[\n");
-    buildJson(metrics);
+    appendMetricsJson();
     buffer.append("]");
     buffer.append("}");
 
-    return buffer.toString();
   }
 
-  protected void buildJson(List<Metric> metrics) throws IOException {
+  protected void appendMetricsJson() throws IOException {
+    
+    List<Metric> metrics = reportMetrics.getMetrics();
+    
     for (int i = 0; i < metrics.size(); i++) {
       if (i == 0) {
         buffer.append("  ");
@@ -59,12 +73,9 @@ public class JsonWriteVisitor implements MetricVisitor {
     }
   }
 
-  public String getBufferValue() {
-    return buffer.toString();
-  }
+  protected void appendHeader() throws IOException {
 
-  protected void appendHeader(HeaderInfo headerInfo) throws IOException {
-
+    HeaderInfo headerInfo = reportMetrics.getHeaderInfo();
     writeHeader("time", System.currentTimeMillis());
     writeHeader("app", headerInfo.getApp());
     writeHeader("env", headerInfo.getEnv());

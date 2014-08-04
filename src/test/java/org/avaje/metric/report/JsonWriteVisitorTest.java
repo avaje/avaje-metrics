@@ -1,6 +1,8 @@
 package org.avaje.metric.report;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,19 +34,21 @@ public class JsonWriteVisitorTest {
   private static long NANOS_TO_MILLIS = 1000000L;
 
     
-  private JsonWriteVisitor newJsonMetricVisitor() {
-    return new JsonWriteVisitor(System.currentTimeMillis());
+  private JsonWriteVisitor newJsonMetricVisitor(Writer writer) {
+    ReportMetrics m = new ReportMetrics(null, System.currentTimeMillis(), null);
+    return new JsonWriteVisitor(writer, m);
   }
   
   @Test
   public void testCounter() throws IOException {
     
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     
     CounterMetric counter = createCounterMetric();
     
     jsonVisitor.visit(counter);
-    String counterJson = jsonVisitor.getBufferValue();
+    String counterJson = writer.toString();
     
     Assert.assertEquals("{\"type\":\"counter\",\"name\":\"org.test.CounterFoo.doStuff\",\"count\":10,\"dur\":0}", counterJson);
   }
@@ -53,11 +57,12 @@ public class JsonWriteVisitorTest {
   @Test
   public void testGaugeMetric() throws IOException {
     
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     GaugeDoubleMetric metric = createGaugeMetric();
     
     jsonVisitor.visit(metric);
-    String counterJson = jsonVisitor.getBufferValue();
+    String counterJson = writer.toString();
     
     Assert.assertEquals("{\"type\":\"gauge\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
   }
@@ -65,12 +70,13 @@ public class JsonWriteVisitorTest {
   @Test
   public void testValueMetric() throws IOException {
     
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     
     ValueMetric metric = createValueMetric();
     
     jsonVisitor.visit(metric);
-    String counterJson = jsonVisitor.getBufferValue();
+    String counterJson = writer.toString();
     
     Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"n\":{\"count\":3,\"avg\":14,\"max\":16,\"sum\":42,\"dur\":0}}", counterJson);
   }
@@ -79,12 +85,13 @@ public class JsonWriteVisitorTest {
   @Test
   public void testTimedMetric() throws IOException {
     
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     
     TimedMetric metric = createTimedMetric();
     
     jsonVisitor.visit(metric);
-    String counterJson = jsonVisitor.getBufferValue();
+    String counterJson = writer.toString();
     
     // values converted into microseconds
     Assert.assertEquals("{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"n\":{\"count\":3,\"avg\":120,\"max\":140,\"sum\":360,\"dur\":0},\"e\":{\"count\":2,\"avg\":210,\"max\":220,\"sum\":420,\"dur\":0}}", counterJson);
@@ -97,12 +104,13 @@ public class JsonWriteVisitorTest {
   @Test
   public void testBucketTimedMetricFull() throws IOException {
     
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     
     BucketTimedMetric metric = createBucketTimedMetricFull();
     
     jsonVisitor.visit(metric);
-    String bucketJson = jsonVisitor.getBufferValue();
+    String bucketJson = writer.toString();
 
     String[] lines = bucketJson.split("\n");
     Assert.assertEquals(3, lines.length);
@@ -118,12 +126,13 @@ public class JsonWriteVisitorTest {
   @Test
   public void testBucketTimedMetricPartial() throws IOException {
     
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     
     BucketTimedMetric metric = createBucketTimedMetricPartial();
     
     jsonVisitor.visit(metric);
-    String bucketJson = jsonVisitor.getBufferValue();
+    String bucketJson = writer.toString();
 
     String[] lines = bucketJson.split("\n");
     Assert.assertEquals(4, lines.length);
@@ -148,17 +157,20 @@ public class JsonWriteVisitorTest {
     metrics.add(createBucketTimedMetricPartial());
     metrics.add(createCounterMetric());
 
-
-
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor();
-
     HeaderInfo headerInfo = new HeaderInfo();
     headerInfo.setKey("key-val");
     headerInfo.setEnv("dev");
     headerInfo.setApp("app-val");
     headerInfo.setServer("server-val");
+
+    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, System.currentTimeMillis(), metrics);
+
+    StringWriter writer = new StringWriter();
+    JsonWriteVisitor jsonVisitor = new JsonWriteVisitor(writer, reportMetrics);
+
     
-    String json = jsonVisitor.buildJson(headerInfo, metrics);
+    jsonVisitor.write();
+    String json = writer.toString();
     System.out.println("---");
     System.out.println(json);
     System.out.println("---");
