@@ -17,52 +17,35 @@ public class CsvReportWriter implements ReportWriter {
 
   protected final int decimalPlaces;
 
-  protected final int nameWidth;
+  protected final String delimiter;
 
-  protected final int columnWidth;
-
-  protected final String delimitPrefix;
-
-  protected final String delimitSuffix;
+  protected final String endOfLine;
 
   /**
-   * Create with some padding for the metrics names and columns (somewhat pretty format).
+   * Create as comma delimited with newline character at the end of each line.
    */
   public CsvReportWriter() {
-    this("HH:mm:ss", 45, 16, 2, "", ", ");
-  }
-
-  /**
-   * Create with the option of compact form or with some whitespace padding.
-   */
-  public CsvReportWriter(boolean compact) {
-    this("HH:mm:ss", compact ? 1 : 45, compact ? 1 : 16, 2, "", ",");
+    this("HH:mm:ss", 2, ",", "\n");
   }
 
   /**
    * Construct with all the format options.
-   * 
+   *
    * @param timeNowFormat
    *          The date time format for the collection time. Typically this is HH:mm:ss.
-   * @param nameWidth
-   *          Controls whitespace padding on the metric name.
-   * @param columnWidth
-   *          Controls the whitespace passing on the metric name=value columns.
    * @param decimalPlaces
    *          The number of decimal places to format double values. This typically defaults to 2.
-   * @param delimitPrefix
-   *          A string prefix added between delimiters.
-   * @param delimitSuffix
-   *          A string suffix added between delimiters.
+   * @param delimiter
+   *          A string that separates the columns and typically a comma.
+   * @param endOfLine
+   *          A string added at the end of each metric and typically a newline character.
    */
-  public CsvReportWriter(String timeNowFormat, int nameWidth, int columnWidth, int decimalPlaces, String delimitPrefix, String delimitSuffix) {
+  public CsvReportWriter(String timeNowFormat, int decimalPlaces, String delimiter, String endOfLine) {
 
     this.nowFormatter = new SimpleDateFormat(timeNowFormat);
-    this.nameWidth = nameWidth;
-    this.columnWidth = columnWidth;
     this.decimalPlaces = decimalPlaces;
-    this.delimitPrefix = delimitPrefix;
-    this.delimitSuffix = delimitSuffix;
+    this.delimiter = delimiter;
+    this.endOfLine = endOfLine;
   }
 
   /**
@@ -74,7 +57,7 @@ public class CsvReportWriter implements ReportWriter {
 
     String timeNowFormatted = nowFormatter.format(new Date());
 
-    CsvWriteVisitor visitor = new CsvWriteVisitor(writer, timeNowFormatted, nameWidth, columnWidth, decimalPlaces, delimitPrefix, delimitSuffix);
+    CsvWriteVisitor visitor = new CsvWriteVisitor(writer, timeNowFormatted, decimalPlaces, delimiter, endOfLine);
     visitor.write(reportMetrics);
   }
 

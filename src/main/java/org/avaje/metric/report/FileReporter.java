@@ -147,11 +147,15 @@ public class FileReporter implements MetricReporter {
 
     try {
 
-      // determine the minimum file name based on todays date and numberOfFilesToKeep
+      // determine the minimum file name based on today's date and numberOfFilesToKeep
       final String minFileName = getFileName(baseFileName, numberOfFilesToKeep);
 
       File dir = new File(baseDirectory);
-      
+      if (!dir.exists()) {
+        // directory does not exist yet so no cleanup required
+        return;
+      }
+
       String[] delFileNames = dir.list(new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
@@ -159,14 +163,15 @@ public class FileReporter implements MetricReporter {
         }
       });
 
-      
       logger.debug("cleaning up [{}] old metrics files", delFileNames.length);
-      
-      for (int i = 0; i < delFileNames.length; i++) {
-        File f = new File(dir, delFileNames[i]);
-        if (f.exists()) {
-          if (!f.delete()) {
-            logger.warn("Unable to delete old metric file: {}", f.getAbsoluteFile());
+
+      if (delFileNames != null) {
+        for (int i = 0; i < delFileNames.length; i++) {
+          File f = new File(dir, delFileNames[i]);
+          if (f.exists()) {
+            if (!f.delete()) {
+              logger.warn("Unable to delete old metric file: {}", f.getAbsoluteFile());
+            }
           }
         }
       }

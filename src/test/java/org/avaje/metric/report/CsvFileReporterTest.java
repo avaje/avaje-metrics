@@ -14,7 +14,7 @@ public class CsvFileReporterTest {
   public void exercise_with_MetricReportManager() throws InterruptedException, IOException {
     
     FileReporter fileReporter = new FileReporter(".", "metric-csv-exercise");
-    fileReporter.setReportWriter(new CsvReportWriter(true));
+    fileReporter.setReportWriter(new CsvReportWriter());
     
     MetricReportManager report = new MetricReportManager(1, fileReporter);
 

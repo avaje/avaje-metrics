@@ -30,16 +30,16 @@ public class CsvWriteVisitorTest {
   public void testCounter() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
     
     CounterMetric counter = createCounterMetric();
     
     csvVisitor.visit(counter);
     String counterCsv = writer.toString();
                 
-    Assert.assertTrue(counterCsv.contains("org.test.CounterFoo.doStuff,"));
-    Assert.assertTrue(counterCsv.contains("count=10,"));
-    Assert.assertTrue(counterCsv.contains("dur=0,"));
+    Assert.assertTrue(counterCsv.contains(",org.test.CounterFoo.doStuff,"));
+    Assert.assertTrue(counterCsv.contains(",count=10,"));
+    Assert.assertTrue(counterCsv.contains(",dur=0"));
   }
 
   
@@ -47,34 +47,34 @@ public class CsvWriteVisitorTest {
   public void testGaugeMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
 
     GaugeDoubleMetric metric = createGaugeMetric();
     
     csvVisitor.visit(metric);
     String csvContent = writer.toString();
     
-    Assert.assertTrue(csvContent.contains("org.test.GaugeFoo.doStuff,"));
-    Assert.assertTrue(csvContent.contains("value=24.0,"));    
+    Assert.assertTrue(csvContent.contains(",org.test.GaugeFoo.doStuff,"));
+    Assert.assertTrue(csvContent.contains(",value=24.0"));
   }
 
   @Test
   public void testValueMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
      
     ValueMetric metric = createValueMetric();
     
     csvVisitor.visit(metric);
     String csvContent = writer.toString();
     
-    Assert.assertTrue(csvContent.contains("org.test.ValueFoo.doStuff,"));
-    Assert.assertTrue(csvContent.contains("count=3,"));  
-    Assert.assertTrue(csvContent.contains("avg=14,"));
-    Assert.assertTrue(csvContent.contains("max=16,"));
-    Assert.assertTrue(csvContent.contains("sum=42,"));
-    Assert.assertTrue(csvContent.contains("dur=0,"));
+    Assert.assertTrue(csvContent.contains(",org.test.ValueFoo.doStuff,"));
+    Assert.assertTrue(csvContent.contains(",count=3,"));
+    Assert.assertTrue(csvContent.contains(",avg=14,"));
+    Assert.assertTrue(csvContent.contains(",max=16,"));
+    Assert.assertTrue(csvContent.contains(",sum=42,"));
+    Assert.assertTrue(csvContent.contains(",dur=0"));
   }
 
   
@@ -82,7 +82,7 @@ public class CsvWriteVisitorTest {
   public void testTimedMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
     
     TimedMetric metric = createTimedMetric();
     
@@ -92,18 +92,18 @@ public class CsvWriteVisitorTest {
     
     
     // values converted into microseconds
-    Assert.assertTrue(csvContent.contains("org.test.TimedFoo.doStuff,"));
-    Assert.assertTrue(csvContent.contains("count=3,"));  
-    Assert.assertTrue(csvContent.contains("avg=120,"));
-    Assert.assertTrue(csvContent.contains("max=140,"));
-    Assert.assertTrue(csvContent.contains("sum=360,"));
-    Assert.assertTrue(csvContent.contains("dur=0,"));
+    Assert.assertTrue(csvContent.contains(",org.test.TimedFoo.doStuff,"));
+    Assert.assertTrue(csvContent.contains(",count=3,"));
+    Assert.assertTrue(csvContent.contains(",avg=120,"));
+    Assert.assertTrue(csvContent.contains(",max=140,"));
+    Assert.assertTrue(csvContent.contains(",sum=360,"));
+    Assert.assertTrue(csvContent.contains(",dur=0"));
     
-    Assert.assertTrue(csvContent.contains("err.count=2,"));  
-    Assert.assertTrue(csvContent.contains("err.avg=210,"));
-    Assert.assertTrue(csvContent.contains("err.max=220,"));
-    Assert.assertTrue(csvContent.contains("err.sum=420,"));
-    Assert.assertTrue(csvContent.contains("err.dur=0,"));
+    Assert.assertTrue(csvContent.contains(",err.count=2,"));
+    Assert.assertTrue(csvContent.contains(",err.avg=210,"));
+    Assert.assertTrue(csvContent.contains(",err.max=220,"));
+    Assert.assertTrue(csvContent.contains(",err.sum=420,"));
+    Assert.assertTrue(csvContent.contains(",err.dur=0"));
     
   }
 
@@ -115,7 +115,7 @@ public class CsvWriteVisitorTest {
   public void testBucketTimedMetricFull() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
     
     BucketTimedMetric metric = createBucketTimedMetricFull();
     
@@ -128,22 +128,22 @@ public class CsvWriteVisitorTest {
     // 11:53:58, org.test.BucketTimedFoo.doStuff-0-150, count=3,           avg=120000,        max=140000,        sum=360000,        dur=0,             err.count=0,
     // 11:53:58, org.test.BucketTimedFoo.doStuff-150+, count=2,           avg=210000,        max=220000,        sum=420000,        dur=0,             err.count=0,
 
-    Assert.assertTrue(lines[0].contains("org.test.BucketTimedFoo.doStuff-0-150,"));
-    Assert.assertTrue(lines[0].contains("count=3,"));  
-    Assert.assertTrue(lines[0].contains("avg=120000,"));
-    Assert.assertTrue(lines[0].contains("max=140000,"));
-    Assert.assertTrue(lines[0].contains("sum=360000,"));
-    Assert.assertTrue(lines[0].contains("dur=0,"));
-    Assert.assertTrue(lines[0].contains("err.count=0,"));
+    Assert.assertTrue(lines[0].contains(",org.test.BucketTimedFoo.doStuff-0-150"));
+    Assert.assertTrue(lines[0].contains(",count=3,"));
+    Assert.assertTrue(lines[0].contains(",avg=120000,"));
+    Assert.assertTrue(lines[0].contains(",max=140000,"));
+    Assert.assertTrue(lines[0].contains(",sum=360000,"));
+    Assert.assertTrue(lines[0].contains(",dur=0,"));
+    Assert.assertTrue(lines[0].contains(",err.count=0"));
 
 
-    Assert.assertTrue(lines[1].contains("org.test.BucketTimedFoo.doStuff-150+,"));
-    Assert.assertTrue(lines[1].contains("count=2,"));
-    Assert.assertTrue(lines[1].contains("avg=210000,"));
-    Assert.assertTrue(lines[1].contains("max=220000,"));
-    Assert.assertTrue(lines[1].contains("sum=420000,"));
-    Assert.assertTrue(lines[1].contains("dur=0,"));
-    Assert.assertTrue(lines[1].contains("err.count=0,"));
+    Assert.assertTrue(lines[1].contains(",org.test.BucketTimedFoo.doStuff-150+"));
+    Assert.assertTrue(lines[1].contains(",count=2,"));
+    Assert.assertTrue(lines[1].contains(",avg=210000,"));
+    Assert.assertTrue(lines[1].contains(",max=220000,"));
+    Assert.assertTrue(lines[1].contains(",sum=420000,"));
+    Assert.assertTrue(lines[1].contains(",dur=0,"));
+    Assert.assertTrue(lines[1].contains(",err.count=0"));
 
   }
 
@@ -154,7 +154,7 @@ public class CsvWriteVisitorTest {
   public void testBucketTimedMetricPartial() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00");
+    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
       
 
     BucketTimedMetric metric = createBucketTimedMetricPartial();
@@ -169,30 +169,30 @@ public class CsvWriteVisitorTest {
     // 11:57:58, org.test.BucketTimedFoo.doStuff-150-300, count=0,           err.count=0,
     // 11:57:58, org.test.BucketTimedFoo.doStuff-300+, count=0,           err.count=0,
 
-    Assert.assertTrue(lines[0].contains("org.test.BucketTimedFoo.doStuff-0-150,"));
-    Assert.assertTrue(lines[0].contains("count=3,"));
-    Assert.assertTrue(lines[0].contains("avg=120000,"));
-    Assert.assertTrue(lines[0].contains("max=140000,"));
-    Assert.assertTrue(lines[0].contains("sum=360000,"));
-    Assert.assertTrue(lines[0].contains("dur=0,"));
-    Assert.assertTrue(lines[0].contains("err.count=0,"));
+    Assert.assertTrue(lines[0].contains(",org.test.BucketTimedFoo.doStuff-0-150,"));
+    Assert.assertTrue(lines[0].contains(",count=3,"));
+    Assert.assertTrue(lines[0].contains(",avg=120000,"));
+    Assert.assertTrue(lines[0].contains(",max=140000,"));
+    Assert.assertTrue(lines[0].contains(",sum=360000,"));
+    Assert.assertTrue(lines[0].contains(",dur=0,"));
+    Assert.assertTrue(lines[0].contains(",err.count=0"));
 
 
-    Assert.assertTrue(lines[1].contains("org.test.BucketTimedFoo.doStuff-150-300,"));
-    Assert.assertTrue(lines[1].contains("count=0,"));
-    Assert.assertFalse(lines[1].contains("avg="));
-    Assert.assertFalse(lines[1].contains("max="));
-    Assert.assertFalse(lines[1].contains("sum="));
-    Assert.assertFalse(lines[1].contains("dur="));
-    Assert.assertTrue(lines[1].contains("err.count=0,"));
+    Assert.assertTrue(lines[1].contains(",org.test.BucketTimedFoo.doStuff-150-300,"));
+    Assert.assertTrue(lines[1].contains(",count=0,"));
+    Assert.assertFalse(lines[1].contains(",avg="));
+    Assert.assertFalse(lines[1].contains(",max="));
+    Assert.assertFalse(lines[1].contains(",sum="));
+    Assert.assertFalse(lines[1].contains(",dur="));
+    Assert.assertTrue(lines[1].contains(",err.count=0"));
 
-    Assert.assertTrue(lines[2].contains("org.test.BucketTimedFoo.doStuff-300+,"));
-    Assert.assertTrue(lines[2].contains("count=0,"));
-    Assert.assertFalse(lines[2].contains("avg="));
-    Assert.assertFalse(lines[2].contains("max="));
-    Assert.assertFalse(lines[2].contains("sum="));
-    Assert.assertFalse(lines[2].contains("dur="));
-    Assert.assertTrue(lines[2].contains("err.count=0,"));
+    Assert.assertTrue(lines[2].contains(",org.test.BucketTimedFoo.doStuff-300+,"));
+    Assert.assertTrue(lines[2].contains(",count=0,"));
+    Assert.assertFalse(lines[2].contains(",avg="));
+    Assert.assertFalse(lines[2].contains(",max="));
+    Assert.assertFalse(lines[2].contains(",sum="));
+    Assert.assertFalse(lines[2].contains(",dur="));
+    Assert.assertTrue(lines[2].contains(",err.count=0"));
   }
   
   
@@ -259,8 +259,7 @@ public class CsvWriteVisitorTest {
   }
 
   /**
-   * Create a BucketTimedMetric with some buckets completely empty
-   * @return
+   * Create a BucketTimedMetric with some buckets completely empty.
    */
   private BucketTimedMetric createBucketTimedMetricPartial() {
       
@@ -272,7 +271,7 @@ public class CsvWriteVisitorTest {
     metric.addEventDuration(true, 120 * NANOS_TO_MILLIS); // 120 millis
     metric.addEventDuration(true, 140 * NANOS_TO_MILLIS);
       
-    // Not puting in values > 150 millis so last 2 buckets are empty
+    // Not putting in values > 150 millis so last 2 buckets are empty
       
     metric.collectStatistics();
     return metric;

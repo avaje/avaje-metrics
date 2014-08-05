@@ -71,24 +71,14 @@ public class CsvWriteVisitor implements MetricVisitor {
   protected final int decimalPlaces;
 
   /**
-   * Padding defined for the metric names.
-   */
-  protected final int nameWidth;
-
-  /**
-   * Padding defined for the column name=value pairs.
-   */
-  protected final int columnWidth;
-
-  /**
    * Prefix between delimiters.
    */
-  protected final String delimitPrefix;
+  protected final String delimiter;
 
   /**
    * Suffix between delimiters.
    */
-  protected final String delimitSuffix;
+  protected final String endOfLine;
 
   /**
    * The writer that we are writing to.
@@ -96,34 +86,43 @@ public class CsvWriteVisitor implements MetricVisitor {
   protected final Writer writer;
 
   /**
-   * Set to true when reporting error metrics (to get the "err." prefix on the metric name). 
+   * Set to true when reporting error metrics (to get the "err." prefix on the metric name).
    */
   protected boolean errors;
 
-
   /**
-   * Construct with some whitespace padding for metric names and columns.
+   * Construct with a comma delimiter and newline character for the end of each metric.
+   *
+   * @param writer               The writer where the metrics output is written to.
+   * @param collectTimeFormatted The time the metrics were collected. Typically in HH:mm:ss format.
+   * @param decimalPlaces        The number of decimal places to format double values. Typically 2.
    */
-  public CsvWriteVisitor(Writer writer, String timeNowFormat) {
-    this(writer, timeNowFormat, 45, 16, 2, "", ", ");
+  public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces) {
+    this(writer, collectTimeFormatted, decimalPlaces, ",", "\n");
   }
 
   /**
    * Construct with all the format options.
+   *
+   * @param writer               The writer where the metrics output is written to.
+   * @param collectTimeFormatted The time the metrics were collected. Typically in HH:mm:ss format.
+   * @param decimalPlaces        The number of decimal places to format double values. Typically 2.
+   * @param delimiter            The delimiter string that prefixes each column.
+   * @param endOfLine            The character appended after each metric has been output. Typically the newline character.
    */
-  public CsvWriteVisitor(Writer writer, String collectTime, int nameWidth, int columnWidth, int decimalPlaces,
-      String delimitPrefix, String delimitSuffix) {
-    
+  public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces, String delimiter, String endOfLine) {
+
     this.collectTime = System.currentTimeMillis();
     this.writer = writer;
-    this.collectTimeFormatted = collectTime;
+    this.collectTimeFormatted = collectTimeFormatted;
     this.decimalPlaces = decimalPlaces;
-    this.nameWidth = nameWidth;
-    this.columnWidth = columnWidth;
-    this.delimitPrefix = "";
-    this.delimitSuffix = ", ";
+    this.delimiter = delimiter;
+    this.endOfLine = endOfLine;
   }
 
+  /**
+   * Write the metrics out in CSV format.
+   */
   public void write(ReportMetrics reportMetrics) throws IOException {
 
     for (Metric metric : reportMetrics.getMetrics()) {
@@ -131,16 +130,17 @@ public class CsvWriteVisitor implements MetricVisitor {
     }
   }
 
-  protected void writeMetricName(Metric metric, String type) throws IOException {
-    writer.write(getNowString());
-    writer.write(delimitSuffix);
-    writer.write(type);
-    writer.write(delimitSuffix);
-    writeWithPadding(metric.getName().getSimpleName(), nameWidth);
+  protected void writeMetricName(Metric metric, String metricTypeCode) throws IOException {
+
+    writer.write(collectTimeFormatted);
+    writer.write(delimiter);
+    writer.write(metricTypeCode);
+    writer.write(delimiter);
+    writer.write(metric.getName().getSimpleName());
   }
 
   protected void writeMetricEnd(Metric metric) throws IOException {
-    writer.write("\n");
+    writer.write(endOfLine);
   }
 
   @Override
@@ -199,10 +199,6 @@ public class CsvWriteVisitor implements MetricVisitor {
     writeMetricEnd(metric);
   }
 
-  public String formattedValue(double value) {
-    return NumFormat.dp(decimalPlaces, value);
-  }
-
   @Override
   public void visit(GaugeLongMetric metric) throws IOException {
 
@@ -226,28 +222,32 @@ public class CsvWriteVisitor implements MetricVisitor {
 
     // valueStats will be null for a BucketTimedMetric with an empty TimedMetric bucket
     long count = (valueStats == null) ? 0 : valueStats.getCount();
-    write(prefix, "count", count);
+    writePrefix(prefix, "count", count);
     if (count == 0) {
       return;
     }
-    write(prefix, "avg", valueStats.getMean());
-    write(prefix, "max", valueStats.getMax());
-    write(prefix, "sum", valueStats.getTotal());
-    write(prefix, "dur", getDuration(valueStats.getStartTime()));
+    writePrefix(prefix, "avg", valueStats.getMean());
+    writePrefix(prefix, "max", valueStats.getMax());
+    writePrefix(prefix, "sum", valueStats.getTotal());
+    writePrefix(prefix, "dur", getDuration(valueStats.getStartTime()));
   }
 
-  protected void write(String prefix, String name, long value) throws IOException {
-    writePrefix(prefix);
-    write(name, value);
+  protected void writePrefix(String prefix, String name, long value) throws IOException {
+    writePrefix(prefix, name, String.valueOf(value));
   }
 
-  protected void writePrefix(String prefix) throws IOException {
+  protected void writePrefix(String prefix, String name, String value) throws IOException {
+
+    writer.write(delimiter);
     if (errors) {
       writer.write("err.");
     }
     if (!prefix.isEmpty()) {
       writer.write(prefix);
     }
+    writer.write(name);
+    writer.write("=");
+    writer.write(value);
   }
 
   protected void write(String name, long value) throws IOException {
@@ -256,32 +256,17 @@ public class CsvWriteVisitor implements MetricVisitor {
 
   protected void write(String name, String value) throws IOException {
 
+    writer.write(delimiter);
     writer.write(name);
     writer.write("=");
-    writeWithPadding(value, columnWidth - name.length());
-  }
-
-  protected void writeWithPadding(String text, int padTo) throws IOException {
-    writer.write(text);
-    writer.write(delimitSuffix);
-    writePadding(text, padTo);
-  }
-
-  protected void writePadding(String text, int padTo) throws IOException {
-    int extra = padTo - text.length();
-    if (extra > 0) {
-      for (int i = 0; i < extra; i++) {
-        writer.write(" ");
-      }
-    }
-  }
-
-  protected String getNowString() {
-    return collectTimeFormatted;
+    writer.write(value);
   }
 
   protected long getDuration(long startTime) {
     return Math.round((collectTime - startTime) / 1000d);
   }
 
+  protected String formattedValue(double value) {
+    return NumFormat.dp(decimalPlaces, value);
+  }
 }
