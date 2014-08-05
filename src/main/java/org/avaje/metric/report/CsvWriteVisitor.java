@@ -98,7 +98,7 @@ public class CsvWriteVisitor implements MetricVisitor {
    * @param decimalPlaces        The number of decimal places to format double values. Typically 2.
    */
   public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces) {
-    this(writer, collectTimeFormatted, decimalPlaces, ",", "\n");
+    this(writer, collectTimeFormatted, decimalPlaces, ", ", "\n");
   }
 
   /**

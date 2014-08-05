@@ -24,13 +24,12 @@ public class CsvWriteVisitorTest {
   
   private static long NANOS_TO_MILLIS = 1000000L;
 
-    
   
   @Test
   public void testCounter() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
+    CsvWriteVisitor csvVisitor = createVisitor(writer);
     
     CounterMetric counter = createCounterMetric();
     
@@ -42,12 +41,17 @@ public class CsvWriteVisitorTest {
     Assert.assertTrue(counterCsv.contains(",dur=0"));
   }
 
+
+  private CsvWriteVisitor createVisitor(StringWriter writer) {
+    return new CsvWriteVisitor(writer, "10:00:00", 2, ",", "\n");
+  }
+
   
   @Test
   public void testGaugeMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
+    CsvWriteVisitor csvVisitor = createVisitor(writer);
 
     GaugeDoubleMetric metric = createGaugeMetric();
     
@@ -62,7 +66,7 @@ public class CsvWriteVisitorTest {
   public void testValueMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
+    CsvWriteVisitor csvVisitor = createVisitor(writer);
      
     ValueMetric metric = createValueMetric();
     
@@ -82,14 +86,12 @@ public class CsvWriteVisitorTest {
   public void testTimedMetric() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
+    CsvWriteVisitor csvVisitor = createVisitor(writer);
     
     TimedMetric metric = createTimedMetric();
     
     csvVisitor.visit(metric);
     String csvContent = writer.toString();
-    
-    
     
     // values converted into microseconds
     Assert.assertTrue(csvContent.contains(",org.test.TimedFoo.doStuff,"));
@@ -115,7 +117,7 @@ public class CsvWriteVisitorTest {
   public void testBucketTimedMetricFull() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
+    CsvWriteVisitor csvVisitor = createVisitor(writer);
     
     BucketTimedMetric metric = createBucketTimedMetricFull();
     
@@ -124,9 +126,6 @@ public class CsvWriteVisitorTest {
     
     String[] lines = csvContent.split("\n");
     Assert.assertEquals(2, lines.length);
-
-    // 11:53:58, org.test.BucketTimedFoo.doStuff-0-150, count=3,           avg=120000,        max=140000,        sum=360000,        dur=0,             err.count=0,
-    // 11:53:58, org.test.BucketTimedFoo.doStuff-150+, count=2,           avg=210000,        max=220000,        sum=420000,        dur=0,             err.count=0,
 
     Assert.assertTrue(lines[0].contains(",org.test.BucketTimedFoo.doStuff-0-150"));
     Assert.assertTrue(lines[0].contains(",count=3,"));
@@ -154,7 +153,7 @@ public class CsvWriteVisitorTest {
   public void testBucketTimedMetricPartial() throws IOException {
     
     StringWriter writer = new StringWriter();
-    CsvWriteVisitor csvVisitor = new CsvWriteVisitor(writer, "10:00:00", 2);
+    CsvWriteVisitor csvVisitor = createVisitor(writer);
       
 
     BucketTimedMetric metric = createBucketTimedMetricPartial();
@@ -164,10 +163,6 @@ public class CsvWriteVisitorTest {
 
     String[] lines = csvContent.split("\n");
     Assert.assertEquals(3, lines.length);
-
-    // 11:57:58, org.test.BucketTimedFoo.doStuff-0-150, count=3,           avg=120000,        max=140000,        sum=360000,        dur=0,             err.count=0,
-    // 11:57:58, org.test.BucketTimedFoo.doStuff-150-300, count=0,           err.count=0,
-    // 11:57:58, org.test.BucketTimedFoo.doStuff-300+, count=0,           err.count=0,
 
     Assert.assertTrue(lines[0].contains(",org.test.BucketTimedFoo.doStuff-0-150,"));
     Assert.assertTrue(lines[0].contains(",count=3,"));

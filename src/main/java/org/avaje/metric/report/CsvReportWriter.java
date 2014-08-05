@@ -25,7 +25,7 @@ public class CsvReportWriter implements ReportWriter {
    * Create as comma delimited with newline character at the end of each line.
    */
   public CsvReportWriter() {
-    this("HH:mm:ss", 2, ",", "\n");
+    this("HH:mm:ss", 2, ", ", "\n");
   }
 
   /**
