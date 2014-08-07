@@ -1,8 +1,6 @@
 # avaje-metric-core
 
-Please read the main documentation at:
-https://github.com/avaje-metric/avaje-metric-api
-
+Please read the main documentation at: http://avaje-metric.github.io
 
 # Maven dependency
 
@@ -10,7 +8,7 @@ https://github.com/avaje-metric/avaje-metric-api
     <dependency>
       <groupId>org.avaje.metric</groupId>
       <artifactId>avaje-metric-core</artifactId>
-      <version>3.3.1</version>
+      <version>3.5.0</version>
     </dependency>
 ```
 
