@@ -1,18 +1,15 @@
 package org.avaje.metric.report;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Writes the collected metrics to registered reporters.
@@ -31,7 +28,7 @@ public class MetricReportManager {
   /**
    * Timer used to periodically execute the metrics collection and reporting.
    */
-  protected final Timer timer;
+  protected final ScheduledExecutorService executor;
 
   /**
    * Frequency in seconds of which the reporting will execute.
@@ -53,62 +50,68 @@ public class MetricReportManager {
    * are collected for.
    */
   protected HeaderInfo headerInfo;
-  
+
   /**
    * Create specifying the reporting frequency and a reporter.
-   * <p>
+   * <p/>
    * This will create a Timer to execute the reporting periodically.
    */
   public MetricReportManager(int freqInSeconds, MetricReporter reporter) {
-    this(new Timer("MetricReporter", true), freqInSeconds, reporter, null);
+    this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, reporter, null);
   }
 
   /**
    * Create specifying a second reporter.
-   * <p>
+   * <p/>
    * Having 2 reporters can be useful if you want to store to a local file system and report the
    * metrics to a central repository.
    */
   public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
-    this(new Timer("MetricReporter", true), freqInSeconds, localReporter, remoteReporter);
+    this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, localReporter, remoteReporter);
   }
 
   /**
-   * Create specifying the Timer to use.
+   * Create specifying the ScheduledExecutorService to use.
    */
-  public MetricReportManager(Timer timer, int freqInSeconds, MetricReporter reporter) {
-    this(timer, freqInSeconds, reporter, null);
+  public MetricReportManager(ScheduledExecutorService executor, int freqInSeconds, MetricReporter reporter) {
+    this(executor, freqInSeconds, reporter, null);
   }
 
   /**
-   * Create specifying a Timer, reporting frequency and 2 reporters.
-   * <p>
+   * Create specifying a ScheduledExecutorService, reporting frequency and 2 reporters.
+   * <p/>
    * Having 2 reporters can be useful if you want to store to a local file system and report the
    * metrics to a central repository.
    */
-  public MetricReportManager(Timer timer, int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
+  public MetricReportManager(ScheduledExecutorService executor, int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
 
-    this.timer = timer;
+    this.executor = executor;
     this.localReporter = localReporter;
     this.remoteReporter = remoteReporter;
     this.freqInSeconds = freqInSeconds;
-    long freqMillis = freqInSeconds * 1000;
 
-    if (freqMillis > 0) {
-      // Create the Timer and schedule the WriteTask
-      this.timer.scheduleAtFixedRate(new WriteTask(), freqMillis, freqMillis);
+    if (freqInSeconds > 0) {
+      // Register the metrics collection task to run periodically
+      this.executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
+
   }
-  
+
   /**
    * Set the associated HeaderInfo.
+   * <p/>
+   * This is the server environment information that is common to all the metrics
+   * collected on this running instance.
    */
   public void setHeaderInfo(HeaderInfo headerInfo) {
     this.headerInfo = headerInfo;
   }
 
 
-  protected class WriteTask extends TimerTask {
+  /**
+   * Periodic task that collects and reports the metrics.
+   */
+  protected class WriteTask implements Runnable {
 
     int cleanupCounter;
 
@@ -131,7 +134,7 @@ public class MetricReportManager {
 
   /**
    * Perform periodic (defaults to every 8 hours) cleanup.
-   * <p>
+   * <p/>
    * This is used by file reporters to limit the number of metrics files held.
    */
   protected void periodicCleanUp() {
@@ -145,7 +148,7 @@ public class MetricReportManager {
 
   /**
    * Report all the metrics.
-   * <p>
+   * <p/>
    * This typically means appending the metrics to a file or sending over a network.
    */
   protected void reportMetrics() throws IOException {
@@ -154,9 +157,9 @@ public class MetricReportManager {
     List<Metric> metrics = collectMetrics();
 
     logger.trace("reporting [{}] metrics", metrics.size());
-    
+
     ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics);
-    
+
     report(reportMetrics, localReporter);
     report(reportMetrics, remoteReporter);
   }
@@ -165,6 +168,7 @@ public class MetricReportManager {
    * Collect all the non-empty metrics and return them for reporting.
    */
   protected List<Metric> collectMetrics() {
+
     List<Metric> metrics = sort(MetricManager.getJvmMetrics());
     List<Metric> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
     metrics.addAll(otherMetrics);
@@ -175,6 +179,7 @@ public class MetricReportManager {
    * Sort the metrics into name order.
    */
   protected List<Metric> sort(Collection<Metric> metrics) {
+
     ArrayList<Metric> ar = new ArrayList<Metric>(metrics);
     Collections.sort(ar, new NameComp());
     return ar;
