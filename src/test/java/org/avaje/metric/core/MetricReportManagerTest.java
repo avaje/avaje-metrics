@@ -12,9 +12,9 @@ public class MetricReportManagerTest {
   public void test_constructor() throws InterruptedException {
 
     FileReporter fileReporter = new FileReporter();
-    MetricReportManager mgr = new MetricReportManager(20, fileReporter);
+    MetricReportManager mgr = new MetricReportManager(2, fileReporter);
 
-    Thread.sleep(60*1000*5);
+    Thread.sleep(60*100*5);
 
     mgr.shutdown();
   }
