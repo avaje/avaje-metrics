@@ -39,7 +39,7 @@ public class FileReporter implements MetricReporter {
   /**
    * The format that is written to the file.
    */
-  protected ReportWriter reportWriter;
+  protected final ReportWriter reportWriter;
   
   /**
    * Create with the defaults for base directory, file name, numberOfFilesToKeep and CsvReportWriter.
@@ -84,13 +84,11 @@ public class FileReporter implements MetricReporter {
     this.enabled = isWriteToFile();
     
     logger.debug("enabled:{} directory:{} name:{} numberOfFilesToKeep:{}", enabled, baseDirectory, baseFileName, numberOfFilesToKeep);
-  }
-
-  /**
-   * Set the ReportWriter to use when writing the collected metrics.
-   */
-  public void setReportWriter(ReportWriter reportWriter) {
-    this.reportWriter = reportWriter;
+    if (enabled) {
+      String name = getFileName(this.baseFileName, new Date());
+      File file = new File(new File(this.baseDirectory), name);
+      logger.debug("... write to file: {}", file.getAbsolutePath());
+    }
   }
 
   /**
@@ -99,29 +97,23 @@ public class FileReporter implements MetricReporter {
   @Override
   public void report(ReportMetrics reportMetrics) {
 
-    if (!enabled || reportWriter == null) {
-      logger.debug("Not writing any metrics - disabled or reportWriter is not set");
+    if (!enabled) {
+      logger.debug("Not writing any metrics - disabled");
       return;
     }
     
     // Determine the file we should be writing to 
     String name = getFileName(baseFileName, new Date());
     File file = new File(new File(baseDirectory), name);
-    
-    if (logger.isTraceEnabled()) {
-      logger.trace("... write to file: {}", file.getAbsolutePath());
-    }
-    
-    FileOutput fo = new FileOutput(file);
-    try {
-      Writer writer = fo.getWriter();
-      reportWriter.write(writer, reportMetrics);
+    FileOutput fileOutput = new FileOutput(file);
 
+    try {
+      reportWriter.write(fileOutput.getWriter(), reportMetrics);
     } catch (Exception e) {
       logger.error("Error trying to write metrics to file", e);
       
     } finally {
-      fo.close();
+      fileOutput.close();
     }
   }
 
@@ -166,8 +158,8 @@ public class FileReporter implements MetricReporter {
       logger.debug("cleaning up [{}] old metrics files", delFileNames.length);
 
       if (delFileNames != null) {
-        for (int i = 0; i < delFileNames.length; i++) {
-          File f = new File(dir, delFileNames[i]);
+        for (String delFileName : delFileNames) {
+          File f = new File(dir, delFileName);
           if (f.exists()) {
             if (!f.delete()) {
               logger.warn("Unable to delete old metric file: {}", f.getAbsoluteFile());
@@ -228,7 +220,7 @@ public class FileReporter implements MetricReporter {
     if (baseFileName == null) {
       baseFileName = "metric";
     }
-    return baseFileName;
+    return baseFileName.trim();
   }
 
 
@@ -252,20 +244,19 @@ public class FileReporter implements MetricReporter {
    */
   class FileOutput {
 
-    Writer writer;
+    private Writer writer;
 
-    FileOutput(File f) {
-
-      File parentFile = f.getParentFile();
+    FileOutput(File file) {
+      File parentFile = file.getParentFile();
       if (parentFile != null && !parentFile.exists()) {
         if (!parentFile.mkdirs()) {
-          logger.warn("Was unable to make parent directories for file: "+f.getAbsolutePath());
+          logger.warn("Was unable to make parent directories for file: " + file.getAbsolutePath());
         }
       }
 
       try {
-        FileWriter fileWriter = new FileWriter(f, true);
-        writer = new BufferedWriter(fileWriter, 4096);
+        FileWriter fileWriter = new FileWriter(file, true);
+        writer = new BufferedWriter(fileWriter, 2048);
 
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -275,7 +266,7 @@ public class FileReporter implements MetricReporter {
     public Writer getWriter() {
       return writer;
     }
-
+    
     public void close() {
       try {
         writer.flush();
@@ -288,7 +279,6 @@ public class FileReporter implements MetricReporter {
         logger.error("Failed to close metric file writer", e);
       }
     }
-
 
   }
 

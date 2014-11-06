@@ -21,9 +21,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetricReportManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(MetricReportManager.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(MetricReportManager.class);
 
   private static final int EIGHT_HOURS = 60 * 60 * 8;
+
+  private static NameComp NAME_COMPARATOR = new NameComp();
 
   /**
    * Timer used to periodically execute the metrics collection and reporting.
@@ -57,7 +59,7 @@ public class MetricReportManager {
    * This will create a Timer to execute the reporting periodically.
    */
   public MetricReportManager(int freqInSeconds, MetricReporter reporter) {
-    this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, reporter, null);
+    this(freqInSeconds, reporter, null);
   }
 
   /**
@@ -68,13 +70,6 @@ public class MetricReportManager {
    */
   public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
     this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, localReporter, remoteReporter);
-  }
-
-  /**
-   * Create specifying the ScheduledExecutorService to use.
-   */
-  public MetricReportManager(ScheduledExecutorService executor, int freqInSeconds, MetricReporter reporter) {
-    this(executor, freqInSeconds, reporter, null);
   }
 
   /**
@@ -92,9 +87,15 @@ public class MetricReportManager {
 
     if (freqInSeconds > 0) {
       // Register the metrics collection task to run periodically
-      this.executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
+      executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
 
+  }
+
+  public void shutdown() {
+    if (executor != null) {
+      executor.shutdown();
+    }
   }
 
   /**
@@ -153,15 +154,29 @@ public class MetricReportManager {
    */
   protected void reportMetrics() throws IOException {
 
+    long startNanos = System.nanoTime();
     long collectionTime = System.currentTimeMillis();
+    
+    // collect all the 'non-empty' metrics 
     List<Metric> metrics = collectMetrics();
 
-    logger.trace("reporting [{}] metrics", metrics.size());
+    long collectNanos = System.nanoTime() - startNanos;
 
+    // report metrics locally and remotely as necessary
     ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics);
-
     report(reportMetrics, localReporter);
     report(reportMetrics, remoteReporter);
+
+    long reportNanos = System.nanoTime() - startNanos - collectNanos;
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("reported [{}] metrics - collectMicros:{} reportMicros:{}", metrics.size(), asMicros(collectNanos), asMicros(reportNanos));
+    }
+    
+  }
+
+  private long asMicros(long collectNanos) {
+    return TimeUnit.MICROSECONDS.convert(collectNanos, TimeUnit.NANOSECONDS);
   }
 
   /**
@@ -180,9 +195,9 @@ public class MetricReportManager {
    */
   protected List<Metric> sort(Collection<Metric> metrics) {
 
-    ArrayList<Metric> ar = new ArrayList<Metric>(metrics);
-    Collections.sort(ar, new NameComp());
-    return ar;
+    ArrayList<Metric> sortedList = new ArrayList<>(metrics);
+    Collections.sort(sortedList, NAME_COMPARATOR);
+    return sortedList;
   }
 
   /**
