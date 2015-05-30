@@ -176,9 +176,9 @@ public class TimedMetricTest {
     ValueStatistics collectedErrorStatistics = metric.getCollectedErrorStatistics();
 
     Assert.assertEquals(2, collectedSuccessStatistics.getCount());
-    Assert.assertTrue(collectedSuccessStatistics.getTotal() > 3000);
+    Assert.assertTrue(collectedSuccessStatistics.getTotal() >= 3000);
     Assert.assertEquals(1, collectedErrorStatistics.getCount());
-    Assert.assertTrue(collectedErrorStatistics.getTotal() > 5000);
+    Assert.assertTrue(collectedErrorStatistics.getTotal() >= 5000);
 
     Assert.assertEquals(0, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, metric.getSuccessStatistics(false).getTotal());
