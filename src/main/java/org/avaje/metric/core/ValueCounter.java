@@ -64,7 +64,7 @@ public class ValueCounter {
       return new DefaultValueStatistics(startTimeVal, countVal, totalVal, maxVal);
       
     } else {
-      return new DefaultValueStatistics(startTime.get(), count.sum(), total.sum(), max.maxThenReset());
+      return new DefaultValueStatistics(startTime.get(), count.sum(), total.sum(), max.max());
     }
   }
 

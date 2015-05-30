@@ -1,15 +1,38 @@
 package org.avaje.metric.core;
 
+import org.avaje.metric.ValueStatistics;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ValueCounterTest {
 
   @Test
+  public void testGetStatisticsWithNoReset() {
+
+    ValueCounter counter = new ValueCounter();
+    Assert.assertEquals(Long.MIN_VALUE, counter.getMax());
+
+    counter.add(100);
+
+    ValueStatistics statistics = counter.getStatistics(false);
+    Assert.assertEquals(1, statistics.getCount());
+    Assert.assertEquals(100, statistics.getTotal());
+    Assert.assertEquals(100, statistics.getMax());
+
+    counter.add(50);
+    // no activity, just get statistics again
+    statistics = counter.getStatistics(false);
+    Assert.assertEquals(2, statistics.getCount());
+    Assert.assertEquals(150, statistics.getTotal());
+    Assert.assertEquals(100, statistics.getMax());
+
+  }
+
+  @Test
   public void test() {
     
     ValueCounter counter = new ValueCounter();
-    
+
     Assert.assertEquals(0, counter.getCount());
     Assert.assertEquals(0, counter.getTotal());
     Assert.assertEquals(Long.MIN_VALUE, counter.getMax());
