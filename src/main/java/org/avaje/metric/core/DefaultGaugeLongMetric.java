@@ -44,13 +44,6 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
     this.gauge = gauge;
   }
   
-  /**
-   * Create as a non whole number and using group, type and name as the metric name.
-   */
-  public DefaultGaugeLongMetric(String group, String type, String name, GaugeLong gauge) {
-    this(new DefaultMetricName(group, type, name), gauge);
-  }
-  
   @Override
   public MetricName getName() {
     return name;

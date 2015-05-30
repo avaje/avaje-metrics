@@ -5,17 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class DefaultMetricNameTest {
-
-//  @Test
-//  public void testType() {
-//    
-//    MetricName name = new MetricName("log","t","error");
-//    
-//    Assert.assertNotNull(name);
-//    ObjectName mBeanObjectName = name.getMBeanObjectName();
-//    Assert.assertNotNull(mBeanObjectName);
-//    
-//  }
   
   @Test
   public void testParse() {
