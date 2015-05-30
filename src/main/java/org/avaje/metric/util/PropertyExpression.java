@@ -1,14 +1,15 @@
 package org.avaje.metric.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
- * Helper used to evaluate expressions such as ${CATALINA_HOME}.
+ * Helper used to evaluate expressions such as ${HOME}, ${CATALINA_HOME} etc.
  * <p>
  * The expressions can contain environment variables, system properties or JNDI
  * properties. JNDI expressions take the form ${jndi:propertyName} where you
@@ -18,7 +19,7 @@ import javax.naming.NamingException;
  */
 final class PropertyExpression {
 
-  private static final Logger logger = Logger.getLogger(PropertyExpression.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(PropertyExpression.class.getName());
 
   /**
    * Prefix for looking up JNDI Environment variable.
@@ -90,9 +91,7 @@ final class PropertyExpression {
     } else {
       // unable to evaluate yet... but maybe later based on the order
       // in which properties are being set/loaded. You can use
-      // GlobalProperties.evaluateExpressions() to get any unresolved
-      // expressions to be evaluated
-      logger.log(Level.FINE, "Unable to evaluate expression [" + exp + "]");
+      logger.debug("Unable to evaluate expression [{}]", exp);
       return null;
     }
   }
@@ -111,7 +110,7 @@ final class PropertyExpression {
   }
 
   private static void eval(String val, int startPos, StringBuilder sb, Properties map) {
-    
+
     if (startPos < val.length()) {
       int sp = val.indexOf(START, startPos);
       if (sp > -1) {
@@ -132,7 +131,7 @@ final class PropertyExpression {
   }
 
   private static String evalExpression(String val, int sp, int ep, Properties map) {
-    
+
     // trim off start and end ${ and }
     String exp = val.substring(sp + START.length(), ep);
 
@@ -147,20 +146,13 @@ final class PropertyExpression {
   }
 
   private static boolean isJndiExpression(String exp) {
-    if (exp.startsWith("JNDI:")) {
-      return true;
-    }
-    if (exp.startsWith("jndi:")) {
-      return true;
-    }
-    return false;
+    return exp.startsWith("JNDI:") || exp.startsWith("jndi:");
   }
 
   /**
    * Returns null if JNDI is not setup or if the property is not found.
-   * 
-   * @param key
-   *          the key of the JNDI Environment property including a JNDI: prefix.
+   *
+   * @param key the key of the JNDI Environment property including a JNDI: prefix.
    */
   private static String getJndiProperty(String key) {
 
