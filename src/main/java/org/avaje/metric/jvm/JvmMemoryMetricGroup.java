@@ -17,7 +17,7 @@ public final class JvmMemoryMetricGroup {
   /**
    * Helper interface for Heap and NonHeap MemorySource.
    */
-  static interface MemoryUsageSource {
+  interface MemoryUsageSource {
     MemoryUsage getUsage();
   }
   
@@ -47,7 +47,7 @@ public final class JvmMemoryMetricGroup {
     }
   }
   
-  private static final String[] names = {"pct","init","used","committed","max"};
+  private static final String[] names = {"init","used","committed","max","pct"};
   
   private static final double MEGABYTES = 1024*1024;
   
@@ -106,12 +106,22 @@ public final class JvmMemoryMetricGroup {
     }
     
     private GaugeDouble[] createGauges(MemoryUsageSource source) {
-      GaugeDouble[] ga = new GaugeDouble[5];
-      ga[0] = new Pct(source);
-      ga[1] = new Init(source);
-      ga[2] = new Used(source);
-      ga[3] = new Committed(source);
-      ga[4] = new Max(source);
+
+      // JRE 8 is not reporting max for non-heap memory
+      boolean hasMax = (source.getUsage().getMax() > 0);
+
+      int gaugeCount = hasMax ? 5 : 3;
+      GaugeDouble[] ga = new GaugeDouble[gaugeCount];
+      // we always collect Init, Used and Committed
+      ga[0] = new Init(source);
+      ga[1] = new Used(source);
+      ga[2] = new Committed(source);
+
+      if (hasMax) {
+        // also collect Max and Percentage
+        ga[3] = new Max(source);
+        ga[4] = new Pct(source);
+      }
       return ga;
     }
   
@@ -168,7 +178,7 @@ public final class JvmMemoryMetricGroup {
       @Override
       public double getValue() {
         MemoryUsage memoryUsage = source.getUsage();
-        return 100* memoryUsage.getUsed() / memoryUsage.getMax() ;
+        return 100 *  memoryUsage.getUsed() / memoryUsage.getMax() ;
       }
     }
   }
