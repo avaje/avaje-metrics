@@ -107,6 +107,27 @@ public final class DefaultTimedMetric implements TimedMetric {
   }
 
   /**
+   * Return true if this TimedMetric has been pushed onto an active context for this thread.
+   * <p>
+   * This means that the current thread is actively collecting timing entries and this metric
+   * has been pushed onto the nested context.
+   * </p>
+   */
+  @Override
+  public boolean isActiveThreadContext() {
+
+    if (requestTiming) {
+      // explicitly turned on for this metric
+      NestedContext.push(this);
+      return true;
+
+    } else {
+      // on if there is an active nested context
+      return NestedContext.pushIfActive(this);
+    }
+  }
+
+  /**
    * Start an event.
    * <p>
    * The {@link TimedEvent#endWithSuccess()} or {@link TimedEvent#endWithError()} are called at the
@@ -147,9 +168,12 @@ public final class DefaultTimedMetric implements TimedMetric {
    * enhanced code and not general use.
    */
   @Override
-  public void operationEnd(int opCode, long startNanos, boolean useContext) {
+  public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
     // OpCodes.ATHROW = 191
     addEventSince(opCode != 191, startNanos);
+    if (activeThreadContext) {
+      NestedContext.pop();
+    }
   }
 
 }

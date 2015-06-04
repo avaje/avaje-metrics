@@ -17,7 +17,7 @@ public class TimedMetricTest {
 
   public void add() {
 
-    boolean requestTiming = _metric.isRequestTiming();
+    boolean requestTiming = _metric.isActiveThreadContext();
     long start = System.nanoTime();
 
     _metric.operationEnd(13, start, requestTiming);
@@ -29,7 +29,7 @@ public class TimedMetricTest {
     
     TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed");
 
-    boolean useContext = metric.isRequestTiming();
+    boolean useContext = metric.isActiveThreadContext();
     long start = System.nanoTime();
 
     metric.operationEnd(13, start, useContext);

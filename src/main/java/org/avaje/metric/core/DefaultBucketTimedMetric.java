@@ -82,9 +82,33 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
     return requestTiming;
   }
 
+  /**
+   * Return true if this TimedMetric has been pushed onto an active context for this thread.
+   * <p>
+   * This means that the current thread is actively collecting timing entries and this metric
+   * has been pushed onto the nested context.
+   * </p>
+   */
   @Override
-  public void operationEnd(int opCode, long startNanos, boolean useContext) {
+  public boolean isActiveThreadContext() {
+
+    if (requestTiming) {
+      // explicitly turned on for this metric
+      NestedContext.push(this);
+      return true;
+
+    } else {
+      // on if there is an active nested context
+      return NestedContext.pushIfActive(this);
+    }
+  }
+
+  @Override
+  public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
     addEventSince(opCode != OPCODE_ATHROW, startNanos);
+    if (activeThreadContext) {
+      NestedContext.pop();
+    }
   }
 
   @Override

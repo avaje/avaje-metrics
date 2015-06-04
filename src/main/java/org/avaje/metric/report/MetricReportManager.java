@@ -2,6 +2,7 @@ package org.avaje.metric.report;
 
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
+import org.avaje.metric.RequestTiming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,8 @@ public class MetricReportManager {
    */
   protected final MetricReporter remoteReporter;
 
+  protected final RequestTimingReporter requestTimingReporter;
+
   /**
    * The headerInfo which identifies the application, environment and server etc that these metrics
    * are collected for.
@@ -85,10 +88,14 @@ public class MetricReportManager {
     this.remoteReporter = remoteReporter;
     this.freqInSeconds = freqInSeconds;
 
+    this.requestTimingReporter = new RequestFileReporter();
+
     if (freqInSeconds > 0) {
       // Register the metrics collection task to run periodically
       executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
+
+    executor.scheduleAtFixedRate(new WriteRequestTimings(), 5, 5, TimeUnit.SECONDS);
 
   }
 
@@ -108,6 +115,18 @@ public class MetricReportManager {
     this.headerInfo = headerInfo;
   }
 
+
+  protected class WriteRequestTimings implements Runnable {
+
+    public void run() {
+      reportRequestTimings();
+    }
+  }
+
+  private void reportRequestTimings() {
+
+    requestTimingReporter.report(MetricManager.collectRequestTimings());
+  }
 
   /**
    * Periodic task that collects and reports the metrics.

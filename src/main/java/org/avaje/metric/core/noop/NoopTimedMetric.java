@@ -84,8 +84,13 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos, boolean useContext) {
+  public boolean isActiveThreadContext() {
+    return false;
+  }
+
+  @Override
+  public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
     // do nothing    
   }
-  
+
 }

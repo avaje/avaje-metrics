@@ -80,4 +80,9 @@ public class NoopBucketTimedMetric implements BucketTimedMetric {
   public boolean isRequestTiming() {
     return false;
   }
+
+  @Override
+  public boolean isActiveThreadContext() {
+    return false;
+  }
 }

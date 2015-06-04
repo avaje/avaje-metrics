@@ -14,6 +14,7 @@ import org.avaje.metric.util.PropertiesLoader;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Default implementation of the PluginMetricManager.
@@ -66,6 +67,8 @@ public class DefaultMetricManager implements PluginMetricManager {
    */
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
 
+  private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
+
   /**
    * Set to true if collection should be disabled.
    */
@@ -103,14 +106,9 @@ public class DefaultMetricManager implements PluginMetricManager {
     return "true".equalsIgnoreCase(disable);
   }
 
-  public void reportTiming(List<RequestTimingEntry> timingEntryList) {
+  public void reportTiming(RequestTiming requestTiming) {
 
-    System.out.println("---");
-    for (RequestTimingEntry timingEntry : timingEntryList) {
-      System.out.println(timingEntry);
-    }
-    System.out.println("---");
-
+    requestTimings.add(requestTiming);
   }
 
 
@@ -272,6 +270,19 @@ public class DefaultMetricManager implements PluginMetricManager {
     synchronized (monitor) {
       metricsCache.clear();
     }
+  }
+
+  /**
+   * Return the request timings that have been collected since the last collection.
+   */
+  public List<RequestTiming> collectRequestTimings() {
+
+    List<RequestTiming> list = new ArrayList<>();
+    RequestTiming req;
+    while ((req = requestTimings.poll()) != null) {
+      list.add(req);
+    }
+    return list;
   }
 
   @Override

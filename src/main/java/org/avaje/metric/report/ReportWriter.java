@@ -15,6 +15,6 @@ public interface ReportWriter {
   /**
    * Write the collected metrics in the appropriate format to the writer.
    */
-  public void write(Writer writer, ReportMetrics reportMetrics) throws IOException;
+  void write(Writer writer, ReportMetrics reportMetrics) throws IOException;
 
 }
