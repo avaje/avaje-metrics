@@ -22,7 +22,9 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   private final TimedMetric[] buckets;
   
   private final int lastBucketIndex;
-  
+
+  private boolean requestTiming;
+
   public DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
     this.metricName = metricName;
     this.bucketRanges = bucketRanges;
@@ -71,7 +73,17 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos) {
+  public void setRequestTiming(boolean requestTiming) {
+    this.requestTiming = requestTiming;
+  }
+
+  @Override
+  public boolean isRequestTiming() {
+    return requestTiming;
+  }
+
+  @Override
+  public void operationEnd(int opCode, long startNanos, boolean useContext) {
     addEventSince(opCode != OPCODE_ATHROW, startNanos);
   }
 

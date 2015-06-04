@@ -1,25 +1,6 @@
 package org.avaje.metric.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.avaje.metric.BucketTimedMetric;
-import org.avaje.metric.CounterMetric;
-import org.avaje.metric.GaugeDouble;
-import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.GaugeLong;
-import org.avaje.metric.GaugeLongGroup;
-import org.avaje.metric.GaugeLongMetric;
-import org.avaje.metric.Metric;
-import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricNameCache;
-import org.avaje.metric.TimedMetric;
-import org.avaje.metric.TimedMetricGroup;
-import org.avaje.metric.ValueMetric;
+import org.avaje.metric.*;
 import org.avaje.metric.core.noop.NoopBucketTimedFactory;
 import org.avaje.metric.core.noop.NoopCounterMetricFactory;
 import org.avaje.metric.core.noop.NoopTimedMetricFactory;
@@ -30,6 +11,9 @@ import org.avaje.metric.jvm.JvmSystemMetricGroup;
 import org.avaje.metric.jvm.JvmThreadMetricGroup;
 import org.avaje.metric.spi.PluginMetricManager;
 import org.avaje.metric.util.PropertiesLoader;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default implementation of the PluginMetricManager.
@@ -118,7 +102,18 @@ public class DefaultMetricManager implements PluginMetricManager {
 
     return "true".equalsIgnoreCase(disable);
   }
-  
+
+  public void reportTiming(List<RequestTimingEntry> timingEntryList) {
+
+    System.out.println("---");
+    for (RequestTimingEntry timingEntry : timingEntryList) {
+      System.out.println(timingEntry);
+    }
+    System.out.println("---");
+
+  }
+
+
   /**
    * Return the factory used to create TimedMetric instances.
    */

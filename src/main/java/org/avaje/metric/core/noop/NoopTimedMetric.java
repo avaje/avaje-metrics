@@ -59,6 +59,16 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
+  public void setRequestTiming(boolean requestTiming) {
+    // do nothing
+  }
+
+  @Override
+  public boolean isRequestTiming() {
+    return false;
+  }
+
+  @Override
   public TimedEvent startEvent() {
     return NOOP_TIMED_EVENT;
   }
@@ -74,7 +84,7 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos) {
+  public void operationEnd(int opCode, long startNanos, boolean useContext) {
     // do nothing    
   }
   

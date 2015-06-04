@@ -28,6 +28,8 @@ public final class DefaultTimedMetric implements TimedMetric {
 
   private ValueStatistics collectedErrorStatistics;
 
+  private boolean requestTiming;
+
   public DefaultTimedMetric(MetricName name) {
     this.name = name;
   }
@@ -94,6 +96,16 @@ public final class DefaultTimedMetric implements TimedMetric {
     return name;
   }
 
+  @Override
+  public void setRequestTiming(boolean requestTiming) {
+    this.requestTiming = requestTiming;
+  }
+
+  @Override
+  public boolean isRequestTiming() {
+    return requestTiming;
+  }
+
   /**
    * Start an event.
    * <p>
@@ -135,7 +147,7 @@ public final class DefaultTimedMetric implements TimedMetric {
    * enhanced code and not general use.
    */
   @Override
-  public void operationEnd(int opCode, long startNanos) {
+  public void operationEnd(int opCode, long startNanos, boolean useContext) {
     // OpCodes.ATHROW = 191
     addEventSince(opCode != 191, startNanos);
   }

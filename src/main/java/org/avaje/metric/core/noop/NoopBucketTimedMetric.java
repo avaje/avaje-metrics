@@ -67,8 +67,17 @@ public class NoopBucketTimedMetric implements BucketTimedMetric {
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos) {
+  public void operationEnd(int opCode, long startNanos, boolean useContext) {
     // do nothing
   }
 
+  @Override
+  public void setRequestTiming(boolean requestTiming) {
+    // do nothing
+  }
+
+  @Override
+  public boolean isRequestTiming() {
+    return false;
+  }
 }

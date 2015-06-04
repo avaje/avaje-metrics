@@ -8,7 +8,9 @@ public class DisableCollectionTest {
 
   @Test
   public void test() {
-    
+
+    boolean useContext = false;
+
     System.clearProperty(DefaultMetricManager.METRICS_COLLECTION_DISABLE);
     DefaultMetricManager mgr = new DefaultMetricManager();
     Assert.assertFalse(mgr.disable);
@@ -26,8 +28,8 @@ public class DisableCollectionTest {
     timedMetric.addEventDuration(false, 1000000);
     timedMetric.addEventDuration(true, 1000000);
     timedMetric.addEventSince(true, 1000000);
-    timedMetric.operationEnd(1000000, 100);
-    timedMetric.operationEnd(1000000, 191);
+    timedMetric.operationEnd(1000000, 100, useContext);
+    timedMetric.operationEnd(1000000, 191, useContext);
     
     Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());

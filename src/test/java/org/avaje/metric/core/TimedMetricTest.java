@@ -11,11 +11,29 @@ import org.junit.Test;
 
 public class TimedMetricTest {
 
+  boolean useContext = false;
+
+  TimedMetric _metric = MetricManager.getTimedMetric("org.test.mytimed");
+
+  public void add() {
+
+    boolean requestTiming = _metric.isRequestTiming();
+    long start = System.nanoTime();
+
+    _metric.operationEnd(13, start, requestTiming);
+
+  }
+
   @Test
   public void addEventDuration() {
     
     TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed");
-    
+
+    boolean useContext = metric.isRequestTiming();
+    long start = System.nanoTime();
+
+    metric.operationEnd(13, start, useContext);
+
     Assert.assertEquals("org",metric.getName().getGroup());
     Assert.assertEquals("test",metric.getName().getType());
     Assert.assertEquals("mytimed",metric.getName().getName());
@@ -155,16 +173,16 @@ public class TimedMetricTest {
     int SUCCESS_OPCODE = 1;
     int ERROR_OPCODE = 191;
     
-    metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(1000));
+    metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(1000), useContext);
     Assert.assertEquals(1, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
     
-    metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(2000));
+    metric.operationEnd(SUCCESS_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(2000), useContext);
     Assert.assertEquals(2, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getCount());
     Assert.assertEquals(0, metric.getErrorStatistics(false).getTotal());
 
-    metric.operationEnd(ERROR_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(5000));
+    metric.operationEnd(ERROR_OPCODE, System.nanoTime() - TimeUnit.MICROSECONDS.toNanos(5000), useContext);
     Assert.assertEquals(2, metric.getSuccessStatistics(false).getCount());
     Assert.assertEquals(1, metric.getErrorStatistics(false).getCount());
 
