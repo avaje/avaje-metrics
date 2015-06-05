@@ -22,7 +22,7 @@ public class BaseTimingEntry implements RequestTimingEntry {
     this.startNanos = startNanos;
   }
 
-  long setEndNanos(long endNanos) {
+  public long setEndNanos(long endNanos) {
     this.endNanos = endNanos;
     return endNanos - startNanos;
   }

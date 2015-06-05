@@ -48,6 +48,9 @@ public class MetricReportManager {
    */
   protected final MetricReporter remoteReporter;
 
+  /**
+   * Optional reporter for request timings.
+   */
   protected final RequestTimingReporter requestTimingReporter;
 
   /**
@@ -72,23 +75,28 @@ public class MetricReportManager {
    * metrics to a central repository.
    */
   public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
-    this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, localReporter, remoteReporter);
+    this(freqInSeconds, localReporter, remoteReporter, new RequestFileReporter());
+  }
+  
+  /**
+   * Create specifying a reporting frequency and 2 reporters for metrics and a reporter for request timings.
+   * <p/>
+   */
+  public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter, RequestTimingReporter requestTimingReporter) {
+    this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, localReporter, remoteReporter, requestTimingReporter);
   }
 
   /**
-   * Create specifying a ScheduledExecutorService, reporting frequency and 2 reporters.
+   * Create specifying a ScheduledExecutorService, reporting frequency and 2 reporters for metrics and a reporter for request timings.
    * <p/>
-   * Having 2 reporters can be useful if you want to store to a local file system and report the
-   * metrics to a central repository.
    */
-  public MetricReportManager(ScheduledExecutorService executor, int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
+  public MetricReportManager(ScheduledExecutorService executor, int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter, RequestTimingReporter requestTimingReporter) {
 
     this.executor = executor;
     this.localReporter = localReporter;
     this.remoteReporter = remoteReporter;
     this.freqInSeconds = freqInSeconds;
-
-    this.requestTimingReporter = new RequestFileReporter();
+    this.requestTimingReporter = requestTimingReporter;
 
     if (freqInSeconds > 0) {
       // Register the metrics collection task to run periodically
@@ -96,7 +104,6 @@ public class MetricReportManager {
     }
 
     executor.scheduleAtFixedRate(new WriteRequestTimings(), 5, 5, TimeUnit.SECONDS);
-
   }
 
   public void shutdown() {
@@ -116,16 +123,27 @@ public class MetricReportManager {
   }
 
 
+  /**
+   * Periodic task that reads the collected request timings and sends them to the
+   * appropriate reporter.
+   */
   protected class WriteRequestTimings implements Runnable {
-
     public void run() {
       reportRequestTimings();
     }
   }
 
+  /**
+   * Reads the collected request timings and sends them to the reporter.
+   */
   private void reportRequestTimings() {
 
-    requestTimingReporter.report(MetricManager.collectRequestTimings());
+    // read and remove any collected request timings
+    List<RequestTiming> requestTimings = MetricManager.collectRequestTimings();
+    if (!requestTimings.isEmpty() && requestTimingReporter != null) {
+      // write the request timings out to file log typically
+      requestTimingReporter.report(requestTimings);
+    }
   }
 
   /**
@@ -163,6 +181,9 @@ public class MetricReportManager {
     }
     if (remoteReporter != null) {
       remoteReporter.cleanup();
+    }
+    if (requestTimingReporter != null) {
+      requestTimingReporter.cleanup();
     }
   }
 

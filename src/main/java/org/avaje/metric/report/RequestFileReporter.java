@@ -49,7 +49,7 @@ public class RequestFileReporter extends BaseFileReporter implements RequestTimi
   }
 
   /**
-   * Create specifying a write frequency, base directory and base file name.
+   * Create specifying a base directory, base file name, number of files to keep and reportWriter.
    */
   public RequestFileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep, RequestTimingWriter reportWriter) {
 
@@ -57,6 +57,20 @@ public class RequestFileReporter extends BaseFileReporter implements RequestTimi
     this.reportWriter = (reportWriter != null) ? reportWriter : new BasicRequestTimingWriter();
 
     cleanup();
+  }
+
+  /**
+   * Return the base file name - defaults to "metricrequest".
+   */
+  @Override
+  protected String getBaseFileName(String baseFileName) {
+    if (baseFileName == null) {
+      baseFileName = System.getProperty("metricrequest.file");
+    }
+    if (baseFileName == null) {
+      baseFileName = "metricrequest";
+    }
+    return baseFileName.trim();
   }
 
   /**
