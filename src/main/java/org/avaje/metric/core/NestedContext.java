@@ -130,6 +130,7 @@ public final class NestedContext {
         entries.add(pop);
       }
       if (stack.isEmpty()) {
+        pop.getMetric().decrementCollectionCount();
         report(entries);
         entries = new ArrayList<>();
       }

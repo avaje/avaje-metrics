@@ -5,6 +5,7 @@ import org.avaje.metric.core.noop.NoopBucketTimedFactory;
 import org.avaje.metric.core.noop.NoopCounterMetricFactory;
 import org.avaje.metric.core.noop.NoopTimedMetricFactory;
 import org.avaje.metric.core.noop.NoopValueMetricFactory;
+import org.avaje.metric.core.spi.ExternalRequestIdAdapter;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
 import org.avaje.metric.jvm.JvmMemoryMetricGroup;
 import org.avaje.metric.jvm.JvmSystemMetricGroup;
@@ -24,6 +25,10 @@ public class DefaultMetricManager implements PluginMetricManager {
   public static final String APPLICATION_PROPERTIES_LOCATIONS = "application.properties.locations";
 
   public static final String METRICS_COLLECTION_DISABLE = "metrics.collection.disable";
+
+  public static final String METRICS_MDC_REQUEST_ID = "metrics.mdc.requestId";
+
+  private final NameComp sortByName = new NameComp();
 
   private final Object monitor = new Object();
 
@@ -70,6 +75,11 @@ public class DefaultMetricManager implements PluginMetricManager {
   private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
 
   /**
+   * Adapter that can obtain a request id to associate with request timings.
+   */
+  protected final ExternalRequestIdAdapter externalRequestIdAdapter;
+
+  /**
    * Set to true if collection should be disabled.
    */
   protected final boolean disable;
@@ -82,11 +92,24 @@ public class DefaultMetricManager implements PluginMetricManager {
     this.timedMetricFactory = initTimedMetricFactory(disable);
     this.valueMetricFactory = initValueMetricFactory(disable);
     this.counterMetricFactory = initCounterMetricFactory(disable);
+    this.externalRequestIdAdapter = initExternalRequestIdAdapter(disable);
 
     if (!disable) {
       registerStandardJvmMetrics();
     }
     this.coreJvmMetricCollection = Collections.unmodifiableCollection(coreJvmMetrics.values());
+  }
+
+  private ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
+
+    if (disable) return null;
+
+    String mdcKey = System.getProperty(METRICS_MDC_REQUEST_ID);
+    if (mdcKey != null) {
+      return new MdcExternalRequestIdAdapter(mdcKey);
+    }
+
+    return null;
   }
 
   /**
@@ -107,6 +130,13 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   public void reportTiming(RequestTiming requestTiming) {
+
+    if (externalRequestIdAdapter != null) {
+      String requestId = externalRequestIdAdapter.getExternalRequestId();
+      if (requestId != null) {
+        requestTiming.setExternalRequestId(requestId);
+      }
+    }
 
     requestTimings.add(requestTiming);
   }
@@ -309,9 +339,45 @@ public class DefaultMetricManager implements PluginMetricManager {
     }
   }
 
+  /**
+   * Return the list of AbstractTimedMetric that have getRequestTimingCollection()
+   * greater than 0.
+   */
+  @Override
+  public List<AbstractTimedMetric> getRequestTimingMetrics() {
+    synchronized (monitor) {
+
+      Collection<Metric> values = metricsCache.values();
+      List<AbstractTimedMetric> list = new ArrayList<>(values.size());
+
+      for (Metric metric : values) {
+        if (metric instanceof AbstractTimedMetric) {
+          AbstractTimedMetric timed = (AbstractTimedMetric)metric;
+          if (timed.getRequestTimingCollection() > 0) {
+            list.add(timed);
+          }
+        }
+      }
+      Collections.sort(list, sortByName);
+      return list;
+    }
+  }
+
   @Override
   public Collection<Metric> getJvmMetrics() {
     return coreJvmMetricCollection;
   }
 
+
+  /**
+   * Compare Metrics by name for sorting purposes.
+   */
+  protected static class NameComp implements Comparator<Metric> {
+
+    @Override
+    public int compare(Metric o1, Metric o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+
+  }
 }

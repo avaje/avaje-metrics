@@ -7,6 +7,7 @@ import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Default implementation of BucketTimedMetric.
@@ -23,6 +24,8 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   
   private final int lastBucketIndex;
 
+  private final AtomicInteger requestCollection = new AtomicInteger();
+
   private boolean requestTiming;
 
   public DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
@@ -30,6 +33,10 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
     this.lastBucketIndex = bucketRanges.length;
+  }
+
+  public String toString() {
+    return metricName.toString();
   }
 
   @Override
@@ -73,13 +80,23 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   }
 
   @Override
-  public void setRequestTiming(boolean requestTiming) {
-    this.requestTiming = requestTiming;
+  public void setRequestTimingCollection(int collectionCount) {
+
+    requestCollection.set(collectionCount);
+    requestTiming = collectionCount != 0;
   }
 
   @Override
-  public boolean isRequestTiming() {
-    return requestTiming;
+  public int getRequestTimingCollection() {
+    return requestCollection.get();
+  }
+
+  @Override
+  public void decrementCollectionCount() {
+    int count = requestCollection.decrementAndGet();
+    if (count < 1) {
+      requestTiming = false;
+    }
   }
 
   /**

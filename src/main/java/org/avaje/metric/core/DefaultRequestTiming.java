@@ -14,6 +14,8 @@ public class DefaultRequestTiming implements RequestTiming {
 
   final long reportTime;
 
+  String externalRequestId;
+
   public DefaultRequestTiming(List<RequestTimingEntry> entries, long reportTime) {
     this.entries = entries;
     this.reportTime = reportTime;
@@ -25,5 +27,14 @@ public class DefaultRequestTiming implements RequestTiming {
 
   public long getReportTime() {
     return reportTime;
+  }
+
+  public String getExternalRequestId() {
+    return externalRequestId;
+  }
+
+  @Override
+  public void setExternalRequestId(String externalRequestId) {
+    this.externalRequestId = externalRequestId;
   }
 }

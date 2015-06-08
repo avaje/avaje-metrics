@@ -80,6 +80,12 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
     writer.write(String.valueOf(toMillis(totalExeNanos)));
     writer.write("ms  metric:");
     writer.write(headerEntry.getMetric().getName().getSimpleName());
+
+    String requestId = requestTiming.getExternalRequestId();
+    if (requestId != null) {
+      writer.append("  requestId:").append(requestId);
+    }
+
     writer.write("\n");
   }
 

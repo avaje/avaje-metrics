@@ -1,13 +1,10 @@
 package org.avaje.metric.core;
 
+import org.avaje.metric.*;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
-import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
-import org.avaje.metric.TimedEvent;
-import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueStatistics;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Designed to capture the duration of timed events.
@@ -24,11 +21,13 @@ public final class DefaultTimedMetric implements TimedMetric {
 
   private final ValueCounter errorCounter = new ValueCounter();
 
+  private final AtomicInteger requestCollection = new AtomicInteger();
+
+  private volatile boolean requestTiming;
+
   private ValueStatistics collectedSuccessStatistics;
 
   private ValueStatistics collectedErrorStatistics;
-
-  private boolean requestTiming;
 
   public DefaultTimedMetric(MetricName name) {
     this.name = name;
@@ -97,13 +96,23 @@ public final class DefaultTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void setRequestTiming(boolean requestTiming) {
-    this.requestTiming = requestTiming;
+  public void setRequestTimingCollection(int collectionCount) {
+
+    requestCollection.set(collectionCount);
+    requestTiming = (collectionCount > 0);
   }
 
   @Override
-  public boolean isRequestTiming() {
-    return requestTiming;
+  public int getRequestTimingCollection() {
+    return requestCollection.get();
+  }
+
+  @Override
+  public void decrementCollectionCount() {
+    int count = requestCollection.decrementAndGet();
+    if (count < 1) {
+      requestTiming = false;
+    }
   }
 
   /**

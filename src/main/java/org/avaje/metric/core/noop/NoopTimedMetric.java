@@ -59,13 +59,18 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void setRequestTiming(boolean requestTiming) {
+  public void setRequestTimingCollection(int collectionCount) {
     // do nothing
   }
 
   @Override
-  public boolean isRequestTiming() {
-    return false;
+  public int getRequestTimingCollection() {
+    return 0;
+  }
+
+  @Override
+  public void decrementCollectionCount() {
+    // do nothing
   }
 
   @Override
