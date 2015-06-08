@@ -98,7 +98,7 @@
             <version>1.0.0</version>
           </docletArtifact>
           <additionalparam>
-            -Xdoclint:none
+            <!-- &#45;&#45;Xdoclint:none-->
           </additionalparam>
           <linksource>true</linksource>
 
