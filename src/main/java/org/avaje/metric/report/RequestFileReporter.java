@@ -13,8 +13,6 @@ import java.util.List;
  */
 public class RequestFileReporter extends BaseFileReporter implements RequestTimingReporter {
 
-  private static final Logger logger = LoggerFactory.getLogger(RequestFileReporter.class);
-
   /**
    * The format that is written to the file.
    */

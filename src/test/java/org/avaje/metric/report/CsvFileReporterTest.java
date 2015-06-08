@@ -14,8 +14,12 @@ public class CsvFileReporterTest {
   public void exercise_with_MetricReportManager() throws InterruptedException, IOException {
     
     FileReporter fileReporter = new FileReporter(".", "metric-csv-exercise");
-    
-    MetricReportManager report = new MetricReportManager(1, fileReporter);
+
+    MetricReportConfig config = new MetricReportConfig();
+    config.setFreqInSeconds(1);
+    config.setLocalReporter(fileReporter);
+
+    MetricReportManager report = new MetricReportManager(config);
 
     TimedMetric timedMetric = MetricManager.getTimedMetric("group.type.junk");
 

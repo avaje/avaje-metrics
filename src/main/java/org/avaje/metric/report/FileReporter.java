@@ -1,8 +1,5 @@
 package org.avaje.metric.report;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.Date;
 
@@ -16,8 +13,6 @@ import java.util.Date;
  * </p>
  */
 public class FileReporter extends BaseFileReporter implements MetricReporter {
-
-  private static final Logger logger = LoggerFactory.getLogger(FileReporter.class);
 
   /**
    * The format that is written to the file.

@@ -57,53 +57,62 @@ public class MetricReportManager {
    * The headerInfo which identifies the application, environment and server etc that these metrics
    * are collected for.
    */
-  protected HeaderInfo headerInfo;
+  protected final HeaderInfo headerInfo;
 
   /**
-   * Create specifying the reporting frequency and a reporter.
-   * <p/>
-   * This will create a Timer to execute the reporting periodically.
+   * Create using the MetricReportConfig bean.
    */
-  public MetricReportManager(int freqInSeconds, MetricReporter reporter) {
-    this(freqInSeconds, reporter, null);
-  }
+  public MetricReportManager(MetricReportConfig config) {
 
-  /**
-   * Create specifying a second reporter.
-   * <p/>
-   * Having 2 reporters can be useful if you want to store to a local file system and report the
-   * metrics to a central repository.
-   */
-  public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter) {
-    this(freqInSeconds, localReporter, remoteReporter, new RequestFileReporter());
-  }
-  
-  /**
-   * Create specifying a reporting frequency and 2 reporters for metrics and a reporter for request timings.
-   * <p/>
-   */
-  public MetricReportManager(int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter, RequestTimingReporter requestTimingReporter) {
-    this(Executors.newSingleThreadScheduledExecutor(), freqInSeconds, localReporter, remoteReporter, requestTimingReporter);
-  }
-
-  /**
-   * Create specifying a ScheduledExecutorService, reporting frequency and 2 reporters for metrics and a reporter for request timings.
-   * <p/>
-   */
-  public MetricReportManager(ScheduledExecutorService executor, int freqInSeconds, MetricReporter localReporter, MetricReporter remoteReporter, RequestTimingReporter requestTimingReporter) {
-
-    this.executor = executor;
-    this.localReporter = localReporter;
-    this.remoteReporter = remoteReporter;
-    this.freqInSeconds = freqInSeconds;
-    this.requestTimingReporter = requestTimingReporter;
+    this.executor = defaultExecutor(config.getExecutor());
+    this.requestTimingReporter = defaultReqReporter(config);
+    this.localReporter = defaultReporter(config);
+    this.remoteReporter = config.getRemoteReporter();
+    this.freqInSeconds = config.getFreqInSeconds();
+    this.headerInfo = config.getHeaderInfo();
 
     if (freqInSeconds > 0) {
       // Register the metrics collection task to run periodically
       executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
 
-    executor.scheduleAtFixedRate(new WriteRequestTimings(), 5, 5, TimeUnit.SECONDS);
+    int requestFreqInSecs = defaultRequestFreqInSecs(config);
+    executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
+  }
+
+  /**
+   * Helper method that provides a default RequestTimingReporter if not specified.
+   */
+  protected RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
+    if (config.getRequestTimingReporter() != null) {
+      return config.getRequestTimingReporter();
+    }
+    return new RequestFileReporter(config.getDirectory(), config.getRequestsFileName());
+  }
+
+  /**
+   * Helper method that provides a default RequestTimingReporter if not specified.
+   */
+  protected MetricReporter defaultReporter(MetricReportConfig config) {
+    if (config.getLocalReporter() != null) {
+      return config.getLocalReporter();
+    }
+    return new FileReporter(config.getDirectory(), config.getMetricsFileName(), new CsvReportWriter());
+  }
+
+  /**
+   * Helper method that provides a default ScheduledExecutorService if not specified.
+   */
+  protected ScheduledExecutorService defaultExecutor(ScheduledExecutorService executor) {
+    return (executor != null) ? executor : Executors.newSingleThreadScheduledExecutor();
+  }
+
+  /**
+   * Helper method to default the freqInSeconds used for request collection.
+   */
+  protected int defaultRequestFreqInSecs(MetricReportConfig config) {
+    int freqInSeconds = config.getRequestsFreqInSeconds();
+    return freqInSeconds > 1 ? freqInSeconds : 3;
   }
 
   public void shutdown() {
@@ -111,17 +120,6 @@ public class MetricReportManager {
       executor.shutdown();
     }
   }
-
-  /**
-   * Set the associated HeaderInfo.
-   * <p/>
-   * This is the server environment information that is common to all the metrics
-   * collected on this running instance.
-   */
-  public void setHeaderInfo(HeaderInfo headerInfo) {
-    this.headerInfo = headerInfo;
-  }
-
 
   /**
    * Periodic task that reads the collected request timings and sends them to the

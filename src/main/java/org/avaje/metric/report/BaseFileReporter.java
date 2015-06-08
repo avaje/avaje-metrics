@@ -19,7 +19,7 @@ import java.util.Date;
  */
 public abstract class BaseFileReporter {
 
-  private static final Logger logger = LoggerFactory.getLogger(BaseFileReporter.class);
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected static final int DEFAULT_NUM_FILES_TO_KEEP = 20;
 
@@ -114,7 +114,15 @@ public abstract class BaseFileReporter {
     return (value == null || !value.trim().toLowerCase().equals("false"));
   }
 
+  /**
+   * Return the number of files to keep in the directory.
+   */
   protected static int getNumberOfFilesToKeep(int value) {
+
+    if (value > 0) {
+      return value;
+    }
+
     if (value < 1) {
       String sysVal = System.getProperty("metric.numberOfFilesToKeep");
       if (sysVal != null) {
