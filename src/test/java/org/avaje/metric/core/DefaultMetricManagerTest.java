@@ -1,8 +1,10 @@
 package org.avaje.metric.core;
 
+import orange.truck.Customer;
 import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.TimedMetric;
+import org.avaje.metric.TimingMetricInfo;
 import org.junit.Test;
 
 import java.util.List;
@@ -16,17 +18,17 @@ public class DefaultMetricManagerTest {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
-    TimedMetric m0 = mgr.getTimedMetric(new DefaultMetricName("org.req", "Customer", "m0"));
-    TimedMetric m1 = mgr.getTimedMetric(new DefaultMetricName("org.req", "Customer", "m1"));
-    BucketTimedMetric m2 = mgr.getBucketTimedMetric(new DefaultMetricName("org.req", "Customer", "m2"), 100, 200);
+    TimedMetric m0 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m0"));
+    TimedMetric m1 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m1"));
+    BucketTimedMetric m2 = mgr.getBucketTimedMetric(mgr.name("org.req", "Customer", "m2"), 100, 200);
 
-    List<AbstractTimedMetric> timingMetrics = mgr.getRequestTimingMetrics();
+    List<TimingMetricInfo> timingMetrics = mgr.getRequestTimingMetrics();
     assertEquals(0, timingMetrics.size());
 
     m0.setRequestTimingCollection(1);
     timingMetrics = mgr.getRequestTimingMetrics();
     assertEquals(1, timingMetrics.size());
-    assertEquals(m0.getName(), timingMetrics.get(0).getName());
+    assertEquals(m0.getName().getSimpleName(), timingMetrics.get(0).getName());
 
 
     m2.setRequestTimingCollection(10);
@@ -40,6 +42,44 @@ public class DefaultMetricManagerTest {
     m0.decrementCollectionCount();
     timingMetrics = mgr.getRequestTimingMetrics();
     assertEquals(2, timingMetrics.size());
+
+  }
+
+  @Test
+  public void testSetCollection() {
+
+    DefaultMetricManager mgr = new DefaultMetricManager();
+
+    TimedMetric m0 = mgr.getTimedMetric(mgr.name(Customer.class, "doSomething"));
+
+    TimedMetric m0b = mgr.getTimedMetric(mgr.name("orange.truck", "Customer", "doSomething"));
+
+    assertSame(m0, m0b);
+    assertEquals("na.Customer.doSomething", m0.getName().getSimpleName());
+
+    TimedMetric m1 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m1"));
+    BucketTimedMetric m2 = mgr.getBucketTimedMetric(mgr.name("org.req", "Customer", "m2"), 100, 200);
+
+    List<TimingMetricInfo> allTimingMetrics = mgr.getAllTimingMetrics();
+    assertEquals(3, allTimingMetrics.size());
+
+    List<TimingMetricInfo> requestTimingMetrics = mgr.getRequestTimingMetrics();
+    assertEquals(0, requestTimingMetrics.size());
+
+    assertEquals(0, m0.getRequestTimingCollection());
+
+    assertTrue(mgr.setRequestTimingCollection(Customer.class, "doSomething", 1));
+    assertEquals(1, m0.getRequestTimingCollection());
+
+    requestTimingMetrics = mgr.getRequestTimingMetrics();
+    assertEquals(1, requestTimingMetrics.size());
+
+    assertEquals(2, mgr.setRequestTimingCollectionStartsWith("org.req", 3));
+    requestTimingMetrics = mgr.getRequestTimingMetrics();
+    assertEquals(3, requestTimingMetrics.size());
+
+
+    assertFalse(mgr.setRequestTimingCollection(Customer.class, "methodDoesNotExist", 1));
 
   }
 }

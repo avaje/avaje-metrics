@@ -12,6 +12,8 @@ import org.avaje.metric.jvm.JvmSystemMetricGroup;
 import org.avaje.metric.jvm.JvmThreadMetricGroup;
 import org.avaje.metric.spi.PluginMetricManager;
 import org.avaje.metric.util.PropertiesLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +23,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Default implementation of the PluginMetricManager.
  */
 public class DefaultMetricManager implements PluginMetricManager {
+
+  private static final Logger logger = LoggerFactory.getLogger(DefaultMetricManager.class);
 
   public static final String APPLICATION_PROPERTIES_LOCATIONS = "application.properties.locations";
 
@@ -35,7 +39,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Cache of the code JVM metrics.
    */
-  private final ConcurrentHashMap<String, Metric> coreJvmMetrics = new ConcurrentHashMap<String, Metric>();
+  private final ConcurrentHashMap<String, Metric> coreJvmMetrics = new ConcurrentHashMap<>();
 
   /**
    * Derived collection of the core jvm metrics.
@@ -45,7 +49,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Cache of the created metrics (excluding JVM metrics).
    */
-  private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<String, Metric>();
+  private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
 
   /**
    * Factory for creating TimedMetrics.
@@ -70,7 +74,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Cache of the metric names.
    */
-  private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<String, MetricNameCache>();
+  private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<>();
 
   private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
 
@@ -84,9 +88,13 @@ public class DefaultMetricManager implements PluginMetricManager {
    */
   protected final boolean disable;
 
+  protected final NameMapping nameMapping;
+
   public DefaultMetricManager() {
 
     this.disable = isDisableCollection();
+
+    this.nameMapping = new NameMapping(getClass().getClassLoader());
 
     this.bucketTimedMetricFactory = initBucketTimedFactory(disable);
     this.timedMetricFactory = initTimedMetricFactory(disable);
@@ -199,17 +207,29 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   @Override
   public MetricName name(String name) {
-    return DefaultMetricName.parse(name);
+    String mappedName = nameMapping.getMappedName(name);
+    return DefaultMetricName.parse(mappedName);
   }
 
   @Override
   public MetricName name(String group, String type, String name) {
-    return new DefaultMetricName(group, type, name);
+    if (group == null) {
+      throw new IllegalArgumentException("group needs to be specified");
+    }
+    if (type == null) {
+      throw new IllegalArgumentException("type needs to be specified for JMX bean name support");
+    }
+    return name(group + "." + type + append(name));
   }
 
   @Override
   public MetricName name(Class<?> cls, String name) {
-    return new DefaultMetricName(cls, name);
+
+    return name(cls.getName() + append(name));
+  }
+
+  private String append(String value) {
+    return (value == null) ? "" : "." + value;
   }
 
   @Override
@@ -295,12 +315,19 @@ public class DefaultMetricManager implements PluginMetricManager {
     }
     return metric;
   }
+
+  private Metric getMetricWithoutCreate(MetricName name) {
+
+    return  metricsCache.get( name.getSimpleName());
+  }
   
   public void clear() {
     synchronized (monitor) {
       metricsCache.clear();
     }
   }
+
+
 
   /**
    * Return the request timings that have been collected since the last collection.
@@ -320,7 +347,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     synchronized (monitor) {
 
       Collection<Metric> values = metricsCache.values();
-      List<Metric> list = new ArrayList<Metric>(values.size());
+      List<Metric> list = new ArrayList<>(values.size());
 
       for (Metric metric : values) {
         if (metric.collectStatistics()) {
@@ -339,22 +366,77 @@ public class DefaultMetricManager implements PluginMetricManager {
     }
   }
 
-  /**
-   * Return the list of AbstractTimedMetric that have getRequestTimingCollection()
-   * greater than 0.
-   */
   @Override
-  public List<AbstractTimedMetric> getRequestTimingMetrics() {
+  public boolean setRequestTimingCollection(String fullMetricName, int collectionCount) {
+
+    return setRequestTimingCollection(name(fullMetricName), collectionCount);
+  }
+
+  @Override
+  public boolean setRequestTimingCollection(Class<?> cls, String name, int collectionCount) {
+
+    return setRequestTimingCollection(name(cls, name), collectionCount);
+  }
+
+  //@Override
+  public boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
+
+    Metric metric = getMetricWithoutCreate(metricName);
+    if (metric instanceof AbstractTimedMetric) {
+      AbstractTimedMetric timed = (AbstractTimedMetric) metric;
+      timed.setRequestTimingCollection(collectionCount);
+      return true;
+    }
+
+    return false;
+  }
+
+  @Override
+  public int setRequestTimingCollectionStartsWith(String nameStartsWith, int collectionCount) {
+
+    int count = 0;
+
+    for (Map.Entry<String, Metric> entry : metricsCache.entrySet()) {
+      if (entry.getKey().startsWith(nameStartsWith)) {
+        if (entry.getValue() instanceof AbstractTimedMetric) {
+          AbstractTimedMetric timed = (AbstractTimedMetric)entry.getValue();
+          timed.setRequestTimingCollection(collectionCount);
+          logger.debug("setRequestTimingCollection({}) on {}", collectionCount, timed.getName().getSimpleName());
+          count++;
+        }
+      }
+    }
+
+    return count;
+  }
+
+  public List<TimingMetricInfo> getRequestTimingMetrics() {
+    return getRequestTimingMetrics(true);
+  }
+
+  /**
+   * Return the list of all timing metrics.
+   */
+  public List<TimingMetricInfo> getAllTimingMetrics() {
+    return getRequestTimingMetrics(false);
+  }
+
+  /**
+   * Return the list of timing metrics that we are interested in.
+   */
+  protected List<TimingMetricInfo> getRequestTimingMetrics(boolean filterCollecting) {
+
     synchronized (monitor) {
 
+      List<TimingMetricInfo> list = new ArrayList<>();
+
       Collection<Metric> values = metricsCache.values();
-      List<AbstractTimedMetric> list = new ArrayList<>(values.size());
 
       for (Metric metric : values) {
         if (metric instanceof AbstractTimedMetric) {
           AbstractTimedMetric timed = (AbstractTimedMetric)metric;
-          if (timed.getRequestTimingCollection() > 0) {
-            list.add(timed);
+          if (!filterCollecting || timed.getRequestTimingCollection() >= 1) {
+            list.add(new TimingMetricInfo(timed.getName().getSimpleName(), timed.getRequestTimingCollection()));
           }
         }
       }
@@ -372,10 +454,10 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Compare Metrics by name for sorting purposes.
    */
-  protected static class NameComp implements Comparator<Metric> {
+  protected static class NameComp implements Comparator<TimingMetricInfo> {
 
     @Override
-    public int compare(Metric o1, Metric o2) {
+    public int compare(TimingMetricInfo o1, TimingMetricInfo o2) {
       return o1.getName().compareTo(o2.getName());
     }
 
