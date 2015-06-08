@@ -5,6 +5,7 @@ import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimingMetricInfo;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class DefaultMetricManagerTest {
 
   }
 
+  @Ignore
   @Test
   public void testSetCollection() {
 
