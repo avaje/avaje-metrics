@@ -1,11 +1,9 @@
 package org.avaje.metric.core;
 
 import orange.truck.Customer;
-import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimingMetricInfo;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -23,30 +21,29 @@ public class DefaultMetricManagerTest {
     TimedMetric m1 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m1"));
     BucketTimedMetric m2 = mgr.getBucketTimedMetric(mgr.name("org.req", "Customer", "m2"), 100, 200);
 
-    List<TimingMetricInfo> timingMetrics = mgr.getRequestTimingMetrics();
+    List<TimingMetricInfo> timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(0, timingMetrics.size());
 
     m0.setRequestTimingCollection(1);
-    timingMetrics = mgr.getRequestTimingMetrics();
+    timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(1, timingMetrics.size());
     assertEquals(m0.getName().getSimpleName(), timingMetrics.get(0).getName());
 
 
     m2.setRequestTimingCollection(10);
-    timingMetrics = mgr.getRequestTimingMetrics();
+    timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(2, timingMetrics.size());
 
     m1.setRequestTimingCollection(10);
-    timingMetrics = mgr.getRequestTimingMetrics();
+    timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(3, timingMetrics.size());
 
     m0.decrementCollectionCount();
-    timingMetrics = mgr.getRequestTimingMetrics();
+    timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(2, timingMetrics.size());
 
   }
 
-  @Ignore
   @Test
   public void testSetCollection() {
 
@@ -62,10 +59,10 @@ public class DefaultMetricManagerTest {
     TimedMetric m1 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m1"));
     BucketTimedMetric m2 = mgr.getBucketTimedMetric(mgr.name("org.req", "Customer", "m2"), 100, 200);
 
-    List<TimingMetricInfo> allTimingMetrics = mgr.getAllTimingMetrics();
+    List<TimingMetricInfo> allTimingMetrics = mgr.getAllTimingMetrics(null);
     assertEquals(3, allTimingMetrics.size());
 
-    List<TimingMetricInfo> requestTimingMetrics = mgr.getRequestTimingMetrics();
+    List<TimingMetricInfo> requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(0, requestTimingMetrics.size());
 
     assertEquals(0, m0.getRequestTimingCollection());
@@ -73,11 +70,11 @@ public class DefaultMetricManagerTest {
     assertTrue(mgr.setRequestTimingCollection(Customer.class, "doSomething", 1));
     assertEquals(1, m0.getRequestTimingCollection());
 
-    requestTimingMetrics = mgr.getRequestTimingMetrics();
+    requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(1, requestTimingMetrics.size());
 
-    assertEquals(2, mgr.setRequestTimingCollectionStartsWith("org.req", 3));
-    requestTimingMetrics = mgr.getRequestTimingMetrics();
+    assertEquals(2, mgr.setRequestTimingCollectionUsingMatch("org.req*", 3));
+    requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(3, requestTimingMetrics.size());
 
 

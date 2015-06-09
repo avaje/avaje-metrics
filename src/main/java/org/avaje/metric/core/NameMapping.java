@@ -1,5 +1,8 @@
 package org.avaje.metric.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -9,6 +12,8 @@ import java.util.*;
  * Name mapping used to provide shorter metric names with common prefixes.
  */
 public class NameMapping {
+
+  private static final Logger logger = LoggerFactory.getLogger(NameMapping.class);
 
   private static final String METRIC_NAME_MAPPING_RESOURCE = "metric-name-mapping.txt";
 
@@ -28,10 +33,6 @@ public class NameMapping {
     this.classLoader = classLoader;
     this.nameMapping = readNameMapping();
     this.metricNameMatches = getMetricNameMatches();
-  }
-
-  public String getMatches() {
-    return Arrays.toString(this.metricNameMatches);
   }
 
   /**
@@ -106,6 +107,7 @@ public class NameMapping {
         URL url = resources.nextElement();
         InputStream inStream = url.openStream();
         try {
+          logger.debug("reading resource {}",url.toString());
           Properties props = new Properties();
           props.load(inStream);
 

@@ -1,13 +1,11 @@
 package org.avaje.metric.core;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class NameMappingTest {
 
-  @Ignore
   @Test
   public void testGetMappedName() throws Exception {
 

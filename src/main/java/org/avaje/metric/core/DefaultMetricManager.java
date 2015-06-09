@@ -11,6 +11,7 @@ import org.avaje.metric.jvm.JvmMemoryMetricGroup;
 import org.avaje.metric.jvm.JvmSystemMetricGroup;
 import org.avaje.metric.jvm.JvmThreadMetricGroup;
 import org.avaje.metric.spi.PluginMetricManager;
+import org.avaje.metric.util.LikeMatcher;
 import org.avaje.metric.util.PropertiesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +122,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   /**
-   * Return true if metric collection should be disabled. 
+   * Return true if metric collection should be disabled.
    * This has the effect that NOOP metric implementations are used.
    */
   private static boolean isDisableCollection() {
@@ -156,7 +157,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   protected MetricFactory<BucketTimedMetric> initBucketTimedFactory(boolean disableCollection) {
     return (disableCollection) ? new NoopBucketTimedFactory() : new BucketTimedMetricFactory();
   }
-  
+
   /**
    * Return the factory used to create TimedMetric instances.
    */
@@ -262,7 +263,6 @@ public class DefaultMetricManager implements PluginMetricManager {
     return (TimedMetric) getMetric(name, timedMetricFactory);
   }
 
-  
   @Override
   public BucketTimedMetric getBucketTimedMetric(MetricName name, int... bucketRanges) {
     return (BucketTimedMetric) getMetric(name, bucketTimedMetricFactory, bucketRanges);
@@ -293,11 +293,11 @@ public class DefaultMetricManager implements PluginMetricManager {
     metricsCache.put(name.getSimpleName(), metric);
     return metric;
   }
-  
+
   private Metric getMetric(MetricName name, MetricFactory<?> factory) {
     return getMetric(name, factory, null);
   }
-  
+
   private Metric getMetric(MetricName name, MetricFactory<?> factory, int[] bucketRanges) {
 
     String cacheKey = name.getSimpleName();
@@ -318,16 +318,14 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   private Metric getMetricWithoutCreate(MetricName name) {
 
-    return  metricsCache.get( name.getSimpleName());
+    return metricsCache.get(name.getSimpleName());
   }
-  
+
   public void clear() {
     synchronized (monitor) {
       metricsCache.clear();
     }
   }
-
-
 
   /**
    * Return the request timings that have been collected since the last collection.
@@ -378,8 +376,11 @@ public class DefaultMetricManager implements PluginMetricManager {
     return setRequestTimingCollection(name(cls, name), collectionCount);
   }
 
-  //@Override
-  public boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
+  /**
+   * Set request timing collection on a specific timed metric.
+   * Return false if the metric was not found (and timing collection was not set).
+   */
+  protected boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
 
     Metric metric = getMetricWithoutCreate(metricName);
     if (metric instanceof AbstractTimedMetric) {
@@ -391,15 +392,29 @@ public class DefaultMetricManager implements PluginMetricManager {
     return false;
   }
 
+  /**
+   * Set request timing collection on metrics that match the nameMatch expression.
+   *
+   * @param nameMatch       The expression used to match timing metrics
+   * @param collectionCount The number of requests to collect
+   * @return The number of metrics that had the request timing collection set
+   */
   @Override
-  public int setRequestTimingCollectionStartsWith(String nameStartsWith, int collectionCount) {
+  public int setRequestTimingCollectionUsingMatch(String nameMatch, int collectionCount) {
+
+    if (nameMatch == null || nameMatch.trim().length() == 0) {
+      // not turning on collection globally for empty
+      return 0;
+    }
+
+    LikeMatcher like = new LikeMatcher(nameMatch);
 
     int count = 0;
 
-    for (Map.Entry<String, Metric> entry : metricsCache.entrySet()) {
-      if (entry.getKey().startsWith(nameStartsWith)) {
-        if (entry.getValue() instanceof AbstractTimedMetric) {
-          AbstractTimedMetric timed = (AbstractTimedMetric)entry.getValue();
+    for (Metric metric : metricsCache.values()) {
+      if (metric instanceof AbstractTimedMetric) {
+        AbstractTimedMetric timed = (AbstractTimedMetric) metric;
+        if (like.matches(timed.getName().getSimpleName())) {
           timed.setRequestTimingCollection(collectionCount);
           logger.debug("setRequestTimingCollection({}) on {}", collectionCount, timed.getName().getSimpleName());
           count++;
@@ -410,33 +425,45 @@ public class DefaultMetricManager implements PluginMetricManager {
     return count;
   }
 
-  public List<TimingMetricInfo> getRequestTimingMetrics() {
-    return getRequestTimingMetrics(true);
+  /**
+   * Return currently active timing metrics that match the name expression.
+   */
+  @Override
+  public List<TimingMetricInfo> getRequestTimingMetrics(String nameMatchExpression) {
+    return getRequestTimingMetrics(true, nameMatchExpression);
   }
 
   /**
-   * Return the list of all timing metrics.
+   * Return the list of all timing metrics that match the name expression.
    */
-  public List<TimingMetricInfo> getAllTimingMetrics() {
-    return getRequestTimingMetrics(false);
+  @Override
+  public List<TimingMetricInfo> getAllTimingMetrics(String nameMatchExpression) {
+    return getRequestTimingMetrics(false, nameMatchExpression);
   }
 
   /**
    * Return the list of timing metrics that we are interested in.
+   *
+   * @param activeOnly          true if we only want timing metrics that are actively collecting request timings.
+   * @param nameMatchExpression the expression used to match/filter metric names. Null or empty means match all.
    */
-  protected List<TimingMetricInfo> getRequestTimingMetrics(boolean filterCollecting) {
+  protected List<TimingMetricInfo> getRequestTimingMetrics(boolean activeOnly, String nameMatchExpression) {
 
     synchronized (monitor) {
 
       List<TimingMetricInfo> list = new ArrayList<>();
 
-      Collection<Metric> values = metricsCache.values();
+      LikeMatcher like = new LikeMatcher(nameMatchExpression);
 
-      for (Metric metric : values) {
+      for (Metric metric : metricsCache.values()) {
         if (metric instanceof AbstractTimedMetric) {
-          AbstractTimedMetric timed = (AbstractTimedMetric)metric;
-          if (!filterCollecting || timed.getRequestTimingCollection() >= 1) {
-            list.add(new TimingMetricInfo(timed.getName().getSimpleName(), timed.getRequestTimingCollection()));
+          AbstractTimedMetric timed = (AbstractTimedMetric) metric;
+          if (!activeOnly || timed.getRequestTimingCollection() >= 1) {
+            // actively collection or doing the all search
+            if (like.matches(timed.getName().getSimpleName())) {
+              // metric name matches our expression
+              list.add(new TimingMetricInfo(timed.getName().getSimpleName(), timed.getRequestTimingCollection()));
+            }
           }
         }
       }
