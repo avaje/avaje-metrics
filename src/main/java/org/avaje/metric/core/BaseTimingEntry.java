@@ -51,4 +51,11 @@ public class BaseTimingEntry implements RequestTimingEntry {
   public long getExecutionNanos() {
     return endNanos - startNanos;
   }
+
+  @Override
+  public int compareTo(RequestTimingEntry other) {
+
+    int compare = Long.compare(startNanos, other.getStartNanos());
+    return compare != 0 ? compare : Integer.compare(depth, other.getDepth());
+  }
 }
