@@ -397,19 +397,19 @@ public class DefaultMetricManager implements PluginMetricManager {
    *
    * @param nameMatch       The expression used to match timing metrics
    * @param collectionCount The number of requests to collect
-   * @return The number of metrics that had the request timing collection set
+   * @return The timing metrics that had the request timing collection set
    */
   @Override
-  public int setRequestTimingCollectionUsingMatch(String nameMatch, int collectionCount) {
+  public List<TimingMetricInfo> setRequestTimingCollectionUsingMatch(String nameMatch, int collectionCount) {
 
     if (nameMatch == null || nameMatch.trim().length() == 0) {
       // not turning on collection globally for empty
-      return 0;
+      return Collections.EMPTY_LIST;
     }
 
     LikeMatcher like = new LikeMatcher(nameMatch);
 
-    int count = 0;
+    List<TimingMetricInfo> changes = new ArrayList<>();
 
     for (Metric metric : metricsCache.values()) {
       if (metric instanceof AbstractTimedMetric) {
@@ -417,12 +417,14 @@ public class DefaultMetricManager implements PluginMetricManager {
         if (like.matches(timed.getName().getSimpleName())) {
           timed.setRequestTimingCollection(collectionCount);
           logger.debug("setRequestTimingCollection({}) on {}", collectionCount, timed.getName().getSimpleName());
-          count++;
+          changes.add(new TimingMetricInfo(timed.getName().getSimpleName(), collectionCount));
         }
       }
     }
 
-    return count;
+    // ensure we return them in a predicable order
+    Collections.sort(changes, sortByName);
+    return changes;
   }
 
   /**
@@ -467,6 +469,8 @@ public class DefaultMetricManager implements PluginMetricManager {
           }
         }
       }
+
+      // ensure we return them in a predicable order
       Collections.sort(list, sortByName);
       return list;
     }

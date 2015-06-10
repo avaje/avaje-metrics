@@ -73,7 +73,11 @@ public class DefaultMetricManagerTest {
     requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(1, requestTimingMetrics.size());
 
-    assertEquals(2, mgr.setRequestTimingCollectionUsingMatch("org.req*", 3));
+    List<TimingMetricInfo> changes = mgr.setRequestTimingCollectionUsingMatch("org.req*", 3);
+    assertEquals(2, changes.size());
+    assertEquals("org.req.Customer.m1", changes.get(0).getName());
+    assertEquals("org.req.Customer.m2", changes.get(1).getName());
+
     requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(3, requestTimingMetrics.size());
 
