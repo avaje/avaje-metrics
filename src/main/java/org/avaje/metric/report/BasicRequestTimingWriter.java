@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,15 +45,15 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
 
     // note that the entries are in reverse order
     List<RequestTimingEntry> entries = requestTiming.getEntries();
-    int size = entries.size();
 
-    // the top entry (is last on the list)
-    RequestTimingEntry topEntry = entries.get(size - 1);
+    Collections.sort(entries);
+
+    RequestTimingEntry topEntry = entries.get(0);
     long totalExeNanos = topEntry.getExecutionNanos();
 
     writeHeader(writer, topEntry, requestTiming, totalExeNanos);
     // write out reversing the order (to get start based ordering)
-    for (int i = size - 1; i >= 0; i--) {
+    for (int i = 0; i < entries.size(); i++) {
       writeDetail(writer, entries.get(i), totalExeNanos);
     }
     writeFooter(writer);
