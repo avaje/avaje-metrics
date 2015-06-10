@@ -8,7 +8,7 @@ Please read the main documentation at: http://avaje-metric.github.io
     <dependency>
       <groupId>org.avaje.metric</groupId>
       <artifactId>avaje-metric-core</artifactId>
-      <version>3.5.4</version>
+      <version>4.4.1</version>
     </dependency>
 ```
 
