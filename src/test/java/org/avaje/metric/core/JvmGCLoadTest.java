@@ -21,14 +21,14 @@ public class JvmGCLoadTest {
       doSomething(gaugeMetricGroups);      
     }
 
-    Thread.sleep(500);
+    Thread.sleep(100);
   }
 
   private void doSomething(GaugeLongGroup[] gaugeMetricGroups) {
     
     long start = System.currentTimeMillis();
     
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 2; i++) {
 
       createSomeGarbage();
     }
