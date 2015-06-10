@@ -2,7 +2,7 @@
 
 Please read the main documentation at: http://avaje-metric.github.io
 
-# Maven dependency
+## Maven dependency
 
 ```xml
     <dependency>
@@ -13,11 +13,13 @@ Please read the main documentation at: http://avaje-metric.github.io
 ```
 
 
-License
--------
-
+## License - Apache 2
 Published under Apache Software License 2.0, see LICENSE
 
+## Overhead
+Micro benchmarks are notoriously difficult but that said the overhead using version 4.1 has been measured at 140 nanos per method invocation (with request collection count of 0 meaning per request timing isn't collected). For perspective if the overhead was 200 nanos then executing 5000 methods would add 1 millisecond of overhead.
+
+Request timing would not add much more to execution time per say but relatively speaking can produce a lot of output (that is reported in a background thread) and creates objects so adds some extra GC cost. In production you would expect to limit the number of metrics you collect on and limit the number of request timings you collect.
 
 ## Example Metrics output (typically reported every 60 seconds)  
 Below is a sample of the metric log output. The metrics are periodically collected 
