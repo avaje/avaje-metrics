@@ -1,18 +1,13 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.BucketTimedMetric;
-import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
-import org.avaje.metric.TimedEvent;
-import org.avaje.metric.TimedMetric;
+import org.avaje.metric.*;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Default implementation of BucketTimedMetric.
  */
-public class DefaultBucketTimedMetric implements BucketTimedMetric {
+public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketTimedMetric {
 
   private static final int OPCODE_ATHROW = 191;
 
@@ -23,10 +18,6 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   private final TimedMetric[] buckets;
   
   private final int lastBucketIndex;
-
-  private final AtomicInteger requestCollection = new AtomicInteger();
-
-  private boolean requestTiming;
 
   public DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
     this.metricName = metricName;
@@ -77,47 +68,6 @@ public class DefaultBucketTimedMetric implements BucketTimedMetric {
   public void addEventSince(boolean success, long startNanos) {
     long durationNanos = System.nanoTime() - startNanos;
     addEventDuration(success, durationNanos);
-  }
-
-  @Override
-  public void setRequestTimingCollection(int collectionCount) {
-
-    requestCollection.set(collectionCount);
-    requestTiming = collectionCount != 0;
-  }
-
-  @Override
-  public int getRequestTimingCollection() {
-    return requestCollection.get();
-  }
-
-  @Override
-  public void decrementCollectionCount() {
-    int count = requestCollection.decrementAndGet();
-    if (count < 1) {
-      requestTiming = false;
-    }
-  }
-
-  /**
-   * Return true if this TimedMetric has been pushed onto an active context for this thread.
-   * <p>
-   * This means that the current thread is actively collecting timing entries and this metric
-   * has been pushed onto the nested context.
-   * </p>
-   */
-  @Override
-  public boolean isActiveThreadContext() {
-
-    if (requestTiming) {
-      // explicitly turned on for this metric
-      NestedContext.push(this);
-      return true;
-
-    } else {
-      // on if there is an active nested context
-      return NestedContext.pushIfActive(this);
-    }
   }
 
   @Override

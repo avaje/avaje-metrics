@@ -4,7 +4,6 @@ import org.avaje.metric.*;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Designed to capture the duration of timed events.
@@ -13,17 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * collecting time duration and provides separate statistics for success and error completion.
  * </p>
  */
-public final class DefaultTimedMetric implements TimedMetric {
+public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   private final MetricName name;
 
   private final ValueCounter successCounter = new ValueCounter();
 
   private final ValueCounter errorCounter = new ValueCounter();
-
-  private final AtomicInteger requestCollection = new AtomicInteger();
-
-  private volatile boolean requestTiming;
 
   private ValueStatistics collectedSuccessStatistics;
 
@@ -63,10 +58,6 @@ public final class DefaultTimedMetric implements TimedMetric {
     errorCounter.reset();
   }
 
-  protected long getTimeMillis() {
-    return System.currentTimeMillis();
-  }
-
   protected long getTickNanos() {
     return System.nanoTime();
   }
@@ -95,46 +86,6 @@ public final class DefaultTimedMetric implements TimedMetric {
     return name;
   }
 
-  @Override
-  public void setRequestTimingCollection(int collectionCount) {
-
-    requestCollection.set(collectionCount);
-    requestTiming = (collectionCount > 0);
-  }
-
-  @Override
-  public int getRequestTimingCollection() {
-    return requestCollection.get();
-  }
-
-  @Override
-  public void decrementCollectionCount() {
-    int count = requestCollection.decrementAndGet();
-    if (count < 1) {
-      requestTiming = false;
-    }
-  }
-
-  /**
-   * Return true if this TimedMetric has been pushed onto an active context for this thread.
-   * <p>
-   * This means that the current thread is actively collecting timing entries and this metric
-   * has been pushed onto the nested context.
-   * </p>
-   */
-  @Override
-  public boolean isActiveThreadContext() {
-
-    if (requestTiming) {
-      // explicitly turned on for this metric
-      NestedContext.push(this);
-      return true;
-
-    } else {
-      // on if there is an active nested context
-      return NestedContext.pushIfActive(this);
-    }
-  }
 
   /**
    * Start an event.

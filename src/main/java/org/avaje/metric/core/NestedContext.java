@@ -129,8 +129,9 @@ public final class NestedContext {
       if (pop.setEndNanos(System.nanoTime()) > thresholdNanos) {
         entries.add(pop);
       }
+      // (if required) decrement the collection count on the metric
+      pop.getMetric().decrementCollectionCount();
       if (stack.isEmpty()) {
-        pop.getMetric().decrementCollectionCount();
         report(entries);
         entries = new ArrayList<>();
       }
