@@ -25,6 +25,8 @@ public class MetricReportConfig {
 
   RequestTimingReporter requestTimingReporter;
 
+  int requestTimingThreshold;
+
   ScheduledExecutorService executor;
 
   /**
@@ -89,6 +91,32 @@ public class MetricReportConfig {
    */
   public void setRequestsFileName(String requestsFileName) {
     this.requestsFileName = requestsFileName;
+  }
+
+  /**
+   * Return the threshold for request timing reporting. This is a percentage of the total
+   * request time and if an entry is less than the threshold it is omitted from the output.
+   * <p>
+   * This could typically be set to 1 percent (or even up to 5 percent) in order to reduce
+   * the output for request timing and highlight the more costly methods.
+   * </p>
+   */
+  public int getRequestTimingThreshold() {
+    return requestTimingThreshold;
+  }
+
+  /**
+   * Set a threshold for request timing reporting. This is a percentage of the total
+   * request time and if an entry is less than the threshold it is omitted from the output.
+   * <p>
+   * This could typically be set to 1 percent (or even up to 5 percent) in order to reduce
+   * the output for request timing and highlight the more costly methods.
+   * </p>
+   *
+   * @param requestTimingThreshold a percentage value (from 0 to 99) but typically between 0 and 5.
+   */
+  public void setRequestTimingThreshold(int requestTimingThreshold) {
+    this.requestTimingThreshold = requestTimingThreshold;
   }
 
   /**

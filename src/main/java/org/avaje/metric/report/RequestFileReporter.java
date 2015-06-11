@@ -1,8 +1,6 @@
 package org.avaje.metric.report;
 
 import org.avaje.metric.RequestTiming;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Date;
@@ -19,40 +17,26 @@ public class RequestFileReporter extends BaseFileReporter implements RequestTimi
   protected final RequestTimingWriter reportWriter;
 
   /**
-   * Create with the defaults for base directory, file name, numberOfFilesToKeep and CsvReportWriter.
-   */
-  public RequestFileReporter() {
-    this(null);
-  }
-
-  /**
-   * Create specifying a base directory where the metrics files should go.
-   */
-  public RequestFileReporter(String baseDirectory) {
-    this(baseDirectory, null);
-  }
-
-  /**
    * Create specifying a base directory and file name.
    */
   public RequestFileReporter(String baseDirectory, String baseFileName) {
-    this(baseDirectory, baseFileName, -1, null);
+    this(baseDirectory, baseFileName, -1, 0, null);
   }
 
   /**
    * Construct specifying a base directory, file name and report writer.
    */
-  public RequestFileReporter(String baseDirectory, String baseFileName, RequestTimingWriter reportWriter) {
-    this(baseDirectory, baseFileName, -1, reportWriter);
+  public RequestFileReporter(MetricReportConfig config) {
+    this(config.getDirectory(), config.getRequestsFileName(), -1, config.getRequestTimingThreshold(), null);
   }
 
   /**
    * Create specifying a base directory, base file name, number of files to keep and reportWriter.
    */
-  public RequestFileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep, RequestTimingWriter reportWriter) {
+  public RequestFileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep, int thresholdPercentage, RequestTimingWriter reportWriter) {
 
     super(baseDirectory, baseFileName, numberOfFilesToKeep);
-    this.reportWriter = (reportWriter != null) ? reportWriter : new BasicRequestTimingWriter();
+    this.reportWriter = (reportWriter != null) ? reportWriter : new BasicRequestTimingWriter(thresholdPercentage);
 
     cleanup();
   }

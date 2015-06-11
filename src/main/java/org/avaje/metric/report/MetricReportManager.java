@@ -84,10 +84,12 @@ public class MetricReportManager {
    * Helper method that provides a default RequestTimingReporter if not specified.
    */
   protected RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
+
     if (config.getRequestTimingReporter() != null) {
       return config.getRequestTimingReporter();
     }
-    return new RequestFileReporter(config.getDirectory(), config.getRequestsFileName());
+    // just use the default implementation based on config
+    return new RequestFileReporter(config);
   }
 
   /**

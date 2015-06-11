@@ -22,6 +22,16 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
 
   final SimpleDateFormat nowFormatter = new SimpleDateFormat("HH:mm:ss");
 
+  final int thresholdPercentage;
+
+  public BasicRequestTimingWriter() {
+    this(0);
+  }
+
+  public BasicRequestTimingWriter(int thresholdPercentage) {
+    this.thresholdPercentage = thresholdPercentage;
+  }
+
   /**
    * Write all the request timings to the writer.
    */
@@ -97,11 +107,17 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   private void writeDetail(Writer writer, RequestTimingEntry entry, long totalExeNanos) throws IOException {
 
     long executionNanos = entry.getExecutionNanos();
+    long percentage = percentage(totalExeNanos, executionNanos);
+
+    if (thresholdPercentage > percentage) {
+      // skip writing this detail entry as it is deemed not significant enough
+      return;
+    }
 
     writer.append("   d:");
     pad(writer, 2, entry.getDepth());
     writer.append("   p:");
-    pad(writer, 3, percentage(totalExeNanos, executionNanos));
+    pad(writer, 3, percentage);
     writer.write("  ms:");
     pad(writer, 7, toMillis(executionNanos));
     writer.write("   us:");
