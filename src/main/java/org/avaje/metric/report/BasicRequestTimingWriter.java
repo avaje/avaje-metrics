@@ -51,7 +51,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Write the RequestTiming to the writer.
    */
-  protected void writeEntry(Writer writer, RequestTiming requestTiming) throws IOException {
+  public void writeEntry(Writer writer, RequestTiming requestTiming) throws IOException {
 
     // note that the entries are in reverse order
     List<RequestTimingEntry> entries = requestTiming.getEntries();
@@ -73,14 +73,14 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Write the footer content to the writer.
    */
-  private void writeFooter(Writer writer) throws IOException {
+  protected void writeFooter(Writer writer) throws IOException {
     writer.write("\n");
   }
 
   /**
    * Write the header content to the writer.
    */
-  private void writeHeader(Writer writer, RequestTimingEntry headerEntry, RequestTiming requestTiming, long totalExeNanos) throws IOException {
+  protected void writeHeader(Writer writer, RequestTimingEntry headerEntry, RequestTiming requestTiming, long totalExeNanos) throws IOException {
 
     Date reportTime = new Date(requestTiming.getReportTime());
 
@@ -104,7 +104,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Write the detail entry to the writer.
    */
-  private void writeDetail(Writer writer, RequestTimingEntry entry, long totalExeNanos) throws IOException {
+  protected void writeDetail(Writer writer, RequestTimingEntry entry, long totalExeNanos) throws IOException {
 
     long executionNanos = entry.getExecutionNanos();
     long percentage = percentage(totalExeNanos, executionNanos);
@@ -134,7 +134,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Write the value padding with spaces out to padToWidth.
    */
-  private void pad(Writer writer, int padToWidth, long value) throws IOException {
+  protected void pad(Writer writer, int padToWidth, long value) throws IOException {
     String s = String.valueOf(value);
     writer.write(s);
     for (int i=0; i<padToWidth-s.length(); i++) {
@@ -145,7 +145,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Return the percentage of execution time as a value from 0 to 100.
    */
-  private long percentage(long totalExeNanos, long executionNanos) {
+  protected long percentage(long totalExeNanos, long executionNanos) {
     return (100 * executionNanos) / totalExeNanos;
   }
 
@@ -153,14 +153,14 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Return the nanos as milliseconds.
    */
-  long toMillis(long nanos) {
+  protected long toMillis(long nanos) {
     return TimeUnit.NANOSECONDS.toMillis(nanos);
   }
 
   /**
    * Return the nanos as microseconds.
    */
-  long toMicros(long nanos) {
+  protected long toMicros(long nanos) {
     return TimeUnit.NANOSECONDS.toMicros(nanos);
   }
 }

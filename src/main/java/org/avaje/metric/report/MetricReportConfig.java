@@ -1,5 +1,7 @@
 package org.avaje.metric.report;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -28,6 +30,8 @@ public class MetricReportConfig {
   int requestTimingThreshold;
 
   ScheduledExecutorService executor;
+
+  List<RequestTimingListener> requestTimingListeners = new ArrayList<>();
 
   /**
    * Return the HeaderInfo which identifies this application instance.
@@ -203,5 +207,26 @@ public class MetricReportConfig {
    */
   public void setRequestTimingReporter(RequestTimingReporter requestTimingReporter) {
     this.requestTimingReporter = requestTimingReporter;
+  }
+
+  /**
+   * Add a RequestTimingListener.
+   */
+  public void addRequestTimingListener(RequestTimingListener listener) {
+    this.requestTimingListeners.add(listener);
+  }
+
+  /**
+   * Return the list of RequestTimingListener's.
+   */
+  public List<RequestTimingListener> getRequestTimingListeners() {
+    return requestTimingListeners;
+  }
+
+  /**
+   * Set the list of RequestTimingListener's.
+   */
+  public void setRequestTimingListeners(List<RequestTimingListener> requestTimingListeners) {
+    this.requestTimingListeners = requestTimingListeners;
   }
 }

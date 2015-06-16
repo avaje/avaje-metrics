@@ -89,7 +89,8 @@ public class MetricReportManager {
       return config.getRequestTimingReporter();
     }
     // just use the default implementation based on config
-    return new RequestFileReporter(config);
+    RequestTimingReporter fileReporter = new RequestFileReporter(config);
+    return new BaseRequestTimingReporter(fileReporter, config.getRequestTimingListeners());
   }
 
   /**
