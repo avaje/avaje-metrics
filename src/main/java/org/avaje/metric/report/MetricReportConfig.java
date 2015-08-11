@@ -29,6 +29,8 @@ public class MetricReportConfig {
 
   int requestTimingThreshold;
 
+  long thresholdMean;
+
   ScheduledExecutorService executor;
 
   List<RequestTimingListener> requestTimingListeners = new ArrayList<>();
@@ -165,6 +167,22 @@ public class MetricReportConfig {
    */
   public void setRequestsFreqInSeconds(int requestsFreqInSeconds) {
     this.requestsFreqInSeconds = requestsFreqInSeconds;
+  }
+
+  /**
+   * Return a threshold mean in microseconds that can be used to suppress
+   * reporting on uninteresting metrics.
+   */
+  public long getThresholdMean() {
+    return thresholdMean;
+  }
+
+  /**
+   * Set a threshold mean in microseconds that can be used to suppress
+   * reporting on uninteresting metrics.
+   */
+  public void setThresholdMean(long thresholdMean) {
+    this.thresholdMean = thresholdMean;
   }
 
   /**

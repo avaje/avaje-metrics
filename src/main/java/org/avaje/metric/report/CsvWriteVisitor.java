@@ -86,6 +86,11 @@ public class CsvWriteVisitor implements MetricVisitor {
   protected final Writer writer;
 
   /**
+   * A threshold mean value used to suppress reporting of small timed metrics values.
+   */
+  protected final long thresholdMean;
+
+  /**
    * Set to true when reporting error metrics (to get the "err." prefix on the metric name).
    */
   protected boolean errors;
@@ -97,8 +102,8 @@ public class CsvWriteVisitor implements MetricVisitor {
    * @param collectTimeFormatted The time the metrics were collected. Typically in HH:mm:ss format.
    * @param decimalPlaces        The number of decimal places to format double values. Typically 2.
    */
-  public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces) {
-    this(writer, collectTimeFormatted, decimalPlaces, ", ", "\n");
+  public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces, long thresholdMean) {
+    this(writer, collectTimeFormatted, decimalPlaces, ", ", "\n", thresholdMean);
   }
 
   /**
@@ -110,7 +115,8 @@ public class CsvWriteVisitor implements MetricVisitor {
    * @param delimiter            The delimiter string that prefixes each column.
    * @param endOfLine            The character appended after each metric has been output. Typically the newline character.
    */
-  public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces, String delimiter, String endOfLine) {
+  public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces,
+                         String delimiter, String endOfLine, long thresholdMean) {
 
     this.collectTime = System.currentTimeMillis();
     this.writer = writer;
@@ -118,6 +124,7 @@ public class CsvWriteVisitor implements MetricVisitor {
     this.decimalPlaces = decimalPlaces;
     this.delimiter = delimiter;
     this.endOfLine = endOfLine;
+    this.thresholdMean = thresholdMean;
   }
 
   /**
@@ -146,9 +153,19 @@ public class CsvWriteVisitor implements MetricVisitor {
   @Override
   public void visit(TimedMetric metric) throws IOException {
 
+    ValueStatistics successStats = metric.getCollectedSuccessStatistics();
+    ValueStatistics errorStats = metric.getCollectedErrorStatistics();
+    if (thresholdMean > 0) {
+      if (successStats.getMean() < thresholdMean && errorStats.getMean() < thresholdMean) {
+        // suppress reporting based on threshold mean (typically when discovering which
+        // metrics we really want to report on etc).
+        return;
+      }
+    }
+
     writeMetricName(metric, "tm");
-    writeSummary("", metric.getCollectedSuccessStatistics());
-    writeSummary("err.", metric.getCollectedErrorStatistics());
+    writeSummary("", successStats);
+    writeSummary("err.", errorStats);
     writeMetricEnd(metric);
   }
 

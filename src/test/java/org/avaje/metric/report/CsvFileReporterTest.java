@@ -12,12 +12,15 @@ public class CsvFileReporterTest {
 
   @Test
   public void exercise_with_MetricReportManager() throws InterruptedException, IOException {
-    
-    FileReporter fileReporter = new FileReporter(".", "metric-csv-exercise");
+
+    //CsvReportWriter csvReportWriter = new CsvReportWriter(40000);
+    //FileReporter fileReporter = new FileReporter(".", "metric-csv-exercise", csvReportWriter);
 
     MetricReportConfig config = new MetricReportConfig();
     config.setFreqInSeconds(1);
-    config.setLocalReporter(fileReporter);
+    config.setMetricsFileName("metric-csv-exercise2");
+    //config.setThresholdMean(40000);
+    //config.setLocalReporter(fileReporter);
 
     MetricReportManager report = new MetricReportManager(config);
 

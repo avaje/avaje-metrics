@@ -53,7 +53,7 @@ public class FileReporter extends BaseFileReporter implements MetricReporter {
   public FileReporter(String baseDirectory, String baseFileName, int numberOfFilesToKeep, ReportWriter reportWriter) {
 
     super(baseDirectory, baseFileName, numberOfFilesToKeep);
-    this.reportWriter = (reportWriter != null) ? reportWriter : new CsvReportWriter();
+    this.reportWriter = (reportWriter != null) ? reportWriter : new CsvReportWriter(0);
 
     cleanup();
   }

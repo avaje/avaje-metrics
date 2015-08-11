@@ -100,7 +100,7 @@ public class MetricReportManager {
     if (config.getLocalReporter() != null) {
       return config.getLocalReporter();
     }
-    return new FileReporter(config.getDirectory(), config.getMetricsFileName(), new CsvReportWriter());
+    return new FileReporter(config.getDirectory(), config.getMetricsFileName(), new CsvReportWriter(config.getThresholdMean()));
   }
 
   /**

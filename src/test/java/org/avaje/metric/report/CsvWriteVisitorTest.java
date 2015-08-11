@@ -43,7 +43,7 @@ public class CsvWriteVisitorTest {
 
 
   private CsvWriteVisitor createVisitor(StringWriter writer) {
-    return new CsvWriteVisitor(writer, "10:00:00", 2, ",", "\n");
+    return new CsvWriteVisitor(writer, "10:00:00", 2, ",", "\n", 0);
   }
 
   
