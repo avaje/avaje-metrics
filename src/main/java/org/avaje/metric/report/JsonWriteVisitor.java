@@ -1,10 +1,6 @@
 package org.avaje.metric.report;
 
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
-
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
@@ -17,6 +13,10 @@ import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
 
 /**
  * Writes the metric information as JSON to a buffer for sending.
@@ -76,7 +76,8 @@ public class JsonWriteVisitor implements MetricVisitor {
   protected void appendHeader() throws IOException {
 
     HeaderInfo headerInfo = reportMetrics.getHeaderInfo();
-    writeHeader("time", System.currentTimeMillis());
+    writeHeader("collected", reportMetrics.getCollectionTime());
+    writeHeader("reported", System.currentTimeMillis());
     writeHeader("app", headerInfo.getApp());
     writeHeader("env", headerInfo.getEnv());
     writeHeader("server", headerInfo.getServer());
