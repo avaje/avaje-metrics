@@ -1,8 +1,9 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.CounterStatistics;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 public class CounterTest {
 
@@ -10,42 +11,42 @@ public class CounterTest {
   public void test() {
     
     Counter counter = new Counter();
-    Assert.assertEquals(0, counter.getCount());
-    Assert.assertTrue(counter.isEmpty());
+    assertEquals(0, counter.getCount());
+    assertTrue(counter.isEmpty());
 
     counter.increment();
-    Assert.assertFalse(counter.isEmpty());
-    Assert.assertEquals(1, counter.getCount());
+    assertFalse(counter.isEmpty());
+    assertEquals(1, counter.getCount());
     
     counter.increment();
-    Assert.assertEquals(2, counter.getCount());
+    assertEquals(2, counter.getCount());
     counter.decrement();
-    Assert.assertEquals(1, counter.getCount());
+    assertEquals(1, counter.getCount());
     counter.add(100);
-    Assert.assertEquals(101, counter.getCount());
+    assertEquals(101, counter.getCount());
     
     CounterStatistics stats0 = counter.collectStatistics();
-    Assert.assertEquals(101, stats0.getCount());
-    Assert.assertTrue(counter.isEmpty());
+    assertEquals(101, stats0.getCount());
+    assertTrue(counter.isEmpty());
 
     
     counter.add(101);
-    Assert.assertEquals(101, counter.getCount());
+    assertEquals(101, counter.getCount());
 
     CounterStatistics stats1 = counter.getStatistics(true);
-    Assert.assertEquals(101, stats1.getCount());
+    assertEquals(101, stats1.getCount());
     
-    Assert.assertTrue(counter.isEmpty());
-    Assert.assertEquals(0, counter.getCount());
+    assertTrue(counter.isEmpty());
+    assertEquals(0, counter.getCount());
     
 
     counter.add(101);
-    Assert.assertEquals(101, counter.getCount());
+    assertEquals(101, counter.getCount());
 
     CounterStatistics stats2 = counter.getStatistics(false);
-    Assert.assertEquals(101, stats2.getCount());
-    Assert.assertFalse(counter.isEmpty());
-    Assert.assertEquals(101, counter.getCount());
+    assertEquals(101, stats2.getCount());
+    assertFalse(counter.isEmpty());
+    assertEquals(101, counter.getCount());
 
   }
 }

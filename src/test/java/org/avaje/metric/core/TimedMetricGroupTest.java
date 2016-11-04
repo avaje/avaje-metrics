@@ -3,8 +3,8 @@ package org.avaje.metric.core;
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricGroup;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class TimedMetricGroupTest {
 

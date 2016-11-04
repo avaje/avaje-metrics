@@ -4,11 +4,11 @@ import orange.truck.Customer;
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimingMetricInfo;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class DefaultMetricManagerTest {
 

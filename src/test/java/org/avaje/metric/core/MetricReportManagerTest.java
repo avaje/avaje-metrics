@@ -4,7 +4,7 @@ package org.avaje.metric.core;
 import org.avaje.metric.report.FileReporter;
 import org.avaje.metric.report.MetricReportConfig;
 import org.avaje.metric.report.MetricReportManager;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 
 public class MetricReportManagerTest {

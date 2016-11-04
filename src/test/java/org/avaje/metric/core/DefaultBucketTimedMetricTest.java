@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class DefaultBucketTimedMetricTest {
 

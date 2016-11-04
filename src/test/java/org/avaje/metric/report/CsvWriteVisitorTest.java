@@ -15,8 +15,8 @@ import org.avaje.metric.core.DefaultCounterMetric;
 import org.avaje.metric.core.DefaultGaugeDoubleMetric;
 import org.avaje.metric.core.DefaultTimedMetric;
 import org.avaje.metric.core.DefaultValueMetric;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class CsvWriteVisitorTest {
 

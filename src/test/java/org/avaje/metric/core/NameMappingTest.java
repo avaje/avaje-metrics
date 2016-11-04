@@ -1,14 +1,13 @@
 package org.avaje.metric.core;
 
-import org.junit.Ignore;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class NameMappingTest {
 
-  @Ignore
-  @Test
+  @Test(enabled = false)
   public void testGetMappedName() throws Exception {
 
     NameMapping nameMapping = new NameMapping(NameMappingTest.class.getClassLoader());

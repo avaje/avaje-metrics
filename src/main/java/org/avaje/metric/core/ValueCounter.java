@@ -1,10 +1,10 @@
 package org.avaje.metric.core;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.avaje.metric.ValueStatistics;
-import org.avaje.metric.util.LongAdder;
-import org.avaje.metric.util.LongMaxUpdater;
 
 /**
  * Used to collect timed execution statistics.
@@ -17,8 +17,8 @@ public class ValueCounter {
   protected final LongAdder count = new LongAdder();
 
   protected final LongAdder total = new LongAdder();
-  
-  protected final LongMaxUpdater max = new LongMaxUpdater();  
+
+  protected final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
 
   protected final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
   
@@ -32,7 +32,7 @@ public class ValueCounter {
      
     count.increment();
     total.add(value);
-    max.update(value);
+    max.accumulate(value);
   }
   
   public boolean isEmpty() {
@@ -60,11 +60,11 @@ public class ValueCounter {
       final long startTimeVal = startTime.getAndSet(System.currentTimeMillis());
       final long countVal = count.sumThenReset();
       final long totalVal = total.sumThenReset();
-      final long maxVal = max.maxThenReset();
+      final long maxVal = max.getThenReset();
       return new DefaultValueStatistics(startTimeVal, countVal, totalVal, maxVal);
       
     } else {
-      return new DefaultValueStatistics(startTime.get(), count.sum(), total.sum(), max.max());
+      return new DefaultValueStatistics(startTime.get(), count.sum(), total.sum(), max.get());
     }
   }
 
@@ -110,7 +110,7 @@ public class ValueCounter {
    * Return the max value.
    */
   public long getMax() {
-    return max.max();
+    return max.get();
   }
   
 }

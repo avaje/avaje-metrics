@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class JvmGCLoadTest {
 

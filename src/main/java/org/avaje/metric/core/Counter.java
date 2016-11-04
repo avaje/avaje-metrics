@@ -3,7 +3,7 @@ package org.avaje.metric.core;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.util.LongAdder;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * A statistics collection Counter based on LongAdder.

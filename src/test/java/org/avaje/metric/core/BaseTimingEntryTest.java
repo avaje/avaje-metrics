@@ -4,18 +4,15 @@ import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
-/**
- * Created by rob on 9/06/15.
- */
 public class BaseTimingEntryTest {
 
   @Test

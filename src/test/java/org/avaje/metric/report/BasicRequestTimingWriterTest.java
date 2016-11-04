@@ -7,13 +7,13 @@ import org.avaje.metric.core.BaseTimingEntry;
 import org.avaje.metric.core.DefaultMetricName;
 import org.avaje.metric.core.DefaultRequestTiming;
 import org.avaje.metric.core.DefaultTimedMetric;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class BasicRequestTimingWriterTest {
 

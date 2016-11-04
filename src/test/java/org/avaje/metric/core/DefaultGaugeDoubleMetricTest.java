@@ -1,8 +1,8 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeDouble;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class DefaultGaugeDoubleMetricTest {
 

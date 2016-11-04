@@ -2,10 +2,10 @@ package org.avaje.metric.jvm;
 
 import org.avaje.metric.GaugeDoubleGroup;
 import org.avaje.metric.GaugeDoubleMetric;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertEquals;
 
 public class JvmMemoryMetricGroupTest {
 
@@ -32,7 +32,7 @@ public class JvmMemoryMetricGroupTest {
     GaugeDoubleGroup heapGroup = JvmMemoryMetricGroup.createNonHeapGroup();
     GaugeDoubleMetric[] gaugeMetrics = heapGroup.getGaugeMetrics();
 
-    assertTrue("At least 3", gaugeMetrics.length >= 3);
+    assertThat(gaugeMetrics.length).isGreaterThan(2);
     assertEquals("init", gaugeMetrics[0].getName().getName());
     assertEquals("used", gaugeMetrics[1].getName().getName());
     assertEquals("committed", gaugeMetrics[2].getName().getName());

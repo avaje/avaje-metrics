@@ -3,7 +3,7 @@ package org.avaje.metric.report;
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Random;

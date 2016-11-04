@@ -3,8 +3,8 @@ package org.avaje.metric.util;
 import java.net.URL;
 import java.util.Properties;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class PropertiesLoaderTest {
 
@@ -25,12 +25,18 @@ public class PropertiesLoaderTest {
 
     properties = loader.load("classpath:subdir/extra.dummy.properties");    
     Assert.assertFalse(properties.isEmpty());
-    
-    
+  }
+
+  /**
+   * Enable with file:${user.home}/config/dummy.properties
+   */
+  @Test(enabled = false)
+  public void testWithUserHome() {
+
     Properties props = PropertiesLoader.indirectLoad("mylocations.txt");
-    
-    Assert.assertEquals("second file overrides first", "localOverride", props.getProperty("myappname"));
-    Assert.assertEquals("loaded in second file", "localextra", props.getProperty("mylocalextra"));
-    Assert.assertEquals("loaded in first file", "local", props.getProperty("mylocal"));
+
+    Assert.assertEquals("localOverride", props.getProperty("myappname"));
+    Assert.assertEquals("localextra", props.getProperty("mylocalextra"));
+    Assert.assertEquals("local", props.getProperty("mylocal"));
   }
 }
