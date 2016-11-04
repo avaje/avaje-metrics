@@ -26,7 +26,7 @@
     <dependency>
       <groupId>org.avaje.metric</groupId>
       <artifactId>avaje-metric-api</artifactId>
-      <version>5.1.1-SNAPSHOT</version>
+      <version>5.1.1</version>
     </dependency>
 
     <dependency>
