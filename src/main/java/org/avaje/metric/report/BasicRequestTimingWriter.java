@@ -1,5 +1,6 @@
 package org.avaje.metric.report;
 
+import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.RequestTiming;
 import org.avaje.metric.RequestTimingEntry;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -127,17 +129,40 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
       writer.write("   ");
     }
 
-    writer.append("m:").append(entry.getMetric().getName().getSimpleName());
-    writer.write("\n");
+    try {
+      writer.append("m:");
+      AbstractTimedMetric metric = entry.getMetric();
+      Map<String, String> attributes = metric.attributes();
+
+      boolean hasAttributes = (attributes != null && !attributes.isEmpty());
+      if (!hasAttributes) {
+        writer.append(metric.getName().getSimpleName());
+      } else {
+        int pad = 30 - (entry.getDepth() * 3);
+        pad(writer, pad, metric.getName().getSimpleName());
+        for (Map.Entry<String, String> attr : attributes.entrySet()) {
+          writer.append(" ").append(attr.getKey()).append("[").append(attr.getValue()).append("]");
+        }
+      }
+      writer.write("\n");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
    * Write the value padding with spaces out to padToWidth.
    */
   protected void pad(Writer writer, int padToWidth, long value) throws IOException {
-    String s = String.valueOf(value);
+    pad(writer, padToWidth, String.valueOf(value));
+  }
+
+  /**
+   * Write the value padding with spaces out to padToWidth.
+   */
+  protected void pad(Writer writer, int padToWidth, String s) throws IOException {
     writer.write(s);
-    for (int i=0; i<padToWidth-s.length(); i++) {
+    for (int i = 0; i < padToWidth - s.length(); i++) {
       writer.write(" ");
     }
   }

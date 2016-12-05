@@ -6,6 +6,8 @@ import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 
+import java.util.Map;
+
 public class NoopBucketTimedMetric implements BucketTimedMetric {
 
   private static final int[] noRange = {};
@@ -89,5 +91,10 @@ public class NoopBucketTimedMetric implements BucketTimedMetric {
   @Override
   public boolean isActiveThreadContext() {
     return false;
+  }
+
+  @Override
+  public Map<String, String> attributes() {
+    return null;
   }
 }

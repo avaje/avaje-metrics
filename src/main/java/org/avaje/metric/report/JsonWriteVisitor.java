@@ -102,40 +102,32 @@ public class JsonWriteVisitor implements MetricVisitor {
   public void visit(TimedMetric metric) throws IOException {
 
     writeMetricStart("timed", metric);
-    writeSummary("n", metric.getCollectedSuccessStatistics());
+    if (metric.isBucket()) {
+      writeHeader("bucket", metric.getBucketRange());
+    }
+    writeSummary("norm", metric.getCollectedSuccessStatistics());
     buffer.append(",");
-    writeSummary("e", metric.getCollectedErrorStatistics());
+    writeSummary("error", metric.getCollectedErrorStatistics());
     writeMetricEnd(metric);
   }
 
   @Override
   public void visit(BucketTimedMetric metric) throws IOException {
 
-    writeMetricStart("bucketTimed", metric);
-    writeKeyString("bucketRanges", commaDelimited(metric.getBucketRanges()));
-    buffer.append(",");
-
-    // write the buckets as JSON array
-    writeKey("buckets");
-    buffer.append("[\n");
-
     TimedMetric[] buckets = metric.getBuckets();
     for (int i = 0; i < buckets.length; i++) {
       if (i > 0) {
-        buffer.append(",\n");
+        buffer.write(",");
       }
-      buffer.append("         ");
       visit(buckets[i]);
     }
-    buffer.append("]");
-    writeMetricEnd(metric);
   }
 
   @Override
   public void visit(ValueMetric metric) throws IOException {
 
     writeMetricStart("value", metric);
-    writeSummary("n", metric.getCollectedStatistics());
+    writeSummary(null, metric.getCollectedStatistics());
     writeMetricEnd(metric);
   }
 
@@ -206,9 +198,11 @@ public class JsonWriteVisitor implements MetricVisitor {
 
     // valueStats == null when BucketTimedMetric and the bucket is empty
     long count = (valueStats == null) ? 0 : valueStats.getCount();
-    
-    writeKey(prefix);
-    buffer.append("{");
+
+    if (prefix != null) {
+      writeKey(prefix);
+      buffer.append("{");
+    }
     writeKeyNumber("count", count);
     if (count != 0) {
       buffer.append(",");
@@ -220,8 +214,9 @@ public class JsonWriteVisitor implements MetricVisitor {
       buffer.append(",");
       writeKeyNumber("dur", getDuration(valueStats.getStartTime()));
     }
-
-    buffer.append("}");
+    if (prefix != null) {
+      buffer.append("}");
+    }
   }
 
   protected String format(double value) {

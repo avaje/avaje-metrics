@@ -18,6 +18,8 @@ import org.avaje.metric.core.DefaultValueMetric;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class CsvWriteVisitorTest {
 
   private static long NANOS_TO_MICROS = 1000L;
@@ -127,7 +129,7 @@ public class CsvWriteVisitorTest {
     String[] lines = csvContent.split("\n");
     Assert.assertEquals(2, lines.length);
 
-    Assert.assertTrue(lines[0].contains(",org.test.BucketTimedFoo.doStuff-0-150"));
+    assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff[0-150]");
     Assert.assertTrue(lines[0].contains(",count=3,"));
     Assert.assertTrue(lines[0].contains(",avg=120000,"));
     Assert.assertTrue(lines[0].contains(",max=140000,"));
@@ -136,7 +138,7 @@ public class CsvWriteVisitorTest {
     Assert.assertTrue(lines[0].contains(",err.count=0"));
 
 
-    Assert.assertTrue(lines[1].contains(",org.test.BucketTimedFoo.doStuff-150+"));
+    assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff[150+]");
     Assert.assertTrue(lines[1].contains(",count=2,"));
     Assert.assertTrue(lines[1].contains(",avg=210000,"));
     Assert.assertTrue(lines[1].contains(",max=220000,"));
@@ -164,7 +166,7 @@ public class CsvWriteVisitorTest {
     String[] lines = csvContent.split("\n");
     Assert.assertEquals(3, lines.length);
 
-    Assert.assertTrue(lines[0].contains(",org.test.BucketTimedFoo.doStuff-0-150,"));
+    assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff[0-150],");
     Assert.assertTrue(lines[0].contains(",count=3,"));
     Assert.assertTrue(lines[0].contains(",avg=120000,"));
     Assert.assertTrue(lines[0].contains(",max=140000,"));
@@ -173,7 +175,7 @@ public class CsvWriteVisitorTest {
     Assert.assertTrue(lines[0].contains(",err.count=0"));
 
 
-    Assert.assertTrue(lines[1].contains(",org.test.BucketTimedFoo.doStuff-150-300,"));
+    assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff[150-300],");
     Assert.assertTrue(lines[1].contains(",count=0,"));
     Assert.assertFalse(lines[1].contains(",avg="));
     Assert.assertFalse(lines[1].contains(",max="));
@@ -181,7 +183,7 @@ public class CsvWriteVisitorTest {
     Assert.assertFalse(lines[1].contains(",dur="));
     Assert.assertTrue(lines[1].contains(",err.count=0"));
 
-    Assert.assertTrue(lines[2].contains(",org.test.BucketTimedFoo.doStuff-300+,"));
+    assertThat(lines[2]).contains(",org.test.BucketTimedFoo.doStuff[300+],");
     Assert.assertTrue(lines[2].contains(",count=0,"));
     Assert.assertFalse(lines[2].contains(",avg="));
     Assert.assertFalse(lines[2].contains(",max="));

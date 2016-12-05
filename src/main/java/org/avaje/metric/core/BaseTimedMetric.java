@@ -2,25 +2,25 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.AbstractTimedMetric;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Common implementation for TimedMetric and BucketTimedMetric.
  */
-public abstract class BaseTimedMetric implements AbstractTimedMetric {
+abstract class BaseTimedMetric implements AbstractTimedMetric {
 
   /**
    * Holds a count of the number of requests that we want request level
    * timing collected on.  This is decremented down to 0.
    */
-  protected final AtomicInteger requestCollection = new AtomicInteger();
+  private final AtomicInteger requestCollection = new AtomicInteger();
 
   /**
    * Flag set to true when we want to actively turn on 'request' level
    * timing collection.
    */
-  protected volatile boolean requestTiming;
-
+  private volatile boolean requestTiming;
 
   /**
    * Return the number of remain requests that we want 'request' level
@@ -102,4 +102,8 @@ public abstract class BaseTimedMetric implements AbstractTimedMetric {
     }
   }
 
+  @Override
+  public Map<String, String> attributes() {
+    return null;
+  }
 }

@@ -6,6 +6,8 @@ import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueStatistics;
 
+import java.util.Map;
+
 public class NoopTimedMetric implements TimedMetric {
 
   private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
@@ -21,6 +23,16 @@ public class NoopTimedMetric implements TimedMetric {
   @Override
   public MetricName getName() {
     return metricName;
+  }
+
+  @Override
+  public boolean isBucket() {
+    return false;
+  }
+
+  @Override
+  public String getBucketRange() {
+    return "";
   }
 
   @Override
@@ -98,4 +110,8 @@ public class NoopTimedMetric implements TimedMetric {
     // do nothing    
   }
 
+  @Override
+  public Map<String, String> attributes() {
+    return null;
+  }
 }

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -131,6 +132,11 @@ public class BaseTimingEntryTest {
     @Override
     public void clearStatistics() {
 
+    }
+
+    @Override
+    public Map<String, String> attributes() {
+      return null;
     }
   }
 }

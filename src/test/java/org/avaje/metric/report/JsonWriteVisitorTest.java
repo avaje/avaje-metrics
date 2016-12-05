@@ -27,6 +27,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class JsonWriteVisitorTest {
 
   private static long NANOS_TO_MICROS = 1000L;
@@ -78,7 +80,7 @@ public class JsonWriteVisitorTest {
     jsonVisitor.visit(metric);
     String counterJson = writer.toString();
     
-    Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"n\":{\"count\":3,\"avg\":14,\"max\":16,\"sum\":42,\"dur\":0}}", counterJson);
+    Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"avg\":14,\"max\":16,\"sum\":42,\"dur\":0}", counterJson);
   }
 
   
@@ -94,7 +96,7 @@ public class JsonWriteVisitorTest {
     String counterJson = writer.toString();
     
     // values converted into microseconds
-    Assert.assertEquals("{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"n\":{\"count\":3,\"avg\":120,\"max\":140,\"sum\":360,\"dur\":0},\"e\":{\"count\":2,\"avg\":210,\"max\":220,\"sum\":420,\"dur\":0}}", counterJson);
+    Assert.assertEquals("{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"norm\":{\"count\":3,\"avg\":120,\"max\":140,\"sum\":360,\"dur\":0},\"error\":{\"count\":2,\"avg\":210,\"max\":220,\"sum\":420,\"dur\":0}}", counterJson);
   }
 
 
@@ -112,12 +114,8 @@ public class JsonWriteVisitorTest {
     jsonVisitor.visit(metric);
     String bucketJson = writer.toString();
 
-    String[] lines = bucketJson.split("\n");
-    Assert.assertEquals(3, lines.length);
-
-    Assert.assertTrue(lines[0].contains("{\"type\":\"bucketTimed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucketRanges\":\"150\",\"buckets\":["));
-    Assert.assertTrue(lines[1].contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff-0-150\",\"n\":{\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0},\"e\":{\"count\":0}},"));
-    Assert.assertTrue(lines[2].contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff-150+\",\"n\":{\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000,\"dur\":0},\"e\":{\"count\":0}}]}"));
+    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"norm\":{\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0},\"error\":{\"count\":0}},");
+    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150+\",\"norm\":{\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000,\"dur\":0},\"error\":{\"count\":0}}");
   }
 
   /**
@@ -134,17 +132,10 @@ public class JsonWriteVisitorTest {
     jsonVisitor.visit(metric);
     String bucketJson = writer.toString();
 
-    String[] lines = bucketJson.split("\n");
-    Assert.assertEquals(4, lines.length);
-
-    Assert.assertTrue(lines[0].contains("{\"type\":\"bucketTimed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucketRanges\":\"150,300\",\"buckets\":["));
-    Assert.assertTrue(lines[1].contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff-0-150\",\"n\":{\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0},\"e\":{\"count\":0}},"));
-    Assert.assertTrue(lines[2].contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff-150-300\",\"n\":{\"count\":0},\"e\":{\"count\":0}},"));
-    Assert.assertTrue(lines[3].contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff-300+\",\"n\":{\"count\":0},\"e\":{\"count\":0}}]}"));
-
+    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"norm\":{\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0},\"error\":{\"count\":0}},");
+    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150-300\",\"norm\":{\"count\":0},\"error\":{\"count\":0}},");
+    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"300+\",\"norm\":{\"count\":0},\"error\":{\"count\":0}}");
   }
-  
-  
   
   @Test
   public void testMetricList() throws IOException {
@@ -188,7 +179,7 @@ public class JsonWriteVisitorTest {
     
     JsonNode jsonNode = jsonObject.get("metrics");
     ArrayNode metricArray = (ArrayNode)jsonNode;
-    Assert.assertEquals(6, metricArray.size());
+    assertThat(metricArray.size()).isEqualTo(9);
 
   }
   

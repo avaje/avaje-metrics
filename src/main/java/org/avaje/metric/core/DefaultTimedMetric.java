@@ -14,7 +14,11 @@ import java.util.concurrent.TimeUnit;
  */
 public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
 
+  private static final String noBuckets = "";
+
   private final MetricName name;
+
+  private final String bucketRange;
 
   private final ValueCounter successCounter = new ValueCounter();
 
@@ -26,10 +30,26 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
 
   public DefaultTimedMetric(MetricName name) {
     this.name = name;
+    this.bucketRange = noBuckets;
+  }
+
+  public DefaultTimedMetric(MetricName name, String bucketRange) {
+    this.name = name;
+    this.bucketRange = bucketRange;
   }
 
   public String toString() {
     return name.toString();
+  }
+
+  @Override
+  public boolean isBucket() {
+    return !noBuckets.equals(bucketRange);
+  }
+
+  @Override
+  public String getBucketRange() {
+    return bucketRange;
   }
 
   @Override

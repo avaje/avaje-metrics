@@ -1,5 +1,6 @@
 package org.avaje.metric.core;
 
+import org.avaje.metric.MetricManager;
 import org.avaje.metric.TimedMetric;
 import org.testng.annotations.Test;
 
@@ -43,7 +44,6 @@ public class NestedContextTest {
     context.pop();
     context.pop();
     context.pop();
-
   }
 
   @Test
@@ -54,6 +54,19 @@ public class NestedContextTest {
     context.pushIfActive(m1);
     context.pop();
     context.pushIfActive(m2);
+    context.pop();
+    context.pop();
+
+  }
+
+  @Test
+  public void testSupplier() throws Exception {
+
+    NestedContext context = new NestedContext();
+    context.push(m0);
+    context.pushIfActive(() -> new RequestMetric(MetricManager.name("sql.select foo")));
+    context.pop();
+    context.pushIfActive(() -> new RequestMetric(MetricManager.name("sql.select bar")));
     context.pop();
     context.pop();
 

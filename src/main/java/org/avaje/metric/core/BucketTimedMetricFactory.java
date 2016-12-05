@@ -25,10 +25,8 @@ public class BucketTimedMetricFactory implements MetricFactory<BucketTimedMetric
   }
 
   private TimedMetric createTimedMetric(MetricName name, int rangeBottom, int rangeTop) {
-    
-    String suffix = (rangeTop == 0) ? "-"+rangeBottom+"+" : "-"+rangeBottom+"-"+rangeTop;
-    MetricName bucketName = name.withSuffix(suffix);
-    return new DefaultTimedMetric(bucketName);
+    String suffix = (rangeTop == 0) ? rangeBottom + "+" : rangeBottom + "-" + rangeTop;
+    return new DefaultTimedMetric(name, suffix);
   }
 
 }

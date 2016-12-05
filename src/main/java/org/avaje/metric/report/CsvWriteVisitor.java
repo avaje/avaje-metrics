@@ -164,6 +164,11 @@ public class CsvWriteVisitor implements MetricVisitor {
     }
 
     writeMetricName(metric, "tm");
+    if (metric.isBucket()) {
+      writer.write("[");
+      writer.write(metric.getBucketRange());
+      writer.write("]");
+    }
     writeSummary("", successStats);
     writeSummary("err.", errorStats);
     writeMetricEnd(metric);

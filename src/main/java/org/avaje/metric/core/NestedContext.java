@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Uses a ThreadLocal scope holding a 'context/stack' of all the timing metrics occurring for a single request.
@@ -52,6 +53,13 @@ public final class NestedContext {
   }
 
   /**
+   * Push a suppler of timed metric.
+   */
+  public static boolean pushIfActive(Supplier<AbstractTimedMetric> supplier) {
+    return local.get().pushMetricIfActive(supplier);
+  }
+
+  /**
    * Add the TimedMetric to the nested context.
    * <p>
    * If the nested context is not active it will become so.
@@ -92,6 +100,23 @@ public final class NestedContext {
   List<RequestTimingEntry> entries = new ArrayList<>();
 
   NestedContext() {
+  }
+
+  /**
+   * Return true if this timing metric should be added to the nested context.
+   * The supplier allows lazy evaluation of the metric.
+   */
+  boolean pushMetricIfActive(Supplier<AbstractTimedMetric> supplier) {
+    if (depth < 1) {
+      return false;
+    }
+    AbstractTimedMetric metric = supplier.get();
+    if (metric == null) {
+      return false;
+    } else {
+      stack.push(new BaseTimingEntry(depth++, metric, System.nanoTime()));
+      return true;
+    }
   }
 
   /**

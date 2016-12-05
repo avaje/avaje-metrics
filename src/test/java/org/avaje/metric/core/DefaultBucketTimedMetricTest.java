@@ -8,6 +8,8 @@ import org.avaje.metric.TimedMetric;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class DefaultBucketTimedMetricTest {
 
   @Test
@@ -27,11 +29,16 @@ public class DefaultBucketTimedMetricTest {
       
     TimedMetric[] buckets = bucketTimedMetric.getBuckets();
     Assert.assertEquals(4, buckets.length);
-    Assert.assertEquals(name+"-0-100", buckets[0].getName().toString());
-    Assert.assertEquals(name+"-100-200", buckets[1].getName().toString());
-    Assert.assertEquals(name+"-200-300", buckets[2].getName().toString());
-    Assert.assertEquals(name+"-300+", buckets[3].getName().toString());
-    
+    assertNameMatch(buckets[0].getName(), name);
+    assertNameMatch(buckets[1].getName(), name);
+    assertNameMatch(buckets[2].getName(), name);
+    assertNameMatch(buckets[3].getName(), name);
+
+    Assert.assertEquals("0-100", buckets[0].getBucketRange());
+    Assert.assertEquals("100-200", buckets[1].getBucketRange());
+    Assert.assertEquals("200-300", buckets[2].getBucketRange());
+    Assert.assertEquals("300+", buckets[3].getBucketRange());
+
     long fiftyMillisAsNanos = TimeUnit.MILLISECONDS.toNanos(50);
     
     Assert.assertEquals(0, buckets[0].getSuccessStatistics(false).getCount());
@@ -56,5 +63,9 @@ public class DefaultBucketTimedMetricTest {
     bucketTimedMetric.addEventDuration(true, threeFiftyMillisAsNanos);
     Assert.assertEquals(1, buckets[3].getSuccessStatistics(false).getCount());
 
+  }
+
+  private void assertNameMatch(MetricName name, MetricName name1) {
+    assertThat(name.toString()).isEqualTo(name1.toString());
   }
 }
