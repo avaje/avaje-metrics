@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Writes the collected metrics to registered reporters.
@@ -76,8 +78,10 @@ public class MetricReportManager {
       executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
 
-    int requestFreqInSecs = defaultRequestFreqInSecs(config);
-    executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
+    if (config.isRequestTiming()) {
+      int requestFreqInSecs = defaultRequestFreqInSecs(config);
+      executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
+    }
   }
 
   /**
@@ -107,7 +111,7 @@ public class MetricReportManager {
    * Helper method that provides a default ScheduledExecutorService if not specified.
    */
   protected ScheduledExecutorService defaultExecutor(ScheduledExecutorService executor) {
-    return (executor != null) ? executor : Executors.newSingleThreadScheduledExecutor();
+    return (executor != null) ? executor : Executors.newScheduledThreadPool(1, new BasicThreadFactory());
   }
 
   /**
@@ -139,11 +143,15 @@ public class MetricReportManager {
    */
   private void reportRequestTimings() {
 
-    // read and remove any collected request timings
-    List<RequestTiming> requestTimings = MetricManager.collectRequestTimings();
-    if (!requestTimings.isEmpty() && requestTimingReporter != null) {
-      // write the request timings out to file log typically
-      requestTimingReporter.report(requestTimings);
+    try {
+      // read and remove any collected request timings
+      List<RequestTiming> requestTimings = MetricManager.collectRequestTimings();
+      if (!requestTimings.isEmpty() && requestTimingReporter != null) {
+        // write the request timings out to file log typically
+        requestTimingReporter.report(requestTimings);
+      }
+    } catch (Exception e) {
+      logger.error("Error reporting request timing", e);
     }
   }
 
@@ -165,7 +173,7 @@ public class MetricReportManager {
           periodicCleanUp();
         }
 
-      } catch (IOException e) {
+      } catch (Exception e) {
         logger.error("Error writing metrics", e);
       }
     }
@@ -213,7 +221,6 @@ public class MetricReportManager {
     if (logger.isDebugEnabled()) {
       logger.debug("reported [{}] metrics - collectMicros:{} reportMicros:{}", metrics.size(), asMicros(collectNanos), asMicros(reportNanos));
     }
-    
   }
 
   private long asMicros(long collectNanos) {
@@ -267,4 +274,27 @@ public class MetricReportManager {
 
   }
 
+  /**
+   * The default thread factory
+   */
+  protected static class BasicThreadFactory implements ThreadFactory {
+    private final ThreadGroup group;
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final String namePrefix;
+
+    BasicThreadFactory() {
+      SecurityManager s = System.getSecurityManager();
+      group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+      namePrefix = "metric-";
+    }
+
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(),0);
+      if (t.isDaemon())
+        t.setDaemon(false);
+      if (t.getPriority() != Thread.NORM_PRIORITY)
+        t.setPriority(Thread.NORM_PRIORITY);
+      return t;
+    }
+  }
 }

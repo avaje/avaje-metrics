@@ -25,6 +25,8 @@ public class MetricReportConfig {
 
   MetricReporter remoteReporter;
 
+  private boolean requestTiming;
+
   RequestTimingReporter requestTimingReporter;
 
   int requestTimingThreshold;
@@ -246,5 +248,19 @@ public class MetricReportConfig {
    */
   public void setRequestTimingListeners(List<RequestTimingListener> requestTimingListeners) {
     this.requestTimingListeners = requestTimingListeners;
+  }
+
+  /**
+   * Return true if request timing is on.
+   */
+  public boolean isRequestTiming() {
+    return requestTiming;
+  }
+
+  /**
+   * Set to true to collect and report request timing.
+   */
+  public void setRequestTiming(boolean requestTiming) {
+    this.requestTiming = requestTiming;
   }
 }
