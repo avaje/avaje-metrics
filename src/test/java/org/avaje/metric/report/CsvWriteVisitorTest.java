@@ -204,12 +204,7 @@ public class CsvWriteVisitorTest {
   }
   
   private GaugeDoubleMetric createGaugeMetric() {
-    GaugeDouble gauge = new GaugeDouble() {
-      @Override
-      public double getValue() {
-        return 24d;
-      }
-    };
+    GaugeDouble gauge = () -> 24d;
     GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricManager.name("org.test.GaugeFoo.doStuff"), gauge);
     metric.collectStatistics();
     return metric;

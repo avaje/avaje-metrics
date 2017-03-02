@@ -189,7 +189,10 @@ public class DefaultMetricManager implements PluginMetricManager {
 
     GaugeLongGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
     for (GaugeLongGroup gaugeMetricGroup : gaugeMetricGroups) {
-      registerJvmMetric(gaugeMetricGroup);
+      // add gc metrics individually to support exclusion when 0 from reporting
+      for (GaugeLongMetric metric : gaugeMetricGroup.getGaugeMetrics()) {
+        registerJvmMetric(metric);
+      }
     }
 
     registerJvmMetric(JvmThreadMetricGroup.createThreadMetricGroup());
@@ -346,14 +349,13 @@ public class DefaultMetricManager implements PluginMetricManager {
 
       Collection<Metric> values = metricsCache.values();
       List<Metric> list = new ArrayList<>(values.size());
-
       for (Metric metric : values) {
         if (metric.collectStatistics()) {
           list.add(metric);
         }
       }
 
-      return Collections.unmodifiableList(list);
+      return list;
     }
   }
 
@@ -481,6 +483,16 @@ public class DefaultMetricManager implements PluginMetricManager {
     return coreJvmMetricCollection;
   }
 
+  @Override
+  public Collection<Metric> collectNonEmptyJvmMetrics() {
+    List<Metric> list = new ArrayList<>();
+    for (Metric metric : coreJvmMetricCollection) {
+      if (metric.collectStatistics()) {
+        list.add(metric);
+      }
+    }
+    return list;
+  }
 
   /**
    * Compare Metrics by name for sorting purposes.

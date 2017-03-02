@@ -40,7 +40,7 @@ public class JvmGCLoadTest {
   
   private void createSomeGarbage() {
 
-    Map<String, String> m = new ConcurrentHashMap<String, String>();
+    Map<String, String> m = new ConcurrentHashMap<>();
 
     Random r = new Random();
 

@@ -33,8 +33,16 @@ public class CsvFileReporterTest {
       int plus = random.nextInt(20);
       Thread.sleep(20+plus);
       event.endWithSuccess();
+
+      if (i == 20) {
+        Runtime.getRuntime().gc();
+      }
     }
-    
+
+    Thread.sleep(2000);
+
+    Runtime.getRuntime().gc();
+
     Thread.sleep(2000);
 
     report.shutdown();

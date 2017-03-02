@@ -232,7 +232,7 @@ public class MetricReportManager {
    */
   protected List<Metric> collectMetrics() {
 
-    List<Metric> metrics = sort(MetricManager.getJvmMetrics());
+    List<Metric> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
     List<Metric> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
     metrics.addAll(otherMetrics);
     return metrics;

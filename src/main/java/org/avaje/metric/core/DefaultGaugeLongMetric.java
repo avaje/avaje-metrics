@@ -89,6 +89,11 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
     }
 
     @Override
+    public boolean collectStatistics() {
+      return super.getValue() > runningValue;
+    }
+
+    @Override
     public long getValue() {
 
       synchronized (this) {
