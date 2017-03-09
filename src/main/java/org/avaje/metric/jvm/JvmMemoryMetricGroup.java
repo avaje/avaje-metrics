@@ -1,14 +1,18 @@
 package org.avaje.metric.jvm;
 
 import org.avaje.metric.GaugeDouble;
-import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.core.DefaultGaugeDoubleMetric;
+import org.avaje.metric.core.DefaultGaugeLongMetric;
 import org.avaje.metric.core.DefaultMetricName;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class JvmMemoryMetricGroup {
 
@@ -44,15 +48,13 @@ public final class JvmMemoryMetricGroup {
       return memoryMXBean.getNonHeapMemoryUsage();
     }
   }
-  
-  private static final String[] names = {"used","committed","pct"};
-  
-  private static final double MEGABYTES = 1024*1024;
+
+  private static final long MEGABYTES = 1024*1024L;
   
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  public static GaugeDoubleMetric[] createHeapGroup() {
+  public static List<Metric> createHeapGroup() {
     
     DefaultMetricName heapName = DefaultMetricName.createBaseName("jvm","memory.heap");   
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
@@ -62,109 +64,93 @@ public final class JvmMemoryMetricGroup {
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  public static GaugeDoubleMetric[] createNonHeapGroup() {
+  public static List<Metric> createNonHeapGroup() {
     DefaultMetricName nonHeapName = DefaultMetricName.createBaseName("jvm","memory.nonheap");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(nonHeapName, source);
   }
 
-  private static GaugeDoubleMetric[] createGroup(DefaultMetricName baseName, MemoryUsageSource source) {
-    GaugeDouble[] gauges = createGauges(source);
-    return createGroup(baseName, gauges);
-  }
-  
-  private static GaugeDoubleMetric[] createGroup(DefaultMetricName baseName,  GaugeDouble[] gauges) {
-    GaugeDoubleMetric[] group = new GaugeDoubleMetric[gauges.length];
-    for (int i = 0; i < gauges.length; i++) {
-      group[i] = createGaugeMetric(baseName, names[i], gauges[i]);
-    }
-    return group;
-  }
-  
-  private static GaugeDoubleMetric createGaugeMetric(DefaultMetricName baseName, String name, GaugeDouble gauge) {
-    MetricName specificName = baseName.withName(name);
-    return new DefaultGaugeDoubleMetric(specificName, gauge);
-  }
-  
- 
-  private static GaugeDouble[] createGauges(MemoryUsageSource source) {
-    return new MemUsageGauages(source).getGauges();
+  private static List<Metric> createGroup(DefaultMetricName baseName, MemoryUsageSource source) {
+    return new MemUsageGauages(source, baseName).createMetric();
   }
   
   static class MemUsageGauages {
-    private final GaugeDouble[] gauges;
-    
-    private MemUsageGauages(MemoryUsageSource source) {
-      this.gauges = createGauges(source);
+    private final MemoryUsageSource source;
+    private final DefaultMetricName baseName;
+
+    private MemUsageGauages(MemoryUsageSource source, DefaultMetricName baseName) {
+      this.source =  source;
+      this.baseName = baseName;
     }
-    
-    GaugeDouble[] getGauges() {
-      return gauges;
-    }
-    
-    private GaugeDouble[] createGauges(MemoryUsageSource source) {
+
+    public List<Metric> createMetric() {
+
+      List<Metric> metrics = new ArrayList<>();
+
+      metrics.add(new DefaultGaugeLongMetric(name("init"), new Init(source)));
+      metrics.add(new DefaultGaugeLongMetric(name("used"), new Used(source)));
+      metrics.add(new DefaultGaugeLongMetric(name("committed"), new Committed(source)));
 
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.getUsage().getMax() > 0);
-
-      int gaugeCount = hasMax ? 3 : 2;
-      GaugeDouble[] ga = new GaugeDouble[gaugeCount];
-      // we always collect Used and Committed
-      ga[0] = new Used(source);
-      ga[1] = new Committed(source);
-
       if (hasMax) {
-        // also collect Percentage
-        ga[2] = new Pct(source);
+        // also collect Max and Percentage
+        metrics.add(new DefaultGaugeLongMetric(name("max"), new Max(source)));
+        metrics.add(new DefaultGaugeDoubleMetric(name("pct"), new Pct(source)));
       }
-      return ga;
+
+      return metrics;
     }
-  
+
+    private MetricName name(String name) {
+      return baseName.withName(name);
+    }
+
     private abstract class Base {
       MemoryUsageSource source;
       Base(MemoryUsageSource source) {
         this.source = source;
       }
     }
-//    private class Init extends Base implements GaugeDouble {
-//      Init(MemoryUsageSource source) {
-//        super(source);
-//      }
-//      @Override
-//      public double getValue() {
-//        return source.getUsage().getInit() / MEGABYTES;
-//      }
-//    }
+    private class Init extends Base implements GaugeLong {
+      Init(MemoryUsageSource source) {
+        super(source);
+      }
+      @Override
+      public long getValue() {
+        return source.getUsage().getInit() / MEGABYTES;
+      }
+    }
     
-    private class Used extends Base implements GaugeDouble {
+    private class Used extends Base implements GaugeLong {
       Used(MemoryUsageSource source) {
         super(source);
       }
       @Override
-      public double getValue() {
+      public long getValue() {
         return source.getUsage().getUsed() / MEGABYTES;
       }
     }
     
-    private class Committed extends Base implements GaugeDouble {
+    private class Committed extends Base implements GaugeLong {
       Committed(MemoryUsageSource source) {
         super(source);
       }
       @Override
-      public double getValue() {
+      public long getValue() {
         return source.getUsage().getCommitted() / MEGABYTES;
       }
     }
     
-//    private class Max extends Base implements GaugeDouble {
-//      Max(MemoryUsageSource source) {
-//        super(source);
-//      }
-//      @Override
-//      public double getValue() {
-//        return source.getUsage().getMax() / MEGABYTES;
-//      }
-//    }
+    private class Max extends Base implements GaugeLong {
+      Max(MemoryUsageSource source) {
+        super(source);
+      }
+      @Override
+      public long getValue() {
+        return source.getUsage().getMax() / MEGABYTES;
+      }
+    }
 
     private class Pct extends Base implements GaugeDouble {
       Pct(MemoryUsageSource source) {

@@ -196,12 +196,6 @@ public class DefaultMetricManager implements PluginMetricManager {
     }
   }
 
-  private void registerAll(Metric[] metrics) {
-    for (Metric metric : metrics) {
-      registerJvmMetric(metric);
-    }
-  }
-
   private void registerAll(List<Metric> groups) {
     for (Metric metric : groups) {
       registerJvmMetric(metric);
