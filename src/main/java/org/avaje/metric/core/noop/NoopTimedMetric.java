@@ -1,11 +1,13 @@
 package org.avaje.metric.core.noop;
 
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueStatistics;
 
+import java.util.List;
 import java.util.Map;
 
 public class NoopTimedMetric implements TimedMetric {
@@ -36,8 +38,8 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public boolean collectStatistics() {
-    return false;
+  public void collectStatistics(List<Metric> list) {
+    // do nothing
   }
 
   @Override

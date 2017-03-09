@@ -1,10 +1,18 @@
 package org.avaje.metric.core;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.avaje.metric.BucketTimedMetric;
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
+import org.avaje.metric.report.HeaderInfo;
+import org.avaje.metric.report.JsonWriteVisitor;
+import org.avaje.metric.report.ReportMetrics;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,15 +20,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultBucketTimedMetricTest {
 
+  private final DefaultMetricManager mgr = new DefaultMetricManager();
+  private final MetricName name = mgr.name(DefaultBucketTimedMetricTest.class, "test");
+
+  public DefaultBucketTimedMetricTest() {
+  }
+
+  private BucketTimedMetric create() {
+    return mgr.getBucketTimedMetric(name, 100, 200, 300);
+  }
+
   @Test
   public void test() {
-    
-    DefaultMetricManager mgr = new DefaultMetricManager();
-    
-    MetricName name = mgr.name(DefaultBucketTimedMetricTest.class, "test");
-    
-    BucketTimedMetric bucketTimedMetric = mgr.getBucketTimedMetric(name, 100, 200, 300);
-    
+
+    BucketTimedMetric bucketTimedMetric = create();
+
     int[] bucketRanges = bucketTimedMetric.getBucketRanges();
     Assert.assertEquals(3, bucketRanges.length);
     Assert.assertEquals(100, bucketRanges[0]);

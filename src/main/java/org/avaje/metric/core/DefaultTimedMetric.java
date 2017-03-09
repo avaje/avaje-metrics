@@ -3,6 +3,7 @@ package org.avaje.metric.core;
 import org.avaje.metric.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -83,7 +84,8 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
   }
 
   @Override
-  public boolean collectStatistics() {
+  public void collectStatistics(List<Metric> list) {
+
     boolean empty = successCounter.isEmpty() && errorCounter.isEmpty();
     if (empty) {
       // just reset the start time
@@ -93,8 +95,8 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
       // get a snapshot of the statistics and reset the underlying counters
       this.collectedSuccessStatistics = successCounter.getStatistics(true);
       this.collectedErrorStatistics = errorCounter.getStatistics(true);
+      list.add(this);
     }
-    return !empty;
   }
 
   @Override

@@ -1,81 +1,64 @@
 package org.avaje.metric.jvm;
 
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.Metric;
+import org.avaje.metric.core.DefaultGaugeLongMetric;
+import org.avaje.metric.core.DefaultMetricName;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.List;
-
-import org.avaje.metric.GaugeLong;
-import org.avaje.metric.GaugeLongGroup;
-import org.avaje.metric.MetricName;
-import org.avaje.metric.core.DefaultGaugeLongMetric;
-import org.avaje.metric.core.DefaultGaugeLongGroup;
-import org.avaje.metric.core.DefaultMetricName;
 
 /**
  * Collect statistics on the rate of garbage collection.
  */
 public final class JvmGarbageCollectionMetricGroup {
 
-  private static String[] names = { "count", "time" };
-
-  public static GaugeLongGroup[] createGauges() {
+  public static List<Metric> createGauges() {
 
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
-    DefaultGaugeLongGroup[] metricGroups = new DefaultGaugeLongGroup[garbageCollectorMXBeans.size()];
+    List<Metric> metrics = new ArrayList<>();
 
-    for (int i = 0; i < garbageCollectorMXBeans.size(); i++) {
-      GarbageCollectorMXBean gcMXBean = garbageCollectorMXBeans.get(i);
-
+    for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
       // modify collector name replacing spaces with hyphens.
-      String gcName = gcMXBean.getName();
-      gcName = gcName.toLowerCase().replace(' ', '-');
-      
+      String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-');
       DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm.gc", gcName);
 
-      GaugeLong[] gauges = new Collector(gcMXBean).getGauges();
-      DefaultGaugeLongMetric[] group = new DefaultGaugeLongMetric[gauges.length];
-
-      for (int j = 0; j < gauges.length; j++) {
-        MetricName metricName = baseName.withName(names[j]);
-        group[j] = DefaultGaugeLongMetric.incrementing(metricName, gauges[j]);
-      }
-
-      metricGroups[i] = new DefaultGaugeLongGroup(baseName, group);
+      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.withName("count"), new Count(gcMXBean)));
+      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.withName("time"), new Time(gcMXBean)));
     }
 
-    return metricGroups;
+    return metrics;
   }
 
-  /**
-   * A per garbage collector collector.
-   */
-  private static class Collector {
+
+  private static class Count implements GaugeLong {
 
     final GarbageCollectorMXBean gcMXBean;
-    final GaugeLong[] gauges;
 
-    Collector(GarbageCollectorMXBean gcMXBean) {
+    Count(GarbageCollectorMXBean gcMXBean) {
       this.gcMXBean = gcMXBean;
-      this.gauges = new GaugeLong[]{new Count(), new Time()};
     }
 
-    public GaugeLong[] getGauges() {
-      return gauges;
+    @Override
+    public long getValue() {
+      return gcMXBean.getCollectionCount();
+    }
+  }
+
+  private static class Time implements GaugeLong {
+
+    final GarbageCollectorMXBean gcMXBean;
+
+    Time(GarbageCollectorMXBean gcMXBean) {
+      this.gcMXBean = gcMXBean;
     }
 
-    class Count implements GaugeLong {
-      @Override
-      public long getValue() {
-        return gcMXBean.getCollectionCount();
-      }
-    }
-
-    class Time implements GaugeLong {
-      @Override
-      public long getValue() {
-        return gcMXBean.getCollectionTime();
-      }
+    @Override
+    public long getValue() {
+      return gcMXBean.getCollectionTime();
     }
   }
 }

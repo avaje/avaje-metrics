@@ -7,6 +7,7 @@ import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -31,9 +32,11 @@ public final class DefaultValueMetric implements Metric, ValueMetric {
 
 
   @Override
-  public boolean collectStatistics() {
+  public void collectStatistics(List<Metric> list) {
     this.collectedStatistics = valueCounter.collectStatistics();
-    return collectedStatistics != null;
+    if (collectedStatistics != null) {
+      list.add(this);
+    }
   }
 
 

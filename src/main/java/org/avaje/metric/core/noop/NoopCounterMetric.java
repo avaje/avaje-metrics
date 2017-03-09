@@ -2,8 +2,11 @@ package org.avaje.metric.core.noop;
 
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
+
+import java.util.List;
 
 public final class NoopCounterMetric implements CounterMetric {
 
@@ -21,8 +24,8 @@ public final class NoopCounterMetric implements CounterMetric {
   }
 
   @Override
-  public boolean collectStatistics() {
-    return false;
+  public void collectStatistics(List<Metric> list) {
+    // do nothing
   }
 
   @Override

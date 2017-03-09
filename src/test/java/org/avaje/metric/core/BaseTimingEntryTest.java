@@ -1,6 +1,7 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.AbstractTimedMetric;
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
@@ -12,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertSame;
 
 public class BaseTimingEntryTest {
 
@@ -118,10 +119,8 @@ public class BaseTimingEntryTest {
 
     }
 
+    public void collectStatistics(List<Metric> list) {
 
-    @Override
-    public boolean collectStatistics() {
-      return false;
     }
 
     @Override

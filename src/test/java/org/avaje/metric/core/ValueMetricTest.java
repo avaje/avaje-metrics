@@ -1,10 +1,16 @@
 package org.avaje.metric.core;
 
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
-import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertEquals;
 
 public class ValueMetricTest {
 
@@ -13,27 +19,33 @@ public class ValueMetricTest {
 
     ValueMetric metric = MetricManager.getValueMetric(new DefaultMetricName("org", "test", "mycounter"));
 
-    Assert.assertEquals("org", metric.getName().getGroup());
-    Assert.assertEquals("test", metric.getName().getType());
-    Assert.assertEquals("mycounter", metric.getName().getName());
+    assertEquals("org", metric.getName().getGroup());
+    assertEquals("test", metric.getName().getType());
+    assertEquals("mycounter", metric.getName().getName());
 
     metric.clearStatistics();
+    assertThat(collect(metric)).isEmpty();
 
     metric.addEvent(1000);
     metric.addEvent(2000);
     metric.addEvent(1500);
-    
-    Assert.assertTrue(metric.collectStatistics());
+
+    assertThat(collect(metric)).hasSize(1);
     
     ValueStatistics statistics = metric.getCollectedStatistics();
     
-    Assert.assertEquals(3, statistics.getCount());
-    Assert.assertEquals(4500, statistics.getTotal());
-    Assert.assertEquals(2000, statistics.getMax());
-    Assert.assertEquals(1500, statistics.getMean());
+    assertEquals(3, statistics.getCount());
+    assertEquals(4500, statistics.getTotal());
+    assertEquals(2000, statistics.getMax());
+    assertEquals(1500, statistics.getMean());
 
 
-    Assert.assertFalse(metric.collectStatistics());
+    assertThat(collect(metric)).isEmpty();
+  }
 
+  private List<Metric> collect(Metric metric) {
+    List<Metric> list = new ArrayList<>();
+    metric.collectStatistics(list);
+    return list;
   }
 }

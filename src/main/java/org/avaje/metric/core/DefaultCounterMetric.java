@@ -7,6 +7,7 @@ import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -63,9 +64,11 @@ public final class DefaultCounterMetric implements Metric, CounterMetric {
    * Collect the statistics returning true if there are non-zero statistics on this metric.
    */
   @Override
-  public boolean collectStatistics() {
+  public void collectStatistics(List<Metric> list) {
     this.collectedStatistics = counter.collectStatistics();
-    return collectedStatistics != null;
+    if (collectedStatistics != null) {
+      list.add(this);
+    }
   }
   
   @Override

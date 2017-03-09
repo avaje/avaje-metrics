@@ -184,24 +184,27 @@ public class DefaultMetricManager implements PluginMetricManager {
    */
   private void registerStandardJvmMetrics() {
 
-    registerJvmMetric(JvmMemoryMetricGroup.createHeapGroup());
-    registerJvmMetric(JvmMemoryMetricGroup.createNonHeapGroup());
-
-    GaugeLongGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
-    for (GaugeLongGroup gaugeMetricGroup : gaugeMetricGroups) {
-      // add gc metrics individually to support exclusion when 0 from reporting
-      for (GaugeLongMetric metric : gaugeMetricGroup.getGaugeMetrics()) {
-        registerJvmMetric(metric);
-      }
-    }
-
-    registerJvmMetric(JvmThreadMetricGroup.createThreadMetricGroup());
-    registerJvmMetric(JvmSystemMetricGroup.getUptime());
+    registerAll(JvmMemoryMetricGroup.createHeapGroup());
+    registerAll(JvmMemoryMetricGroup.createNonHeapGroup());
+    registerAll(JvmGarbageCollectionMetricGroup.createGauges());
+    registerAll(JvmThreadMetricGroup.createThreadMetricGroup());
 
     DefaultGaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
+    }
+  }
+
+  private void registerAll(Metric[] metrics) {
+    for (Metric metric : metrics) {
+      registerJvmMetric(metric);
+    }
+  }
+
+  private void registerAll(List<Metric> groups) {
+    for (Metric metric : groups) {
+      registerJvmMetric(metric);
     }
   }
 
@@ -344,18 +347,14 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public Collection<Metric> collectNonEmptyMetrics() {
+  public List<Metric> collectNonEmptyMetrics() {
     synchronized (monitor) {
-
+      List<Metric> reportList = new ArrayList<>();
       Collection<Metric> values = metricsCache.values();
-      List<Metric> list = new ArrayList<>(values.size());
       for (Metric metric : values) {
-        if (metric.collectStatistics()) {
-          list.add(metric);
-        }
+        metric.collectStatistics(reportList);
       }
-
-      return list;
+      return reportList;
     }
   }
 
@@ -484,14 +483,12 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public Collection<Metric> collectNonEmptyJvmMetrics() {
-    List<Metric> list = new ArrayList<>();
+  public List<Metric> collectNonEmptyJvmMetrics() {
+    List<Metric> reportList = new ArrayList<>();
     for (Metric metric : coreJvmMetricCollection) {
-      if (metric.collectStatistics()) {
-        list.add(metric);
-      }
+      metric.collectStatistics(reportList);
     }
-    return list;
+    return reportList;
   }
 
   /**

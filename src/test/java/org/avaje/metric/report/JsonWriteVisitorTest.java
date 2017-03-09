@@ -186,19 +186,14 @@ public class JsonWriteVisitorTest {
   private CounterMetric createCounterMetric() {
     CounterMetric counter = new DefaultCounterMetric(MetricManager.name("org.test.CounterFoo.doStuff"));
     counter.markEvents(10);
-    counter.collectStatistics();
+    counter.collectStatistics(new ArrayList<>());
     return counter;
   }
 
   private GaugeDoubleMetric createGaugeMetric() {
-    GaugeDouble gauge = new GaugeDouble() {
-      @Override
-      public double getValue() {
-        return 24d;
-      }
-    };
+    GaugeDouble gauge = () -> 24d;
     GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricManager.name("org.test.GaugeFoo.doStuff"), gauge);
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
@@ -207,7 +202,7 @@ public class JsonWriteVisitorTest {
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
@@ -222,7 +217,7 @@ public class JsonWriteVisitorTest {
     metric.addEventDuration(false, 200 * NANOS_TO_MICROS);
     metric.addEventDuration(false, 220 * NANOS_TO_MICROS);
 
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
@@ -238,7 +233,7 @@ public class JsonWriteVisitorTest {
     metric.addEventDuration(true, 200 * NANOS_TO_MILLIS);
     metric.addEventDuration(true, 220 * NANOS_TO_MILLIS);
 
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
@@ -259,7 +254,7 @@ public class JsonWriteVisitorTest {
 
     // Not puting in values > 150 millis so last 2 buckets are empty
 
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 

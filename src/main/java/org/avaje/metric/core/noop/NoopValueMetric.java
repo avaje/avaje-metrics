@@ -1,9 +1,12 @@
 package org.avaje.metric.core.noop;
 
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
+
+import java.util.List;
 
 public class NoopValueMetric implements ValueMetric {
 
@@ -21,8 +24,8 @@ public class NoopValueMetric implements ValueMetric {
   }
 
   @Override
-  public boolean collectStatistics() {
-    return false;
+  public void collectStatistics(List<Metric> list) {
+    // do nothing
   }
 
   @Override

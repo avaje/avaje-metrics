@@ -2,11 +2,55 @@ package org.avaje.metric.core;
 
 
 import org.avaje.metric.GaugeLong;
+import org.avaje.metric.Metric;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.*;
 
 public class DefaultGaugeLongMetricTest {
+
+  @Test
+  public void skipCollection_when_unchanged() {
+
+    MyGauge myGauge = new MyGauge();
+    DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
+
+    assertEquals(0, metric.getValue());
+    assertThat(collect(metric)).isEmpty();
+
+    myGauge.value = 100;
+    assertEquals(100, metric.getValue());
+    assertThat(collect(metric)).hasSize(1);
+
+    assertEquals(100, metric.getValue());
+
+    // skip
+    assertThat(collect(metric)).isEmpty();
+    assertEquals(100, metric.getValue());
+
+    myGauge.value = 110;
+
+    assertThat(collect(metric)).hasSize(1);
+    assertEquals(110, metric.getValue());
+
+    // skip
+    assertThat(collect(metric)).isEmpty();
+
+    myGauge.value = 90;
+    assertThat(collect(metric)).hasSize(1);
+    assertEquals(90, metric.getValue());
+
+  }
+
+  private List<Metric> collect(Metric metric) {
+    List<Metric> list = new ArrayList<>();
+    metric.collectStatistics(list);
+    return list;
+  }
 
   @Test
   public void test() {
@@ -15,11 +59,11 @@ public class DefaultGaugeLongMetricTest {
     DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
 
     assertEquals(0, metric.getValue());
-    assertFalse(metric.collectStatistics());
+    assertThat(collect(metric)).isEmpty();
 
     myGauge.value = 100;
     assertEquals(100, metric.getValue());
-    assertTrue(metric.collectStatistics());
+    assertThat(collect(metric)).hasSize(1);
 
     DefaultGaugeLongMetric incrementing = DefaultGaugeLongMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
 
@@ -28,15 +72,15 @@ public class DefaultGaugeLongMetricTest {
     assertEquals(100, incrementing.getValue());
 
     myGauge.value = 150;
-    assertTrue(incrementing.collectStatistics());
+    assertThat(collect(metric)).hasSize(1);
     assertEquals(50, incrementing.getValue());
 
     myGauge.value = 280;
-    assertTrue(incrementing.collectStatistics());
+    assertThat(collect(metric)).hasSize(1);
     assertEquals(130, incrementing.getValue());
 
     myGauge.value = 280;
-    assertFalse(incrementing.collectStatistics());
+    assertThat(collect(metric)).isEmpty();
     assertEquals(0, incrementing.getValue());
   }
 

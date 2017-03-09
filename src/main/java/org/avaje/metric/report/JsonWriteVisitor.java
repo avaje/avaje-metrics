@@ -4,9 +4,7 @@ package org.avaje.metric.report;
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.GaugeDoubleGroup;
 import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.GaugeLongMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricVisitor;
@@ -143,24 +141,6 @@ public class JsonWriteVisitor implements MetricVisitor {
   }
 
   @Override
-  public void visit(GaugeDoubleGroup gaugeMetricGroup) throws IOException {
-
-    GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-    writeMetricStart("gaugeGroup", gaugeMetricGroup);
-    writeKey("group");
-    buffer.append("[");
-    for (int i = 0; i < gaugeMetrics.length; i++) {
-      if (i > 0) {
-        buffer.append(", ");
-      }
-      GaugeDoubleMetric m = gaugeMetrics[i];
-      writeKeyNumber(m.getName().getName(), format(m.getValue()));
-    }
-    buffer.append("]");
-    writeMetricEnd(gaugeMetricGroup);
-  }
-
-  @Override
   public void visit(GaugeDoubleMetric metric) throws IOException {
 
     writeMetricStart("gauge", metric);
@@ -174,24 +154,6 @@ public class JsonWriteVisitor implements MetricVisitor {
     writeMetricStart("gaugeCounter", metric);
     writeKeyNumber("value", metric.getValue());
     writeMetricEnd(metric);
-  }
-
-  @Override
-  public void visit(GaugeLongGroup gaugeMetricGroup) throws IOException {
-
-    GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-    writeMetricStart("gaugeCounterGroup", gaugeMetricGroup);
-    writeKey("group");
-    buffer.append("[");
-    for (int i = 0; i < gaugeMetrics.length; i++) {
-      if (i > 0) {
-        buffer.append(", ");
-      }
-      GaugeLongMetric m = gaugeMetrics[i];
-      writeKeyNumber(m.getName().getName(), m.getValue());
-    }
-    buffer.append("]");
-    writeMetricEnd(gaugeMetricGroup);
   }
   
   protected void writeSummary(String prefix, ValueStatistics valueStats) throws IOException {

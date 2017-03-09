@@ -1,8 +1,10 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.MetricName;
-import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 
 public class DefaultMetricNameCacheTest {
 
@@ -14,19 +16,19 @@ public class DefaultMetricNameCacheTest {
     
     MetricName metricName = cache.get("foo");
     
-    Assert.assertEquals("org.avaje.metric.core", metricName.getGroup());
-    Assert.assertEquals("DefaultMetricNameCacheTest", metricName.getType());
-    Assert.assertEquals("foo", metricName.getName());
+    assertEquals("org.avaje.metric.core", metricName.getGroup());
+    assertEquals("DefaultMetricNameCacheTest", metricName.getType());
+    assertEquals("foo", metricName.getName());
     
     MetricName metricName2 = cache.get("bar");
     
-    Assert.assertEquals("org.avaje.metric.core", metricName2.getGroup());
-    Assert.assertEquals("DefaultMetricNameCacheTest", metricName2.getType());
-    Assert.assertEquals("bar", metricName2.getName());
+    assertEquals("org.avaje.metric.core", metricName2.getGroup());
+    assertEquals("DefaultMetricNameCacheTest", metricName2.getType());
+    assertEquals("bar", metricName2.getName());
 
     MetricName metricName3 = cache.get("foo");
 
-    Assert.assertSame(metricName, metricName3);
+    assertSame(metricName, metricName3);
     
   }
 }

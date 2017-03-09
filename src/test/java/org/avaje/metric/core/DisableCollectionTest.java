@@ -4,6 +4,8 @@ import org.avaje.metric.TimedMetric;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 public class DisableCollectionTest {
 
   @Test
@@ -22,8 +24,8 @@ public class DisableCollectionTest {
     
     
     TimedMetric timedMetric = mgr.getTimedMetric(mgr.name("check.disabled.timed1"));
-    Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
+    assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
+    assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
     
     timedMetric.addEventDuration(false, 1000000);
     timedMetric.addEventDuration(true, 1000000);
@@ -31,8 +33,8 @@ public class DisableCollectionTest {
     timedMetric.operationEnd(1000000, 100, useContext);
     timedMetric.operationEnd(1000000, 191, useContext);
     
-    Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
+    assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
+    assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
     
     System.clearProperty(DefaultMetricManager.METRICS_COLLECTION_DISABLE);
   }
@@ -45,13 +47,13 @@ public class DisableCollectionTest {
     Assert.assertTrue(mgr.disable);
     
     TimedMetric timedMetric = mgr.getTimedMetric(mgr.name("check.disabled.timed1"));
-    Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
+    assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
+    assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
     
     timedMetric.addEventDuration(true, 1000000);
     timedMetric.addEventDuration(false, 1000000);
-    Assert.assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
-    Assert.assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
+    assertEquals(0, timedMetric.getSuccessStatistics(false).getCount());
+    assertEquals(0, timedMetric.getErrorStatistics(false).getCount());
 
   }
 }

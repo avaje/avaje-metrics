@@ -2,6 +2,7 @@ package org.avaje.metric.report;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
@@ -19,6 +20,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class CsvWriteVisitorTest {
 
@@ -38,9 +41,9 @@ public class CsvWriteVisitorTest {
     csvVisitor.visit(counter);
     String counterCsv = writer.toString();
                 
-    Assert.assertTrue(counterCsv.contains(",org.test.CounterFoo.doStuff,"));
-    Assert.assertTrue(counterCsv.contains(",count=10,"));
-    Assert.assertTrue(counterCsv.contains(",dur=0"));
+    assertTrue(counterCsv.contains(",org.test.CounterFoo.doStuff,"));
+    assertTrue(counterCsv.contains(",count=10,"));
+    assertTrue(counterCsv.contains(",dur=0"));
   }
 
 
@@ -59,9 +62,9 @@ public class CsvWriteVisitorTest {
     
     csvVisitor.visit(metric);
     String csvContent = writer.toString();
-    
-    Assert.assertTrue(csvContent.contains(",org.test.GaugeFoo.doStuff,"));
-    Assert.assertTrue(csvContent.contains(",value=24.0"));
+
+    assertThat(csvContent).contains(",org.test.GaugeFoo.doStuff,");
+    assertThat(csvContent).contains(",24.0");
   }
 
   @Test
@@ -74,13 +77,13 @@ public class CsvWriteVisitorTest {
     
     csvVisitor.visit(metric);
     String csvContent = writer.toString();
-    
-    Assert.assertTrue(csvContent.contains(",org.test.ValueFoo.doStuff,"));
-    Assert.assertTrue(csvContent.contains(",count=3,"));
-    Assert.assertTrue(csvContent.contains(",avg=14,"));
-    Assert.assertTrue(csvContent.contains(",max=16,"));
-    Assert.assertTrue(csvContent.contains(",sum=42,"));
-    Assert.assertTrue(csvContent.contains(",dur=0"));
+
+    assertThat(csvContent).contains(",org.test.ValueFoo.doStuff,");
+    assertThat(csvContent).contains(",count=3,");
+    assertThat(csvContent).contains(",avg=14,");
+    assertThat(csvContent).contains(",max=16,");
+    assertThat(csvContent).contains(",sum=42,");
+    assertThat(csvContent).contains(",dur=0");
   }
 
   
@@ -96,18 +99,18 @@ public class CsvWriteVisitorTest {
     String csvContent = writer.toString();
     
     // values converted into microseconds
-    Assert.assertTrue(csvContent.contains(",org.test.TimedFoo.doStuff,"));
-    Assert.assertTrue(csvContent.contains(",count=3,"));
-    Assert.assertTrue(csvContent.contains(",avg=120,"));
-    Assert.assertTrue(csvContent.contains(",max=140,"));
-    Assert.assertTrue(csvContent.contains(",sum=360,"));
-    Assert.assertTrue(csvContent.contains(",dur=0"));
-    
-    Assert.assertTrue(csvContent.contains(",err.count=2,"));
-    Assert.assertTrue(csvContent.contains(",err.avg=210,"));
-    Assert.assertTrue(csvContent.contains(",err.max=220,"));
-    Assert.assertTrue(csvContent.contains(",err.sum=420,"));
-    Assert.assertTrue(csvContent.contains(",err.dur=0"));
+    assertThat(csvContent).contains(",org.test.TimedFoo.doStuff,");
+    assertThat(csvContent).contains(",count=3,");
+    assertThat(csvContent).contains(",avg=120,");
+    assertThat(csvContent).contains(",max=140,");
+    assertThat(csvContent).contains(",sum=360,");
+    assertThat(csvContent).contains(",dur=0");
+
+    assertThat(csvContent).contains(",err.count=2,");
+    assertThat(csvContent).contains(",err.avg=210,");
+    assertThat(csvContent).contains(",err.max=220,");
+    assertThat(csvContent).contains(",err.sum=420,");
+    assertThat(csvContent).contains(",err.dur=0");
     
   }
 
@@ -127,25 +130,24 @@ public class CsvWriteVisitorTest {
     String csvContent = writer.toString();
     
     String[] lines = csvContent.split("\n");
-    Assert.assertEquals(2, lines.length);
+    assertEquals(2, lines.length);
 
     assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff[0-150]");
-    Assert.assertTrue(lines[0].contains(",count=3,"));
-    Assert.assertTrue(lines[0].contains(",avg=120000,"));
-    Assert.assertTrue(lines[0].contains(",max=140000,"));
-    Assert.assertTrue(lines[0].contains(",sum=360000,"));
-    Assert.assertTrue(lines[0].contains(",dur=0,"));
-    Assert.assertTrue(lines[0].contains(",err.count=0"));
+    assertThat(lines[0]).contains(",count=3,");
+    assertThat(lines[0]).contains(",avg=120000,");
+    assertThat(lines[0]).contains(",max=140000,");
+    assertThat(lines[0]).contains(",sum=360000,");
+    assertThat(lines[0]).contains(",dur=0,");
+    assertThat(lines[0]).contains(",err.count=0");
 
 
     assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff[150+]");
-    Assert.assertTrue(lines[1].contains(",count=2,"));
-    Assert.assertTrue(lines[1].contains(",avg=210000,"));
-    Assert.assertTrue(lines[1].contains(",max=220000,"));
-    Assert.assertTrue(lines[1].contains(",sum=420000,"));
-    Assert.assertTrue(lines[1].contains(",dur=0,"));
-    Assert.assertTrue(lines[1].contains(",err.count=0"));
-
+    assertThat(lines[1]).contains(",count=2,");
+    assertThat(lines[1]).contains(",avg=210000,");
+    assertThat(lines[1]).contains(",max=220000,");
+    assertThat(lines[1]).contains(",sum=420000,");
+    assertThat(lines[1]).contains(",dur=0,");
+    assertThat(lines[1]).contains(",err.count=0");
   }
 
   /**
@@ -164,32 +166,32 @@ public class CsvWriteVisitorTest {
     String csvContent = writer.toString();
 
     String[] lines = csvContent.split("\n");
-    Assert.assertEquals(3, lines.length);
+    assertEquals(3, lines.length);
 
     assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff[0-150],");
-    Assert.assertTrue(lines[0].contains(",count=3,"));
-    Assert.assertTrue(lines[0].contains(",avg=120000,"));
-    Assert.assertTrue(lines[0].contains(",max=140000,"));
-    Assert.assertTrue(lines[0].contains(",sum=360000,"));
-    Assert.assertTrue(lines[0].contains(",dur=0,"));
-    Assert.assertTrue(lines[0].contains(",err.count=0"));
+    assertThat(lines[0]).contains(",count=3,");
+    assertThat(lines[0]).contains(",avg=120000,");
+    assertThat(lines[0]).contains(",max=140000,");
+    assertThat(lines[0]).contains(",sum=360000,");
+    assertThat(lines[0]).contains(",dur=0,");
+    assertThat(lines[0]).contains(",err.count=0");
 
 
     assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff[150-300],");
-    Assert.assertTrue(lines[1].contains(",count=0,"));
+    assertTrue(lines[1].contains(",count=0,"));
     Assert.assertFalse(lines[1].contains(",avg="));
     Assert.assertFalse(lines[1].contains(",max="));
     Assert.assertFalse(lines[1].contains(",sum="));
     Assert.assertFalse(lines[1].contains(",dur="));
-    Assert.assertTrue(lines[1].contains(",err.count=0"));
+    assertTrue(lines[1].contains(",err.count=0"));
 
     assertThat(lines[2]).contains(",org.test.BucketTimedFoo.doStuff[300+],");
-    Assert.assertTrue(lines[2].contains(",count=0,"));
+    assertTrue(lines[2].contains(",count=0,"));
     Assert.assertFalse(lines[2].contains(",avg="));
     Assert.assertFalse(lines[2].contains(",max="));
     Assert.assertFalse(lines[2].contains(",sum="));
     Assert.assertFalse(lines[2].contains(",dur="));
-    Assert.assertTrue(lines[2].contains(",err.count=0"));
+    assertTrue(lines[2].contains(",err.count=0"));
   }
   
   
@@ -199,14 +201,14 @@ public class CsvWriteVisitorTest {
   private CounterMetric createCounterMetric() {
     CounterMetric counter = new DefaultCounterMetric(MetricManager.name("org.test.CounterFoo.doStuff"));
     counter.markEvents(10);
-    counter.collectStatistics();
+    counter.collectStatistics(new ArrayList<>());
     return counter;
   }
   
   private GaugeDoubleMetric createGaugeMetric() {
     GaugeDouble gauge = () -> 24d;
     GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricManager.name("org.test.GaugeFoo.doStuff"), gauge);
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
   
@@ -215,7 +217,7 @@ public class CsvWriteVisitorTest {
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
   
@@ -230,7 +232,7 @@ public class CsvWriteVisitorTest {
     metric.addEventDuration(false, 200 * NANOS_TO_MICROS);
     metric.addEventDuration(false, 220 * NANOS_TO_MICROS);
     
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
   
@@ -246,7 +248,7 @@ public class CsvWriteVisitorTest {
     metric.addEventDuration(true, 200 * NANOS_TO_MILLIS);
     metric.addEventDuration(true, 220 * NANOS_TO_MILLIS);
     
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
@@ -265,7 +267,7 @@ public class CsvWriteVisitorTest {
       
     // Not putting in values > 150 millis so last 2 buckets are empty
       
-    metric.collectStatistics();
+    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 

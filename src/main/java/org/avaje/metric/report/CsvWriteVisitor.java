@@ -1,20 +1,18 @@
 package org.avaje.metric.report;
 
-import java.io.IOException;
-import java.io.Writer;
-
 import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.GaugeDoubleGroup;
 import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.GaugeLongGroup;
 import org.avaje.metric.GaugeLongMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueMetric;
 import org.avaje.metric.ValueStatistics;
+
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * A visitor that is aimed to write the metrics out in CSV format with different numbers of columns
@@ -26,11 +24,6 @@ import org.avaje.metric.ValueStatistics;
 public class CsvWriteVisitor implements MetricVisitor {
 
   /**
-   * Code for GaugeLongGroup.
-   */
-  private static final String TYPE_LONG_GROUP = "lg";
-
-  /**
    * Code for GaugeLongMetric.
    */
   private static final String TYPE_LONG_METRIC = "lm";
@@ -39,11 +32,6 @@ public class CsvWriteVisitor implements MetricVisitor {
    * Code for GaugeDoubleMetric.
    */
   private static final String TYPE_DOUBLE_METRIC = "dm";
-
-  /**
-   * Code for GaugeDoubleGroup.
-   */
-  private static final String TYPE_DOUBLE_GROUP = "dg";
 
   /**
    * Code for CounterMetric.
@@ -203,21 +191,10 @@ public class CsvWriteVisitor implements MetricVisitor {
   }
 
   @Override
-  public void visit(GaugeDoubleGroup gaugeMetricGroup) throws IOException {
-
-    GaugeDoubleMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-    writeMetricName(gaugeMetricGroup, TYPE_DOUBLE_GROUP);
-    for (GaugeDoubleMetric m : gaugeMetrics) {
-      write(m.getName().getName(), formattedValue(m.getValue()));
-    }
-    writeMetricEnd(gaugeMetricGroup);
-  }
-
-  @Override
   public void visit(GaugeDoubleMetric metric) throws IOException {
 
     writeMetricName(metric, TYPE_DOUBLE_METRIC);
-    write("value", formattedValue(metric.getValue()));
+    writeValue(formattedValue(metric.getValue()));
     writeMetricEnd(metric);
   }
 
@@ -225,19 +202,8 @@ public class CsvWriteVisitor implements MetricVisitor {
   public void visit(GaugeLongMetric metric) throws IOException {
 
     writeMetricName(metric, TYPE_LONG_METRIC);
-    write("value", metric.getValue());
+    writeValue(String.valueOf(metric.getValue()));
     writeMetricEnd(metric);
-  }
-
-  @Override
-  public void visit(GaugeLongGroup gaugeMetricGroup) throws IOException {
-
-    GaugeLongMetric[] gaugeMetrics = gaugeMetricGroup.getGaugeMetrics();
-    writeMetricName(gaugeMetricGroup, TYPE_LONG_GROUP);
-    for (GaugeLongMetric m : gaugeMetrics) {
-      write(m.getName().getName(), m.getValue());
-    }
-    writeMetricEnd(gaugeMetricGroup);
   }
 
   protected void writeSummary(String prefix, ValueStatistics valueStats) throws IOException {
@@ -281,6 +247,11 @@ public class CsvWriteVisitor implements MetricVisitor {
     writer.write(delimiter);
     writer.write(name);
     writer.write("=");
+    writer.write(value);
+  }
+
+  protected void writeValue(String value) throws IOException {
+    writer.write(delimiter);
     writer.write(value);
   }
 

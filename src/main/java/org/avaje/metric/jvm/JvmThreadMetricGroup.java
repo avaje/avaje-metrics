@@ -1,28 +1,27 @@
 package org.avaje.metric.jvm;
 
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.Metric;
+import org.avaje.metric.core.DefaultGaugeLongMetric;
+import org.avaje.metric.core.DefaultMetricName;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-
-import org.avaje.metric.GaugeLong;
-import org.avaje.metric.GaugeLongGroup;
-import org.avaje.metric.GaugeLongMetric;
-import org.avaje.metric.core.DefaultGaugeLongMetric;
-import org.avaje.metric.core.DefaultGaugeLongGroup;
-import org.avaje.metric.core.DefaultMetricName;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class JvmThreadMetricGroup {
 
-  public static GaugeLongGroup createThreadMetricGroup() {
+  public static List<Metric> createThreadMetricGroup() {
     
     GaugeLong[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
 
     DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm", "threads");
-    GaugeLongMetric[] metrics = new GaugeLongMetric[3];
-    metrics[0] = new DefaultGaugeLongMetric(baseName.withName("current"), gauges[0]);
-    metrics[1] = new DefaultGaugeLongMetric(baseName.withName("peak"), gauges[1]);
-    metrics[2] = new DefaultGaugeLongMetric(baseName.withName("daemon"), gauges[2]);
-
-    return new DefaultGaugeLongGroup(baseName, metrics);
+    List<Metric> metrics = new ArrayList<>(3);
+    metrics.add(new DefaultGaugeLongMetric(baseName.withName("current"), gauges[0]));
+    metrics.add(new DefaultGaugeLongMetric(baseName.withName("peak"), gauges[1]));
+    metrics.add(new DefaultGaugeLongMetric(baseName.withName("daemon"), gauges[2]));
+    return metrics;
   }
 
 

@@ -1,8 +1,10 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.MetricName;
-import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class DefaultMetricNameTest {
   
@@ -11,23 +13,23 @@ public class DefaultMetricNameTest {
     
     MetricName name = DefaultMetricName.parse("org.test.Hello.rob");
     
-    Assert.assertNotNull(name);
-    Assert.assertEquals("org.test",name.getGroup());
-    Assert.assertEquals("Hello",name.getType());
-    Assert.assertEquals("rob",name.getName());
+    assertNotNull(name);
+    assertEquals("org.test",name.getGroup());
+    assertEquals("Hello",name.getType());
+    assertEquals("rob",name.getName());
     
     MetricName name2 = DefaultMetricName.parse("test.Hello.rob");
     
-    Assert.assertNotNull(name);
-    Assert.assertEquals("test",name2.getGroup());
-    Assert.assertEquals("Hello",name2.getType());
-    Assert.assertEquals("rob",name2.getName());
+    assertNotNull(name);
+    assertEquals("test",name2.getGroup());
+    assertEquals("Hello",name2.getType());
+    assertEquals("rob",name2.getName());
     
     MetricName name3 = DefaultMetricName.parse("Hello.rob");
     
-    Assert.assertNotNull(name);
-    Assert.assertEquals("o",name3.getGroup());
-    Assert.assertEquals("Hello",name3.getType());
-    Assert.assertEquals("rob",name3.getName());
+    assertNotNull(name);
+    assertEquals("o",name3.getGroup());
+    assertEquals("Hello",name3.getType());
+    assertEquals("rob",name3.getName());
   }
 }

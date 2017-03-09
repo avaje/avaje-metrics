@@ -6,6 +6,8 @@ import org.avaje.metric.TimedMetricGroup;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 public class TimedMetricGroupTest {
 
   @Test
@@ -15,9 +17,9 @@ public class TimedMetricGroupTest {
     TimedMetricGroup timedMetricGroup = MetricManager.getTimedMetricGroup(MetricManager.name("org.test.Hello.dummy"));
     
     TimedMetric timedMetric = timedMetricGroup.getTimedMetric("one");
-    Assert.assertEquals("org.test", timedMetric.getName().getGroup());
-    Assert.assertEquals("Hello", timedMetric.getName().getType());
-    Assert.assertEquals("one", timedMetric.getName().getName());
+    assertEquals("org.test", timedMetric.getName().getGroup());
+    assertEquals("Hello", timedMetric.getName().getType());
+    assertEquals("one", timedMetric.getName().getName());
     
     TimedMetric timedMetric2 = timedMetricGroup.getTimedMetric("one");
     
@@ -27,9 +29,9 @@ public class TimedMetricGroupTest {
     TimedMetric two = timedMetricGroup.getTimedMetric("two");
     Assert.assertNotSame(timedMetric, two);
     
-    Assert.assertEquals("org.test", two.getName().getGroup());
-    Assert.assertEquals("Hello", two.getName().getType());
-    Assert.assertEquals("two", two.getName().getName());
+    assertEquals("org.test", two.getName().getGroup());
+    assertEquals("Hello", two.getName().getType());
+    assertEquals("two", two.getName().getName());
     
   }
 }

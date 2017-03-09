@@ -1,13 +1,13 @@
 package org.avaje.metric.core;
 
-import java.util.Arrays;
+import org.avaje.metric.Metric;
+import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
+import org.testng.annotations.Test;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.avaje.metric.GaugeLongGroup;
-import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
-import org.testng.annotations.Test;
 
 public class JvmGCLoadTest {
 
@@ -15,16 +15,16 @@ public class JvmGCLoadTest {
   @Test
   public void test() throws InterruptedException {
 
-    GaugeLongGroup[] gaugeMetricGroups = JvmGarbageCollectionMetricGroup.createGauges();
+    List<Metric> metrics = JvmGarbageCollectionMetricGroup.createGauges();
     
     for (int i = 0; i < 3; i++) {
-      doSomething(gaugeMetricGroups);      
+      doSomething(metrics);
     }
 
     Thread.sleep(100);
   }
 
-  private void doSomething(GaugeLongGroup[] gaugeMetricGroups) {
+  private void doSomething(List<Metric> metrics) {
     
     long start = System.currentTimeMillis();
     
@@ -35,7 +35,7 @@ public class JvmGCLoadTest {
 
     long exe = System.currentTimeMillis() - start;
     System.out.println("Duration " + exe + " millis");
-    System.out.println("" + Arrays.toString(gaugeMetricGroups));
+    System.out.println(metrics);
   }
   
   private void createSomeGarbage() {

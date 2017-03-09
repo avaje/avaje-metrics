@@ -2,23 +2,24 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
  * A Metric that gets its value from a GaugeDouble.
- * <p>
- * GaugeDoubleMetric can be put into groups via {@link DefaultGaugeDoubleGroup}.
- * </p>
  */
 public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final MetricName name;
 
   protected final GaugeDouble gauge;
+
+  private double lastReported;
 
   /**
    * Create where the Gauge is a monotonically increasing value.
@@ -62,9 +63,13 @@ public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   }
 
   @Override
-  public boolean collectStatistics() {
-    // There is no 'reset' of startTime required here
-    return gauge.getValue() != 0;
+  public void collectStatistics(List<Metric> list) {
+    double value = gauge.getValue();
+    boolean collect = value != 0 && value != lastReported;
+    if (collect) {
+      lastReported = value;
+      list.add(this);
+    }
   }
 
   @Override

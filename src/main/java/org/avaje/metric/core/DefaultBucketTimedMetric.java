@@ -3,6 +3,7 @@ package org.avaje.metric.core;
 import org.avaje.metric.*;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Default implementation of BucketTimedMetric.
@@ -84,14 +85,10 @@ public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketT
   }
 
   @Override
-  public boolean collectStatistics() {
-    int nonEmptyBuckets = 0;
-    for (int i = 0; i < buckets.length; i++) {
-      if (buckets[i].collectStatistics()) {
-        nonEmptyBuckets++;
-      }
+  public void collectStatistics(List<Metric> list) {
+    for (TimedMetric bucket : buckets) {
+      bucket.collectStatistics(list);
     }
-    return nonEmptyBuckets > 0;
   }
 
   @Override

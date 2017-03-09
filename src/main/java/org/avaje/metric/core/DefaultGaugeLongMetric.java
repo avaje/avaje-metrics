@@ -2,23 +2,27 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.GaugeLongMetric;
+import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricVisitor;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
  * A Metric that gets its value from a Gauge.
- * <p>
- * GaugeMetric can be put into groups via {@link DefaultGaugeDoubleGroup}.
- * </p>
  */
 public class DefaultGaugeLongMetric implements GaugeLongMetric {
 
   protected final MetricName name;
 
   protected final GaugeLong gauge;
+
+  /**
+   * The last reported value.
+   */
+  private long lastReported;
 
   /**
    * Create where the Gauge is a monotonically increasing value.
@@ -62,9 +66,13 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
   }
 
   @Override
-  public boolean collectStatistics() {
-    // There is no 'reset' of startTime required here
-    return gauge.getValue() != 0;
+  public void collectStatistics(List<Metric> list) {
+    long value = gauge.getValue();
+    boolean collect = (value != 0 && value != lastReported);
+    if (collect) {
+      lastReported = value;
+      list.add(this);
+    }
   }
 
   @Override
@@ -89,8 +97,10 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
     }
 
     @Override
-    public boolean collectStatistics() {
-      return super.getValue() > runningValue;
+    public void collectStatistics(List<Metric> list) {
+      if (super.getValue() > runningValue) {
+        list.add(this);
+      }
     }
 
     @Override
