@@ -1,7 +1,9 @@
 package org.avaje.metric.jvm;
 
-import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.Metric;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
@@ -11,30 +13,29 @@ public class JvmMemoryMetricGroupTest {
   @Test
   public void testCreateHeapGroup() throws Exception {
 
-    GaugeDoubleMetric[] gaugeMetrics = JvmMemoryMetricGroup.createHeapGroup();
+    List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createHeapGroup();
 
-    assertEquals(3, gaugeMetrics.length);
-    //assertEquals("init", gaugeMetrics[0].getName().getName());
-    assertEquals("used", gaugeMetrics[0].getName().getName());
-    assertEquals("committed", gaugeMetrics[1].getName().getName());
-    //assertEquals("max", gaugeMetrics[3].getName().getName());
-    assertEquals("pct", gaugeMetrics[2].getName().getName());
+    assertEquals(5, gaugeMetrics.size());
+    assertEquals("init", gaugeMetrics.get(0).getName().getName());
+    assertEquals("used", gaugeMetrics.get(1).getName().getName());
+    assertEquals("committed", gaugeMetrics.get(2).getName().getName());
+    assertEquals("max", gaugeMetrics.get(3).getName().getName());
+    assertEquals("pct", gaugeMetrics.get(4).getName().getName());
 
-    assertEquals("jvm.memory.heap.used", gaugeMetrics[0].getName().getSimpleName());
-
+    assertEquals("jvm.memory.heap.init", gaugeMetrics.get(0).getName().getSimpleName());
   }
 
   @Test
   public void testCreateNonHeapGroup() throws Exception {
 
-    GaugeDoubleMetric[] gaugeMetrics = JvmMemoryMetricGroup.createNonHeapGroup();
+    List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createNonHeapGroup();
 
-    assertThat(gaugeMetrics.length).isGreaterThan(1);
-    //assertEquals("init", gaugeMetrics[0].getName().getName());
-    assertEquals("used", gaugeMetrics[0].getName().getName());
-    assertEquals("committed", gaugeMetrics[1].getName().getName());
+    assertThat(gaugeMetrics.size()).isGreaterThan(1);
+    assertEquals("init", gaugeMetrics.get(0).getName().getName());
+    assertEquals("used", gaugeMetrics.get(1).getName().getName());
+    assertEquals("committed", gaugeMetrics.get(2).getName().getName());
 
-    assertEquals("jvm.memory.nonheap.used", gaugeMetrics[0].getName().getSimpleName());
+    assertEquals("jvm.memory.nonheap.init", gaugeMetrics.get(0).getName().getSimpleName());
 
   }
 }
