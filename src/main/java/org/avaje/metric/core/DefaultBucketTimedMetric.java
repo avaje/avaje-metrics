@@ -1,6 +1,11 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.*;
+import org.avaje.metric.BucketTimedMetric;
+import org.avaje.metric.Metric;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.MetricVisitor;
+import org.avaje.metric.TimedEvent;
+import org.avaje.metric.TimedMetric;
 
 import java.io.IOException;
 import java.util.List;

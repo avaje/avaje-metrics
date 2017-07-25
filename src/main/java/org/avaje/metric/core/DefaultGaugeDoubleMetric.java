@@ -65,7 +65,7 @@ public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   @Override
   public void collectStatistics(List<Metric> list) {
     double value = gauge.getValue();
-    boolean collect = value != 0 && value != lastReported;
+    boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
     if (collect) {
       lastReported = value;
       list.add(this);

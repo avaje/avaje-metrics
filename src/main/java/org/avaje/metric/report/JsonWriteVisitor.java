@@ -246,7 +246,7 @@ public class JsonWriteVisitor implements MetricVisitor {
   }
 
   protected long getDuration(long startTime) {
-    return Math.round((System.currentTimeMillis() - startTime) / 1000d);
+    return Math.round((System.currentTimeMillis() - startTime) / 1000.0d);
   }
 
 }

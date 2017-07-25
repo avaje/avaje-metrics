@@ -79,7 +79,7 @@ public class DefaultValueStatistics implements ValueStatistics {
    */
   @Override
   public long getMean() {
-    return (count < 1) ? 0l : Math.round((double)(total / count));
+    return (count < 1) ? 0L : Math.round((double)(total / count));
   }
 
 }
