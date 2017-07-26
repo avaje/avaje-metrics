@@ -3,6 +3,8 @@ package org.avaje.metric.core;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
 
+import java.util.regex.Pattern;
+
 
 /**
  * Provides a name for metrics.
@@ -21,6 +23,9 @@ public class DefaultMetricName implements MetricName {
   private final String type;
   private final String name;
   private final String simpleName;
+
+  /** Compiled Regex for finding replacing symbols in metric names. */
+  private static final Pattern REPLACE_METRIC_NAME = Pattern.compile("\\$$");
 
   /**
    * Create a base name with a group and type but no name.  
@@ -61,8 +66,8 @@ public class DefaultMetricName implements MetricName {
    *          the name of the {@link TimedMetric}
    */
   public DefaultMetricName(Class<?> klass, String name) {
-    this(klass.getPackage() == null ? "" : klass.getPackage().getName(), klass.getSimpleName()
-        .replaceAll("\\$$", ""), name);
+
+    this(klass.getPackage() == null ? "" : klass.getPackage().getName(), REPLACE_METRIC_NAME.matcher(klass.getSimpleName()).replaceAll(""), name);
   }
 
   /**
@@ -170,10 +175,10 @@ public class DefaultMetricName implements MetricName {
     StringBuilder sb = new StringBuilder(80);
     sb.append(group);
     if (type != null) {
-      sb.append(".").append(type);
+      sb.append('.').append(type);
     }
     if (name != null && name.length() > 0) {
-      sb.append(".").append(name);
+      sb.append('.').append(name);
     }
     return sb.toString().replace(' ', '-');
   }

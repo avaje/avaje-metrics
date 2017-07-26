@@ -154,7 +154,7 @@ public final class PropertiesLoader {
   /**
    * Load the properties using a file path search for the properties file.
    */
-  private boolean loadUsingFilePath(String evalLocation, Properties properties) {
+  private static boolean loadUsingFilePath(String evalLocation, Properties properties) {
 
     if (evalLocation.startsWith("file:")) {
       evalLocation = evalLocation.substring(5);

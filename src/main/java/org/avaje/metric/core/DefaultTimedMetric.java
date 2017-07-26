@@ -79,7 +79,7 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
     errorCounter.reset();
   }
 
-  protected long getTickNanos() {
+  protected static long getTickNanos() {
     return System.nanoTime();
   }
 

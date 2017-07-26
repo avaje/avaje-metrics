@@ -88,9 +88,9 @@ public abstract class BaseFileReporter {
         }
       });
 
-      logger.debug("cleaning up [{}] old metrics files", delFileNames.length);
+      if (delFileNames.length != 0) {
+        logger.debug("cleaning up [{}] old metrics files", delFileNames.length);
 
-      if (delFileNames != null) {
         for (String delFileName : delFileNames) {
           File f = new File(dir, delFileName);
           if (f.exists()) {
@@ -109,7 +109,7 @@ public abstract class BaseFileReporter {
   /**
    * Return true if the metric.writeToFile system property allows writing.
    */
-  protected boolean isWriteToFile() {
+  protected static boolean isWriteToFile() {
     String value = System.getProperty("metric.writeToFile");
     return (value == null || !value.trim().toLowerCase().equals("false"));
   }
@@ -123,14 +123,12 @@ public abstract class BaseFileReporter {
       return value;
     }
 
-    if (value < 1) {
-      String sysVal = System.getProperty("metric.numberOfFilesToKeep");
-      if (sysVal != null) {
-        try {
-          return Integer.parseInt(sysVal);
-        } catch (NumberFormatException e) {
-          return DEFAULT_NUM_FILES_TO_KEEP;
-        }
+    String sysVal = System.getProperty("metric.numberOfFilesToKeep");
+    if (sysVal != null) {
+      try {
+        return Integer.parseInt(sysVal);
+      } catch (NumberFormatException e) {
+        return DEFAULT_NUM_FILES_TO_KEEP;
       }
     }
 
@@ -141,7 +139,7 @@ public abstract class BaseFileReporter {
    * Return the base directory to put metrics files in - defaults to current
    * working directory.
    */
-  protected String getBaseDirectory(String baseDirectory) {
+  protected static String getBaseDirectory(String baseDirectory) {
     if (baseDirectory == null) {
       baseDirectory = System.getProperty("metric.directory");
     }
@@ -167,7 +165,7 @@ public abstract class BaseFileReporter {
 
   protected static String getFileName(String baseFileName, Date forDate) {
     String todayString = new SimpleDateFormat("yyyyMMdd").format(forDate);
-    return baseFileName+"-" + todayString + ".log";
+    return baseFileName+ '-' + todayString + ".log";
   }
 
   public static String getFileName(String baseFileName, int daysAgo) {

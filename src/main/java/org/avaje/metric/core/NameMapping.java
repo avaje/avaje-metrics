@@ -64,7 +64,7 @@ public class NameMapping {
   /**
    * trim off any leading period.
    */
-  private String trimMetricName(String metricName) {
+  private static String trimMetricName(String metricName) {
     if (metricName.startsWith(".")) {
       return metricName.substring(1);
     }
@@ -76,8 +76,7 @@ public class NameMapping {
    */
   private String[] getMetricNameMatches() {
 
-    List<String> keys = new ArrayList<>();
-    keys.addAll(this.nameMapping.keySet());
+    List<String> keys = new ArrayList<>(this.nameMapping.keySet());
     Collections.sort(keys);
     return keys.toArray(new String[keys.size()]);
   }

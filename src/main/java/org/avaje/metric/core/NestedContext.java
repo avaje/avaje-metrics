@@ -166,7 +166,7 @@ public final class NestedContext {
   /**
    * Report the list of entries to the MetricManager.
    */
-  void report(List<RequestTimingEntry> entries) {
+  static void report(List<RequestTimingEntry> entries) {
     MetricManager.reportTiming(new DefaultRequestTiming(entries, System.currentTimeMillis()));
   }
 

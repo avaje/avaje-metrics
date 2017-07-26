@@ -103,7 +103,7 @@ public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketT
     }
   }
 
-  protected final class DefaultTimedMetricEvent implements TimedEvent {
+  protected static final class DefaultTimedMetricEvent implements TimedEvent {
 
     private final DefaultBucketTimedMetric metric;
     

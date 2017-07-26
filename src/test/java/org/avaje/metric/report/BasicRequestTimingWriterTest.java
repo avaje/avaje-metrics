@@ -61,11 +61,11 @@ public class BasicRequestTimingWriterTest {
   @Test
   public void testToMillis() throws Exception {
 
-    assertEquals(1L, requestTimingWriter.toMillis(1000000L));
-    assertEquals(0L, requestTimingWriter.toMillis(900000L)); // rounds down
-    assertEquals(1L, requestTimingWriter.toMillis(1100000L));
-    assertEquals(1L, requestTimingWriter.toMillis(1500000L));
-    assertEquals(1L, requestTimingWriter.toMillis(1600000L));
-    assertEquals(2L, requestTimingWriter.toMillis(2000000L));
+    assertEquals(1L, BasicRequestTimingWriter.toMillis(1000000L));
+    assertEquals(0L, BasicRequestTimingWriter.toMillis(900000L)); // rounds down
+    assertEquals(1L, BasicRequestTimingWriter.toMillis(1100000L));
+    assertEquals(1L, BasicRequestTimingWriter.toMillis(1500000L));
+    assertEquals(1L, BasicRequestTimingWriter.toMillis(1600000L));
+    assertEquals(2L, BasicRequestTimingWriter.toMillis(2000000L));
   }
 }

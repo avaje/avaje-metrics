@@ -109,7 +109,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     this.coreJvmMetricCollection = Collections.unmodifiableCollection(coreJvmMetrics.values());
   }
 
-  private ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
+  private static ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
 
     if (disable) return null;
 
@@ -154,28 +154,28 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Return the factory used to create TimedMetric instances.
    */
-  protected MetricFactory<BucketTimedMetric> initBucketTimedFactory(boolean disableCollection) {
+  protected static MetricFactory<BucketTimedMetric> initBucketTimedFactory(boolean disableCollection) {
     return (disableCollection) ? new NoopBucketTimedFactory() : new BucketTimedMetricFactory();
   }
 
   /**
    * Return the factory used to create TimedMetric instances.
    */
-  protected MetricFactory<TimedMetric> initTimedMetricFactory(boolean disableCollection) {
+  protected static MetricFactory<TimedMetric> initTimedMetricFactory(boolean disableCollection) {
     return (disableCollection) ? new NoopTimedMetricFactory() : new TimedMetricFactory();
   }
 
   /**
    * Return the factory used to create CounterMetric instances.
    */
-  protected MetricFactory<CounterMetric> initCounterMetricFactory(boolean disableCollection) {
+  protected static MetricFactory<CounterMetric> initCounterMetricFactory(boolean disableCollection) {
     return (disableCollection) ? new NoopCounterMetricFactory() : new CounterMetricFactory();
   }
 
   /**
    * Return the factory used to create ValueMetric instances.
    */
-  protected MetricFactory<ValueMetric> initValueMetricFactory(boolean disableCollection) {
+  protected static MetricFactory<ValueMetric> initValueMetricFactory(boolean disableCollection) {
     return (disableCollection) ? new NoopValueMetricFactory() : new ValueMetricFactory();
   }
 
@@ -220,7 +220,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     if (type == null) {
       throw new IllegalArgumentException("type needs to be specified for JMX bean name support");
     }
-    return name(group + "." + type + append(name));
+    return name(group + '.' + type + append(name));
   }
 
   @Override
@@ -229,8 +229,8 @@ public class DefaultMetricManager implements PluginMetricManager {
     return name(cls.getName() + append(name));
   }
 
-  private String append(String value) {
-    return (value == null) ? "" : "." + value;
+  private static String append(String value) {
+    return (value == null) ? "" : '.' + value;
   }
 
   @Override

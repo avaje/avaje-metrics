@@ -87,7 +87,7 @@ public class MetricReportManager {
   /**
    * Helper method that provides a default RequestTimingReporter if not specified.
    */
-  protected RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
+  protected static RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
 
     if (config.getRequestTimingReporter() != null) {
       return config.getRequestTimingReporter();
@@ -100,7 +100,7 @@ public class MetricReportManager {
   /**
    * Helper method that provides a default RequestTimingReporter if not specified.
    */
-  protected MetricReporter defaultReporter(MetricReportConfig config) {
+  protected static MetricReporter defaultReporter(MetricReportConfig config) {
     if (config.getLocalReporter() != null) {
       return config.getLocalReporter();
     }
@@ -110,14 +110,14 @@ public class MetricReportManager {
   /**
    * Helper method that provides a default ScheduledExecutorService if not specified.
    */
-  protected ScheduledExecutorService defaultExecutor(ScheduledExecutorService executor) {
+  protected static ScheduledExecutorService defaultExecutor(ScheduledExecutorService executor) {
     return (executor != null) ? executor : Executors.newScheduledThreadPool(1, new BasicThreadFactory());
   }
 
   /**
    * Helper method to default the freqInSeconds used for request collection.
    */
-  protected int defaultRequestFreqInSecs(MetricReportConfig config) {
+  protected static int defaultRequestFreqInSecs(MetricReportConfig config) {
     int freqInSeconds = config.getRequestsFreqInSeconds();
     return freqInSeconds > 1 ? freqInSeconds : 3;
   }
@@ -223,14 +223,14 @@ public class MetricReportManager {
     }
   }
 
-  private long asMicros(long collectNanos) {
+  private static long asMicros(long collectNanos) {
     return TimeUnit.MICROSECONDS.convert(collectNanos, TimeUnit.NANOSECONDS);
   }
 
   /**
    * Collect all the non-empty metrics and return them for reporting.
    */
-  protected List<Metric> collectMetrics() {
+  protected static List<Metric> collectMetrics() {
 
     List<Metric> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
     List<Metric> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
@@ -241,7 +241,7 @@ public class MetricReportManager {
   /**
    * Sort the metrics into name order.
    */
-  protected List<Metric> sort(Collection<Metric> metrics) {
+  protected static List<Metric> sort(Collection<Metric> metrics) {
 
     ArrayList<Metric> sortedList = new ArrayList<>(metrics);
     Collections.sort(sortedList, NAME_COMPARATOR);
@@ -251,7 +251,7 @@ public class MetricReportManager {
   /**
    * Visit the metrics sorted by name.
    */
-  protected void report(ReportMetrics reportMetrics, MetricReporter reporter) {
+  protected static void report(ReportMetrics reportMetrics, MetricReporter reporter) {
 
     if (reporter != null) {
       try {
