@@ -81,13 +81,7 @@ public abstract class BaseFileReporter {
         return;
       }
 
-      String[] delFileNames = dir.list(new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String name) {
-          return (name.startsWith(baseFileName) && name.compareTo(minFileName) < 0);
-        }
-      });
-
+      String[] delFileNames = dir.list((dir1, name) -> (name.startsWith(baseFileName) && name.compareTo(minFileName) < 0));
       logger.debug("cleaning up [{}] old metrics files", delFileNames.length);
 
       if (delFileNames != null) {
