@@ -1,6 +1,20 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.*;
+import org.avaje.metric.AbstractTimedMetric;
+import org.avaje.metric.BucketTimedMetric;
+import org.avaje.metric.CounterMetric;
+import org.avaje.metric.GaugeDouble;
+import org.avaje.metric.GaugeDoubleMetric;
+import org.avaje.metric.GaugeLong;
+import org.avaje.metric.GaugeLongMetric;
+import org.avaje.metric.Metric;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.MetricNameCache;
+import org.avaje.metric.RequestTiming;
+import org.avaje.metric.TimedMetric;
+import org.avaje.metric.TimedMetricGroup;
+import org.avaje.metric.TimingMetricInfo;
+import org.avaje.metric.ValueMetric;
 import org.avaje.metric.core.noop.NoopBucketTimedFactory;
 import org.avaje.metric.core.noop.NoopCounterMetricFactory;
 import org.avaje.metric.core.noop.NoopTimedMetricFactory;
@@ -16,7 +30,12 @@ import org.avaje.metric.util.PropertiesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

@@ -256,7 +256,7 @@ public class CsvWriteVisitor implements MetricVisitor {
   }
 
   protected long getDuration(long startTime) {
-    return Math.round((collectTime - startTime) / 1000d);
+    return Math.round((collectTime - startTime) / 1000.0d);
   }
 
   protected String formattedValue(double value) {

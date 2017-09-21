@@ -226,7 +226,7 @@ public class JsonWriteVisitor implements MetricVisitor {
   /**
    * Return the bucket ranges as a comma delimited list.
    */
-  protected static String commaDelimited(int[] a) {
+  protected String commaDelimited(int[] a) {
 
     if (a == null) {
       return "";
@@ -245,8 +245,8 @@ public class JsonWriteVisitor implements MetricVisitor {
     buffer.append(val);
   }
 
-  protected static long getDuration(long startTime) {
-    return Math.round((System.currentTimeMillis() - startTime) / 1000d);
+  protected long getDuration(long startTime) {
+    return Math.round((System.currentTimeMillis() - startTime) / 1000.0d);
   }
 
 }
