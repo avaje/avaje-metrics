@@ -22,7 +22,7 @@ public final class DefaultTimedMetricEvent implements TimedEvent {
    */
   protected DefaultTimedMetricEvent(DefaultTimedMetric metric) {
     this.metric = metric;
-    this.startNanos = metric.getTickNanos();
+    this.startNanos = DefaultTimedMetric.getTickNanos();
   }
 
   public String toString() {
@@ -60,7 +60,7 @@ public final class DefaultTimedMetricEvent implements TimedEvent {
    * Return the duration in nanos.
    */
   private long getDuration() {
-    return metric.getTickNanos() - startNanos;
+    return DefaultTimedMetric.getTickNanos() - startNanos;
   }
 
 }

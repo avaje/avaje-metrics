@@ -117,14 +117,12 @@ public abstract class BaseFileReporter {
       return value;
     }
 
-    if (value < 1) {
-      String sysVal = System.getProperty("metric.numberOfFilesToKeep");
-      if (sysVal != null) {
-        try {
-          return Integer.parseInt(sysVal);
-        } catch (NumberFormatException e) {
-          return DEFAULT_NUM_FILES_TO_KEEP;
-        }
+    String sysVal = System.getProperty("metric.numberOfFilesToKeep");
+    if (sysVal != null) {
+      try {
+        return Integer.parseInt(sysVal);
+      } catch (NumberFormatException e) {
+        return DEFAULT_NUM_FILES_TO_KEEP;
       }
     }
 
@@ -161,7 +159,7 @@ public abstract class BaseFileReporter {
 
   protected static String getFileName(String baseFileName, Date forDate) {
     String todayString = new SimpleDateFormat("yyyyMMdd").format(forDate);
-    return baseFileName+"-" + todayString + ".log";
+    return baseFileName+ '-' + todayString + ".log";
   }
 
   public static String getFileName(String baseFileName, int daysAgo) {

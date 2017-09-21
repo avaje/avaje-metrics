@@ -1,5 +1,6 @@
 package org.avaje.metric.util;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -10,6 +11,12 @@ public class LikeMatcher {
   private final boolean allMatch;
 
   private final Pattern pattern;
+
+  /** Compiled regex for replacing dots. */
+  private static final Pattern DOT_REPLACE = Pattern.compile(".", Pattern.LITERAL);
+
+  /** Compiled regex for replacing stars. */
+  private static final Pattern STAR_REPLACE = Pattern.compile("*", Pattern.LITERAL);
 
   /**
    * Create with an expression that can contain "*" characters as wildcards.
@@ -46,8 +53,8 @@ public class LikeMatcher {
 
     } else {
       expr = expr.toLowerCase().trim();
-      expr = expr.replace(".", "\\.");
-      expr = expr.replace("*", ".*");
+      expr = DOT_REPLACE.matcher(expr).replaceAll("\\\\.");
+      expr = STAR_REPLACE.matcher(expr).replaceAll(".*");
 
       this.pattern = Pattern.compile(expr);
     }

@@ -106,7 +106,7 @@ public final class JvmMemoryMetricGroup {
       return baseName.withName(name);
     }
 
-    private abstract class Base {
+    private abstract static class Base {
       MemoryUsageSource source;
       Base(MemoryUsageSource source) {
         this.source = source;

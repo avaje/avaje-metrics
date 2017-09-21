@@ -75,7 +75,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Write the footer content to the writer.
    */
-  protected void writeFooter(Writer writer) throws IOException {
+  protected static void writeFooter(Writer writer) throws IOException {
     writer.write("\n");
   }
 
@@ -153,14 +153,14 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Write the value padding with spaces out to padToWidth.
    */
-  protected void pad(Writer writer, int padToWidth, long value) throws IOException {
+  protected static void pad(Writer writer, int padToWidth, long value) throws IOException {
     pad(writer, padToWidth, String.valueOf(value));
   }
 
   /**
    * Write the value padding with spaces out to padToWidth.
    */
-  protected void pad(Writer writer, int padToWidth, String s) throws IOException {
+  protected static void pad(Writer writer, int padToWidth, String s) throws IOException {
     writer.write(s);
     for (int i = 0; i < padToWidth - s.length(); i++) {
       writer.write(" ");
@@ -170,7 +170,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Return the percentage of execution time as a value from 0 to 100.
    */
-  protected long percentage(long totalExeNanos, long executionNanos) {
+  protected static long percentage(long totalExeNanos, long executionNanos) {
     return (100 * executionNanos) / totalExeNanos;
   }
 
@@ -178,14 +178,14 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
   /**
    * Return the nanos as milliseconds.
    */
-  protected long toMillis(long nanos) {
+  protected static long toMillis(long nanos) {
     return TimeUnit.NANOSECONDS.toMillis(nanos);
   }
 
   /**
    * Return the nanos as microseconds.
    */
-  protected long toMicros(long nanos) {
+  protected static long toMicros(long nanos) {
     return TimeUnit.NANOSECONDS.toMicros(nanos);
   }
 }
