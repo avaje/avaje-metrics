@@ -22,6 +22,7 @@ import org.avaje.metric.core.noop.NoopValueMetricFactory;
 import org.avaje.metric.core.spi.ExternalRequestIdAdapter;
 import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
 import org.avaje.metric.jvm.JvmMemoryMetricGroup;
+import org.avaje.metric.jvm.JvmProcessMemory;
 import org.avaje.metric.jvm.JvmSystemMetricGroup;
 import org.avaje.metric.jvm.JvmThreadMetricGroup;
 import org.avaje.metric.spi.PluginMetricManager;
@@ -205,6 +206,7 @@ public class DefaultMetricManager implements PluginMetricManager {
 
     registerAll(JvmMemoryMetricGroup.createHeapGroup());
     registerAll(JvmMemoryMetricGroup.createNonHeapGroup());
+    registerAll(JvmProcessMemory.createGauges());
     registerAll(JvmGarbageCollectionMetricGroup.createGauges());
     registerAll(JvmThreadMetricGroup.createThreadMetricGroup());
 
