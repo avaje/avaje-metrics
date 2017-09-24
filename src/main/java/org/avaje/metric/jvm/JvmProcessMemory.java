@@ -4,11 +4,13 @@ import org.avaje.metric.GaugeLong;
 import org.avaje.metric.Metric;
 import org.avaje.metric.core.DefaultGaugeLongMetric;
 import org.avaje.metric.core.DefaultMetricName;
+import org.avaje.metric.core.MetricManifest;
 import org.avaje.metric.util.ProcessHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,8 @@ public final class JvmProcessMemory {
 	private static final Logger logger = LoggerFactory.getLogger(JvmProcessMemory.class);
 
 	private static final long TO_MEGABYTES = 1024L;
+
+	private static final long MEGABYTES = 1024L * 1024L;
 
 	private final String pid;
 
@@ -76,11 +80,13 @@ public final class JvmProcessMemory {
 	public List<Metric> metrics() {
 
 		List<Metric> metrics = new ArrayList<>();
-		if (pid == null) {
+		if (pid == null || MetricManifest.get().disableProcessMemory()) {
 			// not supported on the OS platform (linux only support at this stage)
+			logger.debug("No process memory collection - os:{} disabled:{}", System.getProperty("os.name"), MetricManifest.get().disableProcessMemory());
 			return metrics;
 		}
 
+		MemoryWarnWatcher memoryWatcher = memoryWatcher(warnMemoryLevel(), pid);
 
 		DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm","memory.process");
 		DefaultMetricName vmRssName = baseName.withName("vmrss");
@@ -88,11 +94,85 @@ public final class JvmProcessMemory {
 
 		Source source = new Source(pid);
 
-		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source)));
+		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source, memoryWatcher)));
 		metrics.add(new DefaultGaugeLongMetric(vmHwmName, new VmHWM(source)));
 		return metrics;
 	}
 
+	private MemoryWarnWatcher memoryWatcher(long warnLevel, String pid) {
+		if (warnLevel == 0) {
+			return new NoMemoryWarn();
+		} else {
+			long freq = MetricManifest.get().getMemoryWarnFrequency();
+			return new MemoryWarn(warnLevel, pid, new DefaultMemoryAlertHandler(freq));
+		}
+	}
+
+	/**
+	 * Does not perform any memory warning.
+	 */
+	private final static class NoMemoryWarn implements MemoryWarnWatcher {
+		public long process(long memoryInMB) {
+			return memoryInMB;
+		}
+	}
+
+	private final static class MemoryWarn implements MemoryWarnWatcher {
+
+		private final long warnLevel;
+
+		private final String pid;
+
+		private final MemoryWarnHandler alertHandler;
+
+		private long lastAlertLevel;
+
+		MemoryWarn(long warnLevel, String pid, MemoryWarnHandler alertHandler) {
+			this.warnLevel = warnLevel;
+			this.pid = pid;
+			this.alertHandler = alertHandler;
+		}
+
+		public long process(long memoryInMB) {
+			if (memoryInMB >= warnLevel) {
+				hitWarnLevel(memoryInMB);
+			}
+			return memoryInMB;
+		}
+
+		private void hitWarnLevel(long memoryInMB) {
+			MemoryWarnEvent event = new MemoryWarnEvent(memoryInMB, warnLevel, lastAlertLevel, pid);
+			if (memoryInMB > lastAlertLevel) {
+				alertHandler.warning(event);
+			} else {
+				alertHandler.stillWarning(event);
+			}
+			lastAlertLevel = memoryInMB;
+		}
+
+	}
+
+	private long warnMemoryLevel() {
+
+		MetricManifest manifest = MetricManifest.get();
+		if (!manifest.hasMemoryWarning()) {
+			return 0;
+		}
+
+		MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+		long heapMax = memoryMXBean.getHeapMemoryUsage().getMax() / MEGABYTES;
+		long nonHeapMax = memoryMXBean.getNonHeapMemoryUsage().getMax() / MEGABYTES;
+
+		long total = manifest.getMemoryWarnAbsolute();
+		long relative = 0;
+		if (total == 0) {
+			relative = manifest.getMemoryWarnRelative();
+			total = relative + heapMax + nonHeapMax;
+		}
+
+		logger.debug("registering memory warning at {}mb - heapMax:{}mb nonHeapMax:{}mb relative:{}mb", total, heapMax, nonHeapMax, relative);
+		return total;
+	}
 
 	/**
 	 * Helper that parses the /proc/x/status output getting VmRSS and VmHWM.
@@ -136,13 +216,16 @@ public final class JvmProcessMemory {
 
 		private final Source source;
 
-		VmRSS(Source source) {
+		private final MemoryWarnWatcher warn;
+
+		VmRSS(Source source, MemoryWarnWatcher warn) {
 			this.source = source;
+			this.warn = warn;
 		}
 
 		@Override
 		public long getValue() {
-			return source.getRss() / TO_MEGABYTES;
+			return warn.process( source.getRss() / TO_MEGABYTES);
 		}
 	}
 

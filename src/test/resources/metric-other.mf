@@ -1,0 +1,4 @@
+memory-warn-relative: 200
+app-memory-warn-relative: 300
+disable-process-memory: true
+

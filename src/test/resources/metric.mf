@@ -1,0 +1,3 @@
+memory-warn-relative: 200
+memory-warn-absolute: 600
+
