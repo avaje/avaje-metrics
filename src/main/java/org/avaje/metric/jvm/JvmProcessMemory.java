@@ -37,7 +37,7 @@ public final class JvmProcessMemory {
 	/**
 	 * Create checking os platform and obtaining the PID.
 	 */
-	JvmProcessMemory() {
+	private JvmProcessMemory() {
 		pid = checkVmRSS(linuxPid());
 	}
 
@@ -91,11 +91,15 @@ public final class JvmProcessMemory {
 		DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm","memory.process");
 		DefaultMetricName vmRssName = baseName.withName("vmrss");
 		DefaultMetricName vmHwmName = baseName.withName("vmhwm");
+		DefaultMetricName committedDelta = baseName.withName("delta");
+//		DefaultMetricName usedDelta = baseName.withName("useddelta");
 
 		Source source = new Source(pid);
 
 		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source, memoryWatcher)));
 		metrics.add(new DefaultGaugeLongMetric(vmHwmName, new VmHWM(source)));
+		metrics.add(new DefaultGaugeLongMetric(committedDelta, new CommittedDelta(source)));
+//		metrics.add(new DefaultGaugeLongMetric(usedDelta, new UsedDelta(source)));
 		return metrics;
 	}
 
@@ -170,7 +174,7 @@ public final class JvmProcessMemory {
 			total = relative + heapMax + nonHeapMax;
 		}
 
-		logger.debug("registering memory warning at {}mb - heapMax:{}mb nonHeapMax:{}mb relative:{}mb", total, heapMax, nonHeapMax, relative);
+		logger.info("registering memory warning at {}mb - heapMax:{}mb nonHeapMax:{}mb relative:{}mb", total, heapMax, nonHeapMax, relative);
 		return total;
 	}
 
@@ -197,6 +201,40 @@ public final class JvmProcessMemory {
 			return Long.parseLong(cols[cols.length - 2]);
 		}
 	}
+
+	/**
+	 * Delta between VmRSS and JVM total committed memory.
+	 */
+	private static final class CommittedDelta implements GaugeLong {
+
+		private final Source source;
+
+		CommittedDelta(Source source) {
+			this.source = source;
+		}
+
+		@Override
+		public long getValue() {
+			return source.getCommittedDelta();
+		}
+	}
+
+//	/**
+//	 * Delta between VmRSS and JVM total used memory.
+//	 */
+//	private static final class UsedDelta implements GaugeLong {
+//
+//		private final Source source;
+//
+//		UsedDelta(Source source) {
+//			this.source = source;
+//		}
+//
+//		@Override
+//		public long getValue() {
+//			return source.getCommittedDelta();
+//		}
+//	}
 
 	private static final class VmHWM implements GaugeLong {
 
@@ -253,6 +291,27 @@ public final class JvmProcessMemory {
 		long getRss() {
 			load();
 			return procStatus.vmRSS;
+		}
+
+		long getCommittedDelta() {
+
+			MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+			long heap = memoryMXBean.getHeapMemoryUsage().getCommitted();
+			long nonHeap = memoryMXBean.getNonHeapMemoryUsage().getCommitted();
+
+			return delta(heap, nonHeap);
+		}
+
+//		long getUsedDelta() {
+//
+//			MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+//			long heap = memoryMXBean.getHeapMemoryUsage().getUsed();
+//			long nonHeap = memoryMXBean.getNonHeapMemoryUsage().getUsed();
+//			return delta(heap, nonHeap);
+//		}
+
+		private long delta(long heap, long nonHeap) {
+			return getRss() / TO_MEGABYTES  - (heap + nonHeap) / MEGABYTES;
 		}
 	}
 }
