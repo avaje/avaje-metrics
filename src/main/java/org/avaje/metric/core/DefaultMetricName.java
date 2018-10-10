@@ -14,10 +14,7 @@ import java.util.regex.Pattern;
  */
 class DefaultMetricName implements MetricName {
 
-  /**
-   * Group used when it is undefined in {@link #parse(String)}.
-   */
-  private static final String UNDEFINED_GROUP = "o";
+  private static final String ERROR = ".error";
 
   private final String group;
   private final String type;
@@ -34,9 +31,17 @@ class DefaultMetricName implements MetricName {
    * </p>
    */
   static DefaultMetricName parse(String rawName) {
-    int lastDot = rawName.lastIndexOf('.');
+
+    int lastDot;
+    if (rawName.endsWith(ERROR)) {
+      lastDot = rawName.lastIndexOf('.', rawName.length() - 7);
+
+    } else {
+      lastDot = rawName.lastIndexOf('.');
+    }
+
     if (lastDot < 1) {
-      return new DefaultMetricName(null, null, rawName);
+      return new DefaultMetricName(rawName, null, null);
     }
     int secLastDot = rawName.lastIndexOf('.', lastDot-1);
     if (secLastDot > 0) {
@@ -47,7 +52,7 @@ class DefaultMetricName implements MetricName {
     }
     String name = rawName.substring(lastDot+1);
     String type = rawName.substring(0, lastDot);
-    return new DefaultMetricName(UNDEFINED_GROUP, type, name);
+    return new DefaultMetricName(type, null, name);
   }
 
   /**
@@ -67,12 +72,6 @@ class DefaultMetricName implements MetricName {
    * Creates a new MetricName.
    */
   DefaultMetricName(String group, String type, String name) {
-    if (group == null) {
-      throw new IllegalArgumentException("group needs to be specified");
-    }
-    if (type == null) {
-      throw new IllegalArgumentException("type needs to be specified for JMX bean name support");
-    }
     this.group = group;
     this.type = type;
     this.name = name;
@@ -138,6 +137,15 @@ class DefaultMetricName implements MetricName {
     return simpleName;
   }
 
+  @Override
+  public boolean startsWith(String prefix) {
+    return simpleName.startsWith(prefix);
+  }
+
+  @Override
+  public boolean isError() {
+    return simpleName.endsWith(ERROR);
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -168,7 +176,9 @@ class DefaultMetricName implements MetricName {
 
   private static String createSimpleName(String group, String type, String name) {
     StringBuilder sb = new StringBuilder(80);
-    sb.append(group);
+    if (group != null) {
+      sb.append(group);
+    }
     if (type != null) {
       sb.append('.').append(type);
     }
