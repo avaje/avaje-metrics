@@ -1,9 +1,9 @@
 package org.avaje.metric.core;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides a cache of MetricNames with a common base name derived from a class
@@ -14,7 +14,7 @@ import org.avaje.metric.MetricNameCache;
  * name (for example, on soap operation name or method name).
  * </p>
  */
-public final class DefaultMetricNameCache implements MetricNameCache {
+final class DefaultMetricNameCache implements MetricNameCache {
 
   private final MetricName baseName;
 
@@ -23,17 +23,17 @@ public final class DefaultMetricNameCache implements MetricNameCache {
   /**
    * Create basing the name off the Class.
    */
-  public DefaultMetricNameCache(Class<?> klass) {
+  DefaultMetricNameCache(Class<?> klass) {
     this(new DefaultMetricName(klass, ""));
   }
 
   /**
    * Create providing a base MetricName.
    */
-  public DefaultMetricNameCache(MetricName baseName) {
+  DefaultMetricNameCache(MetricName baseName) {
     this.baseName = baseName;
   }
-  
+
   /**
    * Return the MetricName from the cache creating it if required.
    * <p>

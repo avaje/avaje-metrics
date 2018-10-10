@@ -1,51 +1,32 @@
 package org.avaje.metric.core.noop;
 
 import org.avaje.metric.CounterMetric;
-import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
-import java.util.List;
-
-public final class NoopCounterMetric implements CounterMetric {
+final class NoopCounterMetric implements CounterMetric {
 
   private static final NoopCounterStatistics NOOP_STATS = NoopCounterStatistics.INSTANCE;
 
   protected final MetricName metricName;
 
-  public NoopCounterMetric(MetricName metricName) {
+  NoopCounterMetric(MetricName metricName) {
     this.metricName = metricName;
   }
-  
+
   @Override
   public MetricName getName() {
     return metricName;
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor visitor) {
     // do nothing
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void clear() {
     // do nothing
-  }
-
-  @Override
-  public void clearStatistics() {
-    // do nothing
-  }
-
-  @Override
-  public CounterStatistics getStatistics(boolean reset) {
-    return NOOP_STATS;
-  }
-
-  @Override
-  public CounterStatistics getCollectedStatistics() {
-    return NOOP_STATS;
   }
 
   @Override
@@ -58,5 +39,8 @@ public final class NoopCounterMetric implements CounterMetric {
     // do nothing
   }
 
-  
+  @Override
+  public long getCount() {
+    return 0;
+  }
 }

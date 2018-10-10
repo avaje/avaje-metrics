@@ -1,19 +1,18 @@
-package org.avaje.metric.report;
+package org.avaje.metric.core;
 
 import org.avaje.metric.RequestTiming;
 import org.avaje.metric.RequestTimingEntry;
 import org.avaje.metric.TimedMetric;
-import org.avaje.metric.core.BaseTimingEntry;
-import org.avaje.metric.core.DefaultMetricName;
-import org.avaje.metric.core.DefaultRequestTiming;
-import org.avaje.metric.core.DefaultTimedMetric;
+import org.avaje.metric.report.BasicRequestTimingWriter;
 import org.testng.annotations.Test;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class BasicRequestTimingWriterTest {
 
@@ -61,11 +60,18 @@ public class BasicRequestTimingWriterTest {
   @Test
   public void testToMillis() throws Exception {
 
-    assertEquals(1L, BasicRequestTimingWriter.toMillis(1000000L));
-    assertEquals(0L, BasicRequestTimingWriter.toMillis(900000L)); // rounds down
-    assertEquals(1L, BasicRequestTimingWriter.toMillis(1100000L));
-    assertEquals(1L, BasicRequestTimingWriter.toMillis(1500000L));
-    assertEquals(1L, BasicRequestTimingWriter.toMillis(1600000L));
-    assertEquals(2L, BasicRequestTimingWriter.toMillis(2000000L));
+    assertEquals(1L, toMillis(1000000L));
+    assertEquals(0L, toMillis(900000L)); // rounds down
+    assertEquals(1L, toMillis(1100000L));
+    assertEquals(1L, toMillis(1500000L));
+    assertEquals(1L, toMillis(1600000L));
+    assertEquals(2L, toMillis(2000000L));
+  }
+
+  /**
+   * Return the nanos as milliseconds.
+   */
+  protected static long toMillis(long nanos) {
+    return TimeUnit.NANOSECONDS.toMillis(nanos);
   }
 }

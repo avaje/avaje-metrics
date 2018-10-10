@@ -1,4 +1,4 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 import org.avaje.metric.util.ProcessHandler;
 import org.slf4j.Logger;

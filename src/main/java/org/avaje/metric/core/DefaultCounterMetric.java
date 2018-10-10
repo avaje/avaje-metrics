@@ -1,13 +1,9 @@
 package org.avaje.metric.core;
 
 import org.avaje.metric.CounterMetric;
-import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
-
-import java.io.IOException;
-import java.util.List;
+import org.avaje.metric.statistics.CounterStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
 
 /**
@@ -17,13 +13,11 @@ import java.util.List;
  * via log4j or logback.
  * </p>
  */
-public final class DefaultCounterMetric implements Metric, CounterMetric {
+final class DefaultCounterMetric implements CounterMetric {
 
   private final MetricName name;
 
-  private final Counter counter = new Counter();
-
-  private CounterStatistics collectedStatistics;
+  private final Counter counter;
 
   /**
    * Create the metric with a name and rateUnit.
@@ -32,48 +26,30 @@ public final class DefaultCounterMetric implements Metric, CounterMetric {
    * manor - typically events per hour, minute or second.
    * </p>
    */
-  public DefaultCounterMetric(MetricName name) {
+  DefaultCounterMetric(MetricName name) {
     this.name = name;
-  }
-
-  /**
-   * Return the current statistics.
-   */
-  @Override
-  public CounterStatistics getStatistics(boolean reset) {
-    return counter.getStatistics(reset);
-  }
-
-  /**
-   * Return the collected statistics. This is used by reporting objects.
-   */
-  @Override
-  public CounterStatistics getCollectedStatistics() {
-    return collectedStatistics;
+    this.counter = new Counter(name);
   }
 
   /**
    * Clear the collected statistics.
    */
   @Override
-  public void clearStatistics() {
+  public void clear() {
     counter.reset();
   }
 
-  /**
-   * Collect the statistics returning true if there are non-zero statistics on this metric.
-   */
   @Override
-  public void collectStatistics(List<Metric> list) {
-    this.collectedStatistics = counter.collectStatistics();
-    if (collectedStatistics != null) {
-      list.add(this);
+  public void collect(MetricStatisticsVisitor collector) {
+    CounterStatistics stats = counter.collectStatistics();
+    if (stats != null) {
+      collector.visit(stats);
     }
   }
-  
+
   @Override
-  public void visit(MetricVisitor visitor) throws IOException {
-    visitor.visit(this);
+  public long getCount() {
+    return counter.getCount();
   }
 
   /**

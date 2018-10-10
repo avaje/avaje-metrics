@@ -1,4 +1,4 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 /**
  * Watch and warn on process memory.

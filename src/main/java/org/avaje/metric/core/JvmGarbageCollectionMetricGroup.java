@@ -1,9 +1,9 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.Metric;
-import org.avaje.metric.core.DefaultGaugeLongMetric;
-import org.avaje.metric.core.DefaultMetricName;
+import org.avaje.metric.MetricManager;
+import org.avaje.metric.MetricName;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -13,9 +13,9 @@ import java.util.List;
 /**
  * Collect statistics on the rate of garbage collection.
  */
-public final class JvmGarbageCollectionMetricGroup {
+final class JvmGarbageCollectionMetricGroup {
 
-  public static List<Metric> createGauges() {
+  static List<Metric> createGauges() {
 
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
@@ -24,8 +24,7 @@ public final class JvmGarbageCollectionMetricGroup {
     for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
       // modify collector name replacing spaces with hyphens.
       String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-');
-      DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm.gc", gcName);
-
+      MetricName baseName = new DefaultMetricName("jvm.gc", gcName, "");
       metrics.add(DefaultGaugeLongMetric.incrementing(baseName.withName("count"), new Count(gcMXBean)));
       metrics.add(DefaultGaugeLongMetric.incrementing(baseName.withName("time"), new Time(gcMXBean)));
     }

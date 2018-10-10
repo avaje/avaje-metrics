@@ -1,13 +1,11 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.AbstractTimedMetric;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
+import org.avaje.metric.TimedMetric;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +16,7 @@ import static org.testng.Assert.assertSame;
 public class BaseTimingEntryTest {
 
   @Test
-  public void testCompareTo() throws Exception {
+  public void testCompareTo() {
 
     int depth = 0;
     List<BaseTimingEntry> entries = new ArrayList<>();
@@ -37,7 +35,6 @@ public class BaseTimingEntryTest {
     assertSame(e1, entries.get(1));
     assertSame(e2, entries.get(2));
     assertSame(e3, entries.get(3));
-
   }
 
 
@@ -66,7 +63,7 @@ public class BaseTimingEntryTest {
 
   }
 
-  class TDMetric implements AbstractTimedMetric {
+  class TDMetric implements TimedMetric {
 
     MetricName metricName;
 
@@ -77,6 +74,16 @@ public class BaseTimingEntryTest {
     @Override
     public MetricName getName() {
       return metricName;
+    }
+
+    @Override
+    public boolean isBucket() {
+      return false;
+    }
+
+    @Override
+    public String getBucketRange() {
+      return null;
     }
 
     @Override
@@ -100,6 +107,11 @@ public class BaseTimingEntryTest {
     }
 
     @Override
+    public void operationEnd(int opCode, long startNanos) {
+
+    }
+
+    @Override
     public boolean isActiveThreadContext() {
       return false;
     }
@@ -119,17 +131,13 @@ public class BaseTimingEntryTest {
 
     }
 
-    public void collectStatistics(List<Metric> list) {
+    @Override
+    public void collect(MetricStatisticsVisitor visitor) {
 
     }
 
     @Override
-    public void visit(MetricVisitor visitor) throws IOException {
-
-    }
-
-    @Override
-    public void clearStatistics() {
+    public void clear() {
 
     }
 

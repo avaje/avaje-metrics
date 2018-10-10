@@ -1,14 +1,14 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.RequestTimingEntry;
+import org.avaje.metric.TimedMetric;
 
 /**
  * Base implementation of TimingEntry.
  */
-public class BaseTimingEntry implements RequestTimingEntry {
+class BaseTimingEntry implements RequestTimingEntry {
 
-  final AbstractTimedMetric metric;
+  final TimedMetric metric;
 
   final int depth;
 
@@ -16,7 +16,7 @@ public class BaseTimingEntry implements RequestTimingEntry {
 
   long endNanos;
 
-  public BaseTimingEntry(int depth, AbstractTimedMetric metric, long startNanos) {
+  BaseTimingEntry(int depth, TimedMetric metric, long startNanos) {
     this.depth = depth;
     this.metric = metric;
     this.startNanos = startNanos;
@@ -35,7 +35,7 @@ public class BaseTimingEntry implements RequestTimingEntry {
     return depth;
   }
 
-  public AbstractTimedMetric getMetric() {
+  public TimedMetric getMetric() {
     return metric;
   }
 

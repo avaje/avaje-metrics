@@ -1,14 +1,17 @@
 package org.avaje.metric.core;
 
 import orange.truck.Customer;
-import org.avaje.metric.BucketTimedMetric;
+import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimingMetricInfo;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 public class DefaultMetricManagerTest {
 
@@ -17,9 +20,9 @@ public class DefaultMetricManagerTest {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
-    TimedMetric m0 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m0"));
-    TimedMetric m1 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m1"));
-    BucketTimedMetric m2 = mgr.getBucketTimedMetric(mgr.name("org.req", "Customer", "m2"), 100, 200);
+    TimedMetric m0 = mgr.getTimedMetric(MetricName.of("org.req", "Customer", "m0"));
+    TimedMetric m1 = mgr.getTimedMetric(MetricName.of("org.req", "Customer", "m1"));
+    TimedMetric m2 = mgr.getTimedMetric(MetricName.of("org.req", "Customer", "m2"), 100, 200);
 
     List<TimingMetricInfo> timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(0, timingMetrics.size());
@@ -49,15 +52,15 @@ public class DefaultMetricManagerTest {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
-    TimedMetric m0 = mgr.getTimedMetric(mgr.name(Customer.class, "doSomething"));
+    TimedMetric m0 = mgr.getTimedMetric(MetricName.of(Customer.class, "doSomething"));
 
-    TimedMetric m0b = mgr.getTimedMetric(mgr.name("orange.truck", "Customer", "doSomething"));
+    TimedMetric m0b = mgr.getTimedMetric(MetricName.of("orange.truck", "Customer", "doSomething"));
 
     assertSame(m0, m0b);
     //assertEquals("na.Customer.doSomething", m0.getName().getSimpleName());
 
-    TimedMetric m1 = mgr.getTimedMetric(mgr.name("org.req", "Customer", "m1"));
-    BucketTimedMetric m2 = mgr.getBucketTimedMetric(mgr.name("org.req", "Customer", "m2"), 100, 200);
+    TimedMetric m1 = mgr.getTimedMetric(MetricName.of("org.req", "Customer", "m1"));
+    TimedMetric m2 = mgr.getTimedMetric(MetricName.of("org.req", "Customer", "m2"), 100, 200);
 
     List<TimingMetricInfo> allTimingMetrics = mgr.getAllTimingMetrics(null);
     assertEquals(3, allTimingMetrics.size());

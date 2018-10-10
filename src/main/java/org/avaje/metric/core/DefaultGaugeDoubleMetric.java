@@ -2,18 +2,14 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
-
-import java.io.IOException;
-import java.util.List;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
 
 /**
  * A Metric that gets its value from a GaugeDouble.
  */
-public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
+class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final MetricName name;
 
@@ -28,23 +24,23 @@ public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
    * for the value.
    * </p>
    */
-  public static DefaultGaugeDoubleMetric incrementing(MetricName name, GaugeDouble gauge) {
+  static DefaultGaugeDoubleMetric incrementing(MetricName name, GaugeDouble gauge) {
     return new Incrementing(name, gauge);
   }
 
   /**
    * Create a GaugeMetric.
-   * 
+   *
    * @param name
    *          the name of the metric.
    * @param gauge
    *          the gauge used to get the value.
    */
-  public DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
+  DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
     this.name = name;
     this.gauge = gauge;
   }
-  
+
   @Override
   public MetricName getName() {
     return name;
@@ -63,22 +59,17 @@ public class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor collector) {
     double value = gauge.getValue();
     boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
     if (collect) {
       lastReported = value;
-      list.add(this);
+      collector.visit(new DGaugeDoubleStatistic(name, value));
     }
   }
 
   @Override
-  public void visit(MetricVisitor visitor) throws IOException {
-    visitor.visit(this);
-  }
-
-  @Override
-  public void clearStatistics() {
+  public void clear() {
     // No need to do anything - direct to gauge
   }
 

@@ -1,28 +1,43 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.CounterStatistics;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.statistics.CounterStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-public class DefaultCounterStatistics implements CounterStatistics {
+class DefaultCounterStatistics implements CounterStatistics {
+
+  protected final MetricName name;
 
   protected final long startTime;
-  
+
   protected final long count;
 
   /**
    * Construct for Counter which doesn't collect time or high water mark.
    */
-  public DefaultCounterStatistics(long collectionStart, long count) {
+  DefaultCounterStatistics(MetricName name, long collectionStart, long count) {
+    this.name = name;
     this.startTime = collectionStart;
     this.count = count;
   }
 
-  public String toString() {
-    return "count:"+count;
+  @Override
+  public void visit(MetricStatisticsVisitor visitor) {
+    visitor.visit(this);
   }
-  
+
+  public String toString() {
+    return "count:" + count;
+  }
+
+  @Override
+  public MetricName getName() {
+    return name;
+  }
+
   /**
    * Return the time the counter started statistics collection.
    */

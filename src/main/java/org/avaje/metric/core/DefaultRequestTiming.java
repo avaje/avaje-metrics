@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Holds the pre request timing entries and the time it was reported.
  */
-public class DefaultRequestTiming implements RequestTiming {
+class DefaultRequestTiming implements RequestTiming {
 
   final List<RequestTimingEntry> entries;
 
@@ -16,7 +16,7 @@ public class DefaultRequestTiming implements RequestTiming {
 
   String externalRequestId;
 
-  public DefaultRequestTiming(List<RequestTimingEntry> entries, long reportTime) {
+  DefaultRequestTiming(List<RequestTimingEntry> entries, long reportTime) {
     this.entries = entries;
     this.reportTime = reportTime;
   }

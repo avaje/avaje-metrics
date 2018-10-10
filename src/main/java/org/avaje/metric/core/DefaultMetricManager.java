@@ -1,7 +1,5 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.AbstractTimedMetric;
-import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
@@ -20,14 +18,9 @@ import org.avaje.metric.core.noop.NoopCounterMetricFactory;
 import org.avaje.metric.core.noop.NoopTimedMetricFactory;
 import org.avaje.metric.core.noop.NoopValueMetricFactory;
 import org.avaje.metric.core.spi.ExternalRequestIdAdapter;
-import org.avaje.metric.jvm.JvmGarbageCollectionMetricGroup;
-import org.avaje.metric.jvm.JvmMemoryMetricGroup;
-import org.avaje.metric.jvm.JvmProcessMemory;
-import org.avaje.metric.jvm.JvmSystemMetricGroup;
-import org.avaje.metric.jvm.JvmThreadMetricGroup;
 import org.avaje.metric.spi.PluginMetricManager;
+import org.avaje.metric.statistics.MetricStatistics;
 import org.avaje.metric.util.LikeMatcher;
-import org.avaje.metric.util.PropertiesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -47,11 +39,9 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   private static final Logger logger = LoggerFactory.getLogger(DefaultMetricManager.class);
 
-  public static final String APPLICATION_PROPERTIES_LOCATIONS = "application.properties.locations";
+  private static final String METRICS_MDC_REQUEST_ID = "metrics.mdc.requestId";
 
-  public static final String METRICS_COLLECTION_DISABLE = "metrics.collection.disable";
-
-  public static final String METRICS_MDC_REQUEST_ID = "metrics.mdc.requestId";
+  private static final String JVM = "jvm";
 
   private final NameComp sortByName = new NameComp();
 
@@ -75,7 +65,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Factory for creating TimedMetrics.
    */
-  private final MetricFactory<BucketTimedMetric> bucketTimedMetricFactory;
+  private final MetricFactory<TimedMetric> bucketTimedMetricFactory;
 
   /**
    * Factory for creating TimedMetrics.
@@ -109,14 +99,9 @@ public class DefaultMetricManager implements PluginMetricManager {
    */
   protected final boolean disable;
 
-  protected final NameMapping nameMapping;
-
   public DefaultMetricManager() {
 
     this.disable = isDisableCollection();
-
-    this.nameMapping = new NameMapping(getClass().getClassLoader());
-
     this.bucketTimedMetricFactory = initBucketTimedFactory(disable);
     this.timedMetricFactory = initTimedMetricFactory(disable);
     this.valueMetricFactory = initValueMetricFactory(disable);
@@ -147,14 +132,7 @@ public class DefaultMetricManager implements PluginMetricManager {
    */
   private static boolean isDisableCollection() {
 
-    // try system properties first
-    String disable = System.getProperty(METRICS_COLLECTION_DISABLE);
-    if (disable == null) {
-      // now try to read properties files (as defined in application.properties.locations)
-      Properties appProperties = PropertiesLoader.indirectLoad(APPLICATION_PROPERTIES_LOCATIONS);
-      disable = appProperties.getProperty(METRICS_COLLECTION_DISABLE);
-    }
-
+    String disable = System.getProperty("metrics.disable", System.getenv("METRICS_DISABLE"));
     return "true".equalsIgnoreCase(disable);
   }
 
@@ -174,7 +152,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Return the factory used to create TimedMetric instances.
    */
-  protected static MetricFactory<BucketTimedMetric> initBucketTimedFactory(boolean disableCollection) {
+  protected static MetricFactory<TimedMetric> initBucketTimedFactory(boolean disableCollection) {
     return (disableCollection) ? new NoopBucketTimedFactory() : new BucketTimedMetricFactory();
   }
 
@@ -210,7 +188,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     registerAll(JvmGarbageCollectionMetricGroup.createGauges());
     registerAll(JvmThreadMetricGroup.createThreadMetricGroup());
 
-    DefaultGaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
+    GaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
@@ -229,8 +207,7 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   @Override
   public MetricName name(String name) {
-    String mappedName = nameMapping.getMappedName(name);
-    return DefaultMetricName.parse(mappedName);
+    return DefaultMetricName.parse(name);
   }
 
   @Override
@@ -246,7 +223,6 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   @Override
   public MetricName name(Class<?> cls, String name) {
-
     return name(cls.getName() + append(name));
   }
 
@@ -285,8 +261,8 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public BucketTimedMetric getBucketTimedMetric(MetricName name, int... bucketRanges) {
-    return (BucketTimedMetric) getMetric(name, bucketTimedMetricFactory, bucketRanges);
+  public TimedMetric getTimedMetric(MetricName name, int... bucketRanges) {
+    return (TimedMetric) getMetric(name, bucketTimedMetricFactory, bucketRanges);
   }
 
   @Override
@@ -301,17 +277,20 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   @Override
   public GaugeDoubleMetric register(MetricName name, GaugeDouble gauge) {
-
-    DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(name, gauge);
-    metricsCache.put(name.getSimpleName(), metric);
-    return metric;
+    return put(name, new DefaultGaugeDoubleMetric(name, gauge));
   }
 
   @Override
   public GaugeLongMetric register(MetricName name, GaugeLong gauge) {
+    return put(name, (GaugeLongMetric) new DefaultGaugeLongMetric(name, gauge));
+  }
 
-    DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(name, gauge);
-    metricsCache.put(name.getSimpleName(), metric);
+  private <T extends Metric> T put(MetricName name, T metric) {
+    if (JVM.equals(name.getGroup())) {
+      registerJvmMetric(metric);
+    } else {
+      metricsCache.put(name.getSimpleName(), metric);
+    }
     return metric;
   }
 
@@ -362,14 +341,14 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public List<Metric> collectNonEmptyMetrics() {
+  public List<MetricStatistics> collectNonEmptyMetrics() {
     synchronized (monitor) {
-      List<Metric> reportList = new ArrayList<>();
+      DStatsCollector collector = new DStatsCollector();
       Collection<Metric> values = metricsCache.values();
       for (Metric metric : values) {
-        metric.collectStatistics(reportList);
+        metric.collect(collector);
       }
-      return reportList;
+      return collector.getList();
     }
   }
 
@@ -383,13 +362,13 @@ public class DefaultMetricManager implements PluginMetricManager {
   @Override
   public boolean setRequestTimingCollection(String fullMetricName, int collectionCount) {
 
-    return setRequestTimingCollection(name(fullMetricName), collectionCount);
+    return setRequestTimingCollection(MetricName.of(fullMetricName), collectionCount);
   }
 
   @Override
   public boolean setRequestTimingCollection(Class<?> cls, String name, int collectionCount) {
 
-    return setRequestTimingCollection(name(cls, name), collectionCount);
+    return setRequestTimingCollection(MetricName.of(cls, name), collectionCount);
   }
 
   /**
@@ -399,8 +378,8 @@ public class DefaultMetricManager implements PluginMetricManager {
   protected boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
 
     Metric metric = getMetricWithoutCreate(metricName);
-    if (metric instanceof AbstractTimedMetric) {
-      AbstractTimedMetric timed = (AbstractTimedMetric) metric;
+    if (metric instanceof TimedMetric) {
+      TimedMetric timed = (TimedMetric) metric;
       timed.setRequestTimingCollection(collectionCount);
       return true;
     }
@@ -428,8 +407,8 @@ public class DefaultMetricManager implements PluginMetricManager {
     List<TimingMetricInfo> changes = new ArrayList<>();
 
     for (Metric metric : metricsCache.values()) {
-      if (metric instanceof AbstractTimedMetric) {
-        AbstractTimedMetric timed = (AbstractTimedMetric) metric;
+      if (metric instanceof TimedMetric) {
+        TimedMetric timed = (TimedMetric) metric;
         if (like.matches(timed.getName().getSimpleName())) {
           timed.setRequestTimingCollection(collectionCount);
           logger.debug("setRequestTimingCollection({}) on {}", collectionCount, timed.getName().getSimpleName());
@@ -474,8 +453,8 @@ public class DefaultMetricManager implements PluginMetricManager {
       LikeMatcher like = new LikeMatcher(nameMatchExpression);
 
       for (Metric metric : metricsCache.values()) {
-        if (metric instanceof AbstractTimedMetric) {
-          AbstractTimedMetric timed = (AbstractTimedMetric) metric;
+        if (metric instanceof TimedMetric) {
+          TimedMetric timed = (TimedMetric) metric;
           if (!activeOnly || timed.getRequestTimingCollection() >= 1) {
             // actively collection or doing the all search
             if (like.matches(timed.getName().getSimpleName())) {
@@ -498,12 +477,13 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public List<Metric> collectNonEmptyJvmMetrics() {
-    List<Metric> reportList = new ArrayList<>();
+  public List<MetricStatistics> collectNonEmptyJvmMetrics() {
+
+    DStatsCollector collector = new DStatsCollector();
     for (Metric metric : coreJvmMetricCollection) {
-      metric.collectStatistics(reportList);
+      metric.collect(collector);
     }
-    return reportList;
+    return collector.getList();
   }
 
   /**

@@ -1,8 +1,8 @@
 package org.avaje.metric.report;
 
-import java.util.List;
+import org.avaje.metric.statistics.MetricStatistics;
 
-import org.avaje.metric.Metric;
+import java.util.List;
 
 /**
  * Wrapper that holds the various information that can be reported.
@@ -24,11 +24,11 @@ public class ReportMetrics {
    * The metrics that were collected that were not empty. Metrics that didn't have events occur are
    * considered empty and not reported.
    */
-  protected final List<Metric> metrics;
+  protected final List<MetricStatistics> metrics;
 
   /**
    * Construct with the details.
-   * 
+   *
    * @param headerInfo
    *          This is the environment specific information - Application, Environment, Server etc.
    * @param collectionTime
@@ -38,7 +38,7 @@ public class ReportMetrics {
    *          The metrics that were collected that were not empty. Metrics that didn't have events
    *          occur are considered empty and not reported.
    */
-  public ReportMetrics(HeaderInfo headerInfo, long collectionTime, List<Metric> metrics) {
+  public ReportMetrics(HeaderInfo headerInfo, long collectionTime, List<MetricStatistics> metrics) {
     this.headerInfo = headerInfo;
     this.collectionTime = collectionTime;
     this.metrics = metrics;
@@ -61,7 +61,7 @@ public class ReportMetrics {
   /**
    * Return the metrics that were collected.
    */
-  public List<Metric> getMetrics() {
+  public List<MetricStatistics> getMetrics() {
     return metrics;
   }
 

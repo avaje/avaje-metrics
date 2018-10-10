@@ -1,46 +1,32 @@
 package org.avaje.metric.core.noop;
 
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.ValueMetric;
-import org.avaje.metric.ValueStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
-import java.util.List;
-
-public class NoopValueMetric implements ValueMetric {
+class NoopValueMetric implements ValueMetric {
 
   private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
 
-  protected final MetricName metricName;
+  private final MetricName metricName;
 
-  public NoopValueMetric(MetricName metricName) {
+  NoopValueMetric(MetricName metricName) {
     this.metricName = metricName;
   }
-  
+
   @Override
   public MetricName getName() {
     return metricName;
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor visitor) {
     // do nothing
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void clear() {
     // do nothing
-  }
-
-  @Override
-  public void clearStatistics() {
-    // do nothing
-  }
-
-  @Override
-  public ValueStatistics getCollectedStatistics() {
-    return NOOP_STATS;
   }
 
   @Override
@@ -48,5 +34,23 @@ public class NoopValueMetric implements ValueMetric {
     // do nothing
   }
 
-  
+  @Override
+  public long getCount() {
+    return 0;
+  }
+
+  @Override
+  public long getTotal() {
+    return 0;
+  }
+
+  @Override
+  public long getMax() {
+    return 0;
+  }
+
+  @Override
+  public long getMean() {
+    return 0;
+  }
 }

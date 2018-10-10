@@ -2,12 +2,9 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.ValueMetric;
-import org.avaje.metric.ValueStatistics;
-
-import java.io.IOException;
-import java.util.List;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
+import org.avaje.metric.statistics.ValueStatistics;
 
 
 /**
@@ -15,43 +12,30 @@ import java.util.List;
  * or rows processed or time. Typically you would use TimedMetric for time based
  * events though.
  */
-public final class DefaultValueMetric implements Metric, ValueMetric {
+final class DefaultValueMetric implements Metric, ValueMetric {
 
   private final MetricName name;
 
-  private final ValueCounter valueCounter = new ValueCounter();
-  
-  private ValueStatistics collectedStatistics;
-  
+  private final ValueCounter valueCounter;
+
   /**
    * Create with a name.
    */
-  public DefaultValueMetric(MetricName name) {
+  DefaultValueMetric(MetricName name) {
     this.name = name;
+    this.valueCounter = new ValueCounter(name);
   }
 
-
   @Override
-  public void collectStatistics(List<Metric> list) {
-    this.collectedStatistics = valueCounter.collectStatistics();
-    if (collectedStatistics != null) {
-      list.add(this);
+  public void collect(MetricStatisticsVisitor collector) {
+    ValueStatistics stats = valueCounter.collectStatistics();
+    if (stats != null) {
+      collector.visit(stats);
     }
   }
 
-
   @Override
-  public ValueStatistics getCollectedStatistics() {
-    return collectedStatistics;
-  }
-
-  @Override
-  public void visit(MetricVisitor visitor) throws IOException {
-    visitor.visit(this);
-  }
-
-  @Override
-  public void clearStatistics() {
+  public void clear() {
     valueCounter.reset();
   }
 
@@ -65,4 +49,24 @@ public final class DefaultValueMetric implements Metric, ValueMetric {
     valueCounter.add(value);
   }
 
+
+  @Override
+  public long getCount() {
+    return valueCounter.getCount();
+  }
+
+  @Override
+  public long getTotal() {
+    return valueCounter.getTotal();
+  }
+
+  @Override
+  public long getMax() {
+    return valueCounter.getMax();
+  }
+
+  @Override
+  public long getMean() {
+    return valueCounter.getMean();
+  }
 }

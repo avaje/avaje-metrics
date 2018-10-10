@@ -1,29 +1,29 @@
 package org.avaje.metric.util;
 
-import java.net.URL;
-import java.util.Properties;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.net.URL;
+import java.util.Properties;
 
 public class PropertiesLoaderTest {
 
   @Test
   public void test() {
-    
+
     ClassLoader classLoader = PropertiesLoaderTest.class.getClassLoader();
-    URL resource = classLoader.getResource("hello.properties");    
+    URL resource = classLoader.getResource("hello.properties");
     Assert.assertNotNull(resource);
 
-    resource = classLoader.getResource("subdir/extra.dummy.properties");    
+    resource = classLoader.getResource("subdir/extra.dummy.properties");
     Assert.assertNotNull(resource);
 
     PropertiesLoader loader = new PropertiesLoader();
 
-    Properties properties = loader.load("classpath:doesnotexist/extra.dummy.properties");    
+    Properties properties = loader.load("classpath:doesnotexist/extra.dummy.properties");
     Assert.assertTrue(properties.isEmpty());
 
-    properties = loader.load("classpath:subdir/extra.dummy.properties");    
+    properties = loader.load("classpath:subdir/extra.dummy.properties");
     Assert.assertFalse(properties.isEmpty());
   }
 

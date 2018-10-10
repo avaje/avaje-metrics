@@ -1,8 +1,9 @@
 package org.avaje.metric.core;
 
-import java.util.concurrent.atomic.AtomicLong;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.statistics.CounterStatistics;
 
-import org.avaje.metric.CounterStatistics;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -12,13 +13,16 @@ import java.util.concurrent.atomic.LongAdder;
  * cases.
  * </p>
  */
-public class Counter {
+class Counter {
 
-  protected final LongAdder count = new LongAdder();
+  private final LongAdder count = new LongAdder();
 
-  protected final AtomicLong startTime;
+  private final AtomicLong startTime;
 
-  public Counter() {
+  private final MetricName name;
+
+  Counter(MetricName name) {
+    this.name = name;
     this.startTime = new AtomicLong(System.currentTimeMillis());
   }
 
@@ -33,13 +37,13 @@ public class Counter {
    * Collect statistics and reset underlying counters in the process. This will
    * return null if no statistics were collected since the last collection.
    */
-  public CounterStatistics collectStatistics() {
+  CounterStatistics collectStatistics() {
     boolean empty = isEmpty();
     if (empty) {
       startTime.set(System.currentTimeMillis());
       return null;
     } else {
-      return getStatistics(true);
+      return getStatistics();
     }
   }
 
@@ -65,24 +69,18 @@ public class Counter {
   }
 
   /**
-   * Return the current statistics reseting the internal values if reset is
-   * true.
+   * Return the current statistics reseting the internal values.
    */
-  public CounterStatistics getStatistics(boolean reset) {
+  private CounterStatistics getStatistics() {
 
-    if (reset) {
-      long now = System.currentTimeMillis();
-      return new DefaultCounterStatistics(startTime.getAndSet(now), count.sumThenReset());
-
-    } else {
-      return new DefaultCounterStatistics(startTime.get(), count.sum());
-    }
+    long now = System.currentTimeMillis();
+    return new DefaultCounterStatistics(name, startTime.getAndSet(now), count.sumThenReset());
   }
 
   /**
    * Reset the counter.
    */
-  public void reset() {
+  void reset() {
     startTime.set(System.currentTimeMillis());
     count.reset();
   }

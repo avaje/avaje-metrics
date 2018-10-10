@@ -2,18 +2,14 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.GaugeLongMetric;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
-
-import java.io.IOException;
-import java.util.List;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
 
 /**
  * A Metric that gets its value from a Gauge.
  */
-public class DefaultGaugeLongMetric implements GaugeLongMetric {
+class DefaultGaugeLongMetric implements GaugeLongMetric {
 
   protected final MetricName name;
 
@@ -31,23 +27,21 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
    * for the value.
    * </p>
    */
-  public static DefaultGaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
+  static DefaultGaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
     return new Incrementing(name, gauge);
   }
 
   /**
    * Create a GaugeMetric.
-   * 
-   * @param name
-   *          the name of the metric.
-   * @param gauge
-   *          the gauge used to get the value.
-    */
-  public DefaultGaugeLongMetric(MetricName name, GaugeLong gauge) {
+   *
+   * @param name  the name of the metric.
+   * @param gauge the gauge used to get the value.
+   */
+  DefaultGaugeLongMetric(MetricName name, GaugeLong gauge) {
     this.name = name;
     this.gauge = gauge;
   }
-  
+
   @Override
   public MetricName getName() {
     return name;
@@ -66,29 +60,25 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor collector) {
+
     long value = gauge.getValue();
     boolean collect = (value != 0 && value != lastReported);
     if (collect) {
       lastReported = value;
-      list.add(this);
+      collector.visit(new DGaugeLongStatistic(name, value));
     }
   }
 
   @Override
-  public void visit(MetricVisitor visitor) throws IOException {
-    visitor.visit(this);
-  }
-
-  @Override
-  public void clearStatistics() {
+  public void clear() {
     // No need to do anything - direct to gauge
   }
 
   /**
    * Supports monotonically increasing gauges.
    */
-  private static class Incrementing extends DefaultGaugeLongMetric {
+  static class Incrementing extends DefaultGaugeLongMetric {
 
     private long runningValue;
 
@@ -97,9 +87,10 @@ public class DefaultGaugeLongMetric implements GaugeLongMetric {
     }
 
     @Override
-    public void collectStatistics(List<Metric> list) {
-      if (super.getValue() > runningValue) {
-        list.add(this);
+    public void collect(MetricStatisticsVisitor collector) {
+      long currentValue = super.getValue();
+      if (currentValue > runningValue) {
+        collector.visit(new DGaugeLongStatistic(name, getValue()));
       }
     }
 

@@ -1,14 +1,11 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
+import org.avaje.metric.statistics.TimedStatistics;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * collecting time duration and provides separate statistics for success and error completion.
  * </p>
  */
-public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
+final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   private static final String noBuckets = "";
 
@@ -26,22 +23,22 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
 
   private final String bucketRange;
 
-  private final ValueCounter successCounter = new ValueCounter();
+  private final ValueCounter successCounter;
 
-  private final ValueCounter errorCounter = new ValueCounter();
+  private final ValueCounter errorCounter;
 
-  private ValueStatistics collectedSuccessStatistics;
-
-  private ValueStatistics collectedErrorStatistics;
-
-  public DefaultTimedMetric(MetricName name) {
+  DefaultTimedMetric(MetricName name) {
     this.name = name;
     this.bucketRange = noBuckets;
+    this.successCounter = new ValueCounter(name);
+    this.errorCounter = new ValueCounter(name.withSuffix(".error"));
   }
 
-  public DefaultTimedMetric(MetricName name, String bucketRange) {
+  DefaultTimedMetric(MetricName name, String bucketRange) {
     this.name = name;
     this.bucketRange = bucketRange;
+    this.successCounter = new ValueCounter(name, bucketRange);
+    this.errorCounter = new ValueCounter(name.withSuffix(".error"));
   }
 
   public String toString() {
@@ -59,27 +56,7 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
   }
 
   @Override
-  public ValueStatistics getCollectedSuccessStatistics() {
-    return collectedSuccessStatistics;
-  }
-
-  @Override
-  public ValueStatistics getCollectedErrorStatistics() {
-    return collectedErrorStatistics;
-  }
-
-  @Override
-  public ValueStatistics getSuccessStatistics(boolean reset) {
-    return successCounter.getStatistics(reset);
-  }
-
-  @Override
-  public ValueStatistics getErrorStatistics(boolean reset) {
-    return errorCounter.getStatistics(reset);
-  }
-
-  @Override
-  public void clearStatistics() {
+  public void clear() {
     successCounter.reset();
     errorCounter.reset();
   }
@@ -89,30 +66,21 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor collector) {
 
-    boolean empty = successCounter.isEmpty() && errorCounter.isEmpty();
-    if (empty) {
-      // just reset the start time
-      successCounter.resetStartTime();
-      errorCounter.resetStartTime();
-    } else {
-      // get a snapshot of the statistics and reset the underlying counters
-      this.collectedSuccessStatistics = successCounter.getStatistics(true);
-      this.collectedErrorStatistics = errorCounter.getStatistics(true);
-      list.add(this);
+    TimedStatistics errStats = errorCounter.collectStatistics();
+    if (errStats != null) {
+      collector.visit(errStats);
     }
-  }
-
-  @Override
-  public void visit(MetricVisitor visitor) throws IOException {
-    visitor.visit(this);
+    TimedStatistics successStats = successCounter.collectStatistics();
+    if (successStats != null) {
+      collector.visit(successStats);
+    }
   }
 
   public MetricName getName() {
     return name;
   }
-
 
   /**
    * Start an event.
@@ -141,9 +109,8 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
     }
   }
 
-  
   /**
-   * Add an event with duration calculated based on startNanos. 
+   * Add an event with duration calculated based on startNanos.
    */
   @Override
   public void addEventSince(boolean success, long startNanos) {
@@ -156,11 +123,15 @@ public final class DefaultTimedMetric extends BaseTimedMetric implements TimedMe
    */
   @Override
   public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
-    // OpCodes.ATHROW = 191
     addEventSince(opCode != 191, startNanos);
     if (activeThreadContext) {
       NestedContext.pop();
     }
+  }
+
+  @Override
+  public void operationEnd(int opCode, long startNanos) {
+    addEventSince(opCode != 191, startNanos);
   }
 
 }

@@ -1,4 +1,4 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 /**
  * Handle alerting when memory warning level hit.

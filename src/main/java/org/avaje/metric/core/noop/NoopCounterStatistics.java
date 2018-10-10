@@ -1,11 +1,18 @@
 package org.avaje.metric.core.noop;
 
-import org.avaje.metric.CounterStatistics;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.statistics.CounterStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
-public final class NoopCounterStatistics implements CounterStatistics {
+final class NoopCounterStatistics implements CounterStatistics {
 
-  public static final NoopCounterStatistics INSTANCE = new NoopCounterStatistics();
-  
+  static final NoopCounterStatistics INSTANCE = new NoopCounterStatistics();
+
+  @Override
+  public void visit(MetricStatisticsVisitor visitor) {
+
+  }
+
   @Override
   public long getStartTime() {
     return 0;
@@ -16,5 +23,9 @@ public final class NoopCounterStatistics implements CounterStatistics {
     return 0;
   }
 
-  
+
+  @Override
+  public MetricName getName() {
+    return null;
+  }
 }

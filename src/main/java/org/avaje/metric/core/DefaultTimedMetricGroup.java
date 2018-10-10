@@ -1,13 +1,13 @@
 package org.avaje.metric.core;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricGroup;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -19,7 +19,7 @@ import org.avaje.metric.TimedMetricGroup;
  * specific and the rest (group, type etc) is common to all the metrics.
  * </p>
  */
-public class DefaultTimedMetricGroup implements TimedMetricGroup {
+class DefaultTimedMetricGroup implements TimedMetricGroup {
 
   private final ConcurrentHashMap<String, TimedMetric> cache = new ConcurrentHashMap<String, TimedMetric>();
 
@@ -31,7 +31,7 @@ public class DefaultTimedMetricGroup implements TimedMetricGroup {
   /**
    * Create the TimedMetricGroup.
    */
-  public DefaultTimedMetricGroup(MetricName baseName) {
+  DefaultTimedMetricGroup(MetricName baseName) {
     this.metricNameCache = MetricManager.getMetricNameCache(baseName);
   }
 
@@ -41,11 +41,11 @@ public class DefaultTimedMetricGroup implements TimedMetricGroup {
    * The group and type parts of the metric name are common and the metrics only
    * differ by this name.
    * </p>
-   * 
+   *
    * @param name
    *          the specific name for the metric (group and type name parts are
    *          common).
-   * 
+   *
    * @return the TimedMetricEvent that has started.
    */
   @Override
@@ -82,7 +82,7 @@ public class DefaultTimedMetricGroup implements TimedMetricGroup {
 
     // parse name and find/create using MetricManager
     MetricName m = metricNameCache.get(name);
-    
+
     // this is safe in that it is single threaded on construction/put
     TimedMetric timedMetric = MetricManager.getTimedMetric(m);
     cache.putIfAbsent(name, timedMetric);

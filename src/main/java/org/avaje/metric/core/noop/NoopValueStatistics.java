@@ -1,14 +1,18 @@
 package org.avaje.metric.core.noop;
 
-import org.avaje.metric.ValueStatistics;
+//import org.avaje.metric.ValueStatistics;
+
+import org.avaje.metric.MetricName;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
+import org.avaje.metric.statistics.ValueStatistics;
 
 /**
  * A NOOP placeholder for ValueStatistics.
  */
-public class NoopValueStatistics implements ValueStatistics {
+class NoopValueStatistics implements ValueStatistics {
 
-  public static NoopValueStatistics INSTANCE = new NoopValueStatistics();
-  
+  static NoopValueStatistics INSTANCE = new NoopValueStatistics();
+
   @Override
   public long getStartTime() {
     return 0;
@@ -33,5 +37,14 @@ public class NoopValueStatistics implements ValueStatistics {
   public long getMean() {
     return 0;
   }
-  
+
+  @Override
+  public MetricName getName() {
+    return null;
+  }
+
+  @Override
+  public void visit(MetricStatisticsVisitor visitor) {
+    // do nothing
+  }
 }

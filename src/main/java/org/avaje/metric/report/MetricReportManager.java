@@ -1,8 +1,8 @@
 package org.avaje.metric.report;
 
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.RequestTiming;
+import org.avaje.metric.statistics.MetricStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,9 +209,9 @@ public class MetricReportManager {
 
     long startNanos = System.nanoTime();
     long collectionTime = System.currentTimeMillis();
-    
-    // collect all the 'non-empty' metrics 
-    List<Metric> metrics = collectMetrics();
+
+    // collect all the 'non-empty' metrics
+    List<MetricStatistics> metrics = collectMetrics();
 
     long collectNanos = System.nanoTime() - startNanos;
 
@@ -234,10 +234,10 @@ public class MetricReportManager {
   /**
    * Collect all the non-empty metrics and return them for reporting.
    */
-  protected static List<Metric> collectMetrics() {
+  protected static List<MetricStatistics> collectMetrics() {
 
-    List<Metric> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
-    List<Metric> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
+    List<MetricStatistics> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
+    List<MetricStatistics> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
     metrics.addAll(otherMetrics);
     return metrics;
   }
@@ -245,9 +245,9 @@ public class MetricReportManager {
   /**
    * Sort the metrics into name order.
    */
-  protected static List<Metric> sort(Collection<Metric> metrics) {
+  protected static List<MetricStatistics> sort(Collection<MetricStatistics> metrics) {
 
-    ArrayList<Metric> sortedList = new ArrayList<>(metrics);
+    ArrayList<MetricStatistics> sortedList = new ArrayList<>(metrics);
     Collections.sort(sortedList, NAME_COMPARATOR);
     return sortedList;
   }
@@ -269,10 +269,10 @@ public class MetricReportManager {
   /**
    * Compare Metrics by name for sorting purposes.
    */
-  protected static class NameComp implements Comparator<Metric> {
+  protected static class NameComp implements Comparator<MetricStatistics> {
 
     @Override
-    public int compare(Metric o1, Metric o2) {
+    public int compare(MetricStatistics o1, MetricStatistics o2) {
       return o1.getName().compareTo(o2.getName());
     }
 

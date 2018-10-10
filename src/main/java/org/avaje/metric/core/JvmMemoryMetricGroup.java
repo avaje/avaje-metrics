@@ -1,12 +1,9 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.core.DefaultGaugeDoubleMetric;
-import org.avaje.metric.core.DefaultGaugeLongMetric;
-import org.avaje.metric.core.DefaultMetricName;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -14,7 +11,7 @@ import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class JvmMemoryMetricGroup {
+final class JvmMemoryMetricGroup {
 
   /**
    * Helper interface for Heap and NonHeap MemorySource.
@@ -22,7 +19,7 @@ public final class JvmMemoryMetricGroup {
   interface MemoryUsageSource {
     MemoryUsage getUsage();
   }
-  
+
   /**
    * Heap MemorySource.
    */
@@ -35,7 +32,7 @@ public final class JvmMemoryMetricGroup {
       return memoryMXBean.getHeapMemoryUsage();
     }
   }
-  
+
   /**
    * NonHeap MemorySource.
    */
@@ -50,35 +47,35 @@ public final class JvmMemoryMetricGroup {
   }
 
   private static final long MEGABYTES = 1024*1024L;
-  
+
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
   public static List<Metric> createHeapGroup() {
-    
-    DefaultMetricName heapName = DefaultMetricName.createBaseName("jvm","memory.heap");   
+
+    MetricName heapName = new DefaultMetricName("jvm","memory.heap","");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(heapName, source);
   }
- 
+
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
   public static List<Metric> createNonHeapGroup() {
-    DefaultMetricName nonHeapName = DefaultMetricName.createBaseName("jvm","memory.nonheap");
+    MetricName nonHeapName = new DefaultMetricName("jvm","memory.nonheap", "");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(nonHeapName, source);
   }
 
-  private static List<Metric> createGroup(DefaultMetricName baseName, MemoryUsageSource source) {
+  private static List<Metric> createGroup(MetricName baseName, MemoryUsageSource source) {
     return new MemUsageGauages(source, baseName).createMetric();
   }
-  
+
   static class MemUsageGauages {
     private final MemoryUsageSource source;
-    private final DefaultMetricName baseName;
+    private final MetricName baseName;
 
-    private MemUsageGauages(MemoryUsageSource source, DefaultMetricName baseName) {
+    private MemUsageGauages(MemoryUsageSource source, MetricName baseName) {
       this.source =  source;
       this.baseName = baseName;
     }
@@ -103,7 +100,7 @@ public final class JvmMemoryMetricGroup {
     }
 
     private MetricName name(String name) {
-      return baseName.withName(name);
+      return baseName.withSuffix(name);
     }
 
     private abstract static class Base {
@@ -121,7 +118,7 @@ public final class JvmMemoryMetricGroup {
         return source.getUsage().getInit() / MEGABYTES;
       }
     }
-    
+
     private class Used extends Base implements GaugeLong {
       Used(MemoryUsageSource source) {
         super(source);
@@ -131,7 +128,7 @@ public final class JvmMemoryMetricGroup {
         return source.getUsage().getUsed() / MEGABYTES;
       }
     }
-    
+
     private class Committed extends Base implements GaugeLong {
       Committed(MemoryUsageSource source) {
         super(source);
@@ -141,7 +138,7 @@ public final class JvmMemoryMetricGroup {
         return source.getUsage().getCommitted() / MEGABYTES;
       }
     }
-    
+
     private class Max extends Base implements GaugeLong {
       Max(MemoryUsageSource source) {
         super(source);
@@ -163,5 +160,5 @@ public final class JvmMemoryMetricGroup {
       }
     }
   }
-  
+
 }

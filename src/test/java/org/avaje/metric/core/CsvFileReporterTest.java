@@ -1,8 +1,10 @@
-package org.avaje.metric.report;
+package org.avaje.metric.core;
 
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
+import org.avaje.metric.report.MetricReportConfig;
+import org.avaje.metric.report.MetricReportManager;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -27,7 +29,7 @@ public class CsvFileReporterTest {
     TimedMetric timedMetric = MetricManager.getTimedMetric("group.type.junk");
 
     Random random = new Random();
-    
+
     for (int i = 0; i < 50; i++) {
       TimedEvent event = timedMetric.startEvent();
       int plus = random.nextInt(20);
@@ -47,5 +49,5 @@ public class CsvFileReporterTest {
 
     report.shutdown();
   }
-  
+
 }

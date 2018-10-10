@@ -1,10 +1,8 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.Metric;
-import org.avaje.metric.core.DefaultGaugeLongMetric;
-import org.avaje.metric.core.DefaultMetricName;
-import org.avaje.metric.core.MetricManifest;
+import org.avaje.metric.MetricName;
 import org.avaje.metric.util.ProcessHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +15,7 @@ import java.util.List;
 /**
  * OS process memory metrics VmRSS and VmHWM to collect when running on Linux.
  */
-public final class JvmProcessMemory {
+final class JvmProcessMemory {
 
 	private static final Logger logger = LoggerFactory.getLogger(JvmProcessMemory.class);
 
@@ -30,7 +28,7 @@ public final class JvmProcessMemory {
 	/**
 	 * Return the list of OS process memory metrics.
 	 */
-	public static List<Metric> createGauges() {
+	static List<Metric> createGauges() {
 		return new JvmProcessMemory().metrics();
 	}
 
@@ -88,18 +86,16 @@ public final class JvmProcessMemory {
 
 		MemoryWarnWatcher memoryWatcher = memoryWatcher(warnMemoryLevel(), pid);
 
-		DefaultMetricName baseName = DefaultMetricName.createBaseName("jvm","memory.process");
-		DefaultMetricName vmRssName = baseName.withName("vmrss");
-		DefaultMetricName vmHwmName = baseName.withName("vmhwm");
-		DefaultMetricName committedDelta = baseName.withName("delta");
-//		DefaultMetricName usedDelta = baseName.withName("useddelta");
+		MetricName baseName = new DefaultMetricName("jvm","memory.process", "");
+		MetricName vmRssName = baseName.withName("vmrss");
+		MetricName vmHwmName = baseName.withName("vmhwm");
+		MetricName committedDelta = baseName.withName("delta");
 
 		Source source = new Source(pid);
 
 		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source, memoryWatcher)));
 		metrics.add(new DefaultGaugeLongMetric(vmHwmName, new VmHWM(source)));
 		metrics.add(new DefaultGaugeLongMetric(committedDelta, new CommittedDelta(source)));
-//		metrics.add(new DefaultGaugeLongMetric(usedDelta, new UsedDelta(source)));
 		return metrics;
 	}
 
@@ -218,23 +214,6 @@ public final class JvmProcessMemory {
 			return source.getCommittedDelta();
 		}
 	}
-
-//	/**
-//	 * Delta between VmRSS and JVM total used memory.
-//	 */
-//	private static final class UsedDelta implements GaugeLong {
-//
-//		private final Source source;
-//
-//		UsedDelta(Source source) {
-//			this.source = source;
-//		}
-//
-//		@Override
-//		public long getValue() {
-//			return source.getCommittedDelta();
-//		}
-//	}
 
 	private static final class VmHWM implements GaugeLong {
 

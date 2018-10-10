@@ -1,8 +1,8 @@
 package org.avaje.metric.report;
 
-import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.RequestTiming;
 import org.avaje.metric.RequestTimingEntry;
+import org.avaje.metric.TimedMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +131,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
 
     try {
       writer.append("m:");
-      AbstractTimedMetric metric = entry.getMetric();
+      TimedMetric metric = entry.getMetric();
       Map<String, String> attributes = metric.attributes();
 
       boolean hasAttributes = (attributes != null && !attributes.isEmpty());

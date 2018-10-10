@@ -1,8 +1,9 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.AbstractTimedMetric;
 import org.avaje.metric.MetricManager;
 import org.avaje.metric.RequestTimingEntry;
+import org.avaje.metric.TimedMetric;
+import org.avaje.metric.util.ArrayStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import java.util.function.Supplier;
  *   so that timing metrics that execute below that threshold are excluded (in order to reduce 'noise').
  * </p>
  */
-public final class NestedContext {
+final class NestedContext {
 
   private static Logger logger = LoggerFactory.getLogger(NestedContext.class);
 
@@ -48,14 +49,14 @@ public final class NestedContext {
    *
    * @return true if the metric was added to the nested context implying the context was already active.
    */
-  public static boolean pushIfActive(AbstractTimedMetric metric) {
+  static boolean pushIfActive(TimedMetric metric) {
     return local.get().pushMetricIfActive(metric);
   }
 
   /**
    * Push a suppler of timed metric.
    */
-  public static boolean pushIfActive(Supplier<AbstractTimedMetric> supplier) {
+  static boolean pushIfActive(Supplier<TimedMetric> supplier) {
     return local.get().pushMetricIfActive(supplier);
   }
 
@@ -65,14 +66,14 @@ public final class NestedContext {
    * If the nested context is not active it will become so.
    * </p>
    */
-  public static void push(AbstractTimedMetric metric) {
+  static void push(TimedMetric metric) {
     local.get().pushMetric(metric);
   }
 
   /**
    * Pop the last TimedMetric off the nested context.
    */
-  public static void pop() {
+  static void pop() {
     local.get().popMetric();
   }
 
@@ -106,11 +107,11 @@ public final class NestedContext {
    * Return true if this timing metric should be added to the nested context.
    * The supplier allows lazy evaluation of the metric.
    */
-  boolean pushMetricIfActive(Supplier<AbstractTimedMetric> supplier) {
+  boolean pushMetricIfActive(Supplier<TimedMetric> supplier) {
     if (depth < 1) {
       return false;
     }
-    AbstractTimedMetric metric = supplier.get();
+    TimedMetric metric = supplier.get();
     if (metric == null) {
       return false;
     } else {
@@ -124,7 +125,7 @@ public final class NestedContext {
    * This should only occur if the nested context is already active - which means
    * some top level TimedMetric has already turned it on.
    */
-  boolean pushMetricIfActive(AbstractTimedMetric metric) {
+  boolean pushMetricIfActive(TimedMetric metric) {
     if (depth < 1) {
       return false;
     }
@@ -135,7 +136,7 @@ public final class NestedContext {
   /**
    * Add the metric. Used when a TimedMetric has it's requestTiming explicitly set on.
    */
-  void pushMetric(AbstractTimedMetric metric) {
+  void pushMetric(TimedMetric metric) {
     stack.push(new BaseTimingEntry(depth++, metric, System.nanoTime()));
   }
 

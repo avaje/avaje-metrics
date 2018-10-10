@@ -1,12 +1,10 @@
-package org.avaje.metric.core;
+package org.avaje.metric.util;
 
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 
 /**
  * Stack based on ArrayList.
- *
- * @author rbygrave
  */
 public class ArrayStack<E> {
 

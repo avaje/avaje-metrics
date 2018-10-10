@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
@@ -63,7 +62,6 @@ public abstract class BaseFileReporter {
    * </p>
    */
   public void cleanup() {
-    
     deleteOldMetricFiles();
   }
 
@@ -168,14 +166,14 @@ public abstract class BaseFileReporter {
   }
 
   public static String getFileName(String baseFileName, int daysAgo) {
-    
+
     Calendar c = Calendar.getInstance();
     c.add(Calendar.DATE, daysAgo * -1);
     Date daysAgoDate = c.getTime();
-    
-    return getFileName(baseFileName, daysAgoDate);    
+
+    return getFileName(baseFileName, daysAgoDate);
   }
-  
+
   /**
    * A helper class for FileReporter that handles the file directory, name and
    * writer etc.
@@ -204,7 +202,7 @@ public abstract class BaseFileReporter {
     public Writer getWriter() {
       return writer;
     }
-    
+
     public void close() {
       try {
         writer.flush();

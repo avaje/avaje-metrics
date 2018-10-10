@@ -1,6 +1,6 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.AbstractTimedMetric;
+import org.avaje.metric.TimedMetric;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Common implementation for TimedMetric and BucketTimedMetric.
  */
-abstract class BaseTimedMetric implements AbstractTimedMetric {
+abstract class BaseTimedMetric implements TimedMetric {
 
   /**
    * Holds a count of the number of requests that we want request level

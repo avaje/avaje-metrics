@@ -1,27 +1,24 @@
 package org.avaje.metric.core.noop;
 
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
-import java.util.List;
 import java.util.Map;
 
 public class NoopTimedMetric implements TimedMetric {
 
   private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
-  
+
   private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
-  
-  protected final MetricName metricName;
-  
+
+  private final MetricName metricName;
+
   public NoopTimedMetric(MetricName metricName) {
     this.metricName = metricName;
   }
-  
+
   @Override
   public MetricName getName() {
     return metricName;
@@ -38,38 +35,13 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor metricStatisticsVisitor) {
     // do nothing
   }
 
   @Override
-  public void visit(MetricVisitor visitor) {
+  public void clear() {
     // do nothing
-  }
-
-  @Override
-  public void clearStatistics() {
-    // do nothing
-  }
-
-  @Override
-  public ValueStatistics getCollectedSuccessStatistics() {
-    return NOOP_STATS;
-  }
-
-  @Override
-  public ValueStatistics getCollectedErrorStatistics() {
-    return NOOP_STATS;
-  }
-
-  @Override
-  public ValueStatistics getSuccessStatistics(boolean reset) {
-    return NOOP_STATS;
-  }
-
-  @Override
-  public ValueStatistics getErrorStatistics(boolean reset) {
-    return NOOP_STATS;
   }
 
   @Override
@@ -109,7 +81,12 @@ public class NoopTimedMetric implements TimedMetric {
 
   @Override
   public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
-    // do nothing    
+    // do nothing
+  }
+
+  @Override
+  public void operationEnd(int opCode, long startNanos) {
+
   }
 
   @Override

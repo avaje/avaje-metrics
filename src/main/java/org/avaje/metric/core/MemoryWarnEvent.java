@@ -1,4 +1,4 @@
-package org.avaje.metric.jvm;
+package org.avaje.metric.core;
 
 /**
  * Memory warning event.

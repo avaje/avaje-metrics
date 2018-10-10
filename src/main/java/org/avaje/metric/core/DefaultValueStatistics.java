@@ -1,12 +1,16 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.ValueStatistics;
+import org.avaje.metric.MetricName;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
+import org.avaje.metric.statistics.TimedStatistics;
 
 
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-public class DefaultValueStatistics implements ValueStatistics {
+class DefaultValueStatistics implements TimedStatistics {
+
+  protected final ValueCounter owner;
 
   protected final long startTime;
 
@@ -17,19 +21,10 @@ public class DefaultValueStatistics implements ValueStatistics {
   protected final long max;
 
   /**
-   * Construct for Counter which doesn't collect time or high water mark.
-   */
-  public DefaultValueStatistics(long collectionStart, long count) {
-    this.startTime = collectionStart;
-    this.count = count;
-    this.total = 0;
-    this.max = 0;
-  }
-
-  /**
    * Construct for TimeCounter.
    */
-  public DefaultValueStatistics(long collectionStart, long count, long total, long max) {
+  DefaultValueStatistics(ValueCounter owner, long collectionStart, long count, long total, long max) {
+    this.owner = owner;
     this.startTime = collectionStart;
     this.count = count;
     this.total = total;
@@ -37,9 +32,28 @@ public class DefaultValueStatistics implements ValueStatistics {
     // this most likely would happen when count = 1 so max = mean
     this.max = max != Long.MIN_VALUE ? max : (count < 1 ? 0 : Math.round(total / count));
   }
-  
+
   public String toString() {
     return "count:" + count + " total:" + total + " max:" + max;
+  }
+
+  @Override
+  public void visit(MetricStatisticsVisitor visitor) {
+    visitor.visit(this);
+  }
+
+  @Override
+  public boolean isBucket() {
+    return owner.isBucket();
+  }
+
+  @Override
+  public String getBucketRange() {
+    return owner.getBucketRange();
+  }
+  @Override
+  public MetricName getName() {
+    return owner.name();
   }
 
   /**

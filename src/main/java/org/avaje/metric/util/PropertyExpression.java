@@ -3,10 +3,9 @@ package org.avaje.metric.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Properties;
 
 /**
  * Helper used to evaluate expressions such as ${HOME}, ${CATALINA_HOME} etc.

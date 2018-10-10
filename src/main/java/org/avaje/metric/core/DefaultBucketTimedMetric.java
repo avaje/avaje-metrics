@@ -1,31 +1,26 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.BucketTimedMetric;
-import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
-import org.avaje.metric.MetricVisitor;
 import org.avaje.metric.TimedEvent;
 import org.avaje.metric.TimedMetric;
-
-import java.io.IOException;
-import java.util.List;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
 /**
  * Default implementation of BucketTimedMetric.
  */
-public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketTimedMetric {
+class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   private static final int OPCODE_ATHROW = 191;
 
   private final MetricName metricName;
-  
+
   private final int[] bucketRanges;
-  
+
   private final TimedMetric[] buckets;
-  
+
   private final int lastBucketIndex;
 
-  public DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
+  DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
     this.metricName = metricName;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
@@ -37,13 +32,13 @@ public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketT
   }
 
   @Override
-  public int[] getBucketRanges() {
-    return bucketRanges;
+  public boolean isBucket() {
+    return false;
   }
 
   @Override
-  public TimedMetric[] getBuckets() {
-    return buckets;
+  public String getBucketRange() {
+    return null;
   }
 
   @Override
@@ -56,18 +51,23 @@ public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketT
    */
   @Override
   public void addEventDuration(boolean success, long durationNanos) {
-    
-    // convert to millis to find which bucket the event goes into
-    long durationMillis = durationNanos / 1000000L;
-    for (int i = 0; i < lastBucketIndex; i++) {
-      if (durationMillis < bucketRanges[i]) {
-        // found the bucket to put the event into
-        buckets[i].addEventDuration(success, durationNanos);
-        return;
+
+    if (!success) {
+      // always add errors to the first bucket
+      buckets[0].addEventDuration(false, durationNanos);
+    } else {
+      // convert to millis to find which bucket the event goes into
+      long durationMillis = durationNanos / 1000000L;
+      for (int i = 0; i < lastBucketIndex; i++) {
+        if (durationMillis < bucketRanges[i]) {
+          // found the bucket to put the event into
+          buckets[i].addEventDuration(true, durationNanos);
+          return;
+        }
       }
+      // add it to the last bucket
+      buckets[lastBucketIndex].addEventDuration(true, durationNanos);
     }
-    // add it to the last bucket
-    buckets[lastBucketIndex].addEventDuration(success, durationNanos);
   }
 
   @Override
@@ -85,33 +85,33 @@ public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketT
   }
 
   @Override
+  public void operationEnd(int opCode, long startNanos) {
+    addEventSince(opCode != OPCODE_ATHROW, startNanos);
+  }
+
+  @Override
   public MetricName getName() {
     return metricName;
   }
 
   @Override
-  public void collectStatistics(List<Metric> list) {
+  public void collect(MetricStatisticsVisitor collector) {
     for (TimedMetric bucket : buckets) {
-      bucket.collectStatistics(list);
+      bucket.collect(collector);
     }
   }
 
   @Override
-  public void visit(MetricVisitor visitor) throws IOException {
-    visitor.visit(this);
-  }
-
-  @Override
-  public void clearStatistics() {
+  public void clear() {
     for (int i = 0; i < buckets.length; i++) {
-      buckets[i].clearStatistics();
+      buckets[i].clear();
     }
   }
 
   protected static final class DefaultTimedMetricEvent implements TimedEvent {
 
     private final DefaultBucketTimedMetric metric;
-    
+
     private final long startNanos;
 
     /**
@@ -133,7 +133,7 @@ public class DefaultBucketTimedMetric extends BaseTimedMetric implements BucketT
     public void end(boolean withSuccess) {
       metric.addEventDuration(withSuccess, getDuration());
     }
-    
+
     /**
      * This timed event ended with successful execution (e.g. Successful SOAP
      * Operation or SQL execution).

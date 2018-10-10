@@ -1,22 +1,25 @@
-package org.avaje.metric.report;
+package org.avaje.metric.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.avaje.metric.BucketTimedMetric;
 import org.avaje.metric.CounterMetric;
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricManager;
+import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueMetric;
-import org.avaje.metric.core.BucketTimedMetricFactory;
-import org.avaje.metric.core.DefaultCounterMetric;
-import org.avaje.metric.core.DefaultGaugeDoubleMetric;
-import org.avaje.metric.core.DefaultTimedMetric;
-import org.avaje.metric.core.DefaultValueMetric;
+import org.avaje.metric.report.HeaderInfo;
+import org.avaje.metric.report.JsonWriteVisitor;
+import org.avaje.metric.report.ReportMetrics;
+import org.avaje.metric.statistics.CounterStatistics;
+import org.avaje.metric.statistics.GaugeDoubleStatistics;
+import org.avaje.metric.statistics.MetricStatistics;
+import org.avaje.metric.statistics.TimedStatistics;
+import org.avaje.metric.statistics.ValueStatistics;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -47,8 +50,8 @@ public class JsonWriteVisitorTest {
     JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
 
     CounterMetric counter = createCounterMetric();
+    jsonVisitor.visit((CounterStatistics) collectOne(counter));
 
-    jsonVisitor.visit(counter);
     String counterJson = writer.toString();
 
     Assert.assertEquals("{\"type\":\"counter\",\"name\":\"org.test.CounterFoo.doStuff\",\"count\":10,\"dur\":0}", counterJson);
@@ -61,8 +64,7 @@ public class JsonWriteVisitorTest {
     StringWriter writer = new StringWriter();
     JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
     GaugeDoubleMetric metric = createGaugeMetric();
-
-    jsonVisitor.visit(metric);
+    jsonVisitor.visit((GaugeDoubleStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
     Assert.assertEquals("{\"type\":\"gauge\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
@@ -75,13 +77,11 @@ public class JsonWriteVisitorTest {
     JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
 
     ValueMetric metric = createValueMetric();
-
-    jsonVisitor.visit(metric);
+    jsonVisitor.visit((ValueStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
     Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"avg\":14,\"max\":16,\"sum\":42,\"dur\":0}", counterJson);
   }
-
 
   @Test
   public void testTimedMetric() throws IOException {
@@ -90,12 +90,13 @@ public class JsonWriteVisitorTest {
     JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
 
     TimedMetric metric = createTimedMetric();
+    visitAllTimed(metric, jsonVisitor);
 
-    jsonVisitor.visit(metric);
     String counterJson = writer.toString();
 
     // values converted into microseconds
-    Assert.assertEquals("{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"norm\":{\"count\":3,\"avg\":120,\"max\":140,\"sum\":360,\"dur\":0},\"error\":{\"count\":2,\"avg\":210,\"max\":220,\"sum\":420,\"dur\":0}}", counterJson);
+    String match = "{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"avg\":210,\"max\":220,\"sum\":420,\"dur\":0}{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"avg\":120,\"max\":140,\"sum\":360,\"dur\":0}";
+    Assert.assertEquals(match, counterJson);
   }
 
 
@@ -108,13 +109,12 @@ public class JsonWriteVisitorTest {
     StringWriter writer = new StringWriter();
     JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
 
-    BucketTimedMetric metric = createBucketTimedMetricFull();
-
-    jsonVisitor.visit(metric);
+    TimedMetric metric = createBucketTimedMetricFull();
+    visitAllTimed(metric, jsonVisitor);
     String bucketJson = writer.toString();
 
-    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"norm\":{\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0},\"error\":{\"count\":0}},");
-    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150+\",\"norm\":{\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000,\"dur\":0},\"error\":{\"count\":0}}");
+    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0}{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150+\",\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000,\"dur\":0}";
+    assertThat(bucketJson).contains(match);
   }
 
   /**
@@ -126,20 +126,27 @@ public class JsonWriteVisitorTest {
     StringWriter writer = new StringWriter();
     JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
 
-    BucketTimedMetric metric = createBucketTimedMetricPartial();
+    TimedMetric metric = createBucketTimedMetricPartial();
+    visitAllTimed(metric, jsonVisitor);
 
-    jsonVisitor.visit(metric);
     String bucketJson = writer.toString();
 
-    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"norm\":{\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0},\"error\":{\"count\":0}},");
-    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150-300\",\"norm\":{\"count\":0},\"error\":{\"count\":0}},");
-    assertThat(bucketJson).contains("{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"300+\",\"norm\":{\"count\":0},\"error\":{\"count\":0}}");
+    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0}";
+    assertThat(bucketJson).contains(match);
+  }
+
+  private void visitAllTimed(Metric metric, JsonWriteVisitor jsonVisitor) {
+
+    List<MetricStatistics> statistics = collectAll(metric);
+    for (MetricStatistics statistic : statistics) {
+      jsonVisitor.visit((TimedStatistics)statistic);
+    }
   }
 
   @Test
   public void testMetricList() throws IOException {
 
-    List<Metric> metrics = new ArrayList<Metric>();
+    List<Metric> metrics = new ArrayList<>();
     metrics.add(createValueMetric());
     metrics.add(createGaugeMetric());
     metrics.add(createTimedMetric());
@@ -147,13 +154,15 @@ public class JsonWriteVisitorTest {
     metrics.add(createBucketTimedMetricPartial());
     metrics.add(createCounterMetric());
 
+    List<MetricStatistics> statistics = collect(metrics);
+
     HeaderInfo headerInfo = new HeaderInfo();
     headerInfo.setKey("key-val");
     headerInfo.setEnv("dev");
     headerInfo.setApp("app-val");
     headerInfo.setServer("server-val");
 
-    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, System.currentTimeMillis(), metrics);
+    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, System.currentTimeMillis(), statistics);
 
     StringWriter writer = new StringWriter();
     JsonWriteVisitor jsonVisitor = new JsonWriteVisitor(writer, reportMetrics);
@@ -178,37 +187,57 @@ public class JsonWriteVisitorTest {
 
     JsonNode jsonNode = jsonObject.get("metrics");
     ArrayNode metricArray = (ArrayNode) jsonNode;
-    assertThat(metricArray.size()).isEqualTo(9);
+    assertThat(metricArray.size()).isEqualTo(8);
 
   }
 
+  private MetricStatistics collectOne(Metric metric) {
+    HelperStatsCollector collector = new HelperStatsCollector();
+    metric.collect(collector);
+    return collector.getList().get(0);
+  }
+
+  private List<MetricStatistics> collect(List<Metric> metrics) {
+
+    HelperStatsCollector collector = new HelperStatsCollector();
+    for (Metric metric : metrics) {
+      metric.collect(collector);
+    }
+    return collector.getList();
+  }
+
+  private List<MetricStatistics> collectAll(Metric... metrics) {
+
+    HelperStatsCollector collector = new HelperStatsCollector();
+    for (Metric metric : metrics) {
+      metric.collect(collector);
+    }
+    return collector.getList();
+  }
 
   private CounterMetric createCounterMetric() {
-    CounterMetric counter = new DefaultCounterMetric(MetricManager.name("org.test.CounterFoo.doStuff"));
+    CounterMetric counter = new DefaultCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
     counter.markEvents(10);
-    counter.collectStatistics(new ArrayList<>());
     return counter;
   }
 
   private GaugeDoubleMetric createGaugeMetric() {
     GaugeDouble gauge = () -> 24d;
-    GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricManager.name("org.test.GaugeFoo.doStuff"), gauge);
-    metric.collectStatistics(new ArrayList<>());
+    GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
     return metric;
   }
 
   private ValueMetric createValueMetric() {
-    ValueMetric metric = new DefaultValueMetric(MetricManager.name("org.test.ValueFoo.doStuff"));
+    ValueMetric metric = new DefaultValueMetric(MetricName.of("org.test.ValueFoo.doStuff"));
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
-    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
   private TimedMetric createTimedMetric() {
 
-    TimedMetric metric = new DefaultTimedMetric(MetricManager.name("org.test.TimedFoo.doStuff"));
+    TimedMetric metric = new DefaultTimedMetric(MetricName.of("org.test.TimedFoo.doStuff"));
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MICROS); // 100 micros
@@ -216,15 +245,13 @@ public class JsonWriteVisitorTest {
     metric.addEventDuration(true, 140 * NANOS_TO_MICROS);
     metric.addEventDuration(false, 200 * NANOS_TO_MICROS);
     metric.addEventDuration(false, 220 * NANOS_TO_MICROS);
-
-    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
-  private BucketTimedMetric createBucketTimedMetricFull() {
+  private TimedMetric createBucketTimedMetricFull() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    BucketTimedMetric metric = factory.createMetric(MetricManager.name("org.test.BucketTimedFoo.doStuff"), new int[]{150});
+    TimedMetric metric = factory.createMetric(MetricName.of("org.test.BucketTimedFoo.doStuff"), new int[]{150});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis
@@ -232,8 +259,6 @@ public class JsonWriteVisitorTest {
     metric.addEventDuration(true, 140 * NANOS_TO_MILLIS);
     metric.addEventDuration(true, 200 * NANOS_TO_MILLIS);
     metric.addEventDuration(true, 220 * NANOS_TO_MILLIS);
-
-    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 
@@ -242,10 +267,10 @@ public class JsonWriteVisitorTest {
    *
    * @return
    */
-  private BucketTimedMetric createBucketTimedMetricPartial() {
+  private TimedMetric createBucketTimedMetricPartial() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    BucketTimedMetric metric = factory.createMetric(MetricManager.name("org.test.BucketTimedFoo.doStuff"), new int[]{150, 300});
+    TimedMetric metric = factory.createMetric(MetricName.of("org.test.BucketTimedFoo.doStuff"), new int[]{150, 300});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis
@@ -253,8 +278,6 @@ public class JsonWriteVisitorTest {
     metric.addEventDuration(true, 140 * NANOS_TO_MILLIS);
 
     // Not puting in values > 150 millis so last 2 buckets are empty
-
-    metric.collectStatistics(new ArrayList<>());
     return metric;
   }
 

@@ -2,10 +2,10 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.Metric;
+import org.avaje.metric.statistics.MetricStatistics;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,10 +14,10 @@ import static org.testng.Assert.assertEquals;
 public class DefaultGaugeDoubleMetricTest {
 
 
-  private List<Metric> collect(Metric metric) {
-    List<Metric> list = new ArrayList<>();
-    metric.collectStatistics(list);
-    return list;
+  private List<MetricStatistics> collect(Metric metric) {
+    DStatsCollector collector = new DStatsCollector();
+    metric.collect(collector);
+    return collector.getList();
   }
 
   @Test

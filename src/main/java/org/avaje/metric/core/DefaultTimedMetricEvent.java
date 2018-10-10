@@ -11,16 +11,16 @@ import org.avaje.metric.TimedEvent;
  * separately.
  * </p>
  */
-public final class DefaultTimedMetricEvent implements TimedEvent {
+final class DefaultTimedMetricEvent implements TimedEvent {
 
   private final DefaultTimedMetric metric;
-  
+
   private final long startNanos;
 
   /**
    * Create a TimedMetricEvent.
    */
-  protected DefaultTimedMetricEvent(DefaultTimedMetric metric) {
+  DefaultTimedMetricEvent(DefaultTimedMetric metric) {
     this.metric = metric;
     this.startNanos = DefaultTimedMetric.getTickNanos();
   }
@@ -36,7 +36,7 @@ public final class DefaultTimedMetricEvent implements TimedEvent {
   public void end(boolean withSuccess) {
     metric.addEventDuration(withSuccess, getDuration());
   }
-  
+
   /**
    * This timed event ended with successful execution (e.g. Successful SOAP
    * Operation or SQL execution).

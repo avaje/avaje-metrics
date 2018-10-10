@@ -1,16 +1,13 @@
 package org.avaje.metric.report;
 
 
-import org.avaje.metric.BucketTimedMetric;
-import org.avaje.metric.CounterMetric;
-import org.avaje.metric.CounterStatistics;
-import org.avaje.metric.GaugeDoubleMetric;
-import org.avaje.metric.GaugeLongMetric;
-import org.avaje.metric.Metric;
-import org.avaje.metric.MetricVisitor;
-import org.avaje.metric.TimedMetric;
-import org.avaje.metric.ValueMetric;
-import org.avaje.metric.ValueStatistics;
+import org.avaje.metric.statistics.CounterStatistics;
+import org.avaje.metric.statistics.GaugeDoubleStatistics;
+import org.avaje.metric.statistics.GaugeLongStatistics;
+import org.avaje.metric.statistics.MetricStatistics;
+import org.avaje.metric.statistics.MetricStatisticsVisitor;
+import org.avaje.metric.statistics.TimedStatistics;
+import org.avaje.metric.statistics.ValueStatistics;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -19,7 +16,7 @@ import java.util.List;
 /**
  * Writes the metric information as JSON to a buffer for sending.
  */
-public class JsonWriteVisitor implements MetricVisitor {
+public class JsonWriteVisitor implements MetricStatisticsVisitor {
 
   protected final int decimalPlaces;
 
@@ -35,7 +32,7 @@ public class JsonWriteVisitor implements MetricVisitor {
   public JsonWriteVisitor(Writer writer, ReportMetrics reportMetrics) {
     this(2, writer, reportMetrics);
   }
-  
+
   public JsonWriteVisitor(int decimalPlaces, Writer writer, ReportMetrics reportMetrics) {
     this.decimalPlaces = decimalPlaces;
     this.buffer = writer;
@@ -56,16 +53,16 @@ public class JsonWriteVisitor implements MetricVisitor {
   }
 
   protected void appendMetricsJson() throws IOException {
-    
-    List<Metric> metrics = reportMetrics.getMetrics();
-    
+
+    List<MetricStatistics> metrics = reportMetrics.getMetrics();
+
     for (int i = 0; i < metrics.size(); i++) {
       if (i == 0) {
         buffer.append("  ");
       } else {
         buffer.append(" ,");
       }
-      Metric metric = metrics.get(i);
+      MetricStatistics metric = metrics.get(i);
       metric.visit(this);
       buffer.append("\n");
     }
@@ -81,7 +78,7 @@ public class JsonWriteVisitor implements MetricVisitor {
     writeHeader("server", headerInfo.getServer());
   }
 
-  protected void writeMetricStart(String type, Metric metric) throws IOException {
+  protected void writeMetricStart(String type, MetricStatistics metric) throws IOException {
 
     buffer.append("{");
     writeKey("type");
@@ -92,79 +89,79 @@ public class JsonWriteVisitor implements MetricVisitor {
     buffer.append(",");
   }
 
-  protected void writeMetricEnd(Metric metric) throws IOException {
-    buffer.append("}");
-  }
-
-  @Override
-  public void visit(TimedMetric metric) throws IOException {
-
-    writeMetricStart("timed", metric);
-    if (metric.isBucket()) {
-      writeHeader("bucket", metric.getBucketRange());
+  protected void writeMetricEnd(MetricStatistics metric) {
+    try {
+      buffer.append("}");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    writeSummary("norm", metric.getCollectedSuccessStatistics());
-    buffer.append(",");
-    writeSummary("error", metric.getCollectedErrorStatistics());
-    writeMetricEnd(metric);
   }
 
   @Override
-  public void visit(BucketTimedMetric metric) throws IOException {
-
-    TimedMetric[] buckets = metric.getBuckets();
-    for (int i = 0; i < buckets.length; i++) {
-      if (i > 0) {
-        buffer.write(",");
+  public void visit(TimedStatistics metric) {
+    try {
+      writeMetricStart("timed", metric);
+      if (metric.isBucket()) {
+        writeHeader("bucket", metric.getBucketRange());
       }
-      visit(buckets[i]);
+      writeSummary(metric);
+      writeMetricEnd(metric);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Override
-  public void visit(ValueMetric metric) throws IOException {
-
-    writeMetricStart("value", metric);
-    writeSummary(null, metric.getCollectedStatistics());
-    writeMetricEnd(metric);
+  public void visit(ValueStatistics metric) {
+    try {
+      writeMetricStart("value", metric);
+      writeSummary(metric);
+      writeMetricEnd(metric);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public void visit(CounterMetric metric) throws IOException {
-
-    writeMetricStart("counter", metric);
-    CounterStatistics counterStatistics = metric.getCollectedStatistics();
-    writeKeyNumber("count", counterStatistics.getCount());
-    buffer.append(",");
-    writeKeyNumber("dur", getDuration(counterStatistics.getStartTime()));
-    writeMetricEnd(metric);
+  public void visit(CounterStatistics metric) {
+    try {
+      writeMetricStart("counter", metric);
+      writeKeyNumber("count", metric.getCount());
+      buffer.append(",");
+      writeKeyNumber("dur", getDuration(metric.getStartTime()));
+      writeMetricEnd(metric);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public void visit(GaugeDoubleMetric metric) throws IOException {
-
-    writeMetricStart("gauge", metric);
-    writeKeyNumber("value", format(metric.getValue()));
-    writeMetricEnd(metric);
+  public void visit(GaugeDoubleStatistics metric) {
+    try {
+      writeMetricStart("gauge", metric);
+      writeKeyNumber("value", format(metric.getValue()));
+      writeMetricEnd(metric);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public void visit(GaugeLongMetric metric) throws IOException {
-
-    writeMetricStart("gaugeCounter", metric);
-    writeKeyNumber("value", metric.getValue());
-    writeMetricEnd(metric);
+  public void visit(GaugeLongStatistics metric) {
+    try {
+      writeMetricStart("gaugeCounter", metric);
+      writeKeyNumber("value", metric.getValue());
+      writeMetricEnd(metric);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
-  
-  protected void writeSummary(String prefix, ValueStatistics valueStats) throws IOException {
+
+  protected void writeSummary(ValueStatistics valueStats) throws IOException {
 
     // valueStats == null when BucketTimedMetric and the bucket is empty
     long count = (valueStats == null) ? 0 : valueStats.getCount();
 
-    if (prefix != null) {
-      writeKey(prefix);
-      buffer.append("{");
-    }
     writeKeyNumber("count", count);
     if (count != 0) {
       buffer.append(",");
@@ -175,9 +172,6 @@ public class JsonWriteVisitor implements MetricVisitor {
       writeKeyNumber("sum", valueStats.getTotal());
       buffer.append(",");
       writeKeyNumber("dur", getDuration(valueStats.getStartTime()));
-    }
-    if (prefix != null) {
-      buffer.append("}");
     }
   }
 
@@ -192,11 +186,6 @@ public class JsonWriteVisitor implements MetricVisitor {
   protected void writeKeyNumber(String key, String numberValue) throws IOException {
     writeKey(key);
     writeNumberValue(numberValue);
-  }
-
-  protected void writeKeyString(String key, String value) throws IOException {
-    writeKey(key);
-    writeValue(value);
   }
 
   public void writeHeader(String key, String value) throws IOException {
@@ -221,24 +210,6 @@ public class JsonWriteVisitor implements MetricVisitor {
     buffer.append("\"");
     buffer.append(val);
     buffer.append("\"");
-  }
-
-  /**
-   * Return the bucket ranges as a comma delimited list.
-   */
-  protected String commaDelimited(int[] a) {
-
-    if (a == null) {
-      return "";
-    }
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < a.length ; i++) {
-      if (i > 0) {
-        sb.append(',');
-      }
-      sb.append(a[i]);
-    }
-    return sb.toString();
   }
 
   protected void writeNumberValue(String val) throws IOException {
