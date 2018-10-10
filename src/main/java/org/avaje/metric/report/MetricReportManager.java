@@ -47,12 +47,7 @@ public class MetricReportManager {
   /**
    * Optional first reporter.
    */
-  protected final MetricReporter localReporter;
-
-  /**
-   * Optional second reporter.
-   */
-  protected final MetricReporter remoteReporter;
+  protected final MetricReporter reporter;
 
   /**
    * Optional reporter for request timings.
@@ -72,8 +67,7 @@ public class MetricReportManager {
 
     this.executor = defaultExecutor(config.getExecutor());
     this.requestTimingReporter = defaultReqReporter(config);
-    this.localReporter = defaultReporter(config);
-    this.remoteReporter = config.getRemoteReporter();
+    this.reporter = defaultReporter(config);
     this.freqInSeconds = config.getFreqInSeconds();
     this.headerInfo = config.getHeaderInfo();
 
@@ -105,8 +99,8 @@ public class MetricReportManager {
    * Helper method that provides a default RequestTimingReporter if not specified.
    */
   protected static MetricReporter defaultReporter(MetricReportConfig config) {
-    if (config.getLocalReporter() != null) {
-      return config.getLocalReporter();
+    if (config.getReporter() != null) {
+      return config.getReporter();
     }
     return new FileReporter(config.getDirectory(), config.getMetricsFileName(), new CsvReportWriter(config.getThresholdMean()));
   }
@@ -189,11 +183,8 @@ public class MetricReportManager {
    * This is used by file reporters to limit the number of metrics files held.
    */
   protected void periodicCleanUp() {
-    if (localReporter != null) {
-      localReporter.cleanup();
-    }
-    if (remoteReporter != null) {
-      remoteReporter.cleanup();
+    if (reporter != null) {
+      reporter.cleanup();
     }
     if (requestTimingReporter != null) {
       requestTimingReporter.cleanup();
@@ -205,7 +196,7 @@ public class MetricReportManager {
    * <p/>
    * This typically means appending the metrics to a file or sending over a network.
    */
-  protected void reportMetrics() throws IOException {
+  protected void reportMetrics() {
 
     long startNanos = System.nanoTime();
     long collectionTime = System.currentTimeMillis();
@@ -217,8 +208,7 @@ public class MetricReportManager {
 
     // report metrics locally and remotely as necessary
     ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics);
-    report(reportMetrics, localReporter);
-    report(reportMetrics, remoteReporter);
+    report(reportMetrics, reporter);
 
     long reportNanos = System.nanoTime() - startNanos - collectNanos;
 

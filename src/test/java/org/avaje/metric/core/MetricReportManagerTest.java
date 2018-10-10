@@ -16,7 +16,7 @@ public class MetricReportManagerTest {
 
     MetricReportConfig config = new MetricReportConfig();
     config.setFreqInSeconds(2);
-    config.setLocalReporter(fileReporter);
+    config.setReporter(fileReporter);
 
     MetricReportManager mgr = new MetricReportManager(config);
 

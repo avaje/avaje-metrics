@@ -14,13 +14,13 @@ public class JvmProcessMemoryTest {
   @Test
   public void testGetMetrics() throws Exception {
 
-    List<Metric> metrics = JvmProcessMemory.createGauges(true);
-    dump(metrics);
+    MetricManager.jvmMetrics().registerStandardJvmMetrics(false);
+    dump();
   }
 
-  private void dump(List<Metric> metrics) throws InterruptedException {
+  private void dump() throws InterruptedException {
     for (int i = 0; i < 5; i++) {
-      if (!metrics.isEmpty()) {
+
         Thread.sleep(1000);
 
         List<MetricStatistics> list = MetricManager.collectNonEmptyJvmMetrics();
@@ -34,7 +34,7 @@ public class JvmProcessMemoryTest {
           assertTrue(values.contains("jvm.memory.process.vmrss"));
         }
       }
-    }
+
   }
 
 }

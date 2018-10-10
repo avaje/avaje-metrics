@@ -21,9 +21,7 @@ public class MetricReportConfig {
 
   String requestsFileName;
 
-  MetricReporter localReporter;
-
-  MetricReporter remoteReporter;
+  MetricReporter reporter;
 
   private boolean requestTiming;
 
@@ -190,29 +188,15 @@ public class MetricReportConfig {
   /**
    * Return the local reporter to use. This is typically a reporter that writes metrics out to a local file system.
    */
-  public MetricReporter getLocalReporter() {
-    return localReporter;
+  public MetricReporter getReporter() {
+    return reporter;
   }
 
   /**
    * Set the local reporter to use. This is typically a reporter that writes metrics out to a local file system.
    */
-  public void setLocalReporter(MetricReporter localReporter) {
-    this.localReporter = localReporter;
-  }
-
-  /**
-   * return the remote reporter to use. This is typically a reporter that sends metrics to a remote repository.
-   */
-  public MetricReporter getRemoteReporter() {
-    return remoteReporter;
-  }
-
-  /**
-   * Set the remote reporter to use. This is typically a reporter that sends metrics to a remote repository.
-   */
-  public void setRemoteReporter(MetricReporter remoteReporter) {
-    this.remoteReporter = remoteReporter;
+  public void setReporter(MetricReporter reporter) {
+    this.reporter = reporter;
   }
 
   /**
