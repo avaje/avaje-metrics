@@ -60,11 +60,14 @@ public class MetricReportManager {
    */
   protected final HeaderInfo headerInfo;
 
+  private final List<MetricReportAggregator> aggregators;
+
   /**
    * Create using the MetricReportConfig bean.
    */
   public MetricReportManager(MetricReportConfig config) {
 
+    this.aggregators = config.getAggregators();
     this.executor = defaultExecutor(config.getExecutor());
     this.requestTimingReporter = defaultReqReporter(config);
     this.reporter = defaultReporter(config);
@@ -203,6 +206,11 @@ public class MetricReportManager {
 
     // collect all the 'non-empty' metrics
     List<MetricStatistics> metrics = collectMetrics();
+    if (aggregators != null) {
+      for (MetricReportAggregator aggregator : aggregators) {
+        aggregator.process(metrics);
+      }
+    }
 
     long collectNanos = System.nanoTime() - startNanos;
 

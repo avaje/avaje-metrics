@@ -5,6 +5,7 @@ import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.GaugeLongMetric;
+import org.avaje.metric.JvmMetrics;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
@@ -46,6 +47,8 @@ public class DefaultMetricManager implements PluginMetricManager {
   private final NameComp sortByName = new NameComp();
 
   private final Object monitor = new Object();
+
+  private boolean reportChangesOnly = true;
 
   /**
    * Cache of the code JVM metrics.
@@ -167,21 +170,33 @@ public class DefaultMetricManager implements PluginMetricManager {
     return (disableCollection) ? new NoopValueMetricFactory() : new ValueMetricFactory();
   }
 
+  @Override
+  public JvmMetrics withReportChangesOnly() {
+    reportChangesOnly = true;
+    return this;
+  }
+
+  @Override
+  public JvmMetrics withReportAlways() {
+    reportChangesOnly = false;
+    return this;
+  }
+
   /**
    * Register the standard JVM metrics.
    */
   @Override
-  public void registerStandardJvmMetrics(boolean reportChangesOnly) {
+  public void registerStandardJvmMetrics() {
 
     registerJvmGCMetrics();
-    registerJvmMemoryMetrics(reportChangesOnly);
-    registerJvmThreadMetrics(reportChangesOnly);
-    registerJvmProcessMemoryMetrics(reportChangesOnly);
+    registerJvmMemoryMetrics();
+    registerJvmThreadMetrics();
+    registerJvmProcessMemoryMetrics();
     registerJvmOsLoadMetric();
   }
 
   @Override
-  public void registerJvmProcessMemoryMetrics(boolean reportChangesOnly) {
+  public void registerJvmProcessMemoryMetrics() {
     registerAll(JvmProcessMemory.createGauges(reportChangesOnly));
   }
 
@@ -195,7 +210,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public void registerJvmThreadMetrics(boolean reportChangesOnly) {
+  public void registerJvmThreadMetrics() {
     registerAll(JvmThreadMetricGroup.createThreadMetricGroup(reportChangesOnly));
   }
 
@@ -205,7 +220,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   @Override
-  public void registerJvmMemoryMetrics(boolean reportChangesOnly) {
+  public void registerJvmMemoryMetrics() {
     registerAll(JvmMemoryMetricGroup.createHeapGroup(reportChangesOnly));
     registerAll(JvmMemoryMetricGroup.createNonHeapGroup(reportChangesOnly));
   }

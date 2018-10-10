@@ -14,7 +14,7 @@ public class JvmProcessMemoryTest {
   @Test
   public void testGetMetrics() throws Exception {
 
-    MetricManager.jvmMetrics().registerStandardJvmMetrics(false);
+    MetricManager.jvmMetrics().registerStandardJvmMetrics();
     dump();
   }
 

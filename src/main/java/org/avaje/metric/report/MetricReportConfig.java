@@ -9,31 +9,62 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class MetricReportConfig {
 
-  HeaderInfo headerInfo;
+  private HeaderInfo headerInfo;
 
-  int freqInSeconds;
+  private int freqInSeconds;
 
-  int requestsFreqInSeconds;
+  private int requestsFreqInSeconds;
 
-  String directory;
+  private String directory;
 
-  String metricsFileName;
+  private String metricsFileName;
 
-  String requestsFileName;
+  private String requestsFileName;
 
-  MetricReporter reporter;
+  private MetricReporter reporter;
 
   private boolean requestTiming;
 
-  RequestTimingReporter requestTimingReporter;
+  private RequestTimingReporter requestTimingReporter;
 
-  int requestTimingThreshold;
+  private int requestTimingThreshold;
 
-  long thresholdMean;
+  private long thresholdMean;
 
-  ScheduledExecutorService executor;
+  private ScheduledExecutorService executor;
 
-  List<RequestTimingListener> requestTimingListeners = new ArrayList<>();
+  private List<RequestTimingListener> requestTimingListeners = new ArrayList<>();
+
+  private List<MetricReportAggregator> aggregators = new ArrayList<>();
+
+  /**
+   * Add a aggregator for timed metrics starting with the given prefix.
+   *
+   * @param prefix The prefix to match timed metrics on
+   * @param name   The name of the aggregation
+   */
+  public void addAggregator(String prefix, String name) {
+    aggregators.add(new AggregatorTimed(prefix, name));
+  }
+
+  /**
+   * Add a aggregator for timed metrics starting with the given prefix.
+   * <p>
+   * The name of the resulting aggreation is the prefix + ".Agg"
+   * </p>
+   *
+   * @param prefix The prefix to match timed metrics on
+   */
+  public void addAggregator(String prefix) {
+    addAggregator(prefix, prefix + ".Agg");
+  }
+
+  /**
+   * Return the aggregators.
+   */
+  public List<MetricReportAggregator> getAggregators() {
+    return aggregators;
+  }
 
   /**
    * Return the HeaderInfo which identifies this application instance.
