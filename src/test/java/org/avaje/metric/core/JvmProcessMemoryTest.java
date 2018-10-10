@@ -14,7 +14,7 @@ public class JvmProcessMemoryTest {
   @Test
   public void testGetMetrics() throws Exception {
 
-    List<Metric> metrics = JvmProcessMemory.createGauges();
+    List<Metric> metrics = JvmProcessMemory.createGauges(true);
     dump(metrics);
   }
 

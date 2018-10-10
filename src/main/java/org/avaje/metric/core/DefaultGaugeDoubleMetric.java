@@ -15,6 +15,8 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final GaugeDouble gauge;
 
+  protected final boolean reportChangesOnly;
+
   private double lastReported;
 
   /**
@@ -28,17 +30,14 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
     return new Incrementing(name, gauge);
   }
 
-  /**
-   * Create a GaugeMetric.
-   *
-   * @param name
-   *          the name of the metric.
-   * @param gauge
-   *          the gauge used to get the value.
-   */
   DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
+    this(name, gauge, true);
+  }
+
+  DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
+    this.reportChangesOnly = reportChangesOnly;
   }
 
   @Override
@@ -60,11 +59,15 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
   @Override
   public void collect(MetricStatisticsVisitor collector) {
-    double value = gauge.getValue();
-    boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
-    if (collect) {
-      lastReported = value;
-      collector.visit(new DGaugeDoubleStatistic(name, value));
+    if (!reportChangesOnly) {
+      collector.visit(new DGaugeDoubleStatistic(name, gauge.getValue()));
+    } else {
+      double value = gauge.getValue();
+      boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
+      if (collect) {
+        lastReported = value;
+        collector.visit(new DGaugeDoubleStatistic(name, value));
+      }
     }
   }
 

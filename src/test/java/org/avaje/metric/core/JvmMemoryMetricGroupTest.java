@@ -1,6 +1,5 @@
 package org.avaje.metric.core;
 
-import org.assertj.core.api.AbstractByteAssert;
 import org.avaje.metric.Metric;
 import org.testng.annotations.Test;
 
@@ -14,7 +13,7 @@ public class JvmMemoryMetricGroupTest {
   @Test
   public void testCreateHeapGroup() {
 
-    List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createHeapGroup();
+    List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createHeapGroup(true);
 
     assertEquals(5, gaugeMetrics.size());
     assertEquals("init", gaugeMetrics.get(0).getName().getName());
@@ -29,7 +28,7 @@ public class JvmMemoryMetricGroupTest {
   @Test
   public void testCreateNonHeapGroup() {
 
-    List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createNonHeapGroup();
+    List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createNonHeapGroup(true);
 
     assertThat(gaugeMetrics.size()).isGreaterThan(1);
     assertEquals("init", gaugeMetrics.get(0).getName().getName());

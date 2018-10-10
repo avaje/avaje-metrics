@@ -11,16 +11,16 @@ import java.util.List;
 
 final class JvmThreadMetricGroup {
 
-  static List<Metric> createThreadMetricGroup() {
+  static List<Metric> createThreadMetricGroup(boolean reportChangesOnly) {
 
     GaugeLong[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
 
     MetricName baseName = new DefaultMetricName("jvm", "threads", "");
 
     List<Metric> metrics = new ArrayList<>(3);
-    metrics.add(new DefaultGaugeLongMetric(baseName.withName("current"), gauges[0]));
-    metrics.add(new DefaultGaugeLongMetric(baseName.withName("peak"), gauges[1]));
-    metrics.add(new DefaultGaugeLongMetric(baseName.withName("daemon"), gauges[2]));
+    metrics.add(new DefaultGaugeLongMetric(baseName.withName("current"), gauges[0], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.withName("peak"), gauges[1], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.withName("daemon"), gauges[2], reportChangesOnly));
     return metrics;
   }
 

@@ -53,11 +53,6 @@ public class DefaultMetricManager implements PluginMetricManager {
   private final ConcurrentHashMap<String, Metric> coreJvmMetrics = new ConcurrentHashMap<>();
 
   /**
-   * Derived collection of the core jvm metrics.
-   */
-  private final Collection<Metric> coreJvmMetricCollection;
-
-  /**
    * Cache of the created metrics (excluding JVM metrics).
    */
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
@@ -100,18 +95,12 @@ public class DefaultMetricManager implements PluginMetricManager {
   protected final boolean disable;
 
   public DefaultMetricManager() {
-
     this.disable = isDisableCollection();
     this.bucketTimedMetricFactory = initBucketTimedFactory(disable);
     this.timedMetricFactory = initTimedMetricFactory(disable);
     this.valueMetricFactory = initValueMetricFactory(disable);
     this.counterMetricFactory = initCounterMetricFactory(disable);
     this.externalRequestIdAdapter = initExternalRequestIdAdapter(disable);
-
-    if (!disable) {
-      registerStandardJvmMetrics();
-    }
-    this.coreJvmMetricCollection = Collections.unmodifiableCollection(coreJvmMetrics.values());
   }
 
   private static ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
@@ -136,6 +125,7 @@ public class DefaultMetricManager implements PluginMetricManager {
     return "true".equalsIgnoreCase(disable);
   }
 
+  @Override
   public void reportTiming(RequestTiming requestTiming) {
 
     if (externalRequestIdAdapter != null) {
@@ -180,19 +170,44 @@ public class DefaultMetricManager implements PluginMetricManager {
   /**
    * Register the standard JVM metrics.
    */
-  private void registerStandardJvmMetrics() {
+  @Override
+  public void registerStandardJvmMetrics(boolean reportChangesOnly) {
 
-    registerAll(JvmMemoryMetricGroup.createHeapGroup());
-    registerAll(JvmMemoryMetricGroup.createNonHeapGroup());
-    registerAll(JvmProcessMemory.createGauges());
-    registerAll(JvmGarbageCollectionMetricGroup.createGauges());
-    registerAll(JvmThreadMetricGroup.createThreadMetricGroup());
+    registerJvmGCMetrics();
+    registerJvmMemoryMetrics(reportChangesOnly);
+    registerJvmThreadMetrics(reportChangesOnly);
+    registerJvmProcessMemoryMetrics(reportChangesOnly);
+    registerJvmOsLoadMetric();
+  }
 
+  @Override
+  public void registerJvmProcessMemoryMetrics(boolean reportChangesOnly) {
+    registerAll(JvmProcessMemory.createGauges(reportChangesOnly));
+  }
+
+  @Override
+  public void registerJvmOsLoadMetric() {
     GaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
     }
+  }
+
+  @Override
+  public void registerJvmThreadMetrics(boolean reportChangesOnly) {
+    registerAll(JvmThreadMetricGroup.createThreadMetricGroup(reportChangesOnly));
+  }
+
+  @Override
+  public void registerJvmGCMetrics() {
+    registerAll(JvmGarbageCollectionMetricGroup.createGauges());
+  }
+
+  @Override
+  public void registerJvmMemoryMetrics(boolean reportChangesOnly) {
+    registerAll(JvmMemoryMetricGroup.createHeapGroup(reportChangesOnly));
+    registerAll(JvmMemoryMetricGroup.createNonHeapGroup(reportChangesOnly));
   }
 
   private void registerAll(List<Metric> groups) {
@@ -473,14 +488,14 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   @Override
   public Collection<Metric> getJvmMetrics() {
-    return coreJvmMetricCollection;
+    return coreJvmMetrics.values();
   }
 
   @Override
   public List<MetricStatistics> collectNonEmptyJvmMetrics() {
 
     DStatsCollector collector = new DStatsCollector();
-    for (Metric metric : coreJvmMetricCollection) {
+    for (Metric metric : coreJvmMetrics.values()) {
       metric.collect(collector);
     }
     return collector.getList();

@@ -15,6 +15,8 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
 
   protected final GaugeLong gauge;
 
+  protected final boolean reportChangesOnly;
+
   /**
    * The last reported value.
    */
@@ -38,8 +40,13 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
    * @param gauge the gauge used to get the value.
    */
   DefaultGaugeLongMetric(MetricName name, GaugeLong gauge) {
+    this(name, gauge, true);
+  }
+
+  DefaultGaugeLongMetric(MetricName name, GaugeLong gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
+    this.reportChangesOnly = reportChangesOnly;
   }
 
   @Override
@@ -61,12 +68,15 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
 
   @Override
   public void collect(MetricStatisticsVisitor collector) {
-
-    long value = gauge.getValue();
-    boolean collect = (value != 0 && value != lastReported);
-    if (collect) {
-      lastReported = value;
-      collector.visit(new DGaugeLongStatistic(name, value));
+    if (!reportChangesOnly) {
+      collector.visit(new DGaugeLongStatistic(name, gauge.getValue()));
+    } else {
+      long value = gauge.getValue();
+      boolean collect = (value != 0 && value != lastReported);
+      if (collect) {
+        lastReported = value;
+        collector.visit(new DGaugeLongStatistic(name, value));
+      }
     }
   }
 

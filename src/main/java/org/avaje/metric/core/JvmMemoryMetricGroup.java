@@ -51,24 +51,24 @@ final class JvmMemoryMetricGroup {
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  public static List<Metric> createHeapGroup() {
+  public static List<Metric> createHeapGroup(boolean reportChangesOnly) {
 
     MetricName heapName = new DefaultMetricName("jvm","memory.heap","");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    return createGroup(heapName, source);
+    return createGroup(heapName, source, reportChangesOnly);
   }
 
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  public static List<Metric> createNonHeapGroup() {
+  public static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
     MetricName nonHeapName = new DefaultMetricName("jvm","memory.nonheap", "");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    return createGroup(nonHeapName, source);
+    return createGroup(nonHeapName, source, reportChangesOnly);
   }
 
-  private static List<Metric> createGroup(MetricName baseName, MemoryUsageSource source) {
-    return new MemUsageGauages(source, baseName).createMetric();
+  private static List<Metric> createGroup(MetricName baseName, MemoryUsageSource source, boolean reportChangesOnly) {
+    return new MemUsageGauages(source, baseName).createMetric(reportChangesOnly);
   }
 
   static class MemUsageGauages {
@@ -80,20 +80,20 @@ final class JvmMemoryMetricGroup {
       this.baseName = baseName;
     }
 
-    public List<Metric> createMetric() {
+    public List<Metric> createMetric(boolean reportChangesOnly) {
 
       List<Metric> metrics = new ArrayList<>();
 
-      metrics.add(new DefaultGaugeLongMetric(name("init"), new Init(source)));
-      metrics.add(new DefaultGaugeLongMetric(name("used"), new Used(source)));
-      metrics.add(new DefaultGaugeLongMetric(name("committed"), new Committed(source)));
+      metrics.add(new DefaultGaugeLongMetric(name("init"), new Init(source), reportChangesOnly));
+      metrics.add(new DefaultGaugeLongMetric(name("used"), new Used(source), reportChangesOnly));
+      metrics.add(new DefaultGaugeLongMetric(name("committed"), new Committed(source), reportChangesOnly));
 
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.getUsage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
-        metrics.add(new DefaultGaugeLongMetric(name("max"), new Max(source)));
-        metrics.add(new DefaultGaugeDoubleMetric(name("pct"), new Pct(source)));
+        metrics.add(new DefaultGaugeLongMetric(name("max"), new Max(source), reportChangesOnly));
+        metrics.add(new DefaultGaugeDoubleMetric(name("pct"), new Pct(source), reportChangesOnly));
       }
 
       return metrics;

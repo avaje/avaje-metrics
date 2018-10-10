@@ -28,8 +28,8 @@ final class JvmProcessMemory {
 	/**
 	 * Return the list of OS process memory metrics.
 	 */
-	static List<Metric> createGauges() {
-		return new JvmProcessMemory().metrics();
+	static List<Metric> createGauges(boolean reportChangesOnly) {
+		return new JvmProcessMemory().metrics(reportChangesOnly);
 	}
 
 	/**
@@ -75,7 +75,7 @@ final class JvmProcessMemory {
 	/**
 	 * Return the metrics for VmRSS and VmHWM.
 	 */
-	public List<Metric> metrics() {
+	public List<Metric> metrics(boolean reportChangesOnly) {
 
 		List<Metric> metrics = new ArrayList<>();
 		if (pid == null || MetricManifest.get().disableProcessMemory()) {
@@ -89,13 +89,13 @@ final class JvmProcessMemory {
 		MetricName baseName = new DefaultMetricName("jvm","memory.process", "");
 		MetricName vmRssName = baseName.withName("vmrss");
 		MetricName vmHwmName = baseName.withName("vmhwm");
-		MetricName committedDelta = baseName.withName("delta");
+//		MetricName committedDelta = baseName.withName("delta");
 
 		Source source = new Source(pid);
 
-		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source, memoryWatcher)));
-		metrics.add(new DefaultGaugeLongMetric(vmHwmName, new VmHWM(source)));
-		metrics.add(new DefaultGaugeLongMetric(committedDelta, new CommittedDelta(source)));
+		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source, memoryWatcher), reportChangesOnly));
+		metrics.add(new DefaultGaugeLongMetric(vmHwmName, new VmHWM(source), reportChangesOnly));
+//		metrics.add(new DefaultGaugeLongMetric(committedDelta, new CommittedDelta(source)));
 		return metrics;
 	}
 
@@ -198,22 +198,22 @@ final class JvmProcessMemory {
 		}
 	}
 
-	/**
-	 * Delta between VmRSS and JVM total committed memory.
-	 */
-	private static final class CommittedDelta implements GaugeLong {
-
-		private final Source source;
-
-		CommittedDelta(Source source) {
-			this.source = source;
-		}
-
-		@Override
-		public long getValue() {
-			return source.getCommittedDelta();
-		}
-	}
+//	/**
+//	 * Delta between VmRSS and JVM total committed memory.
+//	 */
+//	private static final class CommittedDelta implements GaugeLong {
+//
+//		private final Source source;
+//
+//		CommittedDelta(Source source) {
+//			this.source = source;
+//		}
+//
+//		@Override
+//		public long getValue() {
+//			return source.getCommittedDelta();
+//		}
+//	}
 
 	private static final class VmHWM implements GaugeLong {
 
@@ -272,14 +272,14 @@ final class JvmProcessMemory {
 			return procStatus.vmRSS;
 		}
 
-		long getCommittedDelta() {
-
-			MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-			long heap = memoryMXBean.getHeapMemoryUsage().getCommitted();
-			long nonHeap = memoryMXBean.getNonHeapMemoryUsage().getCommitted();
-
-			return delta(heap, nonHeap);
-		}
+//		long getCommittedDelta() {
+//
+//			MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+//			long heap = memoryMXBean.getHeapMemoryUsage().getCommitted();
+//			long nonHeap = memoryMXBean.getNonHeapMemoryUsage().getCommitted();
+//
+//			return delta(heap, nonHeap);
+//		}
 
 //		long getUsedDelta() {
 //
