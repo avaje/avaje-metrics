@@ -15,7 +15,7 @@ public class MetricManifest {
 
 	private static final Logger logger = LoggerFactory.getLogger(MetricManifest.class);
 
-	private static final MetricManifest INSTANCE = read("metric.mf");
+	private static final MetricManifest INSTANCE = read("metrics.mf");
 
 	private final Manifest manifest;
 

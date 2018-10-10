@@ -8,7 +8,7 @@ import static org.testng.Assert.assertTrue;
 public class MetricManifestTest {
 
 	@Test
-	public void testRead() throws Exception {
+	public void testRead() {
 
 		MetricManifest metricManifest = MetricManifest.get();
 		assertTrue(metricManifest.hasMemoryWarning());
@@ -16,9 +16,9 @@ public class MetricManifestTest {
 	}
 
 	@Test
-	public void testOtherRead() throws Exception {
+	public void testOtherRead() {
 
-		MetricManifest metricManifest = MetricManifest.read("metric-other.mf");
+		MetricManifest metricManifest = MetricManifest.read("metrics-other.mf");
 
 		assertTrue(metricManifest.hasMemoryWarning());
 		assertEquals(metricManifest.getMemoryWarnRelative(), 300);
