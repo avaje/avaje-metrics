@@ -27,21 +27,24 @@ public class ReportMetrics {
   protected final List<MetricStatistics> metrics;
 
   /**
+   * The reporting frequency in seconds.
+   */
+  protected final int freqInSeconds;
+
+  /**
    * Construct with the details.
    *
-   * @param headerInfo
-   *          This is the environment specific information - Application, Environment, Server etc.
-   * @param collectionTime
-   *          The time the metrics were collected. This is used to determine the duration for each
-   *          metric which is the time since its last collection.
-   * @param metrics
-   *          The metrics that were collected that were not empty. Metrics that didn't have events
-   *          occur are considered empty and not reported.
+   * @param headerInfo     This is the environment specific information - Application, Environment, Server etc.
+   * @param collectionTime The time the metrics were collected. This is used to determine the duration for each
+   *                       metric which is the time since its last collection.
+   * @param metrics        The metrics that were collected that were not empty. Metrics that didn't have events
+   * @param freqInSeconds  The reporting frequency in seconds.
    */
-  public ReportMetrics(HeaderInfo headerInfo, long collectionTime, List<MetricStatistics> metrics) {
+  public ReportMetrics(HeaderInfo headerInfo, long collectionTime, List<MetricStatistics> metrics, int freqInSeconds) {
     this.headerInfo = headerInfo;
     this.collectionTime = collectionTime;
     this.metrics = metrics;
+    this.freqInSeconds = freqInSeconds;
   }
 
   /**
@@ -65,4 +68,10 @@ public class ReportMetrics {
     return metrics;
   }
 
+  /**
+   * Return the reporting frequency in seconds.
+   */
+  public int getFreqInSeconds() {
+    return freqInSeconds;
+  }
 }

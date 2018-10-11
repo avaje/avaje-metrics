@@ -25,7 +25,7 @@
     <dependency>
       <groupId>org.avaje.metric</groupId>
       <artifactId>metric-api</artifactId>
-      <version>7.2.1-SNAPSHOT</version>
+      <version>7.2.1</version>
     </dependency>
 
     <dependency>

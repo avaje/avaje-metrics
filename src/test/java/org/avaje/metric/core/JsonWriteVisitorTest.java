@@ -8,7 +8,6 @@ import org.avaje.metric.CounterMetric;
 import org.avaje.metric.GaugeDouble;
 import org.avaje.metric.GaugeDoubleMetric;
 import org.avaje.metric.Metric;
-import org.avaje.metric.MetricManager;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.ValueMetric;
@@ -39,7 +38,7 @@ public class JsonWriteVisitorTest {
 
 
   private JsonWriteVisitor newJsonMetricVisitor(Writer writer) {
-    ReportMetrics m = new ReportMetrics(null, System.currentTimeMillis(), null);
+    ReportMetrics m = new ReportMetrics(null, System.currentTimeMillis(), null, 60);
     return new JsonWriteVisitor(writer, m);
   }
 
@@ -162,7 +161,7 @@ public class JsonWriteVisitorTest {
     headerInfo.setApp("app-val");
     headerInfo.setServer("server-val");
 
-    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, System.currentTimeMillis(), statistics);
+    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, System.currentTimeMillis(), statistics, 60);
 
     StringWriter writer = new StringWriter();
     JsonWriteVisitor jsonVisitor = new JsonWriteVisitor(writer, reportMetrics);

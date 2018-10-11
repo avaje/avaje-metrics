@@ -215,7 +215,7 @@ public class MetricReportManager {
     long collectNanos = System.nanoTime() - startNanos;
 
     // report metrics locally and remotely as necessary
-    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics);
+    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics, freqInSeconds);
     report(reportMetrics, reporter);
 
     long reportNanos = System.nanoTime() - startNanos - collectNanos;
