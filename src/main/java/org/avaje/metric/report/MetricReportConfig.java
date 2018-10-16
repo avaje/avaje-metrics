@@ -37,6 +37,22 @@ public class MetricReportConfig {
 
   private List<MetricReportAggregator> aggregators = new ArrayList<>();
 
+  private List<MetricSupplier> suppliers = new ArrayList<>();
+
+  /**
+   * Add additional metrics supplier that can supply metrics to the reporter.
+   */
+  public void addSupplier(MetricSupplier supplier) {
+    suppliers.add(supplier);
+  }
+
+  /**
+   * Return additional suppliers.
+   */
+  public List<MetricSupplier> getSuppliers() {
+    return suppliers;
+  }
+
   /**
    * Add a aggregator for timed metrics starting with the given prefix.
    *

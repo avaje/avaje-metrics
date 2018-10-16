@@ -6,7 +6,6 @@ import org.avaje.metric.statistics.MetricStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,11 +61,13 @@ public class MetricReportManager {
 
   private final List<MetricReportAggregator> aggregators;
 
+  private final List<MetricSupplier> suppliers;
+
   /**
    * Create using the MetricReportConfig bean.
    */
   public MetricReportManager(MetricReportConfig config) {
-
+    this.suppliers = config.getSuppliers();
     this.aggregators = config.getAggregators();
     this.executor = defaultExecutor(config.getExecutor());
     this.requestTimingReporter = defaultReqReporter(config);
@@ -232,11 +233,16 @@ public class MetricReportManager {
   /**
    * Collect all the non-empty metrics and return them for reporting.
    */
-  protected static List<MetricStatistics> collectMetrics() {
+  protected List<MetricStatistics> collectMetrics() {
 
     List<MetricStatistics> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
     List<MetricStatistics> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
     metrics.addAll(otherMetrics);
+
+    for (MetricSupplier supplier : suppliers) {
+      metrics.addAll(supplier.collectMetrics());
+    }
+
     return metrics;
   }
 
