@@ -31,14 +31,14 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
     this.name = name;
     this.bucketRange = noBuckets;
     this.successCounter = new ValueCounter(name);
-    this.errorCounter = new ValueCounter(name.withSuffix(".error"));
+    this.errorCounter = new ValueCounter(name.append("error"));
   }
 
   DefaultTimedMetric(MetricName name, String bucketRange) {
     this.name = name;
     this.bucketRange = bucketRange;
     this.successCounter = new ValueCounter(name, bucketRange);
-    this.errorCounter = new ValueCounter(name.withSuffix(".error"));
+    this.errorCounter = new ValueCounter(name.append("error"));
   }
 
   public String toString() {

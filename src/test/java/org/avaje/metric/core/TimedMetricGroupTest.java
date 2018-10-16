@@ -15,12 +15,11 @@ public class TimedMetricGroupTest {
   public void test() {
 
 
-    TimedMetricGroup timedMetricGroup = MetricManager.getTimedMetricGroup(MetricName.of("org.test.Hello.dummy"));
+    TimedMetricGroup timedMetricGroup = MetricManager.getTimedMetricGroup(MetricName.of("org.test.Hello"));
 
     TimedMetric timedMetric = timedMetricGroup.getTimedMetric("one");
-    assertEquals("org.test", timedMetric.getName().getGroup());
-    assertEquals("Hello", timedMetric.getName().getType());
-    assertEquals("one", timedMetric.getName().getName());
+    assertEquals("org.test.Hello.one", timedMetric.getName().getSimpleName());
+
 
     TimedMetric timedMetric2 = timedMetricGroup.getTimedMetric("one");
 
@@ -30,9 +29,7 @@ public class TimedMetricGroupTest {
     TimedMetric two = timedMetricGroup.getTimedMetric("two");
     Assert.assertNotSame(timedMetric, two);
 
-    assertEquals("org.test", two.getName().getGroup());
-    assertEquals("Hello", two.getName().getType());
-    assertEquals("two", two.getName().getName());
+    assertEquals("org.test.Hello.two", two.getName().getSimpleName());
 
   }
 }

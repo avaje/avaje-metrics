@@ -2,7 +2,6 @@ package org.avaje.metric.core;
 
 import org.avaje.metric.GaugeLong;
 import org.avaje.metric.Metric;
-import org.avaje.metric.MetricManager;
 import org.avaje.metric.MetricName;
 
 import java.lang.management.GarbageCollectorMXBean;
@@ -24,9 +23,9 @@ final class JvmGarbageCollectionMetricGroup {
     for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
       // modify collector name replacing spaces with hyphens.
       String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-');
-      MetricName baseName = new DefaultMetricName("jvm.gc", gcName, "");
-      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.withName("count"), new Count(gcMXBean)));
-      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.withName("time"), new Time(gcMXBean)));
+      MetricName baseName = new DefaultMetricName("jvm.gc." + gcName);
+      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.append("count"), new Count(gcMXBean)));
+      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.append("time"), new Time(gcMXBean)));
     }
 
     return metrics;

@@ -15,12 +15,12 @@ final class JvmThreadMetricGroup {
 
     GaugeLong[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
 
-    MetricName baseName = new DefaultMetricName("jvm", "threads", "");
+    MetricName baseName = new DefaultMetricName("jvm.threads");
 
     List<Metric> metrics = new ArrayList<>(3);
-    metrics.add(new DefaultGaugeLongMetric(baseName.withName("current"), gauges[0], reportChangesOnly));
-    metrics.add(new DefaultGaugeLongMetric(baseName.withName("peak"), gauges[1], reportChangesOnly));
-    metrics.add(new DefaultGaugeLongMetric(baseName.withName("daemon"), gauges[2], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.append("current"), gauges[0], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.append("peak"), gauges[1], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.append("daemon"), gauges[2], reportChangesOnly));
     return metrics;
   }
 

@@ -34,8 +34,8 @@ class DefaultCounterStatistics implements CounterStatistics {
   }
 
   @Override
-  public MetricName getName() {
-    return name;
+  public String getName() {
+    return name.getSimpleName();
   }
 
   /**

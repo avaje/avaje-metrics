@@ -1,6 +1,5 @@
 package org.avaje.metric.core;
 
-import org.avaje.metric.MetricName;
 import org.avaje.metric.statistics.MetricStatisticsVisitor;
 import org.avaje.metric.statistics.TimedStatistics;
 
@@ -51,9 +50,10 @@ class DefaultValueStatistics implements TimedStatistics {
   public String getBucketRange() {
     return owner.getBucketRange();
   }
+
   @Override
-  public MetricName getName() {
-    return owner.name();
+  public String getName() {
+    return owner.name().getSimpleName();
   }
 
   /**
@@ -93,7 +93,7 @@ class DefaultValueStatistics implements TimedStatistics {
    */
   @Override
   public long getMean() {
-    return (count < 1) ? 0L : Math.round((double)(total / count));
+    return (count < 1) ? 0L : Math.round((double) (total / count));
   }
 
 }

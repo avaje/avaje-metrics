@@ -9,6 +9,8 @@ import java.util.List;
 
 class AggregatorTimedRequest {
 
+  private static final String ERROR = ".error";
+
   private final String prefix;
 
   private final String name;
@@ -39,9 +41,9 @@ class AggregatorTimedRequest {
   }
 
   private void add(TimedStatistics stat) {
-    if (stat.getName().isError()) {
+    if (stat.getName().endsWith(ERROR)) {
       if (aggTimedError == null) {
-        aggTimedError = new AggTimed(name(".error"), stat.getStartTime());
+        aggTimedError = new AggTimed(name(ERROR), stat.getStartTime());
       }
       aggTimedError.add(stat);
     } else {
@@ -106,8 +108,8 @@ class AggregatorTimedRequest {
     }
 
     @Override
-    public MetricName getName() {
-      return name;
+    public String getName() {
+      return name.getSimpleName();
     }
 
     @Override

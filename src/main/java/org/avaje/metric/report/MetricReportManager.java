@@ -146,7 +146,7 @@ public class MetricReportManager {
 
     try {
       // read and remove any collected request timings
-      List<RequestTiming> requestTimings = MetricManager.collectRequestTimings();
+      List<RequestTiming> requestTimings = MetricManager.requestTimingManager().collectRequestTimings();
       if (!requestTimings.isEmpty() && requestTimingReporter != null) {
         // write the request timings out to file log typically
         requestTimingReporter.report(requestTimings);

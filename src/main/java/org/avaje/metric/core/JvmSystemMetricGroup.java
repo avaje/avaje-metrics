@@ -10,7 +10,7 @@ class JvmSystemMetricGroup {
 
   static GaugeDoubleMetric getOsLoadAvgMetric() {
     GaugeDouble osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean());
-    return new DefaultGaugeDoubleMetric(new DefaultMetricName("jvm", "os", "loadAverage"), osLoadAvg);
+    return new DefaultGaugeDoubleMetric(new DefaultMetricName("jvm.os.loadAverage"), osLoadAvg);
   }
 
   private static class OsLoadGauge implements GaugeDouble {

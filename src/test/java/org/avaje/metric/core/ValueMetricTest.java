@@ -17,11 +17,9 @@ public class ValueMetricTest {
   @Test
   public void test() {
 
-    ValueMetric metric = MetricManager.getValueMetric(new DefaultMetricName("org", "test", "mycounter"));
+    ValueMetric metric = MetricManager.getValueMetric(new DefaultMetricName("org.test.mycounter"));
 
-    assertEquals("org", metric.getName().getGroup());
-    assertEquals("test", metric.getName().getType());
-    assertEquals("mycounter", metric.getName().getName());
+    assertEquals("org.test.mycounter", metric.getName().getSimpleName());
 
     metric.clear();
     assertThat(collect(metric)).isEmpty();

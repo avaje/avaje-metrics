@@ -26,8 +26,8 @@ class DGaugeDoubleStatistic implements GaugeDoubleStatistics {
   }
 
   @Override
-  public MetricName getName() {
-    return name;
+  public String getName() {
+    return name.getSimpleName();
   }
 
   @Override

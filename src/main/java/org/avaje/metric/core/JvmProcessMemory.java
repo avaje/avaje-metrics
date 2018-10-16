@@ -86,16 +86,14 @@ final class JvmProcessMemory {
 
 		MemoryWarnWatcher memoryWatcher = memoryWatcher(warnMemoryLevel(), pid);
 
-		MetricName baseName = new DefaultMetricName("jvm","memory.process", "");
-		MetricName vmRssName = baseName.withName("vmrss");
-		MetricName vmHwmName = baseName.withName("vmhwm");
-//		MetricName committedDelta = baseName.withName("delta");
+		MetricName baseName = new DefaultMetricName("jvm.memory.process");
+		MetricName vmRssName = baseName.append("vmrss");
+		MetricName vmHwmName = baseName.append("vmhwm");
 
 		Source source = new Source(pid);
 
 		metrics.add(new DefaultGaugeLongMetric(vmRssName, new VmRSS(source, memoryWatcher), reportChangesOnly));
 		metrics.add(new DefaultGaugeLongMetric(vmHwmName, new VmHWM(source), reportChangesOnly));
-//		metrics.add(new DefaultGaugeLongMetric(committedDelta, new CommittedDelta(source)));
 		return metrics;
 	}
 
@@ -198,23 +196,6 @@ final class JvmProcessMemory {
 		}
 	}
 
-//	/**
-//	 * Delta between VmRSS and JVM total committed memory.
-//	 */
-//	private static final class CommittedDelta implements GaugeLong {
-//
-//		private final Source source;
-//
-//		CommittedDelta(Source source) {
-//			this.source = source;
-//		}
-//
-//		@Override
-//		public long getValue() {
-//			return source.getCommittedDelta();
-//		}
-//	}
-
 	private static final class VmHWM implements GaugeLong {
 
 		private final Source source;
@@ -272,25 +253,5 @@ final class JvmProcessMemory {
 			return procStatus.vmRSS;
 		}
 
-//		long getCommittedDelta() {
-//
-//			MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-//			long heap = memoryMXBean.getHeapMemoryUsage().getCommitted();
-//			long nonHeap = memoryMXBean.getNonHeapMemoryUsage().getCommitted();
-//
-//			return delta(heap, nonHeap);
-//		}
-
-//		long getUsedDelta() {
-//
-//			MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-//			long heap = memoryMXBean.getHeapMemoryUsage().getUsed();
-//			long nonHeap = memoryMXBean.getNonHeapMemoryUsage().getUsed();
-//			return delta(heap, nonHeap);
-//		}
-
-		private long delta(long heap, long nonHeap) {
-			return getRss() / TO_MEGABYTES  - (heap + nonHeap) / MEGABYTES;
-		}
 	}
 }

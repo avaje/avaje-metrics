@@ -16,11 +16,9 @@ public class CounterMetricTest {
   @Test
   public void test() {
 
-    CounterMetric counterMetric = MetricManager.getCounterMetric(new DefaultMetricName("org", "test", "mycountermetric"));
+    CounterMetric counterMetric = MetricManager.getCounterMetric(new DefaultMetricName("org.test.mycountermetric"));
 
-    assertEquals("org", counterMetric.getName().getGroup());
-    assertEquals("test", counterMetric.getName().getType());
-    assertEquals("mycountermetric", counterMetric.getName().getName());
+    assertEquals("org.test.mycountermetric", counterMetric.getName().getSimpleName());
 
     counterMetric.clear();
     assertEquals(0, counterMetric.getCount());

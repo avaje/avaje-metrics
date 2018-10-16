@@ -1,8 +1,5 @@
 package org.avaje.metric.core.noop;
 
-//import org.avaje.metric.ValueStatistics;
-
-import org.avaje.metric.MetricName;
 import org.avaje.metric.statistics.MetricStatisticsVisitor;
 import org.avaje.metric.statistics.ValueStatistics;
 
@@ -39,7 +36,7 @@ class NoopValueStatistics implements ValueStatistics {
   }
 
   @Override
-  public MetricName getName() {
+  public String getName() {
     return null;
   }
 

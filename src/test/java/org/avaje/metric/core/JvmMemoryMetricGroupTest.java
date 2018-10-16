@@ -16,11 +16,11 @@ public class JvmMemoryMetricGroupTest {
     List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createHeapGroup(true);
 
     assertEquals(5, gaugeMetrics.size());
-    assertEquals("init", gaugeMetrics.get(0).getName().getName());
-    assertEquals("used", gaugeMetrics.get(1).getName().getName());
-    assertEquals("committed", gaugeMetrics.get(2).getName().getName());
-    assertEquals("max", gaugeMetrics.get(3).getName().getName());
-    assertEquals("pct", gaugeMetrics.get(4).getName().getName());
+    assertEquals("jvm.memory.heap.init", gaugeMetrics.get(0).getName().getSimpleName());
+    assertEquals("jvm.memory.heap.used", gaugeMetrics.get(1).getName().getSimpleName());
+    assertEquals("jvm.memory.heap.committed", gaugeMetrics.get(2).getName().getSimpleName());
+    assertEquals("jvm.memory.heap.max", gaugeMetrics.get(3).getName().getSimpleName());
+    assertEquals("jvm.memory.heap.pct", gaugeMetrics.get(4).getName().getSimpleName());
 
     assertEquals("jvm.memory.heap.init", gaugeMetrics.get(0).getName().getSimpleName());
   }
@@ -31,9 +31,9 @@ public class JvmMemoryMetricGroupTest {
     List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createNonHeapGroup(true);
 
     assertThat(gaugeMetrics.size()).isGreaterThan(1);
-    assertEquals("init", gaugeMetrics.get(0).getName().getName());
-    assertEquals("used", gaugeMetrics.get(1).getName().getName());
-    assertEquals("committed", gaugeMetrics.get(2).getName().getName());
+    assertEquals("jvm.memory.nonheap.init", gaugeMetrics.get(0).getName().getSimpleName());
+    assertEquals("jvm.memory.nonheap.used", gaugeMetrics.get(1).getName().getSimpleName());
+    assertEquals("jvm.memory.nonheap.committed", gaugeMetrics.get(2).getName().getSimpleName());
 
     assertEquals("jvm.memory.nonheap.init", gaugeMetrics.get(0).getName().getSimpleName());
   }

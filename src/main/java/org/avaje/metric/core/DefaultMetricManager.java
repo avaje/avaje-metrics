@@ -14,12 +14,14 @@ import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricGroup;
 import org.avaje.metric.TimingMetricInfo;
 import org.avaje.metric.ValueMetric;
+import org.avaje.metric.core.log4j.Log4JMetricRegister;
+import org.avaje.metric.core.logback.LogbackMetricRegister;
 import org.avaje.metric.core.noop.NoopBucketTimedFactory;
 import org.avaje.metric.core.noop.NoopCounterMetricFactory;
 import org.avaje.metric.core.noop.NoopTimedMetricFactory;
 import org.avaje.metric.core.noop.NoopValueMetricFactory;
 import org.avaje.metric.core.spi.ExternalRequestIdAdapter;
-import org.avaje.metric.spi.PluginMetricManager;
+import org.avaje.metric.spi.SpiMetricManager;
 import org.avaje.metric.statistics.MetricStatistics;
 import org.avaje.metric.util.LikeMatcher;
 import org.slf4j.Logger;
@@ -36,19 +38,23 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Default implementation of the PluginMetricManager.
  */
-public class DefaultMetricManager implements PluginMetricManager {
+public class DefaultMetricManager implements SpiMetricManager {
 
   private static final Logger logger = LoggerFactory.getLogger(DefaultMetricManager.class);
 
   private static final String METRICS_MDC_REQUEST_ID = "metrics.mdc.requestId";
 
-  private static final String JVM = "jvm";
+  private static final String JVM = "jvm.";
 
   private final NameComp sortByName = new NameComp();
 
   private final Object monitor = new Object();
 
   private boolean reportChangesOnly = true;
+
+  private String logErrorName = "app.log.error";
+
+  private String logWarnName = "app.log.warn";
 
   /**
    * Cache of the code JVM metrics.
@@ -141,7 +147,6 @@ public class DefaultMetricManager implements PluginMetricManager {
     requestTimings.add(requestTiming);
   }
 
-
   /**
    * Return the factory used to create TimedMetric instances.
    */
@@ -182,47 +187,72 @@ public class DefaultMetricManager implements PluginMetricManager {
     return this;
   }
 
+  @Override
+  public JvmMetrics withLogMetricName(String errorMetricName, String warnMetricName) {
+    this.logErrorName = errorMetricName;
+    this.logWarnName = warnMetricName;
+    return this;
+  }
+
+  @Override
+  public JvmMetrics registerLogbackMetrics() {
+    LogbackMetricRegister.registerWith(logErrorName, logWarnName);
+    return this;
+  }
+
+  @Override
+  public JvmMetrics registerLog4JMetrics() {
+    Log4JMetricRegister.registerWith(logErrorName, logWarnName);
+    return this;
+  }
+
   /**
    * Register the standard JVM metrics.
    */
   @Override
-  public void registerStandardJvmMetrics() {
+  public JvmMetrics registerStandardJvmMetrics() {
 
     registerJvmGCMetrics();
     registerJvmMemoryMetrics();
     registerJvmThreadMetrics();
     registerJvmProcessMemoryMetrics();
     registerJvmOsLoadMetric();
+    return this;
   }
 
   @Override
-  public void registerJvmProcessMemoryMetrics() {
+  public JvmMetrics registerJvmProcessMemoryMetrics() {
     registerAll(JvmProcessMemory.createGauges(reportChangesOnly));
+    return this;
   }
 
   @Override
-  public void registerJvmOsLoadMetric() {
+  public JvmMetrics registerJvmOsLoadMetric() {
     GaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
     }
+    return this;
   }
 
   @Override
-  public void registerJvmThreadMetrics() {
+  public JvmMetrics registerJvmThreadMetrics() {
     registerAll(JvmThreadMetricGroup.createThreadMetricGroup(reportChangesOnly));
+    return this;
   }
 
   @Override
-  public void registerJvmGCMetrics() {
+  public JvmMetrics registerJvmGCMetrics() {
     registerAll(JvmGarbageCollectionMetricGroup.createGauges());
+    return this;
   }
 
   @Override
-  public void registerJvmMemoryMetrics() {
+  public JvmMetrics registerJvmMemoryMetrics() {
     registerAll(JvmMemoryMetricGroup.createHeapGroup(reportChangesOnly));
     registerAll(JvmMemoryMetricGroup.createNonHeapGroup(reportChangesOnly));
+    return this;
   }
 
   private void registerAll(List<Metric> groups) {
@@ -237,27 +267,12 @@ public class DefaultMetricManager implements PluginMetricManager {
 
   @Override
   public MetricName name(String name) {
-    return DefaultMetricName.parse(name);
-  }
-
-  @Override
-  public MetricName name(String group, String type, String name) {
-    if (group == null) {
-      throw new IllegalArgumentException("group needs to be specified");
-    }
-    if (type == null) {
-      throw new IllegalArgumentException("type needs to be specified for JMX bean name support");
-    }
-    return name(group + '.' + type + append(name));
+    return new DefaultMetricName(name);
   }
 
   @Override
   public MetricName name(Class<?> cls, String name) {
-    return name(cls.getName() + append(name));
-  }
-
-  private static String append(String value) {
-    return (value == null) ? "" : '.' + value;
+    return new DefaultMetricName(cls, name);
   }
 
   @Override
@@ -316,7 +331,7 @@ public class DefaultMetricManager implements PluginMetricManager {
   }
 
   private <T extends Metric> T put(MetricName name, T metric) {
-    if (JVM.equals(name.getGroup())) {
+    if (name.startsWith(JVM)) {
       registerJvmMetric(metric);
     } else {
       metricsCache.put(name.getSimpleName(), metric);

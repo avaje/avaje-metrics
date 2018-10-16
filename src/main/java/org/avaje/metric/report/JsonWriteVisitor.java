@@ -85,7 +85,7 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
     writeValue(type);
     buffer.append(",");
     writeKey("name");
-    writeValue(metric.getName().getSimpleName());
+    writeValue(metric.getName());
     buffer.append(",");
   }
 

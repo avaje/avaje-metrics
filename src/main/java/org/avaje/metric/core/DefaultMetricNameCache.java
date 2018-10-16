@@ -18,7 +18,7 @@ final class DefaultMetricNameCache implements MetricNameCache {
 
   private final MetricName baseName;
 
-  private final ConcurrentHashMap<String, DefaultMetricName> cache = new ConcurrentHashMap<String, DefaultMetricName>();
+  private final ConcurrentHashMap<String, MetricName> cache = new ConcurrentHashMap<>();
 
   /**
    * Create basing the name off the Class.
@@ -43,7 +43,7 @@ final class DefaultMetricNameCache implements MetricNameCache {
   @Override
   public MetricName get(String name) {
 
-    DefaultMetricName metricName = cache.get(name);
+    MetricName metricName = cache.get(name);
     if (metricName == null) {
       metricName = deriveWithName(name);
       MetricName oldMetricName = cache.putIfAbsent(name, metricName);
@@ -60,7 +60,7 @@ final class DefaultMetricNameCache implements MetricNameCache {
    * Typically used via MetricNameCache.
    * </p>
    */
-  private DefaultMetricName deriveWithName(String newName) {
-    return new DefaultMetricName(baseName.getGroup(), baseName.getType(), newName);
+  private MetricName deriveWithName(String newName) {
+    return baseName.append(newName);
   }
 }

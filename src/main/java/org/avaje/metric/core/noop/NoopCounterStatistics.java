@@ -1,6 +1,5 @@
 package org.avaje.metric.core.noop;
 
-import org.avaje.metric.MetricName;
 import org.avaje.metric.statistics.CounterStatistics;
 import org.avaje.metric.statistics.MetricStatisticsVisitor;
 
@@ -23,9 +22,8 @@ final class NoopCounterStatistics implements CounterStatistics {
     return 0;
   }
 
-
   @Override
-  public MetricName getName() {
+  public String getName() {
     return null;
   }
 }

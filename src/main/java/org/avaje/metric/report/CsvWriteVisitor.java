@@ -128,7 +128,7 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     writer.write(delimiter);
     writer.write(metricTypeCode);
     writer.write(delimiter);
-    writer.write(metric.getName().getSimpleName());
+    writer.write(metric.getName());
   }
 
   protected void writeMetricEnd(MetricStatistics metric) throws IOException {

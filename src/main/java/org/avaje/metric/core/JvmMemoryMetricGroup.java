@@ -53,7 +53,7 @@ final class JvmMemoryMetricGroup {
    */
   public static List<Metric> createHeapGroup(boolean reportChangesOnly) {
 
-    MetricName heapName = new DefaultMetricName("jvm","memory.heap","");
+    MetricName heapName = new DefaultMetricName("jvm.memory.heap");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(heapName, source, reportChangesOnly);
   }
@@ -62,7 +62,7 @@ final class JvmMemoryMetricGroup {
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
   public static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
-    MetricName nonHeapName = new DefaultMetricName("jvm","memory.nonheap", "");
+    MetricName nonHeapName = new DefaultMetricName("jvm.memory.nonheap");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(nonHeapName, source, reportChangesOnly);
   }
@@ -100,7 +100,7 @@ final class JvmMemoryMetricGroup {
     }
 
     private MetricName name(String name) {
-      return baseName.withSuffix(name);
+      return baseName.append(name);
     }
 
     private abstract static class Base {
