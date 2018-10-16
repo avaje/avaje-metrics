@@ -9,7 +9,7 @@
 
   <groupId>org.avaje.metric</groupId>
   <artifactId>metric-core</artifactId>
-  <version>7.3.1-SNAPSHOT</version>
+  <version>7.3.1</version>
   <packaging>jar</packaging>
 
   <name>metric-core</name>
@@ -17,7 +17,7 @@
 
   <scm>
     <developerConnection>scm:git:git@github.com:avaje-metric/avaje-metric-core.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>metric-core-7.3.1</tag>
   </scm>
 
   <properties>
