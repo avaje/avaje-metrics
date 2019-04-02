@@ -1,6 +1,7 @@
 package org.avaje.metric.report;
 
 import org.avaje.metric.MetricManager;
+import org.avaje.metric.MetricSupplier;
 import org.avaje.metric.RequestTiming;
 import org.avaje.metric.statistics.MetricStatistics;
 import org.slf4j.Logger;

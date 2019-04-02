@@ -45,4 +45,7 @@ class DStatsCollector implements MetricStatisticsVisitor {
     list.add(metric);
   }
 
+  public void addAll(List<MetricStatistics> metrics) {
+    list.addAll(metrics);
+  }
 }

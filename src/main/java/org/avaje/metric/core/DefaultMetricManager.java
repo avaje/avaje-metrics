@@ -9,6 +9,7 @@ import org.avaje.metric.JvmMetrics;
 import org.avaje.metric.Metric;
 import org.avaje.metric.MetricName;
 import org.avaje.metric.MetricNameCache;
+import org.avaje.metric.MetricSupplier;
 import org.avaje.metric.RequestTiming;
 import org.avaje.metric.TimedMetric;
 import org.avaje.metric.TimedMetricGroup;
@@ -92,6 +93,8 @@ public class DefaultMetricManager implements SpiMetricManager {
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<>();
 
   private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
+
+  private final List<MetricSupplier> suppliers = new ArrayList<>();
 
   /**
    * Adapter that can obtain a request id to associate with request timings.
@@ -266,6 +269,11 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   @Override
+  public void addSupplier(MetricSupplier supplier) {
+    suppliers.add(supplier);
+  }
+
+  @Override
   public MetricName name(String name) {
     return new DefaultMetricName(name);
   }
@@ -389,9 +397,11 @@ public class DefaultMetricManager implements SpiMetricManager {
   public List<MetricStatistics> collectNonEmptyMetrics() {
     synchronized (monitor) {
       DStatsCollector collector = new DStatsCollector();
-      Collection<Metric> values = metricsCache.values();
-      for (Metric metric : values) {
+      for (Metric metric : metricsCache.values()) {
         metric.collect(collector);
+      }
+      for (MetricSupplier supplier : suppliers) {
+        collector.addAll(supplier.collectMetrics());
       }
       return collector.getList();
     }

@@ -1,5 +1,7 @@
 package org.avaje.metric.report;
 
+import org.avaje.metric.MetricSupplier;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
