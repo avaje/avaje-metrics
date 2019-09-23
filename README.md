@@ -1,6 +1,6 @@
 # avaje-metric-core
 
-Please read the main documentation at: http://avaje-metric.github.io
+Please read the main documentation at: http://avaje-metrics.github.io
 
 ## Maven dependency
 
