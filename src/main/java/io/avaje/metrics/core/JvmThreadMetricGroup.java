@@ -1,0 +1,68 @@
+package io.avaje.metrics.core;
+
+import io.avaje.metrics.GaugeLong;
+import io.avaje.metrics.Metric;
+import io.avaje.metrics.MetricName;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.List;
+
+final class JvmThreadMetricGroup {
+
+  static List<Metric> createThreadMetricGroup(boolean reportChangesOnly) {
+
+    GaugeLong[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
+
+    MetricName baseName = new DefaultMetricName("jvm.threads");
+
+    List<Metric> metrics = new ArrayList<>(3);
+    metrics.add(new DefaultGaugeLongMetric(baseName.append("current"), gauges[0], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.append("peak"), gauges[1], reportChangesOnly));
+    metrics.add(new DefaultGaugeLongMetric(baseName.append("daemon"), gauges[2], reportChangesOnly));
+    return metrics;
+  }
+
+
+  private static class ThreadGauges {
+
+    private final ThreadMXBean threadMXBean;
+    private final GaugeLong[] gauges = new GaugeLong[3];
+
+    ThreadGauges(ThreadMXBean threadMXBean) {
+      this.threadMXBean = threadMXBean;
+      gauges[0] = new Count();
+      gauges[1] = new Peak();
+      gauges[2] = new Daemon();
+    }
+
+    GaugeLong[] getGauges() {
+      return gauges;
+    }
+
+    class Count implements GaugeLong {
+      @Override
+      public long getValue() {
+        return threadMXBean.getThreadCount();
+      }
+    }
+
+    class Peak implements GaugeLong {
+      @Override
+      public long getValue() {
+        // read and reset the peak
+        int peakThreadCount = threadMXBean.getPeakThreadCount();
+        threadMXBean.resetPeakThreadCount();
+        return peakThreadCount;
+      }
+    }
+
+    class Daemon implements GaugeLong {
+      @Override
+      public long getValue() {
+        return threadMXBean.getDaemonThreadCount();
+      }
+    }
+  }
+}
