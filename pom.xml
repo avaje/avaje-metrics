@@ -9,7 +9,7 @@
 
   <groupId>io.avaje.metrics</groupId>
   <artifactId>metrics</artifactId>
-  <version>8.1.1-SNAPSHOT</version>
+  <version>8.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>metrics</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>io.avaje.metrics</groupId>
       <artifactId>metrics-api</artifactId>
-      <version>8.1.1-SNAPSHOT</version>
+      <version>8.1</version>
     </dependency>
 
     <dependency>
