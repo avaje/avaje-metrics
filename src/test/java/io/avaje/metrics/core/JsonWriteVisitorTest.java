@@ -53,7 +53,7 @@ public class JsonWriteVisitorTest {
 
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"counter\",\"name\":\"org.test.CounterFoo.doStuff\",\"count\":10,\"dur\":0}", counterJson);
+    Assert.assertEquals("{\"type\":\"counter\",\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
   }
 
 
@@ -79,7 +79,7 @@ public class JsonWriteVisitorTest {
     jsonVisitor.visit((ValueStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"avg\":14,\"max\":16,\"sum\":42,\"dur\":0}", counterJson);
+    Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"avg\":14,\"max\":16,\"sum\":42}", counterJson);
   }
 
   @Test
@@ -94,7 +94,7 @@ public class JsonWriteVisitorTest {
     String counterJson = writer.toString();
 
     // values converted into microseconds
-    String match = "{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"avg\":210,\"max\":220,\"sum\":420,\"dur\":0}{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"avg\":120,\"max\":140,\"sum\":360,\"dur\":0}";
+    String match = "{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"avg\":210,\"max\":220,\"sum\":420}{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"avg\":120,\"max\":140,\"sum\":360}";
     Assert.assertEquals(match, counterJson);
   }
 
@@ -112,7 +112,7 @@ public class JsonWriteVisitorTest {
     visitAllTimed(metric, jsonVisitor);
     String bucketJson = writer.toString();
 
-    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0}{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150+\",\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000,\"dur\":0}";
+    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000}{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150+\",\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000}";
     assertThat(bucketJson).contains(match);
   }
 
@@ -130,7 +130,7 @@ public class JsonWriteVisitorTest {
 
     String bucketJson = writer.toString();
 
-    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000,\"dur\":0}";
+    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000}";
     assertThat(bucketJson).contains(match);
   }
 

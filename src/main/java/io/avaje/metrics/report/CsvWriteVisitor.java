@@ -76,11 +76,6 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   protected final long thresholdMean;
 
   /**
-   * Set to true when reporting error metrics (to get the "err." prefix on the metric name).
-   */
-  protected boolean errors;
-
-  /**
    * Construct with a comma delimiter and newline character for the end of each metric.
    *
    * @param writer               The writer where the metrics output is written to.
@@ -177,8 +172,7 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
 
     try {
       writeMetricName(metric, TYPE_COUNTER_METRIC);
-      write("count", metric.getCount());
-      write("dur", getDuration(metric.getStartTime()));
+      writeValue(String.valueOf(metric.getCount()));
       writeMetricEnd(metric);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -217,7 +211,6 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     write("avg", valueStats.getMean());
     write("max", valueStats.getMax());
     write("sum", valueStats.getTotal());
-    write("dur", getDuration(valueStats.getStartTime()));
   }
 
   protected void write(String name, long value) throws IOException {
@@ -235,10 +228,6 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   protected void writeValue(String value) throws IOException {
     writer.write(delimiter);
     writer.write(value);
-  }
-
-  protected long getDuration(long startTime) {
-    return Math.round((collectTime - startTime) / 1000.0d);
   }
 
   protected String formattedValue(double value) {

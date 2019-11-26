@@ -126,9 +126,7 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
   public void visit(CounterStatistics metric) {
     try {
       writeMetricStart("counter", metric);
-      writeKeyNumber("count", metric.getCount());
-      buffer.append(",");
-      writeKeyNumber("dur", getDuration(metric.getStartTime()));
+      writeKeyNumber("value", metric.getCount());
       writeMetricEnd(metric);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -170,8 +168,6 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
       writeKeyNumber("max", valueStats.getMax());
       buffer.append(",");
       writeKeyNumber("sum", valueStats.getTotal());
-      buffer.append(",");
-      writeKeyNumber("dur", getDuration(valueStats.getStartTime()));
     }
   }
 
@@ -214,10 +210,6 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
 
   protected void writeNumberValue(String val) throws IOException {
     buffer.append(val);
-  }
-
-  protected long getDuration(long startTime) {
-    return Math.round((System.currentTimeMillis() - startTime) / 1000.0d);
   }
 
 }
