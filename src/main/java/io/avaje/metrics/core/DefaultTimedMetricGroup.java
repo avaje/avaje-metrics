@@ -51,7 +51,7 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
   @Override
   public TimedEvent start(String name) {
 
-    TimedMetric timedMetric = getTimedMetric(name);
+    TimedMetric timedMetric = timed(name);
     return timedMetric.startEvent();
   }
 
@@ -64,7 +64,7 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
 
   @Override
   public void addEventDuration(String name, boolean success, long durationNanos) {
-    TimedMetric timedMetric = getTimedMetric(name);
+    TimedMetric timedMetric = timed(name);
     timedMetric.addEventDuration(success, durationNanos);
   }
 
@@ -72,7 +72,7 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
    * Return the TimedMetric for the specific name.
    */
   @Override
-  public TimedMetric getTimedMetric(String name) {
+  public TimedMetric timed(String name) {
 
     // try local cache first to try and avoid the name parse
     TimedMetric found = cache.get(name);
@@ -85,8 +85,8 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
 
     // this is safe in that it is single threaded on construction/put
     TimedMetric timedMetric = MetricManager.timed(metricName);
-    cache.putIfAbsent(name, timedMetric);
-    return timedMetric;
+    final TimedMetric existing = cache.putIfAbsent(name, timedMetric);
+    return (existing != null) ? existing : timedMetric;
   }
 
 }
