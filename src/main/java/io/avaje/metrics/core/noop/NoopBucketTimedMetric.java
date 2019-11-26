@@ -63,12 +63,22 @@ class NoopBucketTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos, boolean useContext) {
+  public void operationEnd(long startNanos) {
     // do nothing
   }
 
   @Override
-  public void operationEnd(int i, long l) {
+  public void operationEnd(long startNanos, boolean activeThreadContext) {
+    // do nothing
+  }
+
+  @Override
+  public void operationErr(long startNanos) {
+    // do nothing
+  }
+
+  @Override
+  public void operationErr(long startNanos, boolean activeThreadContext) {
     // do nothing
   }
 

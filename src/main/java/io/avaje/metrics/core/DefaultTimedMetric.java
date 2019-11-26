@@ -117,21 +117,29 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
     addEventDuration(success, System.nanoTime() - startNanos);
   }
 
-  /**
-   * Add an event duration with opCode indicating success or failure. This is intended for use by
-   * enhanced code and not general use.
-   */
   @Override
-  public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
-    addEventSince(opCode != 191, startNanos);
+  public void operationEnd(long startNanos) {
+    successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
+  }
+
+  @Override
+  public void operationEnd(long startNanos, boolean activeThreadContext) {
+    successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
     if (activeThreadContext) {
       NestedContext.pop();
     }
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos) {
-    addEventSince(opCode != 191, startNanos);
+  public void operationErr(long startNanos) {
+    errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
 
+  @Override
+  public void operationErr(long startNanos, boolean activeThreadContext) {
+    errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
+    if (activeThreadContext) {
+      NestedContext.pop();
+    }
+  }
 }

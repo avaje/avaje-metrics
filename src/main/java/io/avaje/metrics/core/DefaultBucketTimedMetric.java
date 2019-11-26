@@ -10,8 +10,6 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
  */
 class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
 
-  private static final int OPCODE_ATHROW = 191;
-
   private final MetricName metricName;
 
   private final int[] bucketRanges;
@@ -77,16 +75,29 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
-    addEventSince(opCode != OPCODE_ATHROW, startNanos);
+  public void operationEnd(long startNanos) {
+    addEventSince(true, startNanos);
+  }
+
+  @Override
+  public void operationEnd(long startNanos, boolean activeThreadContext) {
+    addEventSince(true, startNanos);
     if (activeThreadContext) {
       NestedContext.pop();
     }
   }
 
   @Override
-  public void operationEnd(int opCode, long startNanos) {
-    addEventSince(opCode != OPCODE_ATHROW, startNanos);
+  public void operationErr(long startNanos) {
+    addEventSince(false, startNanos);
+  }
+
+  @Override
+  public void operationErr(long startNanos, boolean activeThreadContext) {
+    addEventSince(false, startNanos);
+    if (activeThreadContext) {
+      NestedContext.pop();
+    }
   }
 
   @Override
@@ -103,8 +114,8 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   @Override
   public void clear() {
-    for (int i = 0; i < buckets.length; i++) {
-      buckets[i].clear();
+    for (TimedMetric bucket : buckets) {
+      bucket.clear();
     }
   }
 
@@ -117,7 +128,7 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
     /**
      * Create a TimedMetricEvent.
      */
-    protected DefaultTimedMetricEvent(DefaultBucketTimedMetric metric) {
+    DefaultTimedMetricEvent(DefaultBucketTimedMetric metric) {
       this.metric = metric;
       this.startNanos = System.nanoTime();
     }
