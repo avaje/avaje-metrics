@@ -102,12 +102,22 @@ public class BaseTimingEntryTest {
     }
 
     @Override
-    public void operationEnd(int opCode, long startNanos, boolean activeThreadContext) {
+    public void operationEnd(long startNanos) {
 
     }
 
     @Override
-    public void operationEnd(int opCode, long startNanos) {
+    public void operationEnd(long startNanos, boolean activeThreadContext) {
+
+    }
+
+    @Override
+    public void operationErr(long startNanos) {
+
+    }
+
+    @Override
+    public void operationErr(long startNanos, boolean activeThreadContext) {
 
     }
 

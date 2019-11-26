@@ -21,17 +21,17 @@ public class NestedContextTest {
   public void testRequestActive() throws Exception {
 
     assertFalse(m0.isActiveThreadContext());
-    m0.operationEnd(1,System.nanoTime(), false);
+    m0.operationEnd(System.nanoTime(), false);
 
     m0.setRequestTimingCollection(1);
     assertTrue(m0.isActiveThreadContext());
     assertTrue(m1.isActiveThreadContext());
-    m1.operationEnd(1,System.nanoTime(), true);
-    m0.operationEnd(1,System.nanoTime(), true);
+    m1.operationEnd(System.nanoTime(), true);
+    m0.operationEnd(System.nanoTime(), true);
 
     m0.setRequestTimingCollection(0);
     assertFalse(m0.isActiveThreadContext());
-    m0.operationEnd(1,System.nanoTime(), false);
+    m0.operationEnd(System.nanoTime(), false);
   }
 
   @Test
