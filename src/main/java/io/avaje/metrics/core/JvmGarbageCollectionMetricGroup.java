@@ -19,18 +19,29 @@ final class JvmGarbageCollectionMetricGroup {
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
     List<Metric> metrics = new ArrayList<>();
+    metrics.add(createTotalGcTime(garbageCollectorMXBeans));
 
     for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
       // modify collector name replacing spaces with hyphens.
       String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-');
-      MetricName baseName = new DefaultMetricName("jvm.gc." + gcName);
-      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.append("count"), new Count(gcMXBean)));
-      metrics.add(DefaultGaugeLongMetric.incrementing(baseName.append("time"), new Time(gcMXBean)));
+      metrics.add(DefaultGaugeLongMetric.incrementing(name("count", gcName), new Count(gcMXBean)));
+      metrics.add(DefaultGaugeLongMetric.incrementing(name("time", gcName), new Time(gcMXBean)));
     }
 
     return metrics;
   }
 
+  /**
+   * Return a Gauge for the total GC time. Gives us a single metric to measure aggregate GC activity.
+   */
+  private static DefaultGaugeLongMetric createTotalGcTime(List<GarbageCollectorMXBean> garbageCollectorMXBeans) {
+    GarbageCollectorMXBean[] gcBeans = garbageCollectorMXBeans.toArray(new GarbageCollectorMXBean[0]);
+    return DefaultGaugeLongMetric.incrementing(new DefaultMetricName("jvm.gc.timeTotal"), new TotalTime(gcBeans));
+  }
+
+  private static MetricName name(String prefix, String gcName) {
+    return new DefaultMetricName("jvm.gc." + prefix + "." + gcName);
+  }
 
   private static class Count implements GaugeLong {
 
@@ -57,6 +68,24 @@ final class JvmGarbageCollectionMetricGroup {
     @Override
     public long getValue() {
       return gcMXBean.getCollectionTime();
+    }
+  }
+
+  private static class TotalTime implements GaugeLong {
+
+    final GarbageCollectorMXBean[] gcMXBeans;
+
+    TotalTime(GarbageCollectorMXBean[] gcMXBeans) {
+      this.gcMXBeans = gcMXBeans;
+    }
+
+    @Override
+    public long getValue() {
+      long total = 0;
+      for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
+        total += gcMXBean.getCollectionTime();
+      }
+      return total;
     }
   }
 }
