@@ -284,12 +284,12 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   @Override
-  public MetricNameCache getMetricNameCache(Class<?> klass) {
-    return getMetricNameCache(name(klass, null));
+  public MetricNameCache nameCache(Class<?> klass) {
+    return nameCache(name(klass, null));
   }
 
   @Override
-  public MetricNameCache getMetricNameCache(MetricName baseName) {
+  public MetricNameCache nameCache(MetricName baseName) {
 
     String key = baseName.getSimpleName();
     MetricNameCache metricNameCache = nameCache.get(key);
@@ -304,27 +304,27 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   @Override
-  public TimedMetricGroup getTimedMetricGroup(MetricName baseName) {
+  public TimedMetricGroup timedGroup(MetricName baseName) {
     return new DefaultTimedMetricGroup(baseName);
   }
 
   @Override
-  public TimedMetric getTimedMetric(MetricName name) {
+  public TimedMetric timed(MetricName name) {
     return (TimedMetric) getMetric(name, timedMetricFactory);
   }
 
   @Override
-  public TimedMetric getTimedMetric(MetricName name, int... bucketRanges) {
+  public TimedMetric timed(MetricName name, int... bucketRanges) {
     return (TimedMetric) getMetric(name, bucketTimedMetricFactory, bucketRanges);
   }
 
   @Override
-  public CounterMetric getCounterMetric(MetricName name) {
+  public CounterMetric counter(MetricName name) {
     return (CounterMetric) getMetric(name, counterMetricFactory);
   }
 
   @Override
-  public ValueMetric getValueMetric(MetricName name) {
+  public ValueMetric value(MetricName name) {
     return (ValueMetric) getMetric(name, valueMetricFactory);
   }
 

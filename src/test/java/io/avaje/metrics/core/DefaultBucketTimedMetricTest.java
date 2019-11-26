@@ -15,7 +15,7 @@ public class DefaultBucketTimedMetricTest {
   }
 
   private TimedMetric create() {
-    return mgr.getTimedMetric(name, 100, 200, 300);
+    return mgr.timed(name, 100, 200, 300);
   }
 
   @Test

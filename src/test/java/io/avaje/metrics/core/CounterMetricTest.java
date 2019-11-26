@@ -16,7 +16,7 @@ public class CounterMetricTest {
   @Test
   public void test() {
 
-    CounterMetric counterMetric = MetricManager.getCounterMetric(new DefaultMetricName("org.test.mycountermetric"));
+    CounterMetric counterMetric = MetricManager.counter(new DefaultMetricName("org.test.mycountermetric"));
 
     assertEquals("org.test.mycountermetric", counterMetric.getName().getSimpleName());
 

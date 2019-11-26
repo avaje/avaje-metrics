@@ -20,8 +20,8 @@ public class Log4JMetricAppender extends AbstractAppender {
 
   public Log4JMetricAppender(String errorName, String warnName) {
     super("metrics", null, null);
-    this.errorMetric = MetricManager.getCounterMetric(errorName);
-    this.warnMetric = MetricManager.getCounterMetric(warnName);
+    this.errorMetric = MetricManager.counter(errorName);
+    this.warnMetric = MetricManager.counter(warnName);
   }
 
   @Override

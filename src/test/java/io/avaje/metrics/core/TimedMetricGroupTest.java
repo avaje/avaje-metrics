@@ -15,7 +15,7 @@ public class TimedMetricGroupTest {
   public void test() {
 
 
-    TimedMetricGroup timedMetricGroup = MetricManager.getTimedMetricGroup(MetricName.of("org.test.Hello"));
+    TimedMetricGroup timedMetricGroup = MetricManager.timedGroup(MetricName.of("org.test.Hello"));
 
     TimedMetric timedMetric = timedMetricGroup.getTimedMetric("one");
     assertEquals("org.test.Hello.one", timedMetric.getName().getSimpleName());

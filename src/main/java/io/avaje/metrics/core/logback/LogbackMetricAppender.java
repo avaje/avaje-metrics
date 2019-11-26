@@ -20,8 +20,8 @@ public final class LogbackMetricAppender extends AppenderBase<ILoggingEvent> {
   }
 
   public LogbackMetricAppender(String errorName, String warnName) {
-    this.errorMetric = MetricManager.getCounterMetric(errorName);
-    this.warnMetric = MetricManager.getCounterMetric(warnName);
+    this.errorMetric = MetricManager.counter(errorName);
+    this.warnMetric = MetricManager.counter(warnName);
   }
 
   /**

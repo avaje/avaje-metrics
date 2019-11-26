@@ -32,7 +32,7 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
    * Create the TimedMetricGroup.
    */
   DefaultTimedMetricGroup(MetricName baseName) {
-    this.metricNameCache = MetricManager.getMetricNameCache(baseName);
+    this.metricNameCache = MetricManager.nameCache(baseName);
   }
 
   /**
@@ -81,10 +81,10 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
     }
 
     // parse name and find/create using MetricManager
-    MetricName m = metricNameCache.get(name);
+    MetricName metricName = metricNameCache.get(name);
 
     // this is safe in that it is single threaded on construction/put
-    TimedMetric timedMetric = MetricManager.getTimedMetric(m);
+    TimedMetric timedMetric = MetricManager.timed(metricName);
     cache.putIfAbsent(name, timedMetric);
     return timedMetric;
   }

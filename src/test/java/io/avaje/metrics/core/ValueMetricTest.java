@@ -17,7 +17,7 @@ public class ValueMetricTest {
   @Test
   public void test() {
 
-    ValueMetric metric = MetricManager.getValueMetric(new DefaultMetricName("org.test.mycounter"));
+    ValueMetric metric = MetricManager.value(new DefaultMetricName("org.test.mycounter"));
 
     assertEquals("org.test.mycounter", metric.getName().getSimpleName());
 

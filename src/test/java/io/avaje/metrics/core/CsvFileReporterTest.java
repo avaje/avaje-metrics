@@ -26,7 +26,7 @@ public class CsvFileReporterTest {
 
     MetricReportManager report = new MetricReportManager(config);
 
-    TimedMetric timedMetric = MetricManager.getTimedMetric("group.type.junk");
+    TimedMetric timedMetric = MetricManager.timed("group.type.junk");
 
     Random random = new Random();
 

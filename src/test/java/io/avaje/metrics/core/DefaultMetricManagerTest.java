@@ -20,9 +20,9 @@ public class DefaultMetricManagerTest {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
-    TimedMetric m0 = mgr.getTimedMetric(MetricName.of("org.req.Customer.m0"));
-    TimedMetric m1 = mgr.getTimedMetric(MetricName.of("org.req.Customer.m1"));
-    TimedMetric m2 = mgr.getTimedMetric(MetricName.of("org.req.Customer.m2"), 100, 200);
+    TimedMetric m0 = mgr.timed(MetricName.of("org.req.Customer.m0"));
+    TimedMetric m1 = mgr.timed(MetricName.of("org.req.Customer.m1"));
+    TimedMetric m2 = mgr.timed(MetricName.of("org.req.Customer.m2"), 100, 200);
 
     List<TimingMetricInfo> timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(0, timingMetrics.size());
@@ -52,15 +52,15 @@ public class DefaultMetricManagerTest {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
-    TimedMetric m0 = mgr.getTimedMetric(MetricName.of(Customer.class, "doSomething"));
+    TimedMetric m0 = mgr.timed(MetricName.of(Customer.class, "doSomething"));
 
-    TimedMetric m0b = mgr.getTimedMetric(MetricName.of("orange.truck.Customer.doSomething"));
+    TimedMetric m0b = mgr.timed(MetricName.of("orange.truck.Customer.doSomething"));
 
     assertSame(m0, m0b);
     //assertEquals("na.Customer.doSomething", m0.getName().getSimpleName());
 
-    TimedMetric m1 = mgr.getTimedMetric(MetricName.of("org.req.Customer.m1"));
-    TimedMetric m2 = mgr.getTimedMetric(MetricName.of("org.req.Customer.m2"), 100, 200);
+    TimedMetric m1 = mgr.timed(MetricName.of("org.req.Customer.m1"));
+    TimedMetric m2 = mgr.timed(MetricName.of("org.req.Customer.m2"), 100, 200);
 
     List<TimingMetricInfo> allTimingMetrics = mgr.getAllTimingMetrics(null);
     assertEquals(3, allTimingMetrics.size());

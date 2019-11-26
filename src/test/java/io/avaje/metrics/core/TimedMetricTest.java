@@ -7,7 +7,7 @@ public class TimedMetricTest {
 
   private boolean useContext = false;
 
-  private TimedMetric _metric = MetricManager.getTimedMetric("org.test.mytimed");
+  private TimedMetric _metric = MetricManager.timed("org.test.mytimed");
 
   public void add() {
 
