@@ -1,19 +1,27 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeDouble;
-import io.avaje.metrics.GaugeDoubleMetric;
+import io.avaje.metrics.GaugeLong;
+import io.avaje.metrics.GaugeLongMetric;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 class JvmSystemMetricGroup {
 
-  static GaugeDoubleMetric getOsLoadAvgMetric() {
-    GaugeDouble osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean());
-    return new DefaultGaugeDoubleMetric(new DefaultMetricName("jvm.os.loadAverage"), osLoadAvg);
+  private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+
+  static GaugeLongMetric getOsLoadAvgMetric() {
+    GaugeLong osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean());
+    return new DefaultGaugeLongMetric(new DefaultMetricName("jvm.os.loadAverage"), osLoadAvg);
   }
 
-  private static class OsLoadGauge implements GaugeDouble {
+  static long toLoad(double loadAverage) {
+    return BigDecimal.valueOf(loadAverage).multiply(HUNDRED).setScale(0, RoundingMode.HALF_UP).longValue();
+  }
+
+  private static class OsLoadGauge implements GaugeLong {
 
     private final OperatingSystemMXBean osMXbean;
 
@@ -22,8 +30,9 @@ class JvmSystemMetricGroup {
     }
 
     @Override
-    public double getValue() {
-      return osMXbean.getSystemLoadAverage();
+    public long getValue() {
+      final double loadAverage = osMXbean.getSystemLoadAverage();
+      return BigDecimal.valueOf(loadAverage).multiply(HUNDRED).setScale(0, RoundingMode.HALF_UP).longValue();
     }
 
   }
