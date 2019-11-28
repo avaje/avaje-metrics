@@ -67,7 +67,7 @@ class FileLines {
     }
   }
 
-  private String readLine(){
+  private String readLine() {
     try {
       try (LineNumberReader lineReader = new LineNumberReader(new FileReader(file))) {
         return lineReader.readLine();

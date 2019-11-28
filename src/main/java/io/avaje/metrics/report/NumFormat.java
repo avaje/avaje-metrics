@@ -16,27 +16,25 @@ public class NumFormat {
   /**
    * Format to the number of decimal places.
    *
-   * @param decimalPlaces
-   *          supports 0 to 4 decimal places.
-   * @param number
-   *          the value
+   * @param decimalPlaces supports 0 to 4 decimal places.
+   * @param number        the value
    * @return the decimal formatted value
    */
   public static String dp(int decimalPlaces, double number) {
     switch (decimalPlaces) {
-    case 0:
-      return zerodp(number);
-    case 1:
-      return onedp(number);
-    case 2:
-      return twodp(number);
-    case 3:
-      return threedp(number);
-    case 4:
-      return fourdp(number);
+      case 0:
+        return zerodp(number);
+      case 1:
+        return onedp(number);
+      case 2:
+        return twodp(number);
+      case 3:
+        return threedp(number);
+      case 4:
+        return fourdp(number);
 
-    default:
-      throw new IllegalArgumentException(decimalPlaces + " decimal places not supported");
+      default:
+        throw new IllegalArgumentException(decimalPlaces + " decimal places not supported");
     }
   }
 

@@ -33,11 +33,11 @@ public class CsvReportWriter implements ReportWriter {
   /**
    * Construct with all the format options.
    *
-   * @param timeNowFormat  The date time format for the collection time. Typically this is HH:mm:ss.
-   * @param decimalPlaces  The number of decimal places to format double values. This typically defaults to 2.
-   * @param delimiter      A string that separates the columns and typically a comma.
-   * @param endOfLine      A string added at the end of each metric and typically a newline character.
-   * @param thresholdMean  A threshold mean value that can be used to suppress reporting on small metrics.
+   * @param timeNowFormat The date time format for the collection time. Typically this is HH:mm:ss.
+   * @param decimalPlaces The number of decimal places to format double values. This typically defaults to 2.
+   * @param delimiter     A string that separates the columns and typically a comma.
+   * @param endOfLine     A string added at the end of each metric and typically a newline character.
+   * @param thresholdMean A threshold mean value that can be used to suppress reporting on small metrics.
    */
   public CsvReportWriter(String timeNowFormat, int decimalPlaces, String delimiter, String endOfLine, long thresholdMean) {
 

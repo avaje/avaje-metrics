@@ -31,15 +31,15 @@ public final class LogbackMetricAppender extends AppenderBase<ILoggingEvent> {
   protected void append(ILoggingEvent event) {
 
     switch (event.getLevel().toInt()) {
-    case Level.WARN_INT:
-      warnMetric.markEvent();
-      break;
-    case Level.ERROR_INT:
-      errorMetric.markEvent();
-      break;
-    default:
-      // not interested in any other logging events
-      break;
+      case Level.WARN_INT:
+        warnMetric.markEvent();
+        break;
+      case Level.ERROR_INT:
+        errorMetric.markEvent();
+        break;
+      default:
+        // not interested in any other logging events
+        break;
     }
   }
 

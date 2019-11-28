@@ -162,7 +162,7 @@ public abstract class BaseFileReporter {
 
   protected static String getFileName(String baseFileName, Date forDate) {
     String todayString = new SimpleDateFormat("yyyyMMdd").format(forDate);
-    return baseFileName+ '-' + todayString + ".log";
+    return baseFileName + '-' + todayString + ".log";
   }
 
   public static String getFileName(String baseFileName, int daysAgo) {

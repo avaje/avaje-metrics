@@ -11,19 +11,23 @@ public class LikeMatcher {
 
   private final Pattern pattern;
 
-  /** Compiled regex for replacing dots. */
+  /**
+   * Compiled regex for replacing dots.
+   */
   private static final Pattern DOT_REPLACE = Pattern.compile(".", Pattern.LITERAL);
 
-  /** Compiled regex for replacing stars. */
+  /**
+   * Compiled regex for replacing stars.
+   */
   private static final Pattern STAR_REPLACE = Pattern.compile("*", Pattern.LITERAL);
 
   /**
    * Create with an expression that can contain "*" characters as wildcards.
    * <p>
-   *   Note that matches are case insensitive.
+   * Note that matches are case insensitive.
    * </p>
    * <p>
-   *   If the expression is null or whitespace this will match all non-null values.
+   * If the expression is null or whitespace this will match all non-null values.
    * </p>
    *
    * <pre>{@code

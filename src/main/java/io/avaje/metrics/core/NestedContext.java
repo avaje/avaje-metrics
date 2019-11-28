@@ -14,8 +14,8 @@ import java.util.function.Supplier;
 /**
  * Uses a ThreadLocal scope holding a 'context/stack' of all the timing metrics occurring for a single request.
  * <p>
- *   There is a system property <code>metric.context.threshold.micros</code> that can be used to apply a threshold
- *   so that timing metrics that execute below that threshold are excluded (in order to reduce 'noise').
+ * There is a system property <code>metric.context.threshold.micros</code> that can be used to apply a threshold
+ * so that timing metrics that execute below that threshold are excluded (in order to reduce 'noise').
  * </p>
  */
 final class NestedContext {
@@ -32,7 +32,7 @@ final class NestedContext {
     try {
       return Long.parseLong(threshold);
     } catch (NumberFormatException e) {
-      logger.error("Invalid number value ["+threshold+"] for metric.context.threshold.micros", e);
+      logger.error("Invalid number value [" + threshold + "] for metric.context.threshold.micros", e);
       return 0;
     }
   }
@@ -142,12 +142,12 @@ final class NestedContext {
 
   /**
    * Pop the last entry and add it to the entry list.
-   *
+   * <p>
    * If the stack is empty then the entry list is reported.
    */
   void popMetric() {
     if (--depth < 0) {
-      logger.error("Unexpected depth ["+depth+"] when popping metric");
+      logger.error("Unexpected depth [" + depth + "] when popping metric");
       resetContext();
 
     } else {

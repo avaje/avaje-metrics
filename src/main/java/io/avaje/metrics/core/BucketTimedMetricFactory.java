@@ -10,7 +10,7 @@ class BucketTimedMetricFactory implements MetricFactory<TimedMetric> {
 
     int rangeBottom = 0;
 
-    TimedMetric[] buckets = new TimedMetric[bucketRanges.length+1];
+    TimedMetric[] buckets = new TimedMetric[bucketRanges.length + 1];
 
     for (int i = 0; i < bucketRanges.length; i++) {
       int rangeTop = bucketRanges[i];

@@ -33,7 +33,7 @@ abstract class BaseTimedMetric implements TimedMetric {
 
   /**
    * Set the number of requests we want 'request' timing for.
-   *
+   * <p>
    * If collectionCount is 0 then that effectively turns off
    * request level timing.
    *

@@ -1,9 +1,9 @@
 package io.avaje.metrics.core.log4j;
 
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
 import io.avaje.metrics.CounterMetric;
 import io.avaje.metrics.MetricManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
 
 /**
  * Log4J metric appender. Counts error and warning log messages.

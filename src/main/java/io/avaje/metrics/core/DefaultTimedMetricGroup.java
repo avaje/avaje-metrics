@@ -42,10 +42,8 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
    * differ by this name.
    * </p>
    *
-   * @param name
-   *          the specific name for the metric (group and type name parts are
-   *          common).
-   *
+   * @param name the specific name for the metric (group and type name parts are
+   *             common).
    * @return the TimedMetricEvent that has started.
    */
   @Override

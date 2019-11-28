@@ -26,7 +26,7 @@ public class BaseRequestTimingReporter implements RequestTimingReporter {
     }
     if (!listeners.isEmpty()) {
       // notify all the listeners
-      for (int t = 0; t <requestTimings.size(); t++) {
+      for (int t = 0; t < requestTimings.size(); t++) {
         RequestTiming requestTiming = requestTimings.get(t);
         for (int l = 0; l < listeners.size(); l++) {
           listeners.get(l).onRequestTiming(requestTiming);

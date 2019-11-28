@@ -90,7 +90,7 @@ class JvmCGroupMemoryMetricGroup {
   }
 
   GaugeLongMetric createMemoryLimit(MemSource source) {
-      return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb);
+    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb);
   }
 
   private MetricName name(String s) {

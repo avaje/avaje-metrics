@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricName;
@@ -25,9 +24,11 @@ final class JvmMemoryMetricGroup {
    */
   static class HeapMemoryUsageSource implements MemoryUsageSource {
     final MemoryMXBean memoryMXBean;
+
     HeapMemoryUsageSource(MemoryMXBean memoryMXBean) {
       this.memoryMXBean = memoryMXBean;
     }
+
     public MemoryUsage getUsage() {
       return memoryMXBean.getHeapMemoryUsage();
     }
@@ -38,15 +39,17 @@ final class JvmMemoryMetricGroup {
    */
   static class NonHeapMemoryUsageSource implements MemoryUsageSource {
     final MemoryMXBean memoryMXBean;
+
     NonHeapMemoryUsageSource(MemoryMXBean memoryMXBean) {
       this.memoryMXBean = memoryMXBean;
     }
+
     public MemoryUsage getUsage() {
       return memoryMXBean.getNonHeapMemoryUsage();
     }
   }
 
-  private static final long MEGABYTES = 1024*1024L;
+  private static final long MEGABYTES = 1024 * 1024L;
 
   /**
    * Create the Heap Memory based GaugeMetricGroup.
@@ -76,7 +79,7 @@ final class JvmMemoryMetricGroup {
     private final MetricName baseName;
 
     private MemUsageGauages(MemoryUsageSource source, MetricName baseName) {
-      this.source =  source;
+      this.source = source;
       this.baseName = baseName;
     }
 
@@ -105,14 +108,17 @@ final class JvmMemoryMetricGroup {
 
     private abstract static class Base {
       MemoryUsageSource source;
+
       Base(MemoryUsageSource source) {
         this.source = source;
       }
     }
+
     private class Init extends Base implements GaugeLong {
       Init(MemoryUsageSource source) {
         super(source);
       }
+
       @Override
       public long getValue() {
         return source.getUsage().getInit() / MEGABYTES;
@@ -123,6 +129,7 @@ final class JvmMemoryMetricGroup {
       Used(MemoryUsageSource source) {
         super(source);
       }
+
       @Override
       public long getValue() {
         return source.getUsage().getUsed() / MEGABYTES;
@@ -133,6 +140,7 @@ final class JvmMemoryMetricGroup {
       Committed(MemoryUsageSource source) {
         super(source);
       }
+
       @Override
       public long getValue() {
         return source.getUsage().getCommitted() / MEGABYTES;
@@ -143,6 +151,7 @@ final class JvmMemoryMetricGroup {
       Max(MemoryUsageSource source) {
         super(source);
       }
+
       @Override
       public long getValue() {
         return source.getUsage().getMax() / MEGABYTES;
@@ -153,10 +162,11 @@ final class JvmMemoryMetricGroup {
       Pct(MemoryUsageSource source) {
         super(source);
       }
+
       @Override
       public long getValue() {
         MemoryUsage memoryUsage = source.getUsage();
-        return 100 *  memoryUsage.getUsed() / memoryUsage.getMax() ;
+        return 100 * memoryUsage.getUsed() / memoryUsage.getMax();
       }
     }
   }
