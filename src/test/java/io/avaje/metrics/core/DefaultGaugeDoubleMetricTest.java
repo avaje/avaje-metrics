@@ -51,6 +51,7 @@ public class DefaultGaugeDoubleMetricTest {
     assertEquals(90.0, metric.getValue());
 
   }
+
   @Test
   public void test() {
 

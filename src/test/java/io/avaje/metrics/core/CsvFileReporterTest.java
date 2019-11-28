@@ -33,7 +33,7 @@ public class CsvFileReporterTest {
     for (int i = 0; i < 50; i++) {
       TimedEvent event = timedMetric.startEvent();
       int plus = random.nextInt(20);
-      Thread.sleep(20+plus);
+      Thread.sleep(20 + plus);
       event.endWithSuccess();
 
       if (i == 20) {

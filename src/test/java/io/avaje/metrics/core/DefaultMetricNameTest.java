@@ -22,7 +22,7 @@ public class DefaultMetricNameTest {
   @Test
   public void partial_onlyTwo() {
 
-    MetricName name =  new DefaultMetricName("Hello.rob");
+    MetricName name = new DefaultMetricName("Hello.rob");
 
     assertNotNull(name);
     assertEquals("Hello.rob", name.getSimpleName());

@@ -11,9 +11,9 @@ import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.ValueMetric;
-import io.avaje.metrics.report.ReportMetrics;
 import io.avaje.metrics.report.HeaderInfo;
 import io.avaje.metrics.report.JsonWriteVisitor;
+import io.avaje.metrics.report.ReportMetrics;
 import io.avaje.metrics.statistics.CounterStatistics;
 import io.avaje.metrics.statistics.GaugeDoubleStatistics;
 import io.avaje.metrics.statistics.MetricStatistics;
@@ -138,7 +138,7 @@ public class JsonWriteVisitorTest {
 
     List<MetricStatistics> statistics = collectAll(metric);
     for (MetricStatistics statistic : statistics) {
-      jsonVisitor.visit((TimedStatistics)statistic);
+      jsonVisitor.visit((TimedStatistics) statistic);
     }
   }
 

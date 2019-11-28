@@ -31,7 +31,7 @@ public class ValueMetricTest {
     List<MetricStatistics> stats = collect(metric);
     assertThat(stats).hasSize(1);
 
-    ValueStatistics statistics = (ValueStatistics)stats.get(0);
+    ValueStatistics statistics = (ValueStatistics) stats.get(0);
     assertEquals(3, statistics.getCount());
     assertEquals(4500, statistics.getTotal());
     assertEquals(2000, statistics.getMax());

@@ -21,7 +21,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class CsvWriteVisitorTest {
 
@@ -103,7 +102,7 @@ public class CsvWriteVisitorTest {
 
     List<MetricStatistics> statistics = collectAll(metric);
     for (MetricStatistics statistic : statistics) {
-      csvVisitor.visit((ValueStatistics)statistic);
+      csvVisitor.visit((ValueStatistics) statistic);
     }
     String csvContent = writer.toString();
     String[] lines = csvContent.split("\n");

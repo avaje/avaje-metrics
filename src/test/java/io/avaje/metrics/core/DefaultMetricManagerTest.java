@@ -1,9 +1,9 @@
 package io.avaje.metrics.core;
 
-import orange.truck.Customer;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.TimingMetricInfo;
+import orange.truck.Customer;
 import org.testng.annotations.Test;
 
 import java.util.List;

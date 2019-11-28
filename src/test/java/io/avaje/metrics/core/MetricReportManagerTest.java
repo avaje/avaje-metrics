@@ -20,7 +20,7 @@ public class MetricReportManagerTest {
 
     MetricReportManager mgr = new MetricReportManager(config);
 
-    Thread.sleep(60*100*5);
+    Thread.sleep(60 * 100 * 5);
 
     mgr.shutdown();
   }

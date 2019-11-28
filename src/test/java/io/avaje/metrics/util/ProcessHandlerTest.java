@@ -9,20 +9,20 @@ import static org.testng.Assert.assertFalse;
 
 public class ProcessHandlerTest {
 
-	@Test
-	public void testCommand() throws Exception {
+  @Test
+  public void testCommand() throws Exception {
 
-		boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
-		if (linux) {
+    boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
+    if (linux) {
 
-			String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+      String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
 
-			ProcessResult result = ProcessHandler.command("grep", "Vm", "/proc/" + pid + "/status");
+      ProcessResult result = ProcessHandler.command("grep", "Vm", "/proc/" + pid + "/status");
 
-			List<String> lines = result.getStdOutLines();
-			System.out.println(lines);
-			assertFalse(lines.isEmpty());
-		}
-	}
+      List<String> lines = result.getStdOutLines();
+      System.out.println(lines);
+      assertFalse(lines.isEmpty());
+    }
+  }
 
 }
