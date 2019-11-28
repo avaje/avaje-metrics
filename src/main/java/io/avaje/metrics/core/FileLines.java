@@ -10,6 +10,7 @@ import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 class FileLines {
 
@@ -33,6 +34,20 @@ class FileLines {
   long singleMicros() {
     final String val = readLine();
     return (val == null) ? 0 : Long.parseLong(val) / 1000;
+  }
+
+  void readLines(Predicate<String> consumer) {
+    try {
+      try (LineNumberReader lineReader = new LineNumberReader(new FileReader(file))) {
+        boolean readMore;
+        do {
+          String line = lineReader.readLine();
+          readMore = line != null && consumer.test(line);
+        } while (readMore);
+      }
+    } catch (IOException e) {
+      log.warn("Error reading metrics file " + file, e);
+    }
   }
 
   List<String> readLines() {
