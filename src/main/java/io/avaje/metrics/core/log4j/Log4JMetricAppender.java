@@ -28,13 +28,13 @@ public class Log4JMetricAppender extends AbstractAppender {
   public void append(LogEvent event) {
     switch (event.getLevel().getStandardLevel()) {
       case WARN:
-        warnMetric.markEvent();
+        warnMetric.inc();
         break;
       case ERROR:
-        errorMetric.markEvent();
+        errorMetric.inc();
         break;
       case FATAL:
-        errorMetric.markEvent();
+        errorMetric.inc();
         break;
       default:
         break;

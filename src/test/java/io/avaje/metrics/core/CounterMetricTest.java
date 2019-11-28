@@ -23,14 +23,14 @@ public class CounterMetricTest {
     counterMetric.clear();
     assertEquals(0, counterMetric.getCount());
 
-    counterMetric.markEvent();
+    counterMetric.inc();
     assertEquals(1, counterMetric.getCount());
-    counterMetric.markEvent();
+    counterMetric.inc();
     assertEquals(2, counterMetric.getCount());
-    counterMetric.markEvent();
+    counterMetric.inc();
 
     assertEquals(3, counterMetric.getCount());
-    counterMetric.markEvents(100);
+    counterMetric.inc(100);
     assertEquals(103, counterMetric.getCount());
 
     assertThat(collect(counterMetric)).hasSize(1);

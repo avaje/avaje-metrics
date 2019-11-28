@@ -30,12 +30,12 @@ final class NoopCounterMetric implements CounterMetric {
   }
 
   @Override
-  public void markEvent() {
+  public void inc() {
     // do nothing
   }
 
   @Override
-  public void markEvents(long numberOfEventsOccurred) {
+  public void inc(long numberOfEventsOccurred) {
     // do nothing
   }
 

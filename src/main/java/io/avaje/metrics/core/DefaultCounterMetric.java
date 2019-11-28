@@ -64,7 +64,7 @@ final class DefaultCounterMetric implements CounterMetric {
    * Mark that 1 event has occurred.
    */
   @Override
-  public void markEvent() {
+  public void inc() {
     counter.increment();
   }
 
@@ -72,7 +72,7 @@ final class DefaultCounterMetric implements CounterMetric {
    * Mark that numberOfEventsOccurred events have occurred.
    */
   @Override
-  public void markEvents(long numberOfEventsOccurred) {
+  public void inc(long numberOfEventsOccurred) {
     counter.add(numberOfEventsOccurred);
   }
 

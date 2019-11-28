@@ -194,7 +194,7 @@ public class CsvWriteVisitorTest {
 
   private CounterMetric createCounterMetric() {
     CounterMetric counter = new DefaultCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
-    counter.markEvents(10);
+    counter.inc(10);
     return counter;
   }
 
