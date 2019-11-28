@@ -23,7 +23,7 @@ final class JvmGarbageCollectionMetricGroup {
 
     for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
       // modify collector name replacing spaces with hyphens.
-      String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-');
+      String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-').replace(".","");
       metrics.add(DefaultGaugeLongMetric.incrementing(name("count", gcName), new Count(gcMXBean)));
       metrics.add(DefaultGaugeLongMetric.incrementing(name("time", gcName), new Time(gcMXBean)));
     }
@@ -32,11 +32,11 @@ final class JvmGarbageCollectionMetricGroup {
   }
 
   /**
-   * Return a Gauge for the total GC time. Gives us a single metric to measure aggregate GC activity.
+   * Return a Gauge for the total GC time in millis. Gives us a single metric to measure aggregate GC activity.
    */
   private static DefaultGaugeLongMetric createTotalGcTime(List<GarbageCollectorMXBean> garbageCollectorMXBeans) {
     GarbageCollectorMXBean[] gcBeans = garbageCollectorMXBeans.toArray(new GarbageCollectorMXBean[0]);
-    return DefaultGaugeLongMetric.incrementing(new DefaultMetricName("jvm.gc.timeTotal"), new TotalTime(gcBeans));
+    return DefaultGaugeLongMetric.incrementing(new DefaultMetricName("jvm.gc.time"), new TotalTime(gcBeans));
   }
 
   private static MetricName name(String prefix, String gcName) {
