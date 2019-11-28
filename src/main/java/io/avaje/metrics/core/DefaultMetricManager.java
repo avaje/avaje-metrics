@@ -218,14 +218,20 @@ public class DefaultMetricManager implements SpiMetricManager {
     registerJvmGCMetrics();
     registerJvmMemoryMetrics();
     registerJvmThreadMetrics();
-    registerJvmProcessMemoryMetrics();
+    registerProcessMemoryMetrics();
     registerJvmOsLoadMetric();
     return this;
   }
 
   @Override
-  public JvmMetrics registerJvmProcessMemoryMetrics() {
+  public JvmMetrics registerProcessMemoryMetrics() {
     registerAll(JvmProcessMemory.createGauges(reportChangesOnly));
+    return this;
+  }
+
+  @Override
+  public JvmMetrics registerCGroupMetrics() {
+    registerAll(JvmCGroupMetricGroup.createGauges());
     return this;
   }
 
