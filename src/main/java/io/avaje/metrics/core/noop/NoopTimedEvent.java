@@ -10,7 +10,7 @@ class NoopTimedEvent implements TimedEvent {
   }
 
   @Override
-  public void endWithSuccess() {
+  public void end() {
     // do nothing
   }
 

@@ -5,6 +5,8 @@ import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 
+import java.util.function.Supplier;
+
 /**
  * Default implementation of BucketTimedMetric.
  */
@@ -37,6 +39,31 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
   @Override
   public String getBucketRange() {
     return null;
+  }
+
+  @Override
+  public void time(Runnable event) {
+    long start = System.nanoTime();
+    try {
+      event.run();
+      add(start);
+    } catch (RuntimeException e) {
+      addErr(start);
+      throw e;
+    }
+  }
+
+  @Override
+  public <T> T time(Supplier<T> event) {
+    long start = System.nanoTime();
+    try {
+      final T result = event.get();
+      add(start);
+      return result;
+    } catch (Exception e) {
+      addErr(start);
+      throw e;
+    }
   }
 
   @Override
@@ -75,12 +102,12 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationEnd(long startNanos) {
+  public void add(long startNanos) {
     addEventSince(true, startNanos);
   }
 
   @Override
-  public void operationEnd(long startNanos, boolean activeThreadContext) {
+  public void add(long startNanos, boolean activeThreadContext) {
     addEventSince(true, startNanos);
     if (activeThreadContext) {
       NestedContext.pop();
@@ -88,12 +115,12 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationErr(long startNanos) {
+  public void addErr(long startNanos) {
     addEventSince(false, startNanos);
   }
 
   @Override
-  public void operationErr(long startNanos, boolean activeThreadContext) {
+  public void addErr(long startNanos, boolean activeThreadContext) {
     addEventSince(false, startNanos);
     if (activeThreadContext) {
       NestedContext.pop();
@@ -150,7 +177,7 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
      * Operation or SQL execution).
      */
     @Override
-    public void endWithSuccess() {
+    public void end() {
       end(true);
     }
 

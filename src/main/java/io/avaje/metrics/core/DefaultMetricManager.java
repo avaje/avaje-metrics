@@ -442,7 +442,7 @@ public class DefaultMetricManager implements SpiMetricManager {
     Metric metric = getMetricWithoutCreate(metricName);
     if (metric instanceof TimedMetric) {
       TimedMetric timed = (TimedMetric) metric;
-      timed.setRequestTimingCollection(collectionCount);
+      timed.setRequestTiming(collectionCount);
       return true;
     }
 
@@ -472,7 +472,7 @@ public class DefaultMetricManager implements SpiMetricManager {
       if (metric instanceof TimedMetric) {
         TimedMetric timed = (TimedMetric) metric;
         if (like.matches(timed.getName().getSimpleName())) {
-          timed.setRequestTimingCollection(collectionCount);
+          timed.setRequestTiming(collectionCount);
           logger.debug("setRequestTimingCollection({}) on {}", collectionCount, timed.getName().getSimpleName());
           changes.add(new TimingMetricInfo(timed.getName().getSimpleName(), collectionCount));
         }
@@ -517,11 +517,11 @@ public class DefaultMetricManager implements SpiMetricManager {
       for (Metric metric : metricsCache.values()) {
         if (metric instanceof TimedMetric) {
           TimedMetric timed = (TimedMetric) metric;
-          if (!activeOnly || timed.getRequestTimingCollection() >= 1) {
+          if (!activeOnly || timed.getRequestTiming() >= 1) {
             // actively collection or doing the all search
             if (like.matches(timed.getName().getSimpleName())) {
               // metric name matches our expression
-              list.add(new TimingMetricInfo(timed.getName().getSimpleName(), timed.getRequestTimingCollection()));
+              list.add(new TimingMetricInfo(timed.getName().getSimpleName(), timed.getRequestTiming()));
             }
           }
         }

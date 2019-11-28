@@ -156,7 +156,7 @@ final class NestedContext {
         entries.add(pop);
       }
       // (if required) decrement the collection count on the metric
-      pop.getMetric().decrementCollectionCount();
+      pop.getMetric().decrementRequestTiming();
       if (stack.isEmpty()) {
         report(entries);
         entries = new ArrayList<>();

@@ -2,86 +2,170 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.statistics.MetricStatistics;
+import io.avaje.metrics.statistics.TimedStatistics;
+import org.testng.annotations.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 public class TimedMetricTest {
 
-  private boolean useContext = false;
-
-  private TimedMetric _metric = MetricManager.timed("org.test.mytimed");
-
+  @Test
   public void add() {
 
-    boolean requestTiming = _metric.isActiveThreadContext();
+    TimedMetric metric = MetricManager.timed("org.test.mytimed");
+
+    boolean useContext = metric.isRequestTiming();
     long start = System.nanoTime();
 
-    _metric.operationEnd(start, requestTiming);
+    assertEquals("org.test.mytimed", metric.getName().getSimpleName());
+
+    metric.add(start, useContext);
+    metric.addEventSince(true, start);
+
+    List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+
+    TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+
+    assertEquals("org.test.mytimed", stat0.getName());
+    assertEquals(2, stat0.getCount());
+    assertThat(stat0.getTotal()).isGreaterThan(0);
+    assertThat(stat0.getMean()).isGreaterThan(0);
+    assertThat(stat0.getMax()).isGreaterThan(0);
+
+
+    metric.addErr(start, useContext);
+    metric.addEventSince(false, start);
+    metric.addErr(start, useContext);
+
+    stats = MetricManager.collectNonEmptyMetrics();
+    stat0 = (TimedStatistics) stats.get(0);
+
+    assertEquals("org.test.mytimed.error", stat0.getName());
+    assertEquals(3, stat0.getCount());
+    assertThat(stat0.getTotal()).isGreaterThan(0);
+
+    metric.add(start, useContext);
+    metric.addErr(start, useContext);
+    metric.addErr(start, useContext);
+
+    stats = MetricManager.collectNonEmptyMetrics();
+    stat0 = (TimedStatistics) stats.get(0);
+    TimedStatistics stat1 = (TimedStatistics) stats.get(1);
+
+    assertEquals("org.test.mytimed.error", stat0.getName());
+    assertEquals(2, stat0.getCount());
+
+    assertEquals("org.test.mytimed", stat1.getName());
+    assertEquals(1, stat1.getCount());
   }
 
-//  @Test
-//  public void addEventDuration() {
-//
-//    TimedMetric metric = MetricManager.getTimedMetric("org.test.mytimed");
-//
-//    boolean useContext = metric.isActiveThreadContext();
-//    long start = System.nanoTime();
-//
-//    metric.operationEnd(13, start, useContext);
-//
-//    assertEquals("org",metric.getName().getGroup());
-//    assertEquals("test",metric.getName().getType());
-//    assertEquals("mytimed",metric.getName().getName());
-//
-//    metric.clear();
-//    assertEquals(0, metric.getCount());
-//    assertEquals(0, metric.getTotal());
-//    assertEquals(0, metric.getErrorStatistics(false).getCount());
-//    assertEquals(0, metric.getErrorStatistics(false).getTotal());
-//    assertEquals(0, metric.getMean());
-//    assertEquals(0, metric.getErrorStatistics(false).getMean());
-//
-//    metric.addEventDuration(true, TimeUnit.MICROSECONDS.toNanos(1000));
-//    assertEquals(1, metric.getCount());
-//    assertEquals(1000, metric.getTotal());
-//    assertEquals(0, metric.getErrorStatistics(false).getCount());
-//
-//    metric.addEventDuration(true, TimeUnit.MICROSECONDS.toNanos(2000));
-//    assertEquals(2, metric.getCount());
-//    assertEquals(3000, metric.getTotal());
-//    assertEquals(0, metric.getErrorStatistics(false).getCount());
-//    assertEquals(0, metric.getErrorStatistics(false).getTotal());
-//
-//    metric.addEventDuration(false, TimeUnit.MICROSECONDS.toNanos(5000));
-//    assertEquals(2, metric.getCount());
-//    assertEquals(3000, metric.getTotal());
-//    assertEquals(1, metric.getErrorStatistics(false).getCount());
-//    assertEquals(5000, metric.getErrorStatistics(false).getTotal());
-//
-//    assertEquals(1500, metric.getMean());
-//    assertEquals(5000, metric.getErrorStatistics(false).getMean());
-//
-//
-//    assertThat(collect(metric)).hasSize(1);
-//
-//    ValueStatistics collectedSuccessStatistics = metric.getCollectedSuccessStatistics();
-//    ValueStatistics collectedErrorStatistics = metric.getCollectedErrorStatistics();
-//
-//    assertEquals(2, collectedSuccessStatistics.getCount());
-//    assertEquals(3000, collectedSuccessStatistics.getTotal());
-//    assertEquals(1, collectedErrorStatistics.getCount());
-//    assertEquals(5000, collectedErrorStatistics.getTotal());
-//
-//    assertEquals(1500, collectedSuccessStatistics.getMean());
-//    assertEquals(5000, collectedErrorStatistics.getMean());
-//
-//
-//    assertEquals(0, metric.getCount());
-//    assertEquals(0, metric.getTotal());
-//    assertEquals(0, metric.getErrorStatistics(false).getCount());
-//    assertEquals(0, metric.getErrorStatistics(false).getTotal());
-//    assertEquals(0, metric.getMean());
-//    assertEquals(0, metric.getErrorStatistics(false).getMean());
-//
-//  }
+  private void resetStatistics() {
+    MetricManager.collectNonEmptyMetrics();
+  }
+
+  @Test
+  public void timeRunnable() {
+
+    resetStatistics();
+
+    TimedMetric metric = MetricManager.timed("test.runnable");
+    metric.time(() -> {
+      System.out.println("here");
+    });
+
+    final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+    TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+
+    assertEquals("test.runnable", stat0.getName());
+    assertEquals(1, stat0.getCount());
+    assertThat(stat0.getTotal()).isGreaterThan(0);
+    assertThat(stat0.getMean()).isGreaterThan(0);
+    assertThat(stat0.getMax()).isGreaterThan(0);
+  }
+
+
+  private void runAndThrow() {
+    System.out.println("here");
+    throw new NullPointerException();
+  }
+
+  @Test
+  public void timeRunnable_when_error() {
+
+    resetStatistics();
+
+    TimedMetric metric = MetricManager.timed("test.runnable");
+
+    try {
+      metric.time(this::runAndThrow);
+      fail();
+    } catch (NullPointerException  e) {
+
+      final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+      TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+
+      assertEquals("test.runnable.error", stat0.getName());
+      assertEquals(1, stat0.getCount());
+      assertThat(stat0.getTotal()).isGreaterThan(0);
+      assertThat(stat0.getMean()).isGreaterThan(0);
+      assertThat(stat0.getMax()).isGreaterThan(0);
+    }
+  }
+
+  private String callAndThrow() {
+    System.out.println("here");
+    throw new NullPointerException();
+  }
+
+  @Test
+  public void timeCallable_when_error() {
+
+    resetStatistics();
+
+    TimedMetric metric = MetricManager.timed("test.callable");
+
+    try {
+      metric.time(this::callAndThrow);
+      fail();
+    } catch (Exception  e) {
+
+      final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+      TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+
+      assertEquals("test.callable.error", stat0.getName());
+      assertEquals(1, stat0.getCount());
+      assertThat(stat0.getTotal()).isGreaterThan(0);
+      assertThat(stat0.getMean()).isGreaterThan(0);
+      assertThat(stat0.getMax()).isGreaterThan(0);
+    }
+  }
+
+
+  @Test
+  public void timeCallable_when_success() {
+
+    resetStatistics();
+
+    TimedMetric metric = MetricManager.timed("test.callable");
+
+    String out = metric.time(() -> "foo");
+    assertEquals("foo", out);
+
+    final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+    TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+
+    assertEquals("test.callable", stat0.getName());
+    assertEquals(1, stat0.getCount());
+    assertThat(stat0.getTotal()).isGreaterThan(0);
+    assertThat(stat0.getMean()).isGreaterThan(0);
+    assertThat(stat0.getMax()).isGreaterThan(0);
+  }
+
 //
 //  @Test
 //  public void addEventSince() {

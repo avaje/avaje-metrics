@@ -6,6 +6,7 @@ import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class NoopTimedMetric implements TimedMetric {
 
@@ -45,18 +46,28 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void setRequestTimingCollection(int collectionCount) {
+  public void setRequestTiming(int collectionCount) {
     // do nothing
   }
 
   @Override
-  public int getRequestTimingCollection() {
+  public int getRequestTiming() {
     return 0;
   }
 
   @Override
-  public void decrementCollectionCount() {
+  public void decrementRequestTiming() {
     // do nothing
+  }
+
+  @Override
+  public void time(Runnable event) {
+    event.run();
+  }
+
+  @Override
+  public <T> T time(Supplier<T> event) {
+    return event.get();
   }
 
   @Override
@@ -75,27 +86,27 @@ public class NoopTimedMetric implements TimedMetric {
   }
 
   @Override
-  public boolean isActiveThreadContext() {
+  public boolean isRequestTiming() {
     return false;
   }
 
   @Override
-  public void operationEnd(long startNanos) {
+  public void add(long startNanos) {
 
   }
 
   @Override
-  public void operationEnd(long startNanos, boolean activeThreadContext) {
+  public void add(long startNanos, boolean activeThreadContext) {
 
   }
 
   @Override
-  public void operationErr(long startNanos) {
+  public void addErr(long startNanos) {
 
   }
 
   @Override
-  public void operationErr(long startNanos, boolean activeThreadContext) {
+  public void addErr(long startNanos, boolean activeThreadContext) {
 
   }
 

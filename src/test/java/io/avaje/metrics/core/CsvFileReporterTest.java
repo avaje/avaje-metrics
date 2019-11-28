@@ -34,7 +34,7 @@ public class CsvFileReporterTest {
       TimedEvent event = timedMetric.startEvent();
       int plus = random.nextInt(20);
       Thread.sleep(20 + plus);
-      event.endWithSuccess();
+      event.end();
 
       if (i == 20) {
         Runtime.getRuntime().gc();

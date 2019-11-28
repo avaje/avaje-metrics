@@ -42,7 +42,7 @@ final class DefaultTimedMetricEvent implements TimedEvent {
    * Operation or SQL execution).
    */
   @Override
-  public void endWithSuccess() {
+  public void end() {
     end(true);
   }
 

@@ -7,6 +7,7 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 import io.avaje.metrics.statistics.TimedStatistics;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Designed to capture the duration of timed events.
@@ -82,10 +83,35 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
     return name;
   }
 
+  @Override
+  public void time(Runnable event) {
+    long start = System.nanoTime();
+    try {
+      event.run();
+      add(start);
+    } catch (RuntimeException e) {
+      addErr(start);
+      throw e;
+    }
+  }
+
+  @Override
+  public <T> T time(Supplier<T> event) {
+    long start = System.nanoTime();
+    try {
+      final T result = event.get();
+      add(start);
+      return result;
+    } catch (Exception e) {
+      addErr(start);
+      throw e;
+    }
+  }
+
   /**
    * Start an event.
    * <p>
-   * The {@link TimedEvent#endWithSuccess()} or {@link TimedEvent#endWithError()} are called at the
+   * The {@link TimedEvent#end()} or {@link TimedEvent#endWithError()} are called at the
    * completion of the timed event.
    * </p>
    */
@@ -118,12 +144,12 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationEnd(long startNanos) {
+  public void add(long startNanos) {
     successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
 
   @Override
-  public void operationEnd(long startNanos, boolean activeThreadContext) {
+  public void add(long startNanos, boolean activeThreadContext) {
     successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
     if (activeThreadContext) {
       NestedContext.pop();
@@ -131,12 +157,12 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
   }
 
   @Override
-  public void operationErr(long startNanos) {
+  public void addErr(long startNanos) {
     errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
 
   @Override
-  public void operationErr(long startNanos, boolean activeThreadContext) {
+  public void addErr(long startNanos, boolean activeThreadContext) {
     errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
     if (activeThreadContext) {
       NestedContext.pop();

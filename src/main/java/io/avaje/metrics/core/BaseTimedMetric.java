@@ -27,7 +27,7 @@ abstract class BaseTimedMetric implements TimedMetric {
    * timing collected for.
    */
   @Override
-  public int getRequestTimingCollection() {
+  public int getRequestTiming() {
     return requestCollection.get();
   }
 
@@ -40,7 +40,7 @@ abstract class BaseTimedMetric implements TimedMetric {
    * @param collectionCount the number of requests we want 'request' timing for.
    */
   @Override
-  public void setRequestTimingCollection(int collectionCount) {
+  public void setRequestTiming(int collectionCount) {
 
     // synchronized here ... rare call to set the collectionCount
     // so being safe wrt decrementCollectionCount()
@@ -60,7 +60,7 @@ abstract class BaseTimedMetric implements TimedMetric {
    * </p>
    */
   @Override
-  public void decrementCollectionCount() {
+  public void decrementRequestTiming() {
 
     // synchronized here but this method is only called when 'per request'
     // timing is actively being collected and the timing information is being
@@ -87,7 +87,7 @@ abstract class BaseTimedMetric implements TimedMetric {
    * </p>
    */
   @Override
-  public boolean isActiveThreadContext() {
+  public boolean isRequestTiming() {
 
     // volatile read for requestTiming boolean flag
     if (requestTiming) {

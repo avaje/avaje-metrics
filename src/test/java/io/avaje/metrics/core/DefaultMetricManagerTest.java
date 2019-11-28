@@ -27,21 +27,21 @@ public class DefaultMetricManagerTest {
     List<TimingMetricInfo> timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(0, timingMetrics.size());
 
-    m0.setRequestTimingCollection(1);
+    m0.setRequestTiming(1);
     timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(1, timingMetrics.size());
     assertEquals(m0.getName().getSimpleName(), timingMetrics.get(0).getName());
 
 
-    m2.setRequestTimingCollection(10);
+    m2.setRequestTiming(10);
     timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(2, timingMetrics.size());
 
-    m1.setRequestTimingCollection(10);
+    m1.setRequestTiming(10);
     timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(3, timingMetrics.size());
 
-    m0.decrementCollectionCount();
+    m0.decrementRequestTiming();
     timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(2, timingMetrics.size());
 
@@ -68,10 +68,10 @@ public class DefaultMetricManagerTest {
     List<TimingMetricInfo> requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(0, requestTimingMetrics.size());
 
-    assertEquals(0, m0.getRequestTimingCollection());
+    assertEquals(0, m0.getRequestTiming());
 
     assertTrue(mgr.setRequestTimingCollection(Customer.class, "doSomething", 1));
-    assertEquals(1, m0.getRequestTimingCollection());
+    assertEquals(1, m0.getRequestTiming());
 
     requestTimingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(1, requestTimingMetrics.size());
