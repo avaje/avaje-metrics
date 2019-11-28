@@ -51,7 +51,7 @@ final class JvmMemoryMetricGroup {
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  public static List<Metric> createHeapGroup(boolean reportChangesOnly) {
+  static List<Metric> createHeapGroup(boolean reportChangesOnly) {
 
     MetricName heapName = new DefaultMetricName("jvm.memory.heap");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
@@ -61,7 +61,7 @@ final class JvmMemoryMetricGroup {
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  public static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
+  static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
     MetricName nonHeapName = new DefaultMetricName("jvm.memory.nonheap");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(nonHeapName, source, reportChangesOnly);
@@ -93,7 +93,7 @@ final class JvmMemoryMetricGroup {
       if (hasMax) {
         // also collect Max and Percentage
         metrics.add(new DefaultGaugeLongMetric(name("max"), new Max(source), reportChangesOnly));
-        metrics.add(new DefaultGaugeDoubleMetric(name("pct"), new Pct(source), reportChangesOnly));
+        metrics.add(new DefaultGaugeLongMetric(name("pct"), new Pct(source), reportChangesOnly));
       }
 
       return metrics;
@@ -149,12 +149,12 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Pct extends Base implements GaugeDouble {
+    private class Pct extends Base implements GaugeLong {
       Pct(MemoryUsageSource source) {
         super(source);
       }
       @Override
-      public double getValue() {
+      public long getValue() {
         MemoryUsage memoryUsage = source.getUsage();
         return 100 *  memoryUsage.getUsed() / memoryUsage.getMax() ;
       }
