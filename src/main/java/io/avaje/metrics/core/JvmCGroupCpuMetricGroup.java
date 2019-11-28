@@ -11,7 +11,7 @@ import java.util.List;
 
 import static java.math.BigDecimal.valueOf;
 
-class JvmCGroupMetricGroup {
+class JvmCGroupCpuMetricGroup {
 
   private final List<Metric> metrics = new ArrayList<>();
 
@@ -19,7 +19,7 @@ class JvmCGroupMetricGroup {
    * Return the list of OS process memory metrics.
    */
   static List<Metric> createGauges() {
-    return new JvmCGroupMetricGroup().metrics();
+    return new JvmCGroupCpuMetricGroup().metrics();
   }
 
   private void add(Metric metric) {
@@ -62,7 +62,7 @@ class JvmCGroupMetricGroup {
 
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu_limit"), new FixedGauge(limit));
+      return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu.limit"), new FixedGauge(limit));
     }
 
     return null;
@@ -71,7 +71,7 @@ class JvmCGroupMetricGroup {
   GaugeLongMetric createCGroupCpuRequests(FileLines cpuShares) {
 
     final long requests = convertSharesToRequests(cpuShares.single());
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu_requests"), new FixedGauge(requests));
+    return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu.requests"), new FixedGauge(requests));
   }
 
   long convertQuotaToLimits(long cpuQuotaVal, long quotaPeriod) {
@@ -93,11 +93,11 @@ class JvmCGroupMetricGroup {
   }
 
   private GaugeLongMetric createCGroupCpuUsage(FileLines cpu) {
-    return incrementing(name("jvm.cgroup.cpu_usage_micros"), new CpuUsageMicros(cpu));
+    return incrementing(name("jvm.cgroup.cpu.usageMicros"), new CpuUsageMicros(cpu));
   }
 
   private GaugeLongMetric createCGroupCpuThrottle(FileLines cpuStat) {
-    return incrementing(name("jvm.cgroup.cpu_throttle_micros"), new CpuThrottleMicros(cpuStat));
+    return incrementing(name("jvm.cgroup.cpu.throttleMicros"), new CpuThrottleMicros(cpuStat));
   }
 
   private GaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {

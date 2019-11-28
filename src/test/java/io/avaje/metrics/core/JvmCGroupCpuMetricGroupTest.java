@@ -8,9 +8,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class JvmCGroupMetricGroupTest {
+public class JvmCGroupCpuMetricGroupTest {
 
-  private final JvmCGroupMetricGroup me = new JvmCGroupMetricGroup();
+  private final JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
 
   @Test
   public void convertQuotaToLimits() {
@@ -30,7 +30,7 @@ public class JvmCGroupMetricGroupTest {
     FileLines source = new FileLines("src/test/resources/cgroup/cpuacct.usage");
     assertTrue(source.exists());
 
-    final JvmCGroupMetricGroup.CpuUsageMicros usageMicros = new JvmCGroupMetricGroup.CpuUsageMicros(source);
+    final JvmCGroupCpuMetricGroup.CpuUsageMicros usageMicros = new JvmCGroupCpuMetricGroup.CpuUsageMicros(source);
 
     final long value = usageMicros.getValue();
     assertThat(value).isEqualTo(55035664L);
@@ -42,7 +42,7 @@ public class JvmCGroupMetricGroupTest {
     FileLines source = new FileLines("src/test/resources/cgroup/cpu.stat");
     assertTrue(source.exists());
 
-    final JvmCGroupMetricGroup.CpuThrottleMicros throttleMicros = new JvmCGroupMetricGroup.CpuThrottleMicros(source);
+    final JvmCGroupCpuMetricGroup.CpuThrottleMicros throttleMicros = new JvmCGroupCpuMetricGroup.CpuThrottleMicros(source);
 
     final long value = throttleMicros.getValue();
     assertThat(value).isEqualTo(87738876L);
@@ -56,7 +56,7 @@ public class JvmCGroupMetricGroupTest {
     assertTrue(cpuQuota.exists());
     assertTrue(period.exists());
 
-    JvmCGroupMetricGroup me = new JvmCGroupMetricGroup();
+    JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
     final GaugeLongMetric metric = me.createCGroupCpuLimit(cpuQuota, period);
     final long limit = metric.getValue();
     assertThat(limit).isEqualTo(600L);
@@ -68,7 +68,7 @@ public class JvmCGroupMetricGroupTest {
     FileLines cpuShares = new FileLines("src/test/resources/cgroup/cpu.shares");
     assertTrue(cpuShares.exists());
 
-    JvmCGroupMetricGroup me = new JvmCGroupMetricGroup();
+    JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
     final GaugeLongMetric metric = me.createCGroupCpuRequests(cpuShares);
     final long requests = metric.getValue();
     assertThat(requests).isEqualTo(200L);

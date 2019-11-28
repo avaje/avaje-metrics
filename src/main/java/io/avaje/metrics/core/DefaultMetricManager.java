@@ -231,13 +231,14 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    registerAll(JvmCGroupMetricGroup.createGauges());
+    registerAll(JvmCGroupCpuMetricGroup.createGauges());
+    registerAll(JvmCGroupMemoryMetricGroup.createGauges());
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmOsLoadMetric() {
-    GaugeDoubleMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
+    GaugeLongMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.getValue() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
