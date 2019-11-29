@@ -24,6 +24,7 @@ import io.avaje.metrics.core.noop.NoopValueMetricFactory;
 import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
 import io.avaje.metrics.spi.SpiMetricManager;
 import io.avaje.metrics.statistics.MetricStatistics;
+import io.avaje.metrics.statistics.MetricStatisticsAsJson;
 import io.avaje.metrics.util.LikeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -387,33 +388,6 @@ public class DefaultMetricManager implements SpiMetricManager {
     }
   }
 
-  /**
-   * Return the request timings that have been collected since the last collection.
-   */
-  public List<RequestTiming> collectRequestTimings() {
-
-    List<RequestTiming> list = new ArrayList<>();
-    RequestTiming req;
-    while ((req = requestTimings.poll()) != null) {
-      list.add(req);
-    }
-    return list;
-  }
-
-  @Override
-  public List<MetricStatistics> collectNonEmptyMetrics() {
-    synchronized (monitor) {
-      DStatsCollector collector = new DStatsCollector();
-      for (Metric metric : metricsCache.values()) {
-        metric.collect(collector);
-      }
-      for (MetricSupplier supplier : suppliers) {
-        collector.addAll(supplier.collectMetrics());
-      }
-      return collector.getList();
-    }
-  }
-
   @Override
   public Collection<Metric> getMetrics() {
     synchronized (monitor) {
@@ -538,14 +512,63 @@ public class DefaultMetricManager implements SpiMetricManager {
     return coreJvmMetrics.values();
   }
 
-  @Override
-  public List<MetricStatistics> collectNonEmptyJvmMetrics() {
+  /**
+   * Return the request timings that have been collected since the last collection.
+   */
+  public List<RequestTiming> collectRequestTimings() {
 
-    DStatsCollector collector = new DStatsCollector();
+    List<RequestTiming> list = new ArrayList<>();
+    RequestTiming req;
+    while ((req = requestTimings.poll()) != null) {
+      list.add(req);
+    }
+    return list;
+  }
+
+  private void collectJvmMetrics(DStatsCollector collector) {
     for (Metric metric : coreJvmMetrics.values()) {
       metric.collect(collector);
     }
+  }
+
+  private void collectAppMetrics(DStatsCollector collector) {
+    for (Metric metric : metricsCache.values()) {
+      metric.collect(collector);
+    }
+    for (MetricSupplier supplier : suppliers) {
+      collector.addAll(supplier.collectMetrics());
+    }
+  }
+
+  @Override
+  public List<MetricStatistics> collectNonEmptyMetrics() {
+    synchronized (monitor) {
+      DStatsCollector collector = new DStatsCollector();
+      collectAppMetrics(collector);
+      return collector.getList();
+    }
+  }
+
+  @Override
+  public List<MetricStatistics> collectNonEmptyJvmMetrics() {
+    DStatsCollector collector = new DStatsCollector();
+    collectJvmMetrics(collector);
     return collector.getList();
+  }
+
+  @Override
+  public List<MetricStatistics> collectMetrics() {
+    synchronized (monitor) {
+      DStatsCollector collector = new DStatsCollector();
+      collectJvmMetrics(collector);
+      collectAppMetrics(collector);
+      return collector.getList();
+    }
+  }
+
+  @Override
+  public MetricStatisticsAsJson collectAsJson() {
+    return new DefaultMetricStatisticsAsJson(this);
   }
 
   /**

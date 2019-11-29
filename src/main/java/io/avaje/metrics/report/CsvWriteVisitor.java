@@ -23,57 +23,54 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   /**
    * Code for GaugeLongMetric.
    */
-  private static final String TYPE_LONG_METRIC = "lm";
+  static final String TYPE_LONG_METRIC = "lm";
 
   /**
    * Code for GaugeDoubleMetric.
    */
-  private static final String TYPE_DOUBLE_METRIC = "dm";
+  static final String TYPE_DOUBLE_METRIC = "dm";
 
   /**
    * Code for CounterMetric.
    */
-  private static final String TYPE_COUNTER_METRIC = "cm";
+  static final String TYPE_COUNTER_METRIC = "cm";
 
   /**
    * Code for ValueMetric.
    */
-  private static final String TYPE_VALUE_METRIC = "vm";
+  static final String TYPE_VALUE_METRIC = "vm";
+
+  static final String TYPE_TIMED_METRIC = "tm";
 
   /**
    * The collection time which is typically HH:mm:ss format.
    */
-  protected final String collectTimeFormatted;
-
-  /**
-   * The time used to calculate metric duration.
-   */
-  protected final long collectTime;
+  private final String collectTimeFormatted;
 
   /**
    * The number of decimal places to format double values to.
    */
-  protected final int decimalPlaces;
+  private final int decimalPlaces;
 
   /**
    * Prefix between delimiters.
    */
-  protected final String delimiter;
+  private final String delimiter;
 
   /**
    * Suffix between delimiters.
    */
-  protected final String endOfLine;
+  private final String endOfLine;
 
   /**
    * The writer that we are writing to.
    */
-  protected final Writer writer;
+  private final Writer writer;
 
   /**
    * A threshold mean value used to suppress reporting of small timed metrics values.
    */
-  protected final long thresholdMean;
+  private final long thresholdMean;
 
   /**
    * Construct with a comma delimiter and newline character for the end of each metric.
@@ -98,7 +95,6 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   public CsvWriteVisitor(Writer writer, String collectTimeFormatted, int decimalPlaces,
                          String delimiter, String endOfLine, long thresholdMean) {
 
-    this.collectTime = System.currentTimeMillis();
     this.writer = writer;
     this.collectTimeFormatted = collectTimeFormatted;
     this.decimalPlaces = decimalPlaces;
@@ -117,16 +113,20 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     }
   }
 
-  protected void writeMetricName(MetricStatistics metric, String metricTypeCode) throws IOException {
+  private void writeMetricName(MetricStatistics metric, String metricTypeCode) throws IOException {
+    writeMetricName(metric.getName(), metricTypeCode);
+  }
+
+  private void writeMetricName(String metricName, String metricTypeCode) throws IOException {
 
     writer.write(collectTimeFormatted);
     writer.write(delimiter);
     writer.write(metricTypeCode);
     writer.write(delimiter);
-    writer.write(metric.getName());
+    writer.write(metricName);
   }
 
-  protected void writeMetricEnd(MetricStatistics metric) throws IOException {
+  private void writeMetricEnd() throws IOException {
     writer.write(endOfLine);
   }
 
@@ -142,14 +142,9 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
         }
       }
 
-      writeMetricName(metric, "tm");
-      if (metric.isBucket()) {
-        writer.write("[");
-        writer.write(metric.getBucketRange());
-        writer.write("]");
-      }
+      writeMetricName(metric.getNameWithBucket(), TYPE_TIMED_METRIC);
       writeSummary(metric);
-      writeMetricEnd(metric);
+      writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -161,7 +156,7 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     try {
       writeMetricName(metric, TYPE_VALUE_METRIC);
       writeSummary(metric);
-      writeMetricEnd(metric);
+      writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -173,7 +168,7 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     try {
       writeMetricName(metric, TYPE_COUNTER_METRIC);
       writeValue(String.valueOf(metric.getCount()));
-      writeMetricEnd(metric);
+      writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -184,7 +179,7 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     try {
       writeMetricName(metric, TYPE_DOUBLE_METRIC);
       writeValue(formattedValue(metric.getValue()));
-      writeMetricEnd(metric);
+      writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -195,13 +190,13 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     try {
       writeMetricName(metric, TYPE_LONG_METRIC);
       writeValue(String.valueOf(metric.getValue()));
-      writeMetricEnd(metric);
+      writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  protected void writeSummary(ValueStatistics valueStats) throws IOException {
+  private void writeSummary(ValueStatistics valueStats) throws IOException {
 
     long count = valueStats.getCount();
     write("count", count);
@@ -225,12 +220,12 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     writer.write(value);
   }
 
-  protected void writeValue(String value) throws IOException {
+  private void writeValue(String value) throws IOException {
     writer.write(delimiter);
     writer.write(value);
   }
 
-  protected String formattedValue(double value) {
+  private String formattedValue(double value) {
     return NumFormat.dp(decimalPlaces, value);
   }
 }

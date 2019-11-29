@@ -53,7 +53,12 @@ class DefaultValueStatistics implements TimedStatistics {
 
   @Override
   public String getName() {
-    return owner.name().getSimpleName();
+    return owner.getName();
+  }
+
+  @Override
+  public String getNameWithBucket() {
+    return owner.getNameWithBucket();
   }
 
   /**

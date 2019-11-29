@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.MetricName;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -9,7 +10,7 @@ public class ValueCounterTest {
   @Test
   public void testGetStatisticsWithNoReset() {
 
-    ValueCounter counter = new ValueCounter(null);
+    ValueCounter counter = new ValueCounter(MetricName.of("junk"));
     assertEquals(Long.MIN_VALUE, counter.getMax());
 
     counter.add(100);
@@ -29,7 +30,7 @@ public class ValueCounterTest {
   @Test
   public void test() {
 
-    ValueCounter counter = new ValueCounter(null);
+    ValueCounter counter = new ValueCounter(MetricName.of("junk"));
 
     assertEquals(0, counter.getCount());
     assertEquals(0, counter.getTotal());

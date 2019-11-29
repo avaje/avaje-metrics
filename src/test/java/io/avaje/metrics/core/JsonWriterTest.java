@@ -13,6 +13,7 @@ import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.ValueMetric;
 import io.avaje.metrics.report.HeaderInfo;
 import io.avaje.metrics.report.JsonWriteVisitor;
+import io.avaje.metrics.report.JsonWriter;
 import io.avaje.metrics.report.ReportMetrics;
 import io.avaje.metrics.statistics.CounterStatistics;
 import io.avaje.metrics.statistics.GaugeDoubleStatistics;
@@ -26,67 +27,68 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JsonWriteVisitorTest {
+public class JsonWriterTest {
 
   private static final long NANOS_TO_MICROS = 1000L;
 
   private static final long NANOS_TO_MILLIS = 1000000L;
 
 
-  private JsonWriteVisitor newJsonMetricVisitor(Writer writer) {
-    ReportMetrics m = new ReportMetrics(null, System.currentTimeMillis(), null, 60);
-    return new JsonWriteVisitor(writer, m);
+  private JsonWriter newJsonMetricVisitor(Writer writer) {
+    //ReportMetrics m = new ReportMetrics(null, System.currentTimeMillis(), null, 60);
+    return new JsonWriter(writer, Collections.emptyList());
   }
 
   @Test
-  public void testCounter() throws IOException {
+  public void testCounter() {
 
     StringWriter writer = new StringWriter();
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
     CounterMetric counter = createCounterMetric();
     jsonVisitor.visit((CounterStatistics) collectOne(counter));
 
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"counter\",\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
+    Assert.assertEquals("{\"type\":\"cm\",\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
   }
 
 
   @Test
-  public void testGaugeMetric() throws IOException {
+  public void testGaugeMetric() {
 
     StringWriter writer = new StringWriter();
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
     GaugeDoubleMetric metric = createGaugeMetric();
     jsonVisitor.visit((GaugeDoubleStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"gauge\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
+    Assert.assertEquals("{\"type\":\"dm\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
   }
 
   @Test
-  public void testValueMetric() throws IOException {
+  public void testValueMetric() {
 
     StringWriter writer = new StringWriter();
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
     ValueMetric metric = createValueMetric();
     jsonVisitor.visit((ValueStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"value\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"avg\":14,\"max\":16,\"sum\":42}", counterJson);
+    Assert.assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"sum\":42}", counterJson);
   }
 
   @Test
-  public void testTimedMetric() throws IOException {
+  public void testTimedMetric() {
 
     StringWriter writer = new StringWriter();
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
     TimedMetric metric = createTimedMetric();
     visitAllTimed(metric, jsonVisitor);
@@ -94,7 +96,7 @@ public class JsonWriteVisitorTest {
     String counterJson = writer.toString();
 
     // values converted into microseconds
-    String match = "{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"avg\":210,\"max\":220,\"sum\":420}{\"type\":\"timed\",\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"avg\":120,\"max\":140,\"sum\":360}";
+    String match = "{\"type\":\"tm\",\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"sum\":420}{\"type\":\"tm\",\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"sum\":360}";
     Assert.assertEquals(match, counterJson);
   }
 
@@ -103,16 +105,16 @@ public class JsonWriteVisitorTest {
    * Test using a BucketTimedMetric with all buckets having values.
    */
   @Test
-  public void testBucketTimedMetricFull() throws IOException {
+  public void testBucketTimedMetricFull() {
 
     StringWriter writer = new StringWriter();
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
     TimedMetric metric = createBucketTimedMetricFull();
     visitAllTimed(metric, jsonVisitor);
     String bucketJson = writer.toString();
 
-    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000}{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"150+\",\"count\":2,\"avg\":210000,\"max\":220000,\"sum\":420000}";
+    String match = "{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"sum\":360000}{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=150\",\"count\":2,\"mean\":210000,\"max\":220000,\"sum\":420000}";
     assertThat(bucketJson).contains(match);
   }
 
@@ -120,21 +122,21 @@ public class JsonWriteVisitorTest {
    * Test using a BucketTimedMetric with some buckets empty.
    */
   @Test
-  public void testBucketTimedMetricPartial() throws IOException {
+  public void testBucketTimedMetricPartial() {
 
     StringWriter writer = new StringWriter();
-    JsonWriteVisitor jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
     TimedMetric metric = createBucketTimedMetricPartial();
     visitAllTimed(metric, jsonVisitor);
 
     String bucketJson = writer.toString();
 
-    String match = "{\"type\":\"timed\",\"name\":\"org.test.BucketTimedFoo.doStuff\",\"bucket\":\"0-150\",\"count\":3,\"avg\":120000,\"max\":140000,\"sum\":360000}";
+    String match = "{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"sum\":360000}";
     assertThat(bucketJson).contains(match);
   }
 
-  private void visitAllTimed(Metric metric, JsonWriteVisitor jsonVisitor) {
+  private void visitAllTimed(Metric metric, JsonWriter jsonVisitor) {
 
     List<MetricStatistics> statistics = collectAll(metric);
     for (MetricStatistics statistic : statistics) {
@@ -222,8 +224,7 @@ public class JsonWriteVisitorTest {
 
   private GaugeDoubleMetric createGaugeMetric() {
     GaugeDouble gauge = () -> 24d;
-    GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
-    return metric;
+    return new DefaultGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
   }
 
   private ValueMetric createValueMetric() {
@@ -263,8 +264,6 @@ public class JsonWriteVisitorTest {
 
   /**
    * Create a BucketTimedMetric with some buckets completely empty
-   *
-   * @return
    */
   private TimedMetric createBucketTimedMetricPartial() {
 

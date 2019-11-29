@@ -1,30 +1,21 @@
 package io.avaje.metrics.report;
 
 
-import io.avaje.metrics.statistics.CounterStatistics;
-import io.avaje.metrics.statistics.GaugeDoubleStatistics;
-import io.avaje.metrics.statistics.GaugeLongStatistics;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import io.avaje.metrics.statistics.TimedStatistics;
-import io.avaje.metrics.statistics.ValueStatistics;
-
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 
 /**
  * Writes the metric information as JSON to a buffer for sending.
  */
-public class JsonWriteVisitor implements MetricStatisticsVisitor {
+public class JsonWriteVisitor {
 
-  protected final int decimalPlaces;
+  private final Appendable buffer;
 
-  protected final Writer buffer;
+  private final JsonWriter jsonWriter;
 
-  protected final long collectionTime;
+  private final long collectionTime;
 
-  protected final ReportMetrics reportMetrics;
+  private final ReportMetrics reportMetrics;
 
   /**
    * Construct with default formatting of 2 decimal places.
@@ -33,9 +24,9 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
     this(2, writer, reportMetrics);
   }
 
-  public JsonWriteVisitor(int decimalPlaces, Writer writer, ReportMetrics reportMetrics) {
-    this.decimalPlaces = decimalPlaces;
+  public JsonWriteVisitor(int decimalPlaces, Appendable writer, ReportMetrics reportMetrics) {
     this.buffer = writer;
+    this.jsonWriter = new JsonWriter(decimalPlaces, writer, reportMetrics.getMetrics());
     this.reportMetrics = reportMetrics;
     this.collectionTime = reportMetrics.getCollectionTime();
   }
@@ -46,29 +37,14 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
     appendHeader();
     writeKey("metrics");
     buffer.append("[\n");
-    appendMetricsJson();
+    jsonWriter.write();
+
     buffer.append("]");
     buffer.append("}");
 
   }
 
-  protected void appendMetricsJson() throws IOException {
-
-    List<MetricStatistics> metrics = reportMetrics.getMetrics();
-
-    for (int i = 0; i < metrics.size(); i++) {
-      if (i == 0) {
-        buffer.append("  ");
-      } else {
-        buffer.append(" ,");
-      }
-      MetricStatistics metric = metrics.get(i);
-      metric.visit(this);
-      buffer.append("\n");
-    }
-  }
-
-  protected void appendHeader() throws IOException {
+  private void appendHeader() throws IOException {
 
     HeaderInfo headerInfo = reportMetrics.getHeaderInfo();
     writeHeader("collected", reportMetrics.getCollectionTime());
@@ -78,138 +54,29 @@ public class JsonWriteVisitor implements MetricStatisticsVisitor {
     writeHeader("server", headerInfo.getServer());
   }
 
-  protected void writeMetricStart(String type, MetricStatistics metric) throws IOException {
-
-    buffer.append("{");
-    writeKey("type");
-    writeValue(type);
-    buffer.append(",");
-    writeKey("name");
-    writeValue(metric.getName());
-    buffer.append(",");
-  }
-
-  protected void writeMetricEnd(MetricStatistics metric) {
-    try {
-      buffer.append("}");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public void visit(TimedStatistics metric) {
-    try {
-      writeMetricStart("timed", metric);
-      if (metric.isBucket()) {
-        writeHeader("bucket", metric.getBucketRange());
-      }
-      writeSummary(metric);
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public void visit(ValueStatistics metric) {
-    try {
-      writeMetricStart("value", metric);
-      writeSummary(metric);
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public void visit(CounterStatistics metric) {
-    try {
-      writeMetricStart("counter", metric);
-      writeKeyNumber("value", metric.getCount());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public void visit(GaugeDoubleStatistics metric) {
-    try {
-      writeMetricStart("gauge", metric);
-      writeKeyNumber("value", format(metric.getValue()));
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public void visit(GaugeLongStatistics metric) {
-    try {
-      writeMetricStart("gaugeCounter", metric);
-      writeKeyNumber("value", metric.getValue());
-      writeMetricEnd(metric);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  protected void writeSummary(ValueStatistics valueStats) throws IOException {
-
-    // valueStats == null when BucketTimedMetric and the bucket is empty
-    long count = (valueStats == null) ? 0 : valueStats.getCount();
-
-    writeKeyNumber("count", count);
-    if (count != 0) {
-      buffer.append(",");
-      writeKeyNumber("avg", valueStats.getMean());
-      buffer.append(",");
-      writeKeyNumber("max", valueStats.getMax());
-      buffer.append(",");
-      writeKeyNumber("sum", valueStats.getTotal());
-    }
-  }
-
-  protected String format(double value) {
-    return NumFormat.dp(decimalPlaces, value);
-  }
-
-  protected void writeKeyNumber(String key, long numberValue) throws IOException {
-    writeKeyNumber(key, String.valueOf(numberValue));
-  }
-
-  protected void writeKeyNumber(String key, String numberValue) throws IOException {
-    writeKey(key);
-    writeNumberValue(numberValue);
-  }
-
-  public void writeHeader(String key, String value) throws IOException {
+  private void writeHeader(String key, String value) throws IOException {
     writeKey(key);
     writeValue(value);
     buffer.append(",");
   }
 
-  public void writeHeader(String key, long value) throws IOException {
+  private  void writeHeader(String key, long value) throws IOException {
     writeKey(key);
     buffer.append(String.valueOf(value));
     buffer.append(",");
   }
 
-  protected void writeKey(String key) throws IOException {
+  private  void writeKey(String key) throws IOException {
     buffer.append("\"");
     buffer.append(key);
     buffer.append("\":");
   }
 
-  protected void writeValue(String val) throws IOException {
+  private  void writeValue(String val) throws IOException {
     buffer.append("\"");
     buffer.append(val);
     buffer.append("\"");
   }
 
-  protected void writeNumberValue(String val) throws IOException {
-    buffer.append(val);
-  }
 
 }

@@ -113,6 +113,11 @@ class AggregatorTimedRequest {
     }
 
     @Override
+    public String getNameWithBucket() {
+      return getName();
+    }
+
+    @Override
     public void visit(MetricStatisticsVisitor visitor) {
       visitor.visit(this);
     }

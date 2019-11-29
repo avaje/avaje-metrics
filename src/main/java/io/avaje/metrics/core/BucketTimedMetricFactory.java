@@ -24,7 +24,7 @@ class BucketTimedMetricFactory implements MetricFactory<TimedMetric> {
   }
 
   private static TimedMetric createTimedMetric(MetricName name, int rangeBottom, int rangeTop) {
-    String suffix = (rangeTop == 0) ? rangeBottom + "+" : rangeBottom + "-" + rangeTop;
+    String suffix = (rangeTop == 0) ? String.valueOf(rangeBottom) : rangeBottom + "-" + rangeTop;
     return new DefaultTimedMetric(name, suffix);
   }
 

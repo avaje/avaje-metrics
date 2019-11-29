@@ -15,7 +15,6 @@ import io.avaje.metrics.statistics.TimedStatistics;
 import io.avaje.metrics.statistics.ValueStatistics;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -24,13 +23,10 @@ import static org.testng.Assert.assertEquals;
 
 public class CsvWriteVisitorTest {
 
-  private static long NANOS_TO_MICROS = 1000L;
-
   private static long NANOS_TO_MILLIS = 1000000L;
 
-
   @Test
-  public void testCounter() throws IOException {
+  public void testCounter() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
@@ -150,13 +146,13 @@ public class CsvWriteVisitorTest {
 
     assertThat(lines[0]).contains("org.test.BucketTimedFoo.doStuff.error,count=4,avg=137500,max=220000,sum=550000");
 
-    assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff[0-150]");
+    assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff;bucket=0-150");
     assertThat(lines[1]).contains(",count=3,");
     assertThat(lines[1]).contains(",avg=120000,");
     assertThat(lines[1]).contains(",max=140000,");
     assertThat(lines[1]).contains(",sum=360000");
 
-    assertThat(lines[2]).contains(",org.test.BucketTimedFoo.doStuff[150+]");
+    assertThat(lines[2]).contains(",org.test.BucketTimedFoo.doStuff;bucket=150");
     assertThat(lines[2]).contains(",count=2,");
     assertThat(lines[2]).contains(",avg=210000,");
     assertThat(lines[2]).contains(",max=220000,");
@@ -184,7 +180,7 @@ public class CsvWriteVisitorTest {
     String[] lines = csvContent.split("\n");
     assertEquals(1, lines.length);
 
-    assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff[0-150],");
+    assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff;bucket=0-150,");
     assertThat(lines[0]).contains(",count=3,");
     assertThat(lines[0]).contains(",avg=120000,");
     assertThat(lines[0]).contains(",max=140000,");
@@ -200,8 +196,7 @@ public class CsvWriteVisitorTest {
 
   private GaugeDoubleMetric createGaugeMetric() {
     GaugeDouble gauge = () -> 24d;
-    GaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
-    return metric;
+    return new DefaultGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
   }
 
   private ValueMetric createValueMetric() {
@@ -217,6 +212,7 @@ public class CsvWriteVisitorTest {
     TimedMetric metric = new DefaultTimedMetric(MetricName.of("org.test.TimedFoo.doStuff"));
 
     // add duration times in nanos
+    long NANOS_TO_MICROS = 1000L;
     metric.addEventDuration(true, 100 * NANOS_TO_MICROS); // 100 micros
     metric.addEventDuration(true, 120 * NANOS_TO_MICROS); // 120 micros
     metric.addEventDuration(true, 140 * NANOS_TO_MICROS);

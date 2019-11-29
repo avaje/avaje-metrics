@@ -17,9 +17,11 @@ final class ValueCounter {
 
   private static final String noBuckets = "";
 
-  private final MetricName name;
+  private final String name;
 
   private final boolean withBucket;
+
+  private final String nameWithBucket;
 
   private final String bucketRange;
 
@@ -32,19 +34,25 @@ final class ValueCounter {
   private final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
 
   ValueCounter(MetricName name) {
-    this.name = name;
+    this.name = name.getSimpleName();
     this.withBucket = false;
     this.bucketRange = noBuckets;
+    this.nameWithBucket = name.getSimpleName();
   }
 
   ValueCounter(MetricName name, String bucketRange) {
-    this.name = name;
+    this.name = name.getSimpleName();
     this.withBucket = true;
     this.bucketRange = bucketRange;
+    this.nameWithBucket = this.name + ";bucket=" + bucketRange;
   }
 
-  MetricName name() {
+  String getName() {
     return name;
+  }
+
+  String getNameWithBucket() {
+    return nameWithBucket;
   }
 
   boolean isBucket() {
