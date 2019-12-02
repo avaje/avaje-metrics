@@ -40,7 +40,6 @@ public class JsonWriterTest {
 
 
   private JsonWriter newJsonMetricVisitor(Writer writer) {
-    //ReportMetrics m = new ReportMetrics(null, System.currentTimeMillis(), null, 60);
     return new JsonWriter(writer, Collections.emptyList());
   }
 
@@ -55,7 +54,7 @@ public class JsonWriterTest {
 
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"cm\",\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
+    Assert.assertEquals("{\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
   }
 
 
@@ -63,7 +62,7 @@ public class JsonWriterTest {
   public void testGaugeMetric() {
 
     StringWriter writer = new StringWriter();
-    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
     GaugeDoubleMetric metric = createGaugeMetric();
     jsonVisitor.visit((GaugeDoubleStatistics) collectOne(metric));
     String counterJson = writer.toString();
@@ -75,7 +74,7 @@ public class JsonWriterTest {
   public void testValueMetric() {
 
     StringWriter writer = new StringWriter();
-    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
 
     ValueMetric metric = createValueMetric();
     jsonVisitor.visit((ValueStatistics) collectOne(metric));
@@ -96,7 +95,7 @@ public class JsonWriterTest {
     String counterJson = writer.toString();
 
     // values converted into microseconds
-    String match = "{\"type\":\"tm\",\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"sum\":420}{\"type\":\"tm\",\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"sum\":360}";
+    String match = "{\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"sum\":420}{\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"sum\":360}";
     Assert.assertEquals(match, counterJson);
   }
 
@@ -108,7 +107,7 @@ public class JsonWriterTest {
   public void testBucketTimedMetricFull() {
 
     StringWriter writer = new StringWriter();
-    JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
+    JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
 
     TimedMetric metric = createBucketTimedMetricFull();
     visitAllTimed(metric, jsonVisitor);
@@ -132,7 +131,7 @@ public class JsonWriterTest {
 
     String bucketJson = writer.toString();
 
-    String match = "{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"sum\":360000}";
+    String match = "{\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"sum\":360000}";
     assertThat(bucketJson).contains(match);
   }
 

@@ -27,6 +27,8 @@ public class JsonWriter implements MetricStatisticsVisitor {
 
   private final Appendable buffer;
 
+  private boolean includeType;
+
   private final List<MetricStatistics> metrics;
 
   public static void writeTo(Appendable writer, List<MetricStatistics> metrics) {
@@ -41,6 +43,14 @@ public class JsonWriter implements MetricStatisticsVisitor {
     this.decimalPlaces = decimalPlaces;
     this.buffer = writer;
     this.metrics = metrics;
+  }
+
+  /**
+   * Set to true to include the metric type in the JSON output.
+   */
+  public JsonWriter withType(boolean includeType) {
+    this.includeType = includeType;
+    return this;
   }
 
   public void write() {
@@ -68,9 +78,11 @@ public class JsonWriter implements MetricStatisticsVisitor {
   private void writeMetricStart(String type, String name) throws IOException {
 
     buffer.append("{");
-    writeKey("type");
-    writeValue(type);
-    buffer.append(",");
+    if (includeType) {
+      writeKey("type");
+      writeValue(type);
+      buffer.append(",");
+    }
     writeKey("name");
     writeValue(name);
     buffer.append(",");
