@@ -72,6 +72,8 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
    */
   private final long thresholdMean;
 
+  private boolean includeType;
+
   /**
    * Construct with a comma delimiter and newline character for the end of each metric.
    *
@@ -104,6 +106,14 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   }
 
   /**
+   * Set to true to include the metric type in the JSON output.
+   */
+  public CsvWriteVisitor withType(boolean includeType) {
+    this.includeType = includeType;
+    return this;
+  }
+
+  /**
    * Write the metrics out in CSV format.
    */
   public void write(ReportMetrics reportMetrics) {
@@ -121,8 +131,10 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
 
     writer.write(collectTimeFormatted);
     writer.write(delimiter);
-    writer.write(metricTypeCode);
-    writer.write(delimiter);
+    if (includeType) {
+      writer.write(metricTypeCode);
+      writer.write(delimiter);
+    }
     writer.write(metricName);
   }
 
@@ -203,9 +215,9 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
     if (count == 0) {
       return;
     }
-    write("avg", valueStats.getMean());
+    write("mean", valueStats.getMean());
     write("max", valueStats.getMax());
-    write("sum", valueStats.getTotal());
+    write("total", valueStats.getTotal());
   }
 
   protected void write(String name, long value) throws IOException {

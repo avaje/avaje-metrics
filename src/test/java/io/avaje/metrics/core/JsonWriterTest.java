@@ -80,7 +80,7 @@ public class JsonWriterTest {
     jsonVisitor.visit((ValueStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"sum\":42}", counterJson);
+    Assert.assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"total\":42}", counterJson);
   }
 
   @Test
@@ -95,7 +95,7 @@ public class JsonWriterTest {
     String counterJson = writer.toString();
 
     // values converted into microseconds
-    String match = "{\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"sum\":420}{\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"sum\":360}";
+    String match = "{\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"total\":420}{\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"total\":360}";
     Assert.assertEquals(match, counterJson);
   }
 
@@ -113,7 +113,7 @@ public class JsonWriterTest {
     visitAllTimed(metric, jsonVisitor);
     String bucketJson = writer.toString();
 
-    String match = "{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"sum\":360000}{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=150\",\"count\":2,\"mean\":210000,\"max\":220000,\"sum\":420000}";
+    String match = "{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"total\":360000}{\"type\":\"tm\",\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=150\",\"count\":2,\"mean\":210000,\"max\":220000,\"total\":420000}";
     assertThat(bucketJson).contains(match);
   }
 
@@ -131,7 +131,7 @@ public class JsonWriterTest {
 
     String bucketJson = writer.toString();
 
-    String match = "{\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"sum\":360000}";
+    String match = "{\"name\":\"org.test.BucketTimedFoo.doStuff;bucket=0-150\",\"count\":3,\"mean\":120000,\"max\":140000,\"total\":360000}";
     assertThat(bucketJson).contains(match);
   }
 

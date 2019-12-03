@@ -82,9 +82,9 @@ public class CsvWriteVisitorTest {
 
     assertThat(csvContent).contains(",org.test.ValueFoo.doStuff,");
     assertThat(csvContent).contains(",count=3,");
-    assertThat(csvContent).contains(",avg=14,");
+    assertThat(csvContent).contains(",mean=14,");
     assertThat(csvContent).contains(",max=16,");
-    assertThat(csvContent).contains(",sum=42");
+    assertThat(csvContent).contains(",total=42");
   }
 
 
@@ -106,16 +106,16 @@ public class CsvWriteVisitorTest {
 
     assertThat(lines[0]).contains(",org.test.TimedFoo.doStuff.error,");
     assertThat(lines[0]).contains(",count=2,");
-    assertThat(lines[0]).contains(",avg=210,");
+    assertThat(lines[0]).contains(",mean=210,");
     assertThat(lines[0]).contains(",max=220,");
-    assertThat(lines[0]).contains(",sum=420");
+    assertThat(lines[0]).contains(",total=420");
 
     // values converted into microseconds
     assertThat(lines[1]).contains(",org.test.TimedFoo.doStuff,");
     assertThat(lines[1]).contains(",count=3,");
-    assertThat(lines[1]).contains(",avg=120,");
+    assertThat(lines[1]).contains(",mean=120,");
     assertThat(lines[1]).contains(",max=140,");
-    assertThat(lines[1]).contains(",sum=360");
+    assertThat(lines[1]).contains(",total=360");
   }
 
 
@@ -144,19 +144,19 @@ public class CsvWriteVisitorTest {
     String[] lines = csvContent.split("\n");
     assertEquals(3, lines.length);
 
-    assertThat(lines[0]).contains("org.test.BucketTimedFoo.doStuff.error,count=4,avg=137500,max=220000,sum=550000");
+    assertThat(lines[0]).contains("org.test.BucketTimedFoo.doStuff.error,count=4,mean=137500,max=220000,total=550000");
 
     assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff;bucket=0-150");
     assertThat(lines[1]).contains(",count=3,");
-    assertThat(lines[1]).contains(",avg=120000,");
+    assertThat(lines[1]).contains(",mean=120000,");
     assertThat(lines[1]).contains(",max=140000,");
-    assertThat(lines[1]).contains(",sum=360000");
+    assertThat(lines[1]).contains(",total=360000");
 
     assertThat(lines[2]).contains(",org.test.BucketTimedFoo.doStuff;bucket=150");
     assertThat(lines[2]).contains(",count=2,");
-    assertThat(lines[2]).contains(",avg=210000,");
+    assertThat(lines[2]).contains(",mean=210000,");
     assertThat(lines[2]).contains(",max=220000,");
-    assertThat(lines[2]).contains(",sum=420000");
+    assertThat(lines[2]).contains(",total=420000");
   }
 
   /**
@@ -182,9 +182,9 @@ public class CsvWriteVisitorTest {
 
     assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff;bucket=0-150,");
     assertThat(lines[0]).contains(",count=3,");
-    assertThat(lines[0]).contains(",avg=120000,");
+    assertThat(lines[0]).contains(",mean=120000,");
     assertThat(lines[0]).contains(",max=140000,");
-    assertThat(lines[0]).contains(",sum=360000");
+    assertThat(lines[0]).contains(",total=360000");
   }
 
 

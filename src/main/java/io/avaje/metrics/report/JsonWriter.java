@@ -163,7 +163,7 @@ public class JsonWriter implements MetricStatisticsVisitor {
       buffer.append(",");
       writeKeyNumber("max", valueStats.getMax());
       buffer.append(",");
-      writeKeyNumber("sum", valueStats.getTotal());
+      writeKeyNumber("total", valueStats.getTotal());
     }
   }
 
