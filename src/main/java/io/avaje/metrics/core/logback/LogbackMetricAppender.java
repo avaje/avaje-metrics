@@ -29,7 +29,6 @@ public final class LogbackMetricAppender extends AppenderBase<ILoggingEvent> {
    */
   @Override
   protected void append(ILoggingEvent event) {
-
     switch (event.getLevel().toInt()) {
       case Level.WARN_INT:
         warnMetric.inc();

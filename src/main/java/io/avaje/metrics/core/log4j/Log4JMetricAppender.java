@@ -31,8 +31,6 @@ public class Log4JMetricAppender extends AbstractAppender {
         warnMetric.inc();
         break;
       case ERROR:
-        errorMetric.inc();
-        break;
       case FATAL:
         errorMetric.inc();
         break;
