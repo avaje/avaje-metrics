@@ -61,7 +61,7 @@ public class DefaultMetricManager implements SpiMetricManager {
   /**
    * Cache of the code JVM metrics.
    */
-  private final ConcurrentHashMap<String, Metric> coreJvmMetrics = new ConcurrentHashMap<>();
+  private final List<Metric> coreJvmMetrics = new ArrayList<>();
 
   /**
    * Cache of the created metrics (excluding JVM metrics).
@@ -214,12 +214,11 @@ public class DefaultMetricManager implements SpiMetricManager {
    * Register the standard JVM metrics.
    */
   @Override
-  public JvmMetrics registerStandardJvmMetrics() {
-
+  public JvmMetrics registerJvmMetrics() {
     registerJvmGCMetrics();
     registerJvmMemoryMetrics();
-    registerJvmThreadMetrics();
     registerProcessMemoryMetrics();
+    registerJvmThreadMetrics();
     registerJvmOsLoadMetric();
     return this;
   }
@@ -273,7 +272,9 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   private void registerJvmMetric(Metric m) {
-    coreJvmMetrics.put(m.getName().getSimpleName(), m);
+    synchronized (monitor) {
+      coreJvmMetrics.add(m);
+    }
   }
 
   @Override
@@ -509,7 +510,7 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public Collection<Metric> getJvmMetrics() {
-    return coreJvmMetrics.values();
+    return Collections.unmodifiableList(coreJvmMetrics);
   }
 
   /**
@@ -526,7 +527,7 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   private void collectJvmMetrics(DStatsCollector collector) {
-    for (Metric metric : coreJvmMetrics.values()) {
+    for (Metric metric : coreJvmMetrics) {
       metric.collect(collector);
     }
   }
@@ -551,9 +552,11 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public List<MetricStatistics> collectNonEmptyJvmMetrics() {
-    DStatsCollector collector = new DStatsCollector();
-    collectJvmMetrics(collector);
-    return collector.getList();
+    synchronized (monitor) {
+      DStatsCollector collector = new DStatsCollector();
+      collectJvmMetrics(collector);
+      return collector.getList();
+    }
   }
 
   @Override
