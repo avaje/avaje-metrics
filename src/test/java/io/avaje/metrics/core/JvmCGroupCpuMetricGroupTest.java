@@ -42,10 +42,11 @@ public class JvmCGroupCpuMetricGroupTest {
     FileLines source = new FileLines("src/test/resources/cgroup/cpu.stat");
     assertTrue(source.exists());
 
-    final JvmCGroupCpuMetricGroup.CpuThrottleMicros throttleMicros = new JvmCGroupCpuMetricGroup.CpuThrottleMicros(source);
+    final JvmCGroupCpuMetricGroup.CpuStatsSource cpuStats = new JvmCGroupCpuMetricGroup.CpuStatsSource(source);
 
-    final long value = throttleMicros.getValue();
-    assertThat(value).isEqualTo(87738876L);
+    assertThat(cpuStats.getThrottleMicros()).isEqualTo(87738876L);
+    assertThat(cpuStats.getNumPeriod()).isEqualTo(19295);
+    assertThat(cpuStats.getNumThrottle()).isEqualTo(802);
   }
 
   @Test

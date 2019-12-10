@@ -37,7 +37,7 @@ class JvmCGroupCpuMetricGroup {
 
     FileLines cpuStat = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.stat");
     if (cpuStat.exists()) {
-      add(createCGroupCpuThrottle(cpuStat));
+      createCGroupCpuThrottle(cpuStat);
     }
 
     FileLines cpuShares = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.shares");
@@ -96,12 +96,19 @@ class JvmCGroupCpuMetricGroup {
     return incrementing(name("jvm.cgroup.cpu.usageMicros"), new CpuUsageMicros(cpu));
   }
 
-  private GaugeLongMetric createCGroupCpuThrottle(FileLines cpuStat) {
-    return incrementing(name("jvm.cgroup.cpu.throttleMicros"), new CpuThrottleMicros(cpuStat));
+  private void createCGroupCpuThrottle(FileLines cpuStat) {
+    CpuStatsSource source = new CpuStatsSource(cpuStat);
+    metrics.add(incrementing(name("jvm.cgroup.cpu.throttleMicros"), source::getThrottleMicros));
+    metrics.add(gauge(name("jvm.cgroup.cpu.numPeriod"), source::getNumPeriod));
+    metrics.add(gauge(name("jvm.cgroup.cpu.numThrottle"), source::getNumThrottle));
   }
 
   private GaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
     return DefaultGaugeLongMetric.incrementing(name, gauge);
+  }
+
+  private GaugeLongMetric gauge(MetricName name, GaugeLong gauge) {
+    return new DefaultGaugeLongMetric(name, gauge);
   }
 
   private MetricName name(String s) {
@@ -122,27 +129,39 @@ class JvmCGroupCpuMetricGroup {
     }
   }
 
-  static class CpuThrottleMicros implements GaugeLong {
+  static class CpuStatsSource {
 
     private final FileLines source;
 
-    CpuThrottleMicros(FileLines source) {
+    private long numPeriod;
+    private long numThrottle;
+    private long throttleMicros;
+
+    CpuStatsSource(FileLines source) {
       this.source = source;
     }
 
-    @Override
-    public long getValue() {
-      return parse(source.readLines());
-    }
-
-    private long parse(List<String> lines) {
-      for (String line : lines) {
-        if (line.startsWith("throttled_time")) {
+    void load() {
+      for (String line : source.readLines()) {
+        if (line.startsWith("nr_p")) {
+          numPeriod = Long.parseLong(line.substring(11));
+        } else if (line.startsWith("nr_t")) {
           // convert from nanos to micros
-          return Long.parseLong(line.substring(15)) / 1000;
+          numThrottle = Long.parseLong(line.substring(13));
+        } else {
+          throttleMicros = Long.parseLong(line.substring(15)) / 1000;
         }
       }
-      return 0;
+    }
+    long getThrottleMicros() {
+      load();
+      return throttleMicros;
+    }
+    long getNumThrottle() {
+      return numThrottle;
+    }
+    long getNumPeriod() {
+      return numPeriod;
     }
   }
 
