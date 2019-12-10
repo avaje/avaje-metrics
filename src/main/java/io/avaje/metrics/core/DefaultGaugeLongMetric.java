@@ -106,9 +106,7 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
 
     @Override
     public long getValue() {
-
       synchronized (this) {
-
         long nowValue = super.getValue();
         long diffValue = nowValue - runningValue;
         runningValue = nowValue;

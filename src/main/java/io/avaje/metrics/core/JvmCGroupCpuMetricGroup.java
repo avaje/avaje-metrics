@@ -98,9 +98,10 @@ class JvmCGroupCpuMetricGroup {
 
   private void createCGroupCpuThrottle(FileLines cpuStat) {
     CpuStatsSource source = new CpuStatsSource(cpuStat);
-    metrics.add(incrementing(name("jvm.cgroup.cpu.throttleMicros"), source::getThrottleMicros));
+    metrics.add(gauge(name("jvm.cgroup.cpu.throttleMicros"), source::getThrottleMicros));
     metrics.add(gauge(name("jvm.cgroup.cpu.numPeriod"), source::getNumPeriod));
     metrics.add(gauge(name("jvm.cgroup.cpu.numThrottle"), source::getNumThrottle));
+    metrics.add(gauge(name("jvm.cgroup.cpu.pctThrottle"), source::getPctThrottle));
   }
 
   private GaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
@@ -133,6 +134,14 @@ class JvmCGroupCpuMetricGroup {
 
     private final FileLines source;
 
+    private long prevNumPeriod;
+    private long prevNumThrottle;
+    private long prevThrottleMicros;
+
+    private long currNumPeriod;
+    private long currNumThrottle;
+    private long currThrottleMicros;
+
     private long numPeriod;
     private long numThrottle;
     private long throttleMicros;
@@ -142,26 +151,41 @@ class JvmCGroupCpuMetricGroup {
     }
 
     void load() {
-      for (String line : source.readLines()) {
-        if (line.startsWith("nr_p")) {
-          numPeriod = Long.parseLong(line.substring(11));
-        } else if (line.startsWith("nr_t")) {
-          // convert from nanos to micros
-          numThrottle = Long.parseLong(line.substring(13));
-        } else {
-          throttleMicros = Long.parseLong(line.substring(15)) / 1000;
+      synchronized (this) {
+        for (String line : source.readLines()) {
+          if (line.startsWith("nr_p")) {
+            currNumPeriod = Long.parseLong(line.substring(11));
+          } else if (line.startsWith("nr_t")) {
+            // convert from nanos to micros
+            currNumThrottle = Long.parseLong(line.substring(13));
+          } else {
+            currThrottleMicros = Long.parseLong(line.substring(15)) / 1000;
+          }
         }
+        numPeriod = currNumPeriod - prevNumPeriod;
+        numThrottle = currNumThrottle - prevNumThrottle;
+        throttleMicros = currThrottleMicros - prevThrottleMicros;
+        prevNumPeriod = currNumPeriod;
+        prevNumThrottle = currNumThrottle;
+        prevThrottleMicros = currThrottleMicros;
       }
     }
+
     long getThrottleMicros() {
       load();
       return throttleMicros;
     }
+
     long getNumThrottle() {
       return numThrottle;
     }
+
     long getNumPeriod() {
       return numPeriod;
+    }
+
+    long getPctThrottle() {
+      return (numPeriod <= 0) ? 0 : numThrottle * 100 / numPeriod;
     }
   }
 
