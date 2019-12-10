@@ -27,18 +27,18 @@ class JvmCGroupMemoryMetricGroup {
   }
 
   private List<Metric> metrics() {
-
     FileLines memLimit = new FileLines("/sys/fs/cgroup/memory/memory.limit_in_bytes");
     FileLines memUsage = new FileLines("/sys/fs/cgroup/memory/memory.usage_in_bytes");
     if (memLimit.exists() && memUsage.exists()) {
       long limitInBytes = memLimit.single();
-
       MemSource source = new MemSource(limitInBytes, memUsage);
-      add(createMemoryLimit(source));
       add(createMemoryUsage(source));
-      add(createMemoryPctUsage(source));
+      if (limitInBytes < 1_000_000_000_000L) {
+        // only include when limit is in effect
+        add(createMemoryLimit(source));
+        add(createMemoryPctUsage(source));
+      }
     }
-
     return metrics;
   }
 
