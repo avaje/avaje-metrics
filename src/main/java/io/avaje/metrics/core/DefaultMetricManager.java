@@ -52,7 +52,8 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   private final Object monitor = new Object();
 
-  private boolean reportChangesOnly = true;
+  private boolean withDetails;
+  private boolean reportChangesOnly;
 
   private String logErrorName = "app.log.error";
 
@@ -192,6 +193,12 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   @Override
+  public JvmMetrics withDetails() {
+    withDetails = true;
+    return this;
+  }
+
+  @Override
   public JvmMetrics withLogMetricName(String errorMetricName, String warnMetricName) {
     this.logErrorName = errorMetricName;
     this.logWarnName = warnMetricName;
@@ -231,8 +238,8 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    registerAll(JvmCGroupCpuMetricGroup.createGauges());
-    registerAll(JvmCGroupMemoryMetricGroup.createGauges());
+    registerAll(JvmCGroupCpuMetricGroup.createGauges(reportChangesOnly));
+    registerAll(JvmCGroupMemoryMetricGroup.createGauges(reportChangesOnly));
     return this;
   }
 
@@ -248,13 +255,13 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public JvmMetrics registerJvmThreadMetrics() {
-    registerAll(JvmThreadMetricGroup.createThreadMetricGroup(reportChangesOnly));
+    registerAll(JvmThreadMetricGroup.createThreadMetricGroup(reportChangesOnly, withDetails));
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmGCMetrics() {
-    registerAll(JvmGarbageCollectionMetricGroup.createGauges());
+    registerAll(JvmGarbageCollectionMetricGroup.createGauges(withDetails));
     return this;
   }
 

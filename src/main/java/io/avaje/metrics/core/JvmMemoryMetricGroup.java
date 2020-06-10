@@ -12,6 +12,8 @@ import java.util.List;
 
 final class JvmMemoryMetricGroup {
 
+  private static final long MEGABYTES = 1024 * 1024L;
+
   /**
    * Helper interface for Heap and NonHeap MemorySource.
    */
@@ -48,8 +50,6 @@ final class JvmMemoryMetricGroup {
       return memoryMXBean.getNonHeapMemoryUsage();
     }
   }
-
-  private static final long MEGABYTES = 1024 * 1024L;
 
   /**
    * Create the Heap Memory based GaugeMetricGroup.
@@ -114,7 +114,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Init extends Base implements GaugeLong {
+    private static class Init extends Base implements GaugeLong {
       Init(MemoryUsageSource source) {
         super(source);
       }
@@ -125,7 +125,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Used extends Base implements GaugeLong {
+    private static class Used extends Base implements GaugeLong {
       Used(MemoryUsageSource source) {
         super(source);
       }
@@ -136,7 +136,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Committed extends Base implements GaugeLong {
+    private static class Committed extends Base implements GaugeLong {
       Committed(MemoryUsageSource source) {
         super(source);
       }
@@ -147,7 +147,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Max extends Base implements GaugeLong {
+    private static class Max extends Base implements GaugeLong {
       Max(MemoryUsageSource source) {
         super(source);
       }
@@ -158,7 +158,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private class Pct extends Base implements GaugeLong {
+    private static class Pct extends Base implements GaugeLong {
       Pct(MemoryUsageSource source) {
         super(source);
       }

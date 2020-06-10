@@ -16,8 +16,8 @@ class JvmCGroupMemoryMetricGroup {
   /**
    * Return the list of OS process memory metrics.
    */
-  static List<Metric> createGauges() {
-    return new JvmCGroupMemoryMetricGroup().metrics();
+  static List<Metric> createGauges(boolean reportChangesOnly) {
+    return new JvmCGroupMemoryMetricGroup().metrics(reportChangesOnly);
   }
 
   private void add(Metric metric) {
@@ -26,17 +26,17 @@ class JvmCGroupMemoryMetricGroup {
     }
   }
 
-  private List<Metric> metrics() {
+  private List<Metric> metrics(boolean reportChangesOnly) {
     FileLines memLimit = new FileLines("/sys/fs/cgroup/memory/memory.limit_in_bytes");
     FileLines memUsage = new FileLines("/sys/fs/cgroup/memory/memory.usage_in_bytes");
     if (memLimit.exists() && memUsage.exists()) {
       long limitInBytes = memLimit.single();
       MemSource source = new MemSource(limitInBytes, memUsage);
-      add(createMemoryUsage(source));
+      add(createMemoryUsage(source, reportChangesOnly));
       if (limitInBytes < 1_000_000_000_000L) {
         // only include when limit is in effect
-        add(createMemoryLimit(source));
-        add(createMemoryPctUsage(source));
+        add(createMemoryLimit(source, reportChangesOnly));
+        add(createMemoryPctUsage(source, reportChangesOnly));
       }
     }
     return metrics;
@@ -50,7 +50,7 @@ class JvmCGroupMemoryMetricGroup {
 
     private final FileLines memUsage;
 
-    private long limitMb;
+    private final long limitMb;
     private long usageMb;
     private long pctUsage;
 
@@ -81,16 +81,16 @@ class JvmCGroupMemoryMetricGroup {
     }
   }
 
-  GaugeLongMetric createMemoryUsage(MemSource source) {
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.usageMb"), source::getUsageMb);
+  GaugeLongMetric createMemoryUsage(MemSource source, boolean reportChangesOnly) {
+    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.usageMb"), source::getUsageMb, reportChangesOnly);
   }
 
-  GaugeLongMetric createMemoryPctUsage(MemSource source) {
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.pctUsage"), source::getPctUsage);
+  GaugeLongMetric createMemoryPctUsage(MemSource source, boolean reportChangesOnly) {
+    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.pctUsage"), source::getPctUsage, reportChangesOnly);
   }
 
-  GaugeLongMetric createMemoryLimit(MemSource source) {
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb);
+  GaugeLongMetric createMemoryLimit(MemSource source, boolean reportChangesOnly) {
+    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb, reportChangesOnly);
   }
 
   private MetricName name(String s) {

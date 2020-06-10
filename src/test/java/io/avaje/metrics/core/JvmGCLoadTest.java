@@ -14,8 +14,7 @@ public class JvmGCLoadTest {
   @Test
   public void test() throws InterruptedException {
 
-    List<Metric> metrics = JvmGarbageCollectionMetricGroup.createGauges();
-
+    List<Metric> metrics = JvmGarbageCollectionMetricGroup.createGauges(true);
     for (int i = 0; i < 3; i++) {
       doSomething(metrics);
     }
