@@ -11,44 +11,51 @@ import java.util.List;
 
 final class JvmThreadMetricGroup {
 
-  static List<Metric> createThreadMetricGroup(boolean reportChangesOnly) {
-
-    GaugeLong[] gauges = new ThreadGauges(ManagementFactory.getThreadMXBean()).getGauges();
-
-    MetricName baseName = new DefaultMetricName("jvm.threads");
-
-    List<Metric> metrics = new ArrayList<>(3);
-    metrics.add(new DefaultGaugeLongMetric(baseName.append("current"), gauges[0], reportChangesOnly));
-    metrics.add(new DefaultGaugeLongMetric(baseName.append("peak"), gauges[1], reportChangesOnly));
-    metrics.add(new DefaultGaugeLongMetric(baseName.append("daemon"), gauges[2], reportChangesOnly));
-    return metrics;
+  static List<Metric> createThreadMetricGroup(boolean reportChangesOnly, boolean withDetails) {
+    ThreadGauges threadGauges = new ThreadGauges(ManagementFactory.getThreadMXBean());
+    return threadGauges.createMetrics(reportChangesOnly, withDetails);
   }
-
 
   private static class ThreadGauges {
 
     private final ThreadMXBean threadMXBean;
-    private final GaugeLong[] gauges = new GaugeLong[3];
 
     ThreadGauges(ThreadMXBean threadMXBean) {
       this.threadMXBean = threadMXBean;
-      gauges[0] = new Count();
-      gauges[1] = new Peak();
-      gauges[2] = new Daemon();
     }
 
-    GaugeLong[] getGauges() {
-      return gauges;
+    public List<Metric> createMetrics(boolean reportChangesOnly, boolean withDetails) {
+      MetricName baseName = new DefaultMetricName("jvm.threads");
+      List<Metric> metrics = new ArrayList<>(3);
+
+      metrics.add(new DefaultGaugeLongMetric(baseName.append("current"), new Count(threadMXBean), reportChangesOnly));
+      if (withDetails) {
+        metrics.add(new DefaultGaugeLongMetric(baseName.append("peak"), new Peak(threadMXBean), reportChangesOnly));
+        metrics.add(new DefaultGaugeLongMetric(baseName.append("daemon"), new Daemon(threadMXBean), reportChangesOnly));
+      }
+      return metrics;
     }
 
-    class Count implements GaugeLong {
+    static class Count implements GaugeLong {
+      private final ThreadMXBean threadMXBean;
+
+      Count(ThreadMXBean threadMXBean) {
+        this.threadMXBean = threadMXBean;
+      }
+
       @Override
       public long getValue() {
         return threadMXBean.getThreadCount();
       }
     }
 
-    class Peak implements GaugeLong {
+    static class Peak implements GaugeLong {
+      private final ThreadMXBean threadMXBean;
+
+      Peak(ThreadMXBean threadMXBean) {
+        this.threadMXBean = threadMXBean;
+      }
+
       @Override
       public long getValue() {
         // read and reset the peak
@@ -58,7 +65,13 @@ final class JvmThreadMetricGroup {
       }
     }
 
-    class Daemon implements GaugeLong {
+    static class Daemon implements GaugeLong {
+      private final ThreadMXBean threadMXBean;
+
+      Daemon(ThreadMXBean threadMXBean) {
+        this.threadMXBean = threadMXBean;
+      }
+
       @Override
       public long getValue() {
         return threadMXBean.getDaemonThreadCount();

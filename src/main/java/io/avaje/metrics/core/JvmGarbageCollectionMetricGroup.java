@@ -14,18 +14,20 @@ import java.util.List;
  */
 final class JvmGarbageCollectionMetricGroup {
 
-  static List<Metric> createGauges() {
+  static List<Metric> createGauges(boolean withDetails) {
 
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
     List<Metric> metrics = new ArrayList<>();
     metrics.add(createTotalGcTime(garbageCollectorMXBeans));
 
-    for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
-      // modify collector name replacing spaces with hyphens.
-      String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-').replace(".","");
-      metrics.add(DefaultGaugeLongMetric.incrementing(name("count", gcName), new Count(gcMXBean)));
-      metrics.add(DefaultGaugeLongMetric.incrementing(name("time", gcName), new Time(gcMXBean)));
+    if (withDetails) {
+      for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
+        // modify collector name replacing spaces with hyphens.
+        String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-').replace(".", "");
+        metrics.add(DefaultGaugeLongMetric.incrementing(name("count", gcName), new Count(gcMXBean)));
+        metrics.add(DefaultGaugeLongMetric.incrementing(name("time", gcName), new Time(gcMXBean)));
+      }
     }
 
     return metrics;
