@@ -26,11 +26,6 @@ public class MetricManager {
    */
   private static final SpiMetricManager mgr = initialiseProvider();
 
-//  /**
-//   * The default implementation.
-//   */
-//  private static final String DEFAULT_PROVIDER = "io.avaje.metrics.core.DefaultMetricManager";
-
   /**
    * Finds and returns the implementation of PluginMetricManager using the ServiceLoader.
    */
@@ -41,14 +36,6 @@ public class MetricManager {
       return it.next();
     }
     return new DefaultMetricManager();
-//    try {
-//      Class<?> clazz = Class.forName(DEFAULT_PROVIDER);
-//      return new DefaultMetricManager();
-//    } catch (ClassNotFoundException e) {
-//      throw new RuntimeException("Provider " + DEFAULT_PROVIDER + " not found", e);
-//    } catch (Exception e) {
-//      throw new RuntimeException("Provider " + DEFAULT_PROVIDER + " could not be instantiated: " + e, e);
-//    }
   }
 
   /**

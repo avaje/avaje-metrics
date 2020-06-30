@@ -26,12 +26,6 @@
 
   <dependencies>
 
-<!--    <dependency>-->
-<!--      <groupId>io.avaje.metrics</groupId>-->
-<!--      <artifactId>metrics-api</artifactId>-->
-<!--      <version>8.4</version>-->
-<!--    </dependency>-->
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
