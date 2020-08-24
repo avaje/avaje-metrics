@@ -1,8 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.TimedEvent;
-import io.avaje.metrics.TimedMetric;
-
 /**
  * A group of TimedMetric that share a common base name.
  * <p>

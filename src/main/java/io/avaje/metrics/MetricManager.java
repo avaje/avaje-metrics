@@ -17,7 +17,7 @@ import java.util.ServiceLoader;
  * statistics.
  * <p>
  * This uses a service locator to initialise a underlying PluginMetricManager instance. A default
- * implementation of PluginMetricManager is provided by <em>avaje-metric-core</em>.
+ * implementation of PluginMetricManager is provided by <em>metric</em>.
  */
 public class MetricManager {
 

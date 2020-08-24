@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.MetricManager;
-
 /**
  * The name of the metric.
  */
@@ -11,7 +9,7 @@ public interface MetricName extends Comparable<io.avaje.metrics.MetricName> {
    * Create a Metric name by parsing a name that is expected to include periods (dot notation
    * similar to package.Class.method).
    */
-  static io.avaje.metrics.MetricName of(String name) {
+  static MetricName of(String name) {
     return MetricManager.name(name);
   }
 
@@ -20,7 +18,7 @@ public interface MetricName extends Comparable<io.avaje.metrics.MetricName> {
    * <p>
    * Often the name maps to a method name.
    */
-  static io.avaje.metrics.MetricName of(Class<?> cls, String name) {
+  static MetricName of(Class<?> cls, String name) {
     return MetricManager.name(cls, name);
   }
 
@@ -32,7 +30,7 @@ public interface MetricName extends Comparable<io.avaje.metrics.MetricName> {
   /**
    * Create and return another MetricName by appending the suffix.
    */
-  io.avaje.metrics.MetricName append(String suffix);
+  MetricName append(String suffix);
 
   /**
    * Return true if the metric name starts with the given prefix.

@@ -1,10 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.GaugeLong;
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.MetricName;
-
 /**
  * Metric based on an underlying gauge that reports long values.
  * <p>

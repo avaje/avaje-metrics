@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.Metric;
-
 /**
  * Metric that collects long values (e.g. total bytes sent).
  * <p>

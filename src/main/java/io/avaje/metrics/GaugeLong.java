@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.GaugeLongMetric;
-
 /**
  * A Gauge returning a long value providing the 'source' for a {@link GaugeLongMetric}.
  * <p>

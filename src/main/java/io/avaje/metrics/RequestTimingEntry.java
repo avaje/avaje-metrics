@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.TimedMetric;
-
 /**
  * A timing point entry when collecting nested context timing.
  */

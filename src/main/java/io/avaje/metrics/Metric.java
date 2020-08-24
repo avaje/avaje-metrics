@@ -1,6 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 
 /**

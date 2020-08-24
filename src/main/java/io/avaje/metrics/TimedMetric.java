@@ -1,8 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.TimedEvent;
-
 import java.util.Map;
 import java.util.function.Supplier;
 

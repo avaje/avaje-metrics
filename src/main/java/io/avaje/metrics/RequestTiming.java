@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.RequestTimingEntry;
-
 import java.util.List;
 
 /**

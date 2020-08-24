@@ -1,10 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.GaugeDouble;
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.MetricName;
-
 /**
  * Metric based on a gauge returning double values.
  * <p>

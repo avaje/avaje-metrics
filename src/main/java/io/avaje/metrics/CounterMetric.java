@@ -1,8 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.ValueMetric;
-
 /**
  * Metric based on a counter (long value) typically used to count discrete events.
  * <p>

@@ -1,9 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.RequestTiming;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.TimingMetricInfo;
-
 import java.util.List;
 
 /**

@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.TimedMetric;
-
 /**
  * A TimedEvent that is ended with either success or error.
  * <p>

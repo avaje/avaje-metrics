@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.GaugeDoubleMetric;
-
 /**
  * A Gauge returning a double value providing the 'source' for a {@link GaugeDoubleMetric}.
  * <p>

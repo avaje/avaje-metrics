@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.MetricName;
-
 /**
  * Cache of MetricNames that share a common base name.
  * <p>
