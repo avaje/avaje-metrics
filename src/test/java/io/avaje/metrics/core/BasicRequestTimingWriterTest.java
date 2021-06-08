@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BasicRequestTimingWriterTest {
+class BasicRequestTimingWriterTest {
 
   BasicRequestTimingWriter requestTimingWriter = new BasicRequestTimingWriter();
 
@@ -23,8 +23,7 @@ public class BasicRequestTimingWriterTest {
   TimedMetric m2 = new DefaultTimedMetric(new DefaultMetricName("org.data.CustomerDAO.getById"));
 
   @Test
-  public void testWrite() throws Exception {
-
+  void testWrite() throws Exception {
 
     StringWriter writer = new StringWriter();
     BaseTimingEntry e0 = new BaseTimingEntry(0, m0, System.nanoTime());
@@ -58,7 +57,7 @@ public class BasicRequestTimingWriterTest {
   }
 
   @Test
-  public void testToMillis() {
+  void testToMillis() {
 
     assertEquals(1L, toMillis(1000000L));
     assertEquals(0L, toMillis(900000L)); // rounds down

@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class DefaultMetricNameCacheTest {
+class DefaultMetricNameCacheTest {
 
   @Test
-  public void test() {
-
+  void test() {
 
     DefaultMetricNameCache cache = new DefaultMetricNameCache(DefaultMetricNameCacheTest.class);
 
@@ -22,6 +21,5 @@ public class DefaultMetricNameCacheTest {
 
     MetricName metricName3 = cache.get("foo");
     assertSame(metricName, metricName3);
-
   }
 }

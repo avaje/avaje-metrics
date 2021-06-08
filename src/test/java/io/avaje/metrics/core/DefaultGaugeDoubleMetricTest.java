@@ -11,8 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DefaultGaugeDoubleMetricTest {
-
+class DefaultGaugeDoubleMetricTest {
 
   private List<MetricStatistics> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector();
@@ -21,7 +20,7 @@ public class DefaultGaugeDoubleMetricTest {
   }
 
   @Test
-  public void skipCollection_when_unchanged() {
+  void skipCollection_when_unchanged() {
 
     MyGauge myGauge = new MyGauge();
     DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(new DefaultMetricName(DefaultGaugeLongMetricTest.MyGauge.class, "test"), myGauge);
@@ -53,7 +52,7 @@ public class DefaultGaugeDoubleMetricTest {
   }
 
   @Test
-  public void test() {
+  void test() {
 
     MyGauge myGauge = new MyGauge();
     DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
@@ -81,7 +80,7 @@ public class DefaultGaugeDoubleMetricTest {
 
   }
 
-  class MyGauge implements GaugeDouble {
+  static class MyGauge implements GaugeDouble {
 
     double value;
 

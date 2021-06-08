@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.statistics.MetricStatistics;
@@ -11,10 +10,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DefaultGaugeLongMetricTest {
+class DefaultGaugeLongMetricTest {
 
   @Test
-  public void skipCollection_when_unchanged() {
+  void skipCollection_when_unchanged() {
 
     MyGauge myGauge = new MyGauge();
     DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
@@ -53,7 +52,7 @@ public class DefaultGaugeLongMetricTest {
   }
 
   @Test
-  public void test() {
+  void test() {
 
     MyGauge myGauge = new MyGauge();
     DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
@@ -84,7 +83,7 @@ public class DefaultGaugeLongMetricTest {
     assertEquals(0, incrementing.getValue());
   }
 
-  class MyGauge implements GaugeLong {
+  static class MyGauge implements GaugeLong {
 
     long value;
 

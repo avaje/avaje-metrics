@@ -8,17 +8,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class JvmGCLoadTest {
+class JvmGCLoadTest {
 
   //@Ignore
   @Test
-  public void test() throws InterruptedException {
-
+  void test() throws InterruptedException {
     List<Metric> metrics = JvmGarbageCollectionMetricGroup.createGauges(true);
     for (int i = 0; i < 3; i++) {
       doSomething(metrics);
     }
-
     Thread.sleep(100);
   }
 
@@ -44,11 +42,9 @@ public class JvmGCLoadTest {
 
     for (int i = 0; i < 1000000; i++) {
       int nextInt = r.nextInt(10000000);
-
-      String s = new String("" + nextInt);
+      String s = "" + nextInt;
       m.put(s, s);
     }
-
   }
 
 }

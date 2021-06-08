@@ -7,14 +7,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class ProcessHandlerTest {
+class ProcessHandlerTest {
 
   @Test
-  public void testCommand() {
-
+  void testCommand() {
     boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
     if (linux) {
-
       String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
 
       ProcessResult result = ProcessHandler.command("grep", "Vm", "/proc/" + pid + "/status");

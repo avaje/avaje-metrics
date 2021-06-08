@@ -11,10 +11,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CounterMetricTest {
+class CounterMetricTest {
 
   @Test
-  public void test() {
+  void test() {
 
     CounterMetric counterMetric = MetricManager.counter(new DefaultMetricName("org.test.mycountermetric"));
 

@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JvmProcessMemoryTest {
+class JvmProcessMemoryTest {
 
   @Test
-  public void testGetMetrics() {
-
+  void testGetMetrics() {
     FileLines statusFile = new FileLines("src/test/resources/process/process_status");
     assertTrue(statusFile.exists());
 

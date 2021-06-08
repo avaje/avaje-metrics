@@ -6,19 +6,18 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JvmCGroupMemoryMetricGroupTest {
+class JvmCGroupMemoryMetricGroupTest {
 
   private final JvmCGroupMemoryMetricGroup me = new JvmCGroupMemoryMetricGroup();
 
   @Test
-  public void toMegaBytes() {
-
+  void toMegaBytes() {
     assertThat(JvmCGroupMemoryMetricGroup.toMegaBytes(1074790400)).isEqualTo(1025);
     assertThat(JvmCGroupMemoryMetricGroup.toMegaBytes(238493696)).isEqualTo(227);
   }
 
   @Test
-  public void memSource() {
+  void memSource() {
 
     long limit = 1074790400;
 

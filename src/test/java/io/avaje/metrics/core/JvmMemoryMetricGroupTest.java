@@ -8,10 +8,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JvmMemoryMetricGroupTest {
+class JvmMemoryMetricGroupTest {
 
   @Test
-  public void testCreateHeapGroup() {
+  void testCreateHeapGroup() {
 
     List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createHeapGroup(true);
 
@@ -26,7 +26,7 @@ public class JvmMemoryMetricGroupTest {
   }
 
   @Test
-  public void testCreateNonHeapGroup() {
+  void testCreateNonHeapGroup() {
 
     List<Metric> gaugeMetrics = JvmMemoryMetricGroup.createNonHeapGroup(true);
 

@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DefaultMetricNameTest {
+class DefaultMetricNameTest {
 
   @Test
-  public void testParse() {
+  void testParse() {
 
     MetricName name = new DefaultMetricName("org.test.Hello.rob");
 
@@ -20,7 +20,7 @@ public class DefaultMetricNameTest {
   }
 
   @Test
-  public void partial_onlyTwo() {
+  void partial_onlyTwo() {
 
     MetricName name = new DefaultMetricName("Hello.rob");
 
@@ -29,14 +29,14 @@ public class DefaultMetricNameTest {
   }
 
   @Test
-  public void partial_onlyOne() {
+  void partial_onlyOne() {
 
     MetricName name = new DefaultMetricName("test");
     assertEquals("test", name.getSimpleName());
   }
 
   @Test
-  public void startsWith() {
+  void startsWith() {
 
     MetricName m0 = new DefaultMetricName("web.api.Hello.rob");
     MetricName m1 = new DefaultMetricName("web.api.some.Foo.bar");
@@ -50,7 +50,7 @@ public class DefaultMetricNameTest {
   }
 
   @Test
-  public void isError() {
+  void isError() {
 
     MetricName m0 = new DefaultMetricName("web.api.Hello.rob.error");
     MetricName m1 = new DefaultMetricName("web.api.some.Foo.bar.err");

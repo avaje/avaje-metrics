@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LikeMatcherTest {
+class LikeMatcherTest {
 
   @Test
-  public void testStartsWith() {
-
+  void testStartsWith() {
     LikeMatcher startsWith = new LikeMatcher("web.*");
     assertTrue(startsWith.matches("Web.foo"));
     assertTrue(startsWith.matches("Web."));
@@ -19,8 +18,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testEndsWith() {
-
+  void testEndsWith() {
     LikeMatcher startsWith = new LikeMatcher("*Resource");
     assertTrue(startsWith.matches("Web.foo.SomeResource"));
     assertTrue(startsWith.matches("Web.Resource"));
@@ -35,8 +33,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testContains() {
-
+  void testContains() {
     LikeMatcher startsWith = new LikeMatcher("*Resource*");
     assertTrue(startsWith.matches("Web.foo.SomeResource"));
     assertTrue(startsWith.matches("Web.Resource"));
@@ -53,8 +50,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testStartsAndContains() {
-
+  void testStartsAndContains() {
     LikeMatcher like = new LikeMatcher("web.*Customer*");
     assertTrue(like.matches("Web.foo.CustomerResource"));
     assertTrue(like.matches("web.Customer"));
@@ -71,8 +67,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testStartsContainsEnds() {
-
+  void testStartsContainsEnds() {
     LikeMatcher like = new LikeMatcher("web.*customer*resource");
     assertTrue(like.matches("web.foo.CustomerResource"));
     assertTrue(like.matches("web.CustomerResource"));

@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ValueCounterTest {
+class ValueCounterTest {
 
   @Test
-  public void testGetStatisticsWithNoReset() {
-
+  void testGetStatisticsWithNoReset() {
     ValueCounter counter = new ValueCounter(MetricName.of("junk"));
     assertEquals(Long.MIN_VALUE, counter.getMax());
 
@@ -24,12 +23,10 @@ public class ValueCounterTest {
     assertEquals(2, counter.getCount());
     assertEquals(150, counter.getTotal());
     assertEquals(100, counter.getMax());
-
   }
 
   @Test
-  public void test() {
-
+  void test() {
     ValueCounter counter = new ValueCounter(MetricName.of("junk"));
 
     assertEquals(0, counter.getCount());
@@ -60,6 +57,5 @@ public class ValueCounterTest {
     assertEquals(0, counter.getCount());
     assertEquals(0, counter.getTotal());
     assertEquals(Long.MIN_VALUE, counter.getMax());
-
   }
 }

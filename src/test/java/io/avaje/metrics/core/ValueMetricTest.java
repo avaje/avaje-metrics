@@ -12,11 +12,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ValueMetricTest {
+class ValueMetricTest {
 
   @Test
-  public void test() {
-
+  void test() {
     ValueMetric metric = MetricManager.value(new DefaultMetricName("org.test.mycounter"));
 
     assertEquals("org.test.mycounter", metric.getName().getSimpleName());
@@ -36,8 +35,6 @@ public class ValueMetricTest {
     assertEquals(4500, statistics.getTotal());
     assertEquals(2000, statistics.getMax());
     assertEquals(1500, statistics.getMean());
-
-
     assertThat(collect(metric)).isEmpty();
   }
 

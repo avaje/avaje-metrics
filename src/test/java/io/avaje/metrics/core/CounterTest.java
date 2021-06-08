@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CounterTest {
+class CounterTest {
 
   @Test
-  public void test() {
+  void test() {
 
     Counter counter = new Counter(null);
     assertEquals(0, counter.getCount());

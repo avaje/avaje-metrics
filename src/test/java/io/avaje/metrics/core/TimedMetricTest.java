@@ -12,10 +12,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TimedMetricTest {
+class TimedMetricTest {
 
   @Test
-  public void add() {
+  void add() {
 
     TimedMetric metric = MetricManager.timed("org.test.mytimed");
 
@@ -69,7 +69,7 @@ public class TimedMetricTest {
   }
 
   @Test
-  public void timeRunnable() {
+  void timeRunnable() {
 
     resetStatistics();
 
@@ -95,7 +95,7 @@ public class TimedMetricTest {
   }
 
   @Test
-  public void timeRunnable_when_error() {
+  void timeRunnable_when_error() {
 
     resetStatistics();
 
@@ -123,12 +123,9 @@ public class TimedMetricTest {
   }
 
   @Test
-  public void timeCallable_when_error() {
-
+  void timeCallable_when_error() {
     resetStatistics();
-
     TimedMetric metric = MetricManager.timed("test.callable");
-
     try {
       metric.time(this::callAndThrow);
       fail();
@@ -145,12 +142,9 @@ public class TimedMetricTest {
     }
   }
 
-
   @Test
-  public void timeCallable_when_success() {
-
+  void timeCallable_when_success() {
     resetStatistics();
-
     TimedMetric metric = MetricManager.timed("test.callable");
 
     String out = metric.time(() -> "foo");

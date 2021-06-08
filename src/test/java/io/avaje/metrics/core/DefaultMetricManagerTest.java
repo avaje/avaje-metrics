@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DefaultMetricManagerTest {
+class DefaultMetricManagerTest {
 
   @Test
-  public void testGetRequestTimingMetrics() {
+  void testGetRequestTimingMetrics() {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
@@ -48,7 +48,7 @@ public class DefaultMetricManagerTest {
   }
 
   @Test
-  public void testSetCollection() {
+  void testSetCollection() {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 

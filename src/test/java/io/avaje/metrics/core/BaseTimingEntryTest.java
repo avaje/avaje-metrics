@@ -14,10 +14,10 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class BaseTimingEntryTest {
+class BaseTimingEntryTest {
 
   @Test
-  public void testCompareTo() {
+  void testCompareTo() {
 
     int depth = 0;
     List<BaseTimingEntry> entries = new ArrayList<>();
@@ -38,9 +38,8 @@ public class BaseTimingEntryTest {
     assertSame(e3, entries.get(3));
   }
 
-
   @Test
-  public void testCompareToWithSameDepth() {
+  void testCompareToWithSameDepth() {
 
     int depth = 0;
     List<BaseTimingEntry> entries = new ArrayList<>();
@@ -64,7 +63,7 @@ public class BaseTimingEntryTest {
 
   }
 
-  class TDMetric implements TimedMetric {
+  static class TDMetric implements TimedMetric {
 
     MetricName metricName;
 

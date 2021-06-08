@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NestedContextTest {
-
+class NestedContextTest {
 
   TimedMetric skipMetric = new DefaultTimedMetric(new DefaultMetricName("org.req.Customer.skipped"));
 
@@ -18,7 +17,7 @@ public class NestedContextTest {
 
 
   @Test
-  public void testRequestActive() {
+  void testRequestActive() {
 
     assertFalse(m0.isRequestTiming());
     m0.add(System.nanoTime(), false);
@@ -35,7 +34,7 @@ public class NestedContextTest {
   }
 
   @Test
-  public void testNestedSimple() {
+  void testNestedSimple() {
 
     NestedContext context = new NestedContext();
     context.push(m0);
@@ -47,7 +46,7 @@ public class NestedContextTest {
   }
 
   @Test
-  public void testReport() {
+  void testReport() {
 
     NestedContext context = new NestedContext();
     context.push(m0);
@@ -60,8 +59,7 @@ public class NestedContextTest {
   }
 
   @Test
-  public void testSupplier() {
-
+  void testSupplier() {
     NestedContext context = new NestedContext();
     context.push(m0);
     context.pushIfActive(() -> new RequestMetric(MetricName.of("sql.select foo")));
@@ -69,13 +67,10 @@ public class NestedContextTest {
     context.pushIfActive(() -> new RequestMetric(MetricName.of("sql.select bar")));
     context.pop();
     context.pop();
-
   }
 
-
   @Test
-  public void testSkip() {
-
+  void testSkip() {
     assertFalse(NestedContext.pushIfActive(skipMetric));
 
     NestedContext.push(m1);

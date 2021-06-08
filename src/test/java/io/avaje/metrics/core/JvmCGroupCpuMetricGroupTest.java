@@ -8,24 +8,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JvmCGroupCpuMetricGroupTest {
+class JvmCGroupCpuMetricGroupTest {
 
   private final JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
 
   @Test
-  public void convertQuotaToLimits() {
+  void convertQuotaToLimits() {
     assertEquals(600, me.convertQuotaToLimits(60_000, 100_000));
     assertEquals(1900, me.convertQuotaToLimits(190_000, 100_000));
   }
 
   @Test
-  public void convertSharesToRequests() {
+  void convertSharesToRequests() {
     assertEquals(800, me.convertSharesToRequests(819));
     assertEquals(200, me.convertSharesToRequests(204));
   }
 
   @Test
-  public void cpuUsageMicros() {
+  void cpuUsageMicros() {
 
     FileLines source = new FileLines("src/test/resources/cgroup/cpuacct.usage");
     assertTrue(source.exists());
@@ -37,7 +37,7 @@ public class JvmCGroupCpuMetricGroupTest {
   }
 
   @Test
-  public void cpuThrottleMicros() {
+  void cpuThrottleMicros() {
 
     FileLines source = new FileLines("src/test/resources/cgroup/cpu.stat");
     assertTrue(source.exists());
@@ -50,7 +50,7 @@ public class JvmCGroupCpuMetricGroupTest {
   }
 
   @Test
-  public void createCGroupCpuLimit() {
+  void createCGroupCpuLimit() {
 
     FileLines cpuQuota = new FileLines("src/test/resources/cgroup/cpu.cfs_quota_us");
     FileLines period = new FileLines("src/test/resources/cgroup/cpu.cfs_period_us");
@@ -64,7 +64,7 @@ public class JvmCGroupCpuMetricGroupTest {
   }
 
   @Test
-  public void createCGroupCpuRequests() {
+  void createCGroupCpuRequests() {
 
     FileLines cpuShares = new FileLines("src/test/resources/cgroup/cpu.shares");
     assertTrue(cpuShares.exists());

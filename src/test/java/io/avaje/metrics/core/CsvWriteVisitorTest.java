@@ -21,12 +21,12 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CsvWriteVisitorTest {
+class CsvWriteVisitorTest {
 
-  private static long NANOS_TO_MILLIS = 1000000L;
+  private static final long NANOS_TO_MILLIS = 1000000L;
 
   @Test
-  public void testCounter() {
+  void testCounter() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
@@ -55,7 +55,7 @@ public class CsvWriteVisitorTest {
 
 
   @Test
-  public void testGaugeMetric() {
+  void testGaugeMetric() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
@@ -70,7 +70,7 @@ public class CsvWriteVisitorTest {
   }
 
   @Test
-  public void testValueMetric() {
+  void testValueMetric() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
@@ -89,7 +89,7 @@ public class CsvWriteVisitorTest {
 
 
   @Test
-  public void testTimedMetric() {
+  void testTimedMetric() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
@@ -123,7 +123,7 @@ public class CsvWriteVisitorTest {
    * Test using a BucketTimedMetric with all buckets having values.
    */
   @Test
-  public void testBucketTimedMetricFull() {
+  void testBucketTimedMetricFull() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
@@ -163,7 +163,7 @@ public class CsvWriteVisitorTest {
    * Test using a BucketTimedMetric with some buckets empty.
    */
   @Test
-  public void testBucketTimedMetricPartial() {
+  void testBucketTimedMetricPartial() {
 
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);

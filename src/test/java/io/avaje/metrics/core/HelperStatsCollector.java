@@ -11,7 +11,7 @@ import io.avaje.metrics.statistics.ValueStatistics;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelperStatsCollector implements MetricStatisticsVisitor {
+class HelperStatsCollector implements MetricStatisticsVisitor {
 
   private final List<MetricStatistics> list = new ArrayList<>();
 

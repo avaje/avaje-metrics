@@ -6,11 +6,10 @@ import io.avaje.metrics.report.MetricReportConfig;
 import io.avaje.metrics.report.MetricReportManager;
 import org.junit.jupiter.api.Test;
 
-
-public class MetricReportManagerTest {
+class MetricReportManagerTest {
 
   @Test
-  public void test_constructor() throws InterruptedException {
+  void test_constructor() throws InterruptedException {
 
     FileReporter fileReporter = new FileReporter();
 

@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Random;
 
-public class CsvFileReporterTest {
+class CsvFileReporterTest {
 
   @Test
-  public void exercise_with_MetricReportManager() throws InterruptedException, IOException {
+  void exercise_with_MetricReportManager() throws InterruptedException, IOException {
 
     //CsvReportWriter csvReportWriter = new CsvReportWriter(40000);
     //FileReporter fileReporter = new FileReporter(".", "metric-csv-exercise", csvReportWriter);

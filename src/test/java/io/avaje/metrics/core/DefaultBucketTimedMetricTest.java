@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DefaultBucketTimedMetricTest {
+class DefaultBucketTimedMetricTest {
 
   private final DefaultMetricManager mgr = new DefaultMetricManager();
   private final MetricName name = MetricName.of(DefaultBucketTimedMetricTest.class, "test");
@@ -19,7 +19,7 @@ public class DefaultBucketTimedMetricTest {
   }
 
   @Test
-  public void test() {
+  void test() {
 
 //    BucketTimedMetric bucketTimedMetric = create();
 //

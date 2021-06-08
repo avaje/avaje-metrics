@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JsonWriterTest {
+class JsonWriterTest {
 
   private static final long NANOS_TO_MICROS = 1000L;
 
@@ -45,7 +45,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testCounter() {
+  void testCounter() {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
@@ -58,9 +58,8 @@ public class JsonWriterTest {
     assertEquals("{\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
   }
 
-
   @Test
-  public void testGaugeMetric() {
+  void testGaugeMetric() {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
@@ -72,7 +71,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testValueMetric() {
+  void testValueMetric() {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
@@ -85,7 +84,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testTimedMetric() {
+  void testTimedMetric() {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
@@ -105,7 +104,7 @@ public class JsonWriterTest {
    * Test using a BucketTimedMetric with all buckets having values.
    */
   @Test
-  public void testBucketTimedMetricFull() {
+  void testBucketTimedMetricFull() {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
@@ -122,7 +121,7 @@ public class JsonWriterTest {
    * Test using a BucketTimedMetric with some buckets empty.
    */
   @Test
-  public void testBucketTimedMetricPartial() {
+  void testBucketTimedMetricPartial() {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
@@ -145,7 +144,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testMetricList() throws IOException {
+  void testMetricList() throws IOException {
 
     List<Metric> metrics = new ArrayList<>();
     metrics.add(createValueMetric());

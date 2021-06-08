@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MetricManifestTest {
+class MetricManifestTest {
 
   @Test
-  public void testRead() {
+  void testRead() {
 
     MetricManifest metricManifest = MetricManifest.get();
     assertTrue(metricManifest.hasMemoryWarning());
@@ -16,7 +16,7 @@ public class MetricManifestTest {
   }
 
   @Test
-  public void testOtherRead() {
+  void testOtherRead() {
 
     MetricManifest metricManifest = MetricManifest.read("metrics-other.mf");
 

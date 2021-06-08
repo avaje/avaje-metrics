@@ -8,12 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TimedMetricGroupTest {
+class TimedMetricGroupTest {
 
   @Test
-  public void test() {
-
-
+  void test() {
     TimedMetricGroup timedGroup = MetricManager.timedGroup(MetricName.of("org.test.Hello"));
 
     TimedMetric timedMetric = timedGroup.timed("one");
@@ -29,6 +27,5 @@ public class TimedMetricGroupTest {
     assertNotSame(timedMetric, two);
 
     assertEquals("org.test.Hello.two", two.getName().getSimpleName());
-
   }
 }

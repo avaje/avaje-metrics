@@ -2,10 +2,10 @@ package io.avaje.metrics.core;
 
 import org.junit.jupiter.api.Test;
 
-public class DisableCollectionTest {
+class DisableCollectionTest {
 
   @Test
-  public void test() {
+  void test() {
 
 //    boolean useContext = false;
 //
