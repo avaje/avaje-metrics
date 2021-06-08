@@ -1,16 +1,16 @@
 package io.avaje.metrics.util;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
-import static org.testng.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ProcessHandlerTest {
 
   @Test
-  public void testCommand() throws Exception {
+  public void testCommand() {
 
     boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
     if (linux) {

@@ -5,7 +5,7 @@ import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.report.MetricReportConfig;
 import io.avaje.metrics.report.MetricReportManager;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Random;

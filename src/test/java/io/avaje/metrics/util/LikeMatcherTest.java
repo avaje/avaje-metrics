@@ -1,14 +1,14 @@
 package io.avaje.metrics.util;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LikeMatcherTest {
 
   @Test
-  public void testStartsWith() throws Exception {
+  public void testStartsWith() {
 
     LikeMatcher startsWith = new LikeMatcher("web.*");
     assertTrue(startsWith.matches("Web.foo"));
@@ -19,7 +19,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testEndsWith() throws Exception {
+  public void testEndsWith() {
 
     LikeMatcher startsWith = new LikeMatcher("*Resource");
     assertTrue(startsWith.matches("Web.foo.SomeResource"));
@@ -35,7 +35,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testContains() throws Exception {
+  public void testContains() {
 
     LikeMatcher startsWith = new LikeMatcher("*Resource*");
     assertTrue(startsWith.matches("Web.foo.SomeResource"));
@@ -53,7 +53,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testStartsAndContains() throws Exception {
+  public void testStartsAndContains() {
 
     LikeMatcher like = new LikeMatcher("web.*Customer*");
     assertTrue(like.matches("Web.foo.CustomerResource"));
@@ -71,7 +71,7 @@ public class LikeMatcherTest {
   }
 
   @Test
-  public void testStartsContainsEnds() throws Exception {
+  public void testStartsContainsEnds() {
 
     LikeMatcher like = new LikeMatcher("web.*customer*resource");
     assertTrue(like.matches("web.foo.CustomerResource"));

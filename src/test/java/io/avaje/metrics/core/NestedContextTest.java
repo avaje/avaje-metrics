@@ -2,10 +2,10 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NestedContextTest {
 
@@ -18,7 +18,7 @@ public class NestedContextTest {
 
 
   @Test
-  public void testRequestActive() throws Exception {
+  public void testRequestActive() {
 
     assertFalse(m0.isRequestTiming());
     m0.add(System.nanoTime(), false);
@@ -35,7 +35,7 @@ public class NestedContextTest {
   }
 
   @Test
-  public void testNestedSimple() throws Exception {
+  public void testNestedSimple() {
 
     NestedContext context = new NestedContext();
     context.push(m0);
@@ -47,7 +47,7 @@ public class NestedContextTest {
   }
 
   @Test
-  public void testReport() throws Exception {
+  public void testReport() {
 
     NestedContext context = new NestedContext();
     context.push(m0);
@@ -60,7 +60,7 @@ public class NestedContextTest {
   }
 
   @Test
-  public void testSupplier() throws Exception {
+  public void testSupplier() {
 
     NestedContext context = new NestedContext();
     context.push(m0);
@@ -74,7 +74,7 @@ public class NestedContextTest {
 
 
   @Test
-  public void testSkip() throws Exception {
+  public void testSkip() {
 
     assertFalse(NestedContext.pushIfActive(skipMetric));
 

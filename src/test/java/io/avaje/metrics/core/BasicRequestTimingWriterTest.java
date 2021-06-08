@@ -4,15 +4,15 @@ import io.avaje.metrics.RequestTiming;
 import io.avaje.metrics.RequestTimingEntry;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.report.BasicRequestTimingWriter;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BasicRequestTimingWriterTest {
 
@@ -58,7 +58,7 @@ public class BasicRequestTimingWriterTest {
   }
 
   @Test
-  public void testToMillis() throws Exception {
+  public void testToMillis() {
 
     assertEquals(1L, toMillis(1000000L));
     assertEquals(0L, toMillis(900000L)); // rounds down

@@ -4,19 +4,19 @@ import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.TimingMetricInfo;
 import orange.truck.Customer;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultMetricManagerTest {
 
   @Test
-  public void testGetRequestTimingMetrics() throws Exception {
+  public void testGetRequestTimingMetrics() {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 

@@ -4,7 +4,7 @@ import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class BaseTimingEntryTest {
 
@@ -40,7 +40,7 @@ public class BaseTimingEntryTest {
 
 
   @Test
-  public void testCompareToWithSameDepth() throws Exception {
+  public void testCompareToWithSameDepth() {
 
     int depth = 0;
     List<BaseTimingEntry> entries = new ArrayList<>();

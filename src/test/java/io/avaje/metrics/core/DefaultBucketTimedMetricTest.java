@@ -2,7 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

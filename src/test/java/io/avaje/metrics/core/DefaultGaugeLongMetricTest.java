@@ -4,12 +4,12 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.statistics.MetricStatistics;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DefaultGaugeLongMetricTest {
 

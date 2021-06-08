@@ -13,13 +13,13 @@ import io.avaje.metrics.statistics.GaugeDoubleStatistics;
 import io.avaje.metrics.statistics.MetricStatistics;
 import io.avaje.metrics.statistics.TimedStatistics;
 import io.avaje.metrics.statistics.ValueStatistics;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CsvWriteVisitorTest {
 

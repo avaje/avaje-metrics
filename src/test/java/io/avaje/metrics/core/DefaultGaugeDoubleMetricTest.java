@@ -3,13 +3,13 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.statistics.MetricStatistics;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultGaugeDoubleMetricTest {
 
@@ -58,26 +58,26 @@ public class DefaultGaugeDoubleMetricTest {
     MyGauge myGauge = new MyGauge();
     DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
 
-    Assert.assertTrue(0d == metric.getValue());
+    assertTrue(0d == metric.getValue());
     assertThat(collect(metric)).isEmpty();
 
     myGauge.value = 100d;
-    Assert.assertTrue(100d == metric.getValue());
+    assertTrue(100d == metric.getValue());
     assertThat(collect(metric)).hasSize(1);
 
     DefaultGaugeDoubleMetric incrementing = DefaultGaugeDoubleMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
 
     myGauge.value = 100d;
-    Assert.assertTrue(100d == incrementing.getValue());
+    assertTrue(100d == incrementing.getValue());
 
     myGauge.value = 150d;
-    Assert.assertTrue(50d == incrementing.getValue());
+    assertTrue(50d == incrementing.getValue());
 
     myGauge.value = 280d;
-    Assert.assertTrue(130d == incrementing.getValue());
+    assertTrue(130d == incrementing.getValue());
 
     myGauge.value = 280d;
-    Assert.assertTrue(0d == incrementing.getValue());
+    assertTrue(0d == incrementing.getValue());
 
   }
 

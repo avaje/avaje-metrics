@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class DisableCollectionTest {
 

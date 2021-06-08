@@ -20,8 +20,7 @@ import io.avaje.metrics.statistics.GaugeDoubleStatistics;
 import io.avaje.metrics.statistics.MetricStatistics;
 import io.avaje.metrics.statistics.TimedStatistics;
 import io.avaje.metrics.statistics.ValueStatistics;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -31,6 +30,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonWriterTest {
 
@@ -54,7 +55,7 @@ public class JsonWriterTest {
 
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
+    assertEquals("{\"name\":\"org.test.CounterFoo.doStuff\",\"value\":10}", counterJson);
   }
 
 
@@ -67,7 +68,7 @@ public class JsonWriterTest {
     jsonVisitor.visit((GaugeDoubleStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"dm\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
+    assertEquals("{\"type\":\"dm\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
   }
 
   @Test
@@ -80,7 +81,7 @@ public class JsonWriterTest {
     jsonVisitor.visit((ValueStatistics) collectOne(metric));
     String counterJson = writer.toString();
 
-    Assert.assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"total\":42}", counterJson);
+    assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"total\":42}", counterJson);
   }
 
   @Test
@@ -96,7 +97,7 @@ public class JsonWriterTest {
 
     // values converted into microseconds
     String match = "{\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"total\":420}{\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"total\":360}";
-    Assert.assertEquals(match, counterJson);
+    assertEquals(match, counterJson);
   }
 
 
@@ -174,16 +175,16 @@ public class JsonWriterTest {
     System.out.println(json);
     System.out.println("---");
 
-    Assert.assertTrue(json.contains("\"env\":\"dev\""));
-    Assert.assertTrue(json.contains("\"app\":\"app-val\""));
-    Assert.assertTrue(json.contains("\"server\":\"server-val\""));
+    assertTrue(json.contains("\"env\":\"dev\""));
+    assertTrue(json.contains("\"app\":\"app-val\""));
+    assertTrue(json.contains("\"server\":\"server-val\""));
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode jsonObject = mapper.readValue(json, ObjectNode.class);
 
-    Assert.assertEquals("dev", jsonObject.get("env").asText());
-    Assert.assertEquals("app-val", jsonObject.get("app").asText());
-    Assert.assertEquals("server-val", jsonObject.get("server").asText());
+    assertEquals("dev", jsonObject.get("env").asText());
+    assertEquals("app-val", jsonObject.get("app").asText());
+    assertEquals("server-val", jsonObject.get("server").asText());
 
     JsonNode jsonNode = jsonObject.get("metrics");
     ArrayNode metricArray = (ArrayNode) jsonNode;

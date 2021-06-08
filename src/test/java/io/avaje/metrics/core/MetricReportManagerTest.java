@@ -4,7 +4,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.report.FileReporter;
 import io.avaje.metrics.report.MetricReportConfig;
 import io.avaje.metrics.report.MetricReportManager;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class MetricReportManagerTest {
