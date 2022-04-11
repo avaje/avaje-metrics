@@ -15,7 +15,6 @@ import io.avaje.metrics.statistics.ValueStatistics;
 final class DefaultValueMetric implements Metric, ValueMetric {
 
   private final MetricName name;
-
   private final ValueCounter valueCounter;
 
   /**
@@ -48,7 +47,6 @@ final class DefaultValueMetric implements Metric, ValueMetric {
   public void addEvent(long value) {
     valueCounter.add(value);
   }
-
 
   @Override
   public long getCount() {

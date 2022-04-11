@@ -118,14 +118,13 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   private static ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
-
-    if (disable) return null;
-
+    if (disable) {
+      return null;
+    }
     String mdcKey = System.getProperty(METRICS_MDC_REQUEST_ID);
     if (mdcKey != null) {
       return new MdcExternalRequestIdAdapter(mdcKey);
     }
-
     return null;
   }
 
@@ -134,21 +133,18 @@ public class DefaultMetricManager implements SpiMetricManager {
    * This has the effect that NOOP metric implementations are used.
    */
   private static boolean isDisableCollection() {
-
     String disable = System.getProperty("metrics.disable", System.getenv("METRICS_DISABLE"));
     return "true".equalsIgnoreCase(disable);
   }
 
   @Override
   public void reportTiming(RequestTiming requestTiming) {
-
     if (externalRequestIdAdapter != null) {
       String requestId = externalRequestIdAdapter.getExternalRequestId();
       if (requestId != null) {
         requestTiming.setExternalRequestId(requestId);
       }
     }
-
     requestTimings.add(requestTiming);
   }
 
@@ -306,7 +302,6 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public MetricNameCache nameCache(MetricName baseName) {
-
     String key = baseName.getSimpleName();
     MetricNameCache metricNameCache = nameCache.get(key);
     if (metricNameCache == null) {
@@ -368,7 +363,6 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   private Metric getMetric(MetricName name, MetricFactory<?> factory, int[] bucketRanges) {
-
     String cacheKey = name.getSimpleName();
     // try lock free get first
     Metric metric = metricsCache.get(cacheKey);
@@ -386,7 +380,6 @@ public class DefaultMetricManager implements SpiMetricManager {
   }
 
   private Metric getMetricWithoutCreate(MetricName name) {
-
     return metricsCache.get(name.getSimpleName());
   }
 
@@ -405,13 +398,11 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public boolean setRequestTimingCollection(String fullMetricName, int collectionCount) {
-
     return setRequestTimingCollection(MetricName.of(fullMetricName), collectionCount);
   }
 
   @Override
   public boolean setRequestTimingCollection(Class<?> cls, String name, int collectionCount) {
-
     return setRequestTimingCollection(MetricName.of(cls, name), collectionCount);
   }
 
@@ -420,14 +411,12 @@ public class DefaultMetricManager implements SpiMetricManager {
    * Return false if the metric was not found (and timing collection was not set).
    */
   protected boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
-
     Metric metric = getMetricWithoutCreate(metricName);
     if (metric instanceof TimedMetric) {
       TimedMetric timed = (TimedMetric) metric;
       timed.setRequestTiming(collectionCount);
       return true;
     }
-
     return false;
   }
 
@@ -440,14 +429,12 @@ public class DefaultMetricManager implements SpiMetricManager {
    */
   @Override
   public List<TimingMetricInfo> setRequestTimingCollectionUsingMatch(String nameMatch, int collectionCount) {
-
     if (nameMatch == null || nameMatch.trim().length() == 0) {
       // not turning on collection globally for empty
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
 
     LikeMatcher like = new LikeMatcher(nameMatch);
-
     List<TimingMetricInfo> changes = new ArrayList<>();
 
     for (Metric metric : metricsCache.values()) {
@@ -460,7 +447,6 @@ public class DefaultMetricManager implements SpiMetricManager {
         }
       }
     }
-
     // ensure we return them in a predicable order
     Collections.sort(changes, sortByName);
     return changes;
@@ -489,11 +475,8 @@ public class DefaultMetricManager implements SpiMetricManager {
    * @param nameMatchExpression the expression used to match/filter metric names. Null or empty means match all.
    */
   protected List<TimingMetricInfo> getRequestTimingMetrics(boolean activeOnly, String nameMatchExpression) {
-
     synchronized (monitor) {
-
       List<TimingMetricInfo> list = new ArrayList<>();
-
       LikeMatcher like = new LikeMatcher(nameMatchExpression);
 
       for (Metric metric : metricsCache.values()) {
@@ -508,7 +491,6 @@ public class DefaultMetricManager implements SpiMetricManager {
           }
         }
       }
-
       // ensure we return them in a predicable order
       Collections.sort(list, sortByName);
       return list;
@@ -524,7 +506,6 @@ public class DefaultMetricManager implements SpiMetricManager {
    * Return the request timings that have been collected since the last collection.
    */
   public List<RequestTiming> collectRequestTimings() {
-
     List<RequestTiming> list = new ArrayList<>();
     RequestTiming req;
     while ((req = requestTimings.poll()) != null) {

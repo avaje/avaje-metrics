@@ -16,7 +16,6 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 final class DefaultCounterMetric implements CounterMetric {
 
   private final MetricName name;
-
   private final Counter counter;
 
   /**

@@ -48,7 +48,6 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
    */
   @Override
   public TimedEvent start(String name) {
-
     TimedMetric timedMetric = timed(name);
     return timedMetric.startEvent();
   }
@@ -71,7 +70,6 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
    */
   @Override
   public TimedMetric timed(String name) {
-
     // try local cache first to try and avoid the name parse
     TimedMetric found = cache.get(name);
     if (found != null) {

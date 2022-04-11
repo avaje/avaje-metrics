@@ -10,13 +10,9 @@ import io.avaje.metrics.statistics.TimedStatistics;
 class DefaultValueStatistics implements TimedStatistics {
 
   protected final ValueCounter owner;
-
   protected final long startTime;
-
   protected final long count;
-
   protected final long total;
-
   protected final long max;
 
   /**
@@ -32,6 +28,7 @@ class DefaultValueStatistics implements TimedStatistics {
     this.max = max != Long.MIN_VALUE ? max : (count < 1 ? 0 : Math.round(total / count));
   }
 
+  @Override
   public String toString() {
     return "count:" + count + " total:" + total + " max:" + max;
   }

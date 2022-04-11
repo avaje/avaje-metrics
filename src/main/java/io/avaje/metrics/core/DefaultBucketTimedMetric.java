@@ -10,14 +10,11 @@ import java.util.function.Supplier;
 /**
  * Default implementation of BucketTimedMetric.
  */
-class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
+final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   private final MetricName metricName;
-
   private final int[] bucketRanges;
-
   private final TimedMetric[] buckets;
-
   private final int lastBucketIndex;
 
   DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
@@ -27,6 +24,7 @@ class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
     this.lastBucketIndex = bucketRanges.length;
   }
 
+  @Override
   public String toString() {
     return metricName.toString();
   }

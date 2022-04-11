@@ -42,6 +42,7 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
     this.errorCounter = new ValueCounter(name.append("error"));
   }
 
+  @Override
   public String toString() {
     return name.toString();
   }
@@ -62,7 +63,7 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
     errorCounter.reset();
   }
 
-  protected static long getTickNanos() {
+  static long getTickNanos() {
     return System.nanoTime();
   }
 

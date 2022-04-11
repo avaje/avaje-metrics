@@ -55,7 +55,6 @@ final class JvmMemoryMetricGroup {
    * Create the Heap Memory based GaugeMetricGroup.
    */
   static List<Metric> createHeapGroup(boolean reportChangesOnly) {
-
     MetricName heapName = new DefaultMetricName("jvm.memory.heap");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(heapName, source, reportChangesOnly);
@@ -84,9 +83,7 @@ final class JvmMemoryMetricGroup {
     }
 
     public List<Metric> createMetric(boolean reportChangesOnly) {
-
       List<Metric> metrics = new ArrayList<>();
-
       metrics.add(new DefaultGaugeLongMetric(name("init"), new Init(source), reportChangesOnly));
       metrics.add(new DefaultGaugeLongMetric(name("used"), new Used(source), reportChangesOnly));
       metrics.add(new DefaultGaugeLongMetric(name("committed"), new Committed(source), reportChangesOnly));
@@ -98,7 +95,6 @@ final class JvmMemoryMetricGroup {
         metrics.add(new DefaultGaugeLongMetric(name("max"), new Max(source), reportChangesOnly));
         metrics.add(new DefaultGaugeLongMetric(name("pct"), new Pct(source), reportChangesOnly));
       }
-
       return metrics;
     }
 

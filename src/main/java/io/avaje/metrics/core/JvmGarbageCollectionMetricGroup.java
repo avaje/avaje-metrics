@@ -15,12 +15,10 @@ import java.util.List;
 final class JvmGarbageCollectionMetricGroup {
 
   static List<Metric> createGauges(boolean withDetails) {
-
     List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
     List<Metric> metrics = new ArrayList<>();
     metrics.add(createTotalGcTime(garbageCollectorMXBeans));
-
     if (withDetails) {
       for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
         // modify collector name replacing spaces with hyphens.
@@ -29,7 +27,6 @@ final class JvmGarbageCollectionMetricGroup {
         metrics.add(DefaultGaugeLongMetric.incrementing(name("time", gcName), new Time(gcMXBean)));
       }
     }
-
     return metrics;
   }
 

@@ -11,9 +11,7 @@ import java.util.List;
 class DefaultRequestTiming implements RequestTiming {
 
   final List<RequestTimingEntry> entries;
-
   final long reportTime;
-
   String externalRequestId;
 
   DefaultRequestTiming(List<RequestTimingEntry> entries, long reportTime) {
@@ -21,14 +19,17 @@ class DefaultRequestTiming implements RequestTiming {
     this.reportTime = reportTime;
   }
 
+  @Override
   public List<RequestTimingEntry> getEntries() {
     return entries;
   }
 
+  @Override
   public long getReportTime() {
     return reportTime;
   }
 
+  @Override
   public String getExternalRequestId() {
     return externalRequestId;
   }

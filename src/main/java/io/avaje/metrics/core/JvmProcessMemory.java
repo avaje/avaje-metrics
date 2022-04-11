@@ -48,12 +48,10 @@ final class JvmProcessMemory {
    * Return the metrics for VmRSS and VmHWM.
    */
   public List<Metric> metrics(boolean reportChangesOnly) {
-
     List<Metric> metrics = new ArrayList<>();
     if (pid == null || MetricManifest.get().disableProcessMemory()) {
       return metrics;
     }
-
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
       MetricName baseName = new DefaultMetricName("jvm.memory.process");
@@ -65,10 +63,8 @@ final class JvmProcessMemory {
       metrics.add(new DefaultGaugeLongMetric(vmRssName, source::getRss, reportChangesOnly));
       metrics.add(new DefaultGaugeLongMetric(vmHwmName, source::getHwm, reportChangesOnly));
     }
-
     return metrics;
   }
-
 
   /**
    * Helper that executes the command to obtain the process memory details we want.

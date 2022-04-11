@@ -14,7 +14,6 @@ import io.avaje.metrics.TimedEvent;
 final class DefaultTimedMetricEvent implements TimedEvent {
 
   private final DefaultTimedMetric metric;
-
   private final long startNanos;
 
   /**
@@ -25,6 +24,7 @@ final class DefaultTimedMetricEvent implements TimedEvent {
     this.startNanos = DefaultTimedMetric.getTickNanos();
   }
 
+  @Override
   public String toString() {
     return metric.toString() + " durationMillis:" + getDuration();
   }
@@ -54,7 +54,6 @@ final class DefaultTimedMetricEvent implements TimedEvent {
   public void endWithError() {
     end(false);
   }
-
 
   /**
    * Return the duration in nanos.

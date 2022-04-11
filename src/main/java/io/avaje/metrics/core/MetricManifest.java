@@ -91,9 +91,7 @@ public class MetricManifest {
   }
 
   static MetricManifest read(String resourceName) {
-
     Manifest manifest = new Manifest();
-
     ClassLoader classLoader = MetricManifest.class.getClassLoader();
     try {
       Enumeration<URL> manifests = classLoader.getResources(resourceName);
@@ -104,7 +102,6 @@ public class MetricManifest {
     } catch (IOException e) {
       logger.error("Error reading metric.mf manifest file?", e);
     }
-
     return new MetricManifest(manifest);
   }
 

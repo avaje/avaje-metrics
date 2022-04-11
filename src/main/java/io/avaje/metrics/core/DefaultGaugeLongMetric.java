@@ -12,11 +12,8 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 class DefaultGaugeLongMetric implements GaugeLongMetric {
 
   protected final MetricName name;
-
   protected final GaugeLong gauge;
-
   protected final boolean reportChangesOnly;
-
   /**
    * The last reported value.
    */
@@ -54,6 +51,7 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
     return name;
   }
 
+  @Override
   public String toString() {
     return name + " " + getValue();
   }
@@ -88,7 +86,7 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  static class Incrementing extends DefaultGaugeLongMetric {
+  static final class Incrementing extends DefaultGaugeLongMetric {
 
     private long runningValue;
 

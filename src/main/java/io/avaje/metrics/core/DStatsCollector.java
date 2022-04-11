@@ -15,7 +15,6 @@ class DStatsCollector implements MetricStatisticsVisitor {
 
   private final List<MetricStatistics> list = new ArrayList<>();
 
-
   List<MetricStatistics> getList() {
     return list;
   }

@@ -265,8 +265,8 @@ public class MetricManager {
   }
 
   /**
-   * Return the built in JVM metrics support to register collection of all or some
-   * of the built in JVM metrics.
+   * Return the built-in JVM metrics support to register collection of all or some
+   * of the built-in JVM metrics.
    */
   public static JvmMetrics jvmMetrics() {
     return mgr;

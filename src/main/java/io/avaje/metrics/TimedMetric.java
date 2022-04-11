@@ -96,7 +96,7 @@ public interface TimedMetric extends Metric {
   void add(long startNanos);
 
   /**
-   * Add an successful event duration with request timing.
+   * Add a successful event duration with request timing.
    */
   void add(long startNanos, boolean requestTiming);
 

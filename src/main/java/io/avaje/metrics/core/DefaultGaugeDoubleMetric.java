@@ -12,11 +12,8 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final MetricName name;
-
   protected final GaugeDouble gauge;
-
   protected final boolean reportChangesOnly;
-
   private double lastReported;
 
   /**
@@ -45,6 +42,7 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
     return name;
   }
 
+  @Override
   public String toString() {
     return name + " " + getValue();
   }
@@ -79,7 +77,7 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  private static class Incrementing extends DefaultGaugeDoubleMetric {
+  private static final class Incrementing extends DefaultGaugeDoubleMetric {
 
     private double runningValue;
 
@@ -89,9 +87,7 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
 
     @Override
     public double getValue() {
-
       synchronized (this) {
-
         double nowValue = super.getValue();
         double diffValue = nowValue - runningValue;
         runningValue = nowValue;

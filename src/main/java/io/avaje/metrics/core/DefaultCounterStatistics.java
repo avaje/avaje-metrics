@@ -10,9 +10,7 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 class DefaultCounterStatistics implements CounterStatistics {
 
   protected final MetricName name;
-
   protected final long startTime;
-
   protected final long count;
 
   /**
@@ -29,6 +27,7 @@ class DefaultCounterStatistics implements CounterStatistics {
     visitor.visit(this);
   }
 
+  @Override
   public String toString() {
     return "count:" + count;
   }

@@ -18,19 +18,12 @@ final class ValueCounter {
   private static final String noBuckets = "";
 
   private final String name;
-
   private final boolean withBucket;
-
   private final String nameWithBucket;
-
   private final String bucketRange;
-
-  protected final LongAdder count = new LongAdder();
-
+  final LongAdder count = new LongAdder();
   private final LongAdder total = new LongAdder();
-
-  protected final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
-
+  final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
   private final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
 
   ValueCounter(MetricName name) {
@@ -67,7 +60,6 @@ final class ValueCounter {
    * Add a value. Usually the value is Time or Bytes etc.
    */
   public void add(long value) {
-
     count.increment();
     total.add(value);
     max.accumulate(value);

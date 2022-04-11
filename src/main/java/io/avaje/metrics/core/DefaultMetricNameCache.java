@@ -42,7 +42,6 @@ final class DefaultMetricNameCache implements MetricNameCache {
    */
   @Override
   public MetricName get(String name) {
-
     MetricName metricName = cache.get(name);
     if (metricName == null) {
       metricName = deriveWithName(name);

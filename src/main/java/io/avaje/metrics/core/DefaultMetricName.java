@@ -11,16 +11,16 @@ import java.util.regex.Pattern;
  * Typically names are based on a class and method name.
  * </p>
  */
-class DefaultMetricName implements MetricName {
+final class DefaultMetricName implements MetricName {
 
   private static final String ERROR = ".error";
-
-  private final String simpleName;
 
   /**
    * Compiled Regex for finding replacing symbols in metric names.
    */
   private static final Pattern REPLACE_METRIC_NAME = Pattern.compile("\\$$");
+
+  private final String simpleName;
 
   /**
    * Creates a new MetricNamegiven the class and method/name.
@@ -30,7 +30,6 @@ class DefaultMetricName implements MetricName {
   }
 
   private static String klassName(Class<?> klass, String name) {
-
     String typeName = REPLACE_METRIC_NAME.matcher(klass.getSimpleName()).replaceAll("");
     String metricName = klass.getPackage() == null ? typeName : klass.getPackage().getName() + "." + typeName;
     if (name != null && !name.isEmpty()) {

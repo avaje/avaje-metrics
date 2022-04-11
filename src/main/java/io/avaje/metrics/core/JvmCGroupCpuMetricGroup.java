@@ -29,22 +29,18 @@ class JvmCGroupCpuMetricGroup {
   }
 
   private List<Metric> metrics(boolean reportChangesOnly) {
-
     FileLines cpu = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpuacct.usage");
     if (cpu.exists()) {
       add(createCGroupCpuUsage(cpu));
     }
-
     FileLines cpuStat = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.stat");
     if (cpuStat.exists()) {
       createCGroupCpuThrottle(cpuStat, reportChangesOnly);
     }
-
     FileLines cpuShares = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.shares");
     if (cpuStat.exists()) {
       add(createCGroupCpuRequests(cpuShares));
     }
-
     FileLines cpuQuota = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_quota_us");
     FileLines period = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_period_us");
     if (cpuQuota.exists() && period.exists()) {
@@ -54,17 +50,13 @@ class JvmCGroupCpuMetricGroup {
     return metrics;
   }
 
-
   GaugeLongMetric createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
-
     final long cpuQuotaVal = cpuQuota.single();
     long quotaPeriod = period.single();
-
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
       return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu.limit"), new FixedGauge(limit));
     }
-
     return null;
   }
 
