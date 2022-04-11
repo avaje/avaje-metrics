@@ -74,7 +74,6 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
    */
   @Override
   public void addEventDuration(boolean success, long durationNanos) {
-
     if (!success) {
       // always add errors to the first bucket
       buckets[0].addEventDuration(false, durationNanos);
@@ -147,7 +146,6 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
   protected static final class DefaultTimedMetricEvent implements TimedEvent {
 
     private final DefaultBucketTimedMetric metric;
-
     private final long startNanos;
 
     /**

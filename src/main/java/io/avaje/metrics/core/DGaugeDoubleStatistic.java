@@ -5,7 +5,7 @@ import io.avaje.metrics.MetricName;
 import io.avaje.metrics.statistics.GaugeDoubleStatistics;
 import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 
-class DGaugeDoubleStatistic implements GaugeDoubleStatistics {
+final class DGaugeDoubleStatistic implements GaugeDoubleStatistics {
 
   private final MetricName name;
   private final double value;

@@ -24,7 +24,7 @@ final class JvmMemoryMetricGroup {
   /**
    * Heap MemorySource.
    */
-  static class HeapMemoryUsageSource implements MemoryUsageSource {
+  static final class HeapMemoryUsageSource implements MemoryUsageSource {
     final MemoryMXBean memoryMXBean;
 
     HeapMemoryUsageSource(MemoryMXBean memoryMXBean) {
@@ -39,7 +39,7 @@ final class JvmMemoryMetricGroup {
   /**
    * NonHeap MemorySource.
    */
-  static class NonHeapMemoryUsageSource implements MemoryUsageSource {
+  static final class NonHeapMemoryUsageSource implements MemoryUsageSource {
     final MemoryMXBean memoryMXBean;
 
     NonHeapMemoryUsageSource(MemoryMXBean memoryMXBean) {
@@ -73,7 +73,7 @@ final class JvmMemoryMetricGroup {
     return new MemUsageGauages(source, baseName).createMetric(reportChangesOnly);
   }
 
-  static class MemUsageGauages {
+  static final class MemUsageGauages {
     private final MemoryUsageSource source;
     private final MetricName baseName;
 
@@ -110,7 +110,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private static class Init extends Base implements GaugeLong {
+    private static final class Init extends Base implements GaugeLong {
       Init(MemoryUsageSource source) {
         super(source);
       }
@@ -121,7 +121,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private static class Used extends Base implements GaugeLong {
+    private static final class Used extends Base implements GaugeLong {
       Used(MemoryUsageSource source) {
         super(source);
       }
@@ -132,7 +132,7 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private static class Committed extends Base implements GaugeLong {
+    private static final class Committed extends Base implements GaugeLong {
       Committed(MemoryUsageSource source) {
         super(source);
       }

@@ -13,12 +13,10 @@ import java.util.concurrent.atomic.LongAdder;
  * cases.
  * </p>
  */
-class Counter {
+final class Counter {
 
   private final LongAdder count = new LongAdder();
-
   private final AtomicLong startTime;
-
   private final MetricName name;
 
   Counter(MetricName name) {
@@ -72,7 +70,6 @@ class Counter {
    * Return the current statistics reseting the internal values.
    */
   private CounterStatistics getStatistics() {
-
     long now = System.currentTimeMillis();
     return new DefaultCounterStatistics(name, startTime.getAndSet(now), count.sumThenReset());
   }

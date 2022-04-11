@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * specific and the rest (group, type etc) is common to all the metrics.
  * </p>
  */
-class DefaultTimedMetricGroup implements TimedMetricGroup {
+final class DefaultTimedMetricGroup implements TimedMetricGroup {
 
   private final ConcurrentHashMap<String, TimedMetric> cache = new ConcurrentHashMap<String, TimedMetric>();
 
@@ -70,10 +70,8 @@ class DefaultTimedMetricGroup implements TimedMetricGroup {
     if (found != null) {
       return found;
     }
-
     // parse name and find/create using MetricManager
     MetricName metricName = metricNameCache.get(name);
-
     // this is safe in that it is single threaded on construction/put
     TimedMetric timedMetric = MetricManager.timed(metricName);
     final TimedMetric existing = cache.putIfAbsent(name, timedMetric);

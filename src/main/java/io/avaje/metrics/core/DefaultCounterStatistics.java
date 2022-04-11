@@ -7,11 +7,11 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-class DefaultCounterStatistics implements CounterStatistics {
+final class DefaultCounterStatistics implements CounterStatistics {
 
-  protected final MetricName name;
-  protected final long startTime;
-  protected final long count;
+  final MetricName name;
+  final long startTime;
+  final long count;
 
   /**
    * Construct for Counter which doesn't collect time or high water mark.
@@ -40,6 +40,7 @@ class DefaultCounterStatistics implements CounterStatistics {
   /**
    * Return the time the counter started statistics collection.
    */
+  @Override
   public long getStartTime() {
     return startTime;
   }
@@ -47,6 +48,7 @@ class DefaultCounterStatistics implements CounterStatistics {
   /**
    * Return the count of values collected.
    */
+  @Override
   public long getCount() {
     return count;
   }

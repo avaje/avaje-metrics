@@ -7,7 +7,7 @@ import io.avaje.metrics.MetricName;
 import java.util.ArrayList;
 import java.util.List;
 
-class JvmCGroupMemoryMetricGroup {
+final class JvmCGroupMemoryMetricGroup {
 
   private static final long MEG = 1_048_576;
 
@@ -46,10 +46,9 @@ class JvmCGroupMemoryMetricGroup {
     return bytes / MEG;
   }
 
-  static class MemSource {
+  static final class MemSource {
 
     private final FileLines memUsage;
-
     private final long limitMb;
     private long usageMb;
     private long pctUsage;

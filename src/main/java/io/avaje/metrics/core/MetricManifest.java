@@ -11,7 +11,7 @@ import java.util.jar.Manifest;
 /**
  * Configuration information for metrics such as memory warning levels.
  */
-public class MetricManifest {
+public final class MetricManifest {
 
   private static final Logger logger = LoggerFactory.getLogger(MetricManifest.class);
 

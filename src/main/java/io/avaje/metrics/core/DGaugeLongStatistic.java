@@ -5,7 +5,7 @@ import io.avaje.metrics.MetricName;
 import io.avaje.metrics.statistics.GaugeLongStatistics;
 import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 
-class DGaugeLongStatistic implements GaugeLongStatistics {
+final class DGaugeLongStatistic implements GaugeLongStatistics {
 
   private final MetricName name;
   private final long value;

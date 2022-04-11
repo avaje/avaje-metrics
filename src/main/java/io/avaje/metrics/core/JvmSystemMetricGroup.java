@@ -8,7 +8,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-class JvmSystemMetricGroup {
+final class JvmSystemMetricGroup {
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
@@ -21,7 +21,7 @@ class JvmSystemMetricGroup {
     return BigDecimal.valueOf(loadAverage).multiply(HUNDRED).setScale(0, RoundingMode.HALF_UP).longValue();
   }
 
-  private static class OsLoadGauge implements GaugeLong {
+  private static final class OsLoadGauge implements GaugeLong {
 
     private final OperatingSystemMXBean osMXbean;
 

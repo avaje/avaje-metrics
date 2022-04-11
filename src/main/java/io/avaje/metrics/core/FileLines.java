@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-class FileLines {
+final class FileLines {
 
   private static final Logger log = LoggerFactory.getLogger(FileLines.class);
 

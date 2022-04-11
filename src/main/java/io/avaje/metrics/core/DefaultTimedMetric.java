@@ -21,11 +21,8 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
   private static final String noBuckets = "";
 
   private final MetricName name;
-
   private final String bucketRange;
-
   private final ValueCounter successCounter;
-
   private final ValueCounter errorCounter;
 
   DefaultTimedMetric(MetricName name) {
@@ -69,7 +66,6 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   @Override
   public void collect(MetricStatisticsVisitor collector) {
-
     TimedStatistics errStats = errorCounter.collectStatistics();
     if (errStats != null) {
       collector.visit(errStats);

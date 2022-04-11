@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  */
 final class NestedContext {
 
-  private static Logger logger = LoggerFactory.getLogger(NestedContext.class);
+  private static final Logger logger = LoggerFactory.getLogger(NestedContext.class);
 
   private static final long thresholdNanos = 1000 * getThresholdMicros();
 
@@ -37,7 +37,7 @@ final class NestedContext {
     }
   }
 
-  private static ThreadLocal<NestedContext> local = new ThreadLocal<NestedContext>() {
+  private static final ThreadLocal<NestedContext> local = new ThreadLocal<NestedContext>() {
     protected synchronized NestedContext initialValue() {
       return new NestedContext();
     }
@@ -83,7 +83,6 @@ final class NestedContext {
   public static void reset() {
     local.get().resetContext();
   }
-
 
   /**
    * Stack that the timing entries go onto.

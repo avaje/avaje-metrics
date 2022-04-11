@@ -5,7 +5,7 @@ import io.avaje.metrics.statistics.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class DStatsCollector implements MetricStatisticsVisitor {
+final class DStatsCollector implements MetricStatisticsVisitor {
 
   private final List<MetricStatistics> list = new ArrayList<>();
 
@@ -38,7 +38,7 @@ class DStatsCollector implements MetricStatisticsVisitor {
     list.add(metric);
   }
 
-  public void addAll(List<MetricStatistics> metrics) {
+  void addAll(List<MetricStatistics> metrics) {
     list.addAll(metrics);
   }
 }

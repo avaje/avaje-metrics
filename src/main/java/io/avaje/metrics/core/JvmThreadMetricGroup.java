@@ -16,7 +16,7 @@ final class JvmThreadMetricGroup {
     return threadGauges.createMetrics(reportChangesOnly, withDetails);
   }
 
-  private static class ThreadGauges {
+  private static final class ThreadGauges {
 
     private final ThreadMXBean threadMXBean;
 
@@ -24,7 +24,7 @@ final class JvmThreadMetricGroup {
       this.threadMXBean = threadMXBean;
     }
 
-    public List<Metric> createMetrics(boolean reportChangesOnly, boolean withDetails) {
+    List<Metric> createMetrics(boolean reportChangesOnly, boolean withDetails) {
       MetricName baseName = new DefaultMetricName("jvm.threads");
       List<Metric> metrics = new ArrayList<>(3);
 
@@ -36,7 +36,7 @@ final class JvmThreadMetricGroup {
       return metrics;
     }
 
-    static class Count implements GaugeLong {
+    static final class Count implements GaugeLong {
       private final ThreadMXBean threadMXBean;
 
       Count(ThreadMXBean threadMXBean) {
@@ -49,7 +49,7 @@ final class JvmThreadMetricGroup {
       }
     }
 
-    static class Peak implements GaugeLong {
+    static final class Peak implements GaugeLong {
       private final ThreadMXBean threadMXBean;
 
       Peak(ThreadMXBean threadMXBean) {
@@ -65,7 +65,7 @@ final class JvmThreadMetricGroup {
       }
     }
 
-    static class Daemon implements GaugeLong {
+    static final class Daemon implements GaugeLong {
       private final ThreadMXBean threadMXBean;
 
       Daemon(ThreadMXBean threadMXBean) {

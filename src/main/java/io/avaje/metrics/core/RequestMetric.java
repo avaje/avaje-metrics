@@ -5,7 +5,7 @@ import io.avaje.metrics.core.noop.NoopTimedMetric;
 
 import java.util.Map;
 
-class RequestMetric extends NoopTimedMetric {
+final class RequestMetric extends NoopTimedMetric {
 
   private final Map<String, String> attributes;
 

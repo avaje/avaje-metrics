@@ -11,7 +11,7 @@ import java.util.List;
 
 import static java.math.BigDecimal.valueOf;
 
-class JvmCGroupCpuMetricGroup {
+final class JvmCGroupCpuMetricGroup {
 
   private final List<Metric> metrics = new ArrayList<>();
 
@@ -107,7 +107,7 @@ class JvmCGroupCpuMetricGroup {
     return new DefaultMetricName(s);
   }
 
-  static class CpuUsageMicros implements GaugeLong {
+  static final class CpuUsageMicros implements GaugeLong {
 
     private final FileLines source;
 
@@ -121,7 +121,7 @@ class JvmCGroupCpuMetricGroup {
     }
   }
 
-  static class CpuStatsSource {
+  static final class CpuStatsSource {
 
     private final FileLines source;
 
@@ -180,7 +180,7 @@ class JvmCGroupCpuMetricGroup {
     }
   }
 
-  static class FixedGauge implements GaugeLong {
+  static final class FixedGauge implements GaugeLong {
 
     private final long value;
 

@@ -6,14 +6,14 @@ import org.slf4j.MDC;
 /**
  * Obtains the external request id from MDC context.
  */
-public class MdcExternalRequestIdAdapter implements ExternalRequestIdAdapter {
+final class MdcExternalRequestIdAdapter implements ExternalRequestIdAdapter {
 
   final String key;
 
   /**
    * Construct supplying a MDC key.
    */
-  public MdcExternalRequestIdAdapter(String key) {
+  MdcExternalRequestIdAdapter(String key) {
     this.key = key;
   }
 

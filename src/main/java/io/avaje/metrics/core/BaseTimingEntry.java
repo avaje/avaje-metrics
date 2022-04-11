@@ -6,14 +6,11 @@ import io.avaje.metrics.TimedMetric;
 /**
  * Base implementation of TimingEntry.
  */
-class BaseTimingEntry implements RequestTimingEntry {
+final class BaseTimingEntry implements RequestTimingEntry {
 
   final TimedMetric metric;
-
   final int depth;
-
   final long startNanos;
-
   long endNanos;
 
   BaseTimingEntry(int depth, TimedMetric metric, long startNanos) {
@@ -55,7 +52,6 @@ class BaseTimingEntry implements RequestTimingEntry {
 
   @Override
   public int compareTo(RequestTimingEntry other) {
-
     int compare = Long.compare(startNanos, other.getStartNanos());
     return compare != 0 ? compare : Integer.compare(depth, other.getDepth());
   }

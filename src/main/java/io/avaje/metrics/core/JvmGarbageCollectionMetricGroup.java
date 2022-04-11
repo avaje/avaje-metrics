@@ -42,7 +42,7 @@ final class JvmGarbageCollectionMetricGroup {
     return new DefaultMetricName("jvm.gc." + prefix + "." + gcName);
   }
 
-  private static class Count implements GaugeLong {
+  private static final class Count implements GaugeLong {
 
     final GarbageCollectorMXBean gcMXBean;
 
@@ -56,7 +56,7 @@ final class JvmGarbageCollectionMetricGroup {
     }
   }
 
-  private static class Time implements GaugeLong {
+  private static final class Time implements GaugeLong {
 
     final GarbageCollectorMXBean gcMXBean;
 
@@ -70,7 +70,7 @@ final class JvmGarbageCollectionMetricGroup {
     }
   }
 
-  private static class TotalTime implements GaugeLong {
+  private static final class TotalTime implements GaugeLong {
 
     final GarbageCollectorMXBean[] gcMXBeans;
 

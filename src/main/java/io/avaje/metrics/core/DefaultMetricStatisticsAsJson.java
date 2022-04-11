@@ -3,7 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.report.JsonWriter;
 import io.avaje.metrics.statistics.MetricStatisticsAsJson;
 
-class DefaultMetricStatisticsAsJson implements MetricStatisticsAsJson {
+final class DefaultMetricStatisticsAsJson implements MetricStatisticsAsJson {
 
   private final DefaultMetricManager manager;
 

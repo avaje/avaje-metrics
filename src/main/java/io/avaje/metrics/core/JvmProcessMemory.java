@@ -72,7 +72,6 @@ final class JvmProcessMemory {
   static final class Source {
 
     private final FileLines statusFile;
-
     private long vmHWM;
     private long vmRSS;
 
@@ -86,7 +85,6 @@ final class JvmProcessMemory {
     }
 
     private void load() {
-
       statusFile.readLines(line -> {
         if (line.startsWith("VmHWM")) {
           vmHWM = parse(line) / TO_MEGABYTES;

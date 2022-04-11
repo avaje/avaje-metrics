@@ -59,13 +59,13 @@ final class ValueCounter {
   /**
    * Add a value. Usually the value is Time or Bytes etc.
    */
-  public void add(long value) {
+  void add(long value) {
     count.increment();
     total.add(value);
     max.accumulate(value);
   }
 
-  public boolean isEmpty() {
+  boolean isEmpty() {
     return count.sum() == 0;
   }
 
@@ -102,7 +102,7 @@ final class ValueCounter {
   /**
    * Reset all the internal counters and start time.
    */
-  public void reset() {
+  void reset() {
     startTime.set(System.currentTimeMillis());
     max.reset();
     count.reset();
@@ -112,32 +112,32 @@ final class ValueCounter {
   /**
    * Return the start time.
    */
-  public long getStartTime() {
+  long getStartTime() {
     return startTime.get();
   }
 
   /**
    * Return the count of values.
    */
-  public long getCount() {
+  long getCount() {
     return count.sum();
   }
 
   /**
    * Return the total of values.
    */
-  public long getTotal() {
+  long getTotal() {
     return total.sum();
   }
 
   /**
    * Return the max value.
    */
-  public long getMax() {
+  long getMax() {
     return max.get();
   }
 
-  public long getMean() {
+  long getMean() {
     long count = getCount();
     long total = getTotal();
     return (count < 1) ? 0L : Math.round((double) (total / count));

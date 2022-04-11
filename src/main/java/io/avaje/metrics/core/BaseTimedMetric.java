@@ -41,10 +41,8 @@ abstract class BaseTimedMetric implements TimedMetric {
    */
   @Override
   public void setRequestTiming(int collectionCount) {
-
     // synchronized here ... rare call to set the collectionCount
     // so being safe wrt decrementCollectionCount()
-
     synchronized (this) {
       requestCollection.set(collectionCount);
       requestTiming = (collectionCount > 0);
@@ -61,11 +59,9 @@ abstract class BaseTimedMetric implements TimedMetric {
    */
   @Override
   public void decrementRequestTiming() {
-
     // synchronized here but this method is only called when 'per request'
     // timing is actively being collected and the timing information is being
     // popped off and collected
-
     synchronized (this) {
       // reading and setting requestTiming here ..
       if (requestTiming) {
@@ -88,13 +84,11 @@ abstract class BaseTimedMetric implements TimedMetric {
    */
   @Override
   public boolean isRequestTiming() {
-
     // volatile read for requestTiming boolean flag
     if (requestTiming) {
       // explicitly turn on 'request' timing (if it is not already active)
       NestedContext.push(this);
       return true;
-
     } else {
       // 'request' timing only if there is an already active
       // nested context (thread local)

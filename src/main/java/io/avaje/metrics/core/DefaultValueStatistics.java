@@ -7,13 +7,13 @@ import io.avaje.metrics.statistics.TimedStatistics;
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-class DefaultValueStatistics implements TimedStatistics {
+final class DefaultValueStatistics implements TimedStatistics {
 
-  protected final ValueCounter owner;
-  protected final long startTime;
-  protected final long count;
-  protected final long total;
-  protected final long max;
+  final ValueCounter owner;
+  final long startTime;
+  final long count;
+  final long total;
+  final long max;
 
   /**
    * Construct for TimeCounter.
