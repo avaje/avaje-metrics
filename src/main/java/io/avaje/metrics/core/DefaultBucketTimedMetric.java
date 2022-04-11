@@ -158,6 +158,7 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
       this.startNanos = System.nanoTime();
     }
 
+    @Override
     public String toString() {
       return metric.toString() + " durationMillis:" + getDuration();
     }
