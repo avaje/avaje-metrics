@@ -11,20 +11,16 @@ import java.util.function.Supplier;
  * We can use timed metric by putting <code>@Timed</code> annotation on
  * a class. When we do that all public methods of that class will have timing
  * added via enhancement.
- * </p>
  * <p>
  * We can put <code>@Timed</code> on private methods that we want to have timed
  * (as private methods don't have timing added by default).
- * </p>
  * <p>
  * We can put <code>@NotTimed</code> on public methods that we don't want timing on.
- * </p>
  *
  * <h3>Adding TimedMetric via code</h3>
  * <p>
  * Alternatively we can use TimedMetric via writing code ourselves to get the
  * TimedMetric and use TimedEvent like the following example:
- * </p>
  *
  * <pre>
  * <code>
@@ -46,7 +42,6 @@ import java.util.function.Supplier;
  * <p>
  * Alternatively we can add event timing using a start time in nanos
  * like the following example:
- * </p>
  *
  * <pre>
  * <code>
@@ -91,7 +86,18 @@ public interface TimedMetric extends Metric {
   TimedEvent startEvent();
 
   /**
-   * Add an successful event duration.
+   * Add an event based on a startNanos (determined by {@link System#nanoTime()}).
+   * <p>
+   * Success and failure statistics are kept separately.
+   * <p>
+   * This is an alternative to using {@link #startEvent()}. Note that using startEvent() has
+   * slightly higher overhead as it instantiates a TimedEvent object which must be later GC'ed. In
+   * this sense generally addEventSince() is the preferred method to use.
+   */
+  void addEventSince(boolean success, long startNanos);
+
+  /**
+   * Add a successful event duration.
    */
   void add(long startNanos);
 
@@ -104,7 +110,6 @@ public interface TimedMetric extends Metric {
    * Add an error event duration to the error.
    * <p>
    * Success and error execution are kept on separate metrics.
-   * </p>
    */
   void addErr(long startNanos);
 
@@ -112,20 +117,8 @@ public interface TimedMetric extends Metric {
    * Add an error event duration with request timing.
    * <p>
    * Success and error execution are kept on separate metrics.
-   * </p>
    */
   void addErr(long startNanos, boolean requestTiming);
-
-  /**
-   * Add an event based on a startNanos (determined by {@link System#nanoTime()}).
-   * <p>
-   * Success and failure statistics are kept separately.
-   * <p>
-   * This is an alternative to using {@link #startEvent()}. Note that using startEvent() has
-   * slightly higher overhead as it instantiates a TimedEvent object which must be later GC'ed. In
-   * this sense generally addEventSince() is the preferred method to use.
-   */
-  void addEventSince(boolean success, long startNanos);
 
   /**
    * Add an event duration in nanoseconds noting if it was a success or failure result.
@@ -153,7 +146,6 @@ public interface TimedMetric extends Metric {
    * <p>
    * This means that the current thread is actively collecting timing entries and this metric
    * has been pushed onto the nested context.
-   * </p>
    */
   boolean isRequestTiming();
 
@@ -165,7 +157,6 @@ public interface TimedMetric extends Metric {
    * Once a request timing context has been created by the top level metric then 'nested metrics'
    * (typically service and data access layers) can append to that existing context.  In this way
    * detailed per request level timing entries can be collected for only selected endpoints.
-   * </p>
    */
   void setRequestTiming(int collectionCount);
 
@@ -175,7 +166,6 @@ public interface TimedMetric extends Metric {
    * This value starts out as the value set by #setRequestTimingCollection and then decrements
    * after a request timing is reported until it reaches 0 at which point request timing automatically
    * turns off for this metric.
-   * </p>
    */
   int getRequestTiming();
 
