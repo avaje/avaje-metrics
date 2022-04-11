@@ -17,10 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Writes the collected metrics to registered reporters.
  * <p>
- * Typically you configure the frequency in seconds in which statistics are collected and reported
- * as well as a base directory where the metric files go. By default the base directory will be read
+ * Typically, you configure the frequency in seconds in which statistics are collected and reported
+ * as well as a base directory where the metric files go. By default, the base directory will be read
  * from a system property 'metric.directory' and otherwise defaults to the current directory.
- * </p>
  */
 public class MetricReportManager {
 
@@ -28,7 +27,7 @@ public class MetricReportManager {
 
   private static final int EIGHT_HOURS = 60 * 60 * 8;
 
-  private static NameComp NAME_COMPARATOR = new NameComp();
+  private static final NameComp NAME_COMPARATOR = new NameComp();
 
   /**
    * Timer used to periodically execute the metrics collection and reporting.
@@ -76,7 +75,6 @@ public class MetricReportManager {
       // Register the metrics collection task to run periodically
       executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
-
     if (config.isRequestTiming()) {
       int requestFreqInSecs = defaultRequestFreqInSecs(config);
       executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
@@ -87,7 +85,6 @@ public class MetricReportManager {
    * Helper method that provides a default RequestTimingReporter if not specified.
    */
   protected static RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
-
     if (config.getRequestTimingReporter() != null) {
       return config.getRequestTimingReporter();
     }
@@ -141,7 +138,6 @@ public class MetricReportManager {
    * Reads the collected request timings and sends them to the reporter.
    */
   private void reportRequestTimings() {
-
     try {
       // read and remove any collected request timings
       List<RequestTiming> requestTimings = MetricManager.requestTimingManager().collectRequestTimings();
@@ -158,20 +154,16 @@ public class MetricReportManager {
    * Periodic task that collects and reports the metrics.
    */
   protected class WriteTask implements Runnable {
-
     int cleanupCounter;
-
     public void run() {
       try {
         cleanupCounter++;
         reportMetrics();
-
         if (cleanupCounter * freqInSeconds > EIGHT_HOURS) {
           // cleanup old metric files about every 8 hours
           cleanupCounter = 0;
           periodicCleanUp();
         }
-
       } catch (Exception e) {
         logger.error("Error writing metrics", e);
       }
@@ -198,7 +190,6 @@ public class MetricReportManager {
    * This typically means appending the metrics to a file or sending over a network.
    */
   protected void reportMetrics() {
-
     long startNanos = System.nanoTime();
     long collectionTime = System.currentTimeMillis();
 
@@ -231,15 +222,12 @@ public class MetricReportManager {
    * Collect all the non-empty metrics and return them for reporting.
    */
   protected List<MetricStatistics> collectMetrics() {
-
     List<MetricStatistics> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
     List<MetricStatistics> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
     metrics.addAll(otherMetrics);
-
     for (MetricSupplier supplier : suppliers) {
       metrics.addAll(supplier.collectMetrics());
     }
-
     return metrics;
   }
 
@@ -247,9 +235,8 @@ public class MetricReportManager {
    * Sort the metrics into name order.
    */
   protected static List<MetricStatistics> sort(Collection<MetricStatistics> metrics) {
-
     ArrayList<MetricStatistics> sortedList = new ArrayList<>(metrics);
-    Collections.sort(sortedList, NAME_COMPARATOR);
+    sortedList.sort(NAME_COMPARATOR);
     return sortedList;
   }
 
@@ -257,7 +244,6 @@ public class MetricReportManager {
    * Visit the metrics sorted by name.
    */
   protected static void report(ReportMetrics reportMetrics, MetricReporter reporter) {
-
     if (reporter != null) {
       try {
         reporter.report(reportMetrics);
@@ -295,10 +281,12 @@ public class MetricReportManager {
 
     public Thread newThread(Runnable r) {
       Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-      if (t.isDaemon())
+      if (t.isDaemon()) {
         t.setDaemon(false);
-      if (t.getPriority() != Thread.NORM_PRIORITY)
+      }
+      if (t.getPriority() != Thread.NORM_PRIORITY) {
         t.setPriority(Thread.NORM_PRIORITY);
+      }
       return t;
     }
   }

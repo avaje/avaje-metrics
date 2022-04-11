@@ -16,7 +16,7 @@ public class BaseRequestTimingReporter implements RequestTimingReporter {
 
   public BaseRequestTimingReporter(RequestTimingReporter reporter, List<RequestTimingListener> listeners) {
     this.reporter = reporter;
-    this.listeners = (listeners != null) ? listeners : Collections.EMPTY_LIST;
+    this.listeners = (listeners != null) ? listeners : Collections.emptyList();
   }
 
   @Override
@@ -26,10 +26,9 @@ public class BaseRequestTimingReporter implements RequestTimingReporter {
     }
     if (!listeners.isEmpty()) {
       // notify all the listeners
-      for (int t = 0; t < requestTimings.size(); t++) {
-        RequestTiming requestTiming = requestTimings.get(t);
-        for (int l = 0; l < listeners.size(); l++) {
-          listeners.get(l).onRequestTiming(requestTiming);
+      for (RequestTiming requestTiming : requestTimings) {
+        for (RequestTimingListener listener : listeners) {
+          listener.onRequestTiming(requestTiming);
         }
       }
     }

@@ -4,6 +4,7 @@ import io.avaje.metrics.CounterMetric;
 import io.avaje.metrics.MetricManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 
 /**
  * Log4J metric appender. Counts error and warning log messages.
@@ -19,7 +20,7 @@ public class Log4JMetricAppender extends AbstractAppender {
   }
 
   public Log4JMetricAppender(String errorName, String warnName) {
-    super("metrics", null, null);
+    super("metrics", null, null, true, Property.EMPTY_ARRAY);
     this.errorMetric = MetricManager.counter(errorName);
     this.warnMetric = MetricManager.counter(warnName);
   }
