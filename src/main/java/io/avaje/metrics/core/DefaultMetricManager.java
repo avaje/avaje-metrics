@@ -1,20 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.GaugeDouble;
-import io.avaje.metrics.GaugeDoubleMetric;
-import io.avaje.metrics.GaugeLong;
-import io.avaje.metrics.GaugeLongMetric;
-import io.avaje.metrics.JvmMetrics;
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
-import io.avaje.metrics.MetricNameCache;
-import io.avaje.metrics.MetricSupplier;
-import io.avaje.metrics.RequestTiming;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.TimedMetricGroup;
-import io.avaje.metrics.TimingMetricInfo;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.*;
 import io.avaje.metrics.core.log4j.Log4JMetricRegister;
 import io.avaje.metrics.core.logback.LogbackMetricRegister;
 import io.avaje.metrics.core.noop.NoopBucketTimedFactory;
@@ -29,11 +15,7 @@ import io.avaje.metrics.util.LikeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

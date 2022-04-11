@@ -104,7 +104,7 @@ class TimedMetricTest {
     try {
       metric.time(this::runAndThrow);
       fail();
-    } catch (NullPointerException  e) {
+    } catch (NullPointerException e) {
 
       final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
       TimedStatistics stat0 = (TimedStatistics) stats.get(0);
@@ -129,7 +129,7 @@ class TimedMetricTest {
     try {
       metric.time(this::callAndThrow);
       fail();
-    } catch (Exception  e) {
+    } catch (Exception e) {
 
       final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
       TimedStatistics stat0 = (TimedStatistics) stats.get(0);

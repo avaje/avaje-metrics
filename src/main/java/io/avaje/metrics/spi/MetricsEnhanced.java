@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * <p>
  * This annotation is added to enhanced classes.
  */
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MetricsEnhanced {
 

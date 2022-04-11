@@ -1,18 +1,8 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.GaugeDouble;
-import io.avaje.metrics.GaugeDoubleMetric;
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.*;
 import io.avaje.metrics.report.CsvWriteVisitor;
-import io.avaje.metrics.statistics.CounterStatistics;
-import io.avaje.metrics.statistics.GaugeDoubleStatistics;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.TimedStatistics;
-import io.avaje.metrics.statistics.ValueStatistics;
+import io.avaje.metrics.statistics.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;

@@ -60,19 +60,19 @@ public class JsonWriteVisitor {
     buffer.append(",");
   }
 
-  private  void writeHeader(String key, long value) throws IOException {
+  private void writeHeader(String key, long value) throws IOException {
     writeKey(key);
     buffer.append(String.valueOf(value));
     buffer.append(",");
   }
 
-  private  void writeKey(String key) throws IOException {
+  private void writeKey(String key) throws IOException {
     buffer.append("\"");
     buffer.append(key);
     buffer.append("\":");
   }
 
-  private  void writeValue(String val) throws IOException {
+  private void writeValue(String val) throws IOException {
     buffer.append("\"");
     buffer.append(val);
     buffer.append("\"");

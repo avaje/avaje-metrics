@@ -1,12 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.statistics.CounterStatistics;
-import io.avaje.metrics.statistics.GaugeDoubleStatistics;
-import io.avaje.metrics.statistics.GaugeLongStatistics;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import io.avaje.metrics.statistics.TimedStatistics;
-import io.avaje.metrics.statistics.ValueStatistics;
+import io.avaje.metrics.statistics.*;
 
 import java.util.ArrayList;
 import java.util.List;
