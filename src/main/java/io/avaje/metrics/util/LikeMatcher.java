@@ -7,10 +7,6 @@ import java.util.regex.Pattern;
  */
 public class LikeMatcher {
 
-  private final boolean allMatch;
-
-  private final Pattern pattern;
-
   /**
    * Compiled regex for replacing dots.
    */
@@ -20,6 +16,9 @@ public class LikeMatcher {
    * Compiled regex for replacing stars.
    */
   private static final Pattern STAR_REPLACE = Pattern.compile("*", Pattern.LITERAL);
+
+  private final boolean allMatch;
+  private final Pattern pattern;
 
   /**
    * Create with an expression that can contain "*" characters as wildcards.
@@ -47,9 +46,7 @@ public class LikeMatcher {
    * }</pre>
    */
   public LikeMatcher(String expr) {
-
     allMatch = (expr == null || expr.trim().length() == 0);
-
     if (allMatch) {
       // skip using pattern in this case
       this.pattern = Pattern.compile(".*");
@@ -58,7 +55,6 @@ public class LikeMatcher {
       expr = expr.toLowerCase().trim();
       expr = DOT_REPLACE.matcher(expr).replaceAll("\\\\.");
       expr = STAR_REPLACE.matcher(expr).replaceAll(".*");
-
       this.pattern = Pattern.compile(expr);
     }
   }
@@ -67,7 +63,6 @@ public class LikeMatcher {
    * Return true if the values matches the pattern.
    */
   public boolean matches(String value) {
-
     return value != null && (allMatch || pattern.matcher(value.toLowerCase()).matches());
   }
 }

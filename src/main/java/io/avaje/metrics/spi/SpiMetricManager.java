@@ -14,7 +14,7 @@ public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
 
   /**
    * Create a MetricName based on the class and name.
-   * Typically name is a method name.
+   * Typically, name is a method name.
    */
   MetricName name(Class<?> cls, String name);
 
