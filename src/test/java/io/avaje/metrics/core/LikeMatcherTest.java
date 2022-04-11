@@ -1,5 +1,6 @@
-package io.avaje.metrics.util;
+package io.avaje.metrics.core;
 
+import io.avaje.metrics.core.LikeMatcher;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

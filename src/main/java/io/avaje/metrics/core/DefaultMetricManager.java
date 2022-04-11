@@ -11,7 +11,6 @@ import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
 import io.avaje.metrics.spi.SpiMetricManager;
 import io.avaje.metrics.statistics.MetricStatistics;
 import io.avaje.metrics.statistics.MetricStatisticsAsJson;
-import io.avaje.metrics.util.LikeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,11 +1,11 @@
-package io.avaje.metrics.util;
+package io.avaje.metrics.core;
 
 import java.util.regex.Pattern;
 
 /**
  * String matching using "*" as wildcards.
  */
-public class LikeMatcher {
+final class LikeMatcher {
 
   /**
    * Compiled regex for replacing dots.
@@ -45,7 +45,7 @@ public class LikeMatcher {
    *
    * }</pre>
    */
-  public LikeMatcher(String expr) {
+  LikeMatcher(String expr) {
     allMatch = (expr == null || expr.trim().length() == 0);
     if (allMatch) {
       // skip using pattern in this case
@@ -62,7 +62,7 @@ public class LikeMatcher {
   /**
    * Return true if the values matches the pattern.
    */
-  public boolean matches(String value) {
+  boolean matches(String value) {
     return value != null && (allMatch || pattern.matcher(value.toLowerCase()).matches());
   }
 }

@@ -3,7 +3,6 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.RequestTimingEntry;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.util.ArrayStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
