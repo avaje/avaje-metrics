@@ -31,11 +31,6 @@ final class DGaugeLongStatistic implements GaugeLongStatistics {
   }
 
   @Override
-  public long getStartTime() {
-    return 0;
-  }
-
-  @Override
   public long getValue() {
     return value;
   }

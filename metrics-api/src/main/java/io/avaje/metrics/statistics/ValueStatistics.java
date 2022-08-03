@@ -6,14 +6,6 @@ package io.avaje.metrics.statistics;
 public interface ValueStatistics extends MetricStatistics {
 
   /**
-   * Return the time these statistics were collected from.
-   * <p>
-   * This should equate to the last time the statistics were collected for reporting purposes so if
-   * that is ever minute then this would return the epoch time of 1 minute ago.
-   */
-  long getStartTime();
-
-  /**
    * Return the count of values collected (since the last reset/collection).
    */
   long getCount();

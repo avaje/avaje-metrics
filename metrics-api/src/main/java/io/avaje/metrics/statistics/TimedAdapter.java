@@ -12,7 +12,6 @@ public class TimedAdapter implements TimedStatistics {
 
   private final String name;
   private final String bucketName;
-  private final long startTime;
   private final long count;
   private final long total;
   private final long max;
@@ -20,10 +19,9 @@ public class TimedAdapter implements TimedStatistics {
   /**
    * Create with the metric name and values.
    */
-  public TimedAdapter(String name, String bucketName, long startTime, long count, long total, long max) {
+  public TimedAdapter(String name, String bucketName, long count, long total, long max) {
     this.name = name;
     this.bucketName = bucketName;
-    this.startTime = startTime;
     this.count = count;
     this.total = total;
     this.max = max;
@@ -37,11 +35,6 @@ public class TimedAdapter implements TimedStatistics {
   @Override
   public String getBucketRange() {
     return null;
-  }
-
-  @Override
-  public long getStartTime() {
-    return startTime;
   }
 
   @Override

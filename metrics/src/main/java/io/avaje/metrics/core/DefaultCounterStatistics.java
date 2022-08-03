@@ -10,15 +10,13 @@ import io.avaje.metrics.statistics.MetricStatisticsVisitor;
 final class DefaultCounterStatistics implements CounterStatistics {
 
   final MetricName name;
-  final long startTime;
   final long count;
 
   /**
    * Construct for Counter which doesn't collect time or high water mark.
    */
-  DefaultCounterStatistics(MetricName name, long collectionStart, long count) {
+  DefaultCounterStatistics(MetricName name, long count) {
     this.name = name;
-    this.startTime = collectionStart;
     this.count = count;
   }
 
@@ -35,14 +33,6 @@ final class DefaultCounterStatistics implements CounterStatistics {
   @Override
   public String getName() {
     return name.getSimpleName();
-  }
-
-  /**
-   * Return the time the counter started statistics collection.
-   */
-  @Override
-  public long getStartTime() {
-    return startTime;
   }
 
   /**

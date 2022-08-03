@@ -31,11 +31,6 @@ final class DGaugeDoubleStatistic implements GaugeDoubleStatistics {
   }
 
   @Override
-  public long getStartTime() {
-    return 0;
-  }
-
-  @Override
   public double getValue() {
     return value;
   }

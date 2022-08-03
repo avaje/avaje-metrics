@@ -10,7 +10,6 @@ import io.avaje.metrics.statistics.TimedStatistics;
 final class DefaultValueStatistics implements TimedStatistics {
 
   final ValueCounter owner;
-  final long startTime;
   final long count;
   final long total;
   final long max;
@@ -18,9 +17,8 @@ final class DefaultValueStatistics implements TimedStatistics {
   /**
    * Construct for TimeCounter.
    */
-  DefaultValueStatistics(ValueCounter owner, long collectionStart, long count, long total, long max) {
+  DefaultValueStatistics(ValueCounter owner, long count, long total, long max) {
     this.owner = owner;
-    this.startTime = collectionStart;
     this.count = count;
     this.total = total;
     // collection is racy so sanitize the max value if it has not been set
@@ -56,14 +54,6 @@ final class DefaultValueStatistics implements TimedStatistics {
   @Override
   public String getNameWithBucket() {
     return owner.getNameWithBucket();
-  }
-
-  /**
-   * Return the time the counter started statistics collection.
-   */
-  @Override
-  public long getStartTime() {
-    return startTime;
   }
 
   /**

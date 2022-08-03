@@ -8,11 +8,6 @@ import io.avaje.metrics.GaugeLongMetric;
 public interface GaugeLongStatistics extends MetricStatistics {
 
   /**
-   * Return the time the counter started statistics collection.
-   */
-  long getStartTime();
-
-  /**
    * Return the count of values collected.
    */
   long getValue();

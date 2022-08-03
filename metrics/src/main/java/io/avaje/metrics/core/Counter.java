@@ -3,7 +3,6 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.statistics.CounterStatistics;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -16,12 +15,10 @@ import java.util.concurrent.atomic.LongAdder;
 final class Counter {
 
   private final LongAdder count = new LongAdder();
-  private final AtomicLong startTime;
   private final MetricName name;
 
   Counter(MetricName name) {
     this.name = name;
-    this.startTime = new AtomicLong(System.currentTimeMillis());
   }
 
   /**
@@ -38,7 +35,6 @@ final class Counter {
   CounterStatistics collectStatistics() {
     boolean empty = isEmpty();
     if (empty) {
-      startTime.set(System.currentTimeMillis());
       return null;
     } else {
       return getStatistics();
@@ -71,14 +67,13 @@ final class Counter {
    */
   private CounterStatistics getStatistics() {
     long now = System.currentTimeMillis();
-    return new DefaultCounterStatistics(name, startTime.getAndSet(now), count.sumThenReset());
+    return new DefaultCounterStatistics(name, count.sumThenReset());
   }
 
   /**
    * Reset the counter.
    */
   void reset() {
-    startTime.set(System.currentTimeMillis());
     count.reset();
   }
 
@@ -89,10 +84,4 @@ final class Counter {
     return count.sum();
   }
 
-  /**
-   * Return the time this counter was last reset.
-   */
-  public long getStartTime() {
-    return startTime.get();
-  }
 }

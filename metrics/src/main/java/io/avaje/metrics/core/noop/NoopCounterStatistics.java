@@ -13,11 +13,6 @@ final class NoopCounterStatistics implements CounterStatistics {
   }
 
   @Override
-  public long getStartTime() {
-    return 0;
-  }
-
-  @Override
   public long getCount() {
     return 0;
   }

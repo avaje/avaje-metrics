@@ -11,11 +11,6 @@ class NoopValueStatistics implements ValueStatistics {
   static NoopValueStatistics INSTANCE = new NoopValueStatistics();
 
   @Override
-  public long getStartTime() {
-    return 0;
-  }
-
-  @Override
   public long getCount() {
     return 0;
   }

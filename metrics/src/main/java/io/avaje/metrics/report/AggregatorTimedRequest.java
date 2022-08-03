@@ -43,12 +43,12 @@ class AggregatorTimedRequest {
   private void add(TimedStatistics stat) {
     if (stat.getName().endsWith(ERROR)) {
       if (aggTimedError == null) {
-        aggTimedError = new AggTimed(name(ERROR), stat.getStartTime());
+        aggTimedError = new AggTimed(name(ERROR));
       }
       aggTimedError.add(stat);
     } else {
       if (aggTimed == null) {
-        aggTimed = new AggTimed(name(""), stat.getStartTime());
+        aggTimed = new AggTimed(name(""));
       }
       aggTimed.add(stat);
     }
@@ -65,11 +65,9 @@ class AggregatorTimedRequest {
   static class AggTimed implements TimedStatistics {
 
     private final MetricName name;
-    private final long startTime;
 
-    AggTimed(MetricName name, long startTime) {
+    AggTimed(MetricName name) {
       this.name = name;
-      this.startTime = startTime;
     }
 
     @Override
@@ -80,11 +78,6 @@ class AggregatorTimedRequest {
     @Override
     public String getBucketRange() {
       return null;
-    }
-
-    @Override
-    public long getStartTime() {
-      return startTime;
     }
 
     @Override

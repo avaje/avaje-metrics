@@ -3,7 +3,6 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.statistics.TimedStatistics;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -24,7 +23,6 @@ final class ValueCounter {
   final LongAdder count = new LongAdder();
   private final LongAdder total = new LongAdder();
   final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
-  private final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
 
   ValueCounter(MetricName name) {
     this.name = name.getSimpleName();
@@ -72,7 +70,6 @@ final class ValueCounter {
   TimedStatistics collectStatistics() {
     boolean empty = count.sum() == 0;
     if (empty) {
-      startTime.set(System.currentTimeMillis());
       return null;
     } else {
       return getStatistics();
@@ -88,32 +85,16 @@ final class ValueCounter {
     final long maxVal = max.getThenReset();
     final long totalVal = total.sumThenReset();
     final long countVal = count.sumThenReset();
-    final long startTimeVal = startTime.getAndSet(System.currentTimeMillis());
-    return new DefaultValueStatistics(this, startTimeVal, countVal, totalVal, maxVal);
-  }
-
-  /**
-   * Reset just the start time.
-   */
-  public void resetStartTime() {
-    startTime.set(System.currentTimeMillis());
+    return new DefaultValueStatistics(this, countVal, totalVal, maxVal);
   }
 
   /**
    * Reset all the internal counters and start time.
    */
   void reset() {
-    startTime.set(System.currentTimeMillis());
     max.reset();
     count.reset();
     total.reset();
-  }
-
-  /**
-   * Return the start time.
-   */
-  long getStartTime() {
-    return startTime.get();
   }
 
   /**
