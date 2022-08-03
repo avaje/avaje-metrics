@@ -1,12 +1,10 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.core.DefaultMetricManager;
 import io.avaje.metrics.spi.SpiMetricManager;
 import io.avaje.metrics.statistics.MetricStatistics;
 import io.avaje.metrics.statistics.MetricStatisticsAsJson;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
@@ -30,12 +28,9 @@ public class MetricManager {
    * Finds and returns the implementation of PluginMetricManager using the ServiceLoader.
    */
   private static SpiMetricManager initialiseProvider() {
-    ServiceLoader<SpiMetricManager> loader = ServiceLoader.load(SpiMetricManager.class);
-    Iterator<SpiMetricManager> it = loader.iterator();
-    if (it.hasNext()) {
-      return it.next();
-    }
-    return new DefaultMetricManager();
+    return ServiceLoader
+      .load(SpiMetricManager.class)
+      .findFirst().orElseThrow(() -> new IllegalStateException("io.avaje.metrics:metrics is not in classpath?"));
   }
 
   /**

@@ -29,6 +29,7 @@
     <module>metrics-json</module>
     <module>metrics-logback</module>
     <module>metrics-log4j</module>
+    <module>metrics-api</module>
   </modules>
 
 
