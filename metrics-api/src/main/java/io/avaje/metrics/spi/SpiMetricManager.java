@@ -69,25 +69,6 @@ public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
   List<MetricStatistics> collectMetrics();
 
   /**
-   * Return the collection of metrics that are considered non-empty. This means these are metrics
-   * that have collected statistics since the last time they were collected.
-   * <p>
-   * This gets the non emtpy metrics to add themselves to the report list.
-   * </p>
-   */
-  List<MetricStatistics> collectNonEmptyMetrics();
-
-  /**
-   * Return the collection of JVM metrics that are non-empty (for reporting).
-   */
-  List<MetricStatistics> collectNonEmptyJvmMetrics();
-
-//  /**
-//   * Collect the metrics for writing as JSON (typically to a supplied Appender).
-//   */
-//  MetricStatisticsAsJson collectAsJson();
-
-  /**
    * Return a collection of all the metrics.
    */
   Collection<Metric> getMetrics();

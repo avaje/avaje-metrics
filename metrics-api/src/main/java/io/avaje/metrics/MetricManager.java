@@ -246,27 +246,6 @@ public class MetricManager {
   }
 
   /**
-   * Return all the non-JVM registered metrics that are not empty.
-   */
-  public static List<MetricStatistics> collectNonEmptyMetrics() {
-    return mgr.collectNonEmptyMetrics();
-  }
-
-  /**
-   * Return JVM metrics that are not empty.
-   */
-  public static List<MetricStatistics> collectNonEmptyJvmMetrics() {
-    return mgr.collectNonEmptyJvmMetrics();
-  }
-
-//  /**
-//   * Collect the JVM metrics with support for writing them as JSON.
-//   */
-//  public static MetricStatisticsAsJson collectAsJson() {
-//    return mgr.collectAsJson();
-//  }
-
-  /**
    * Return the built-in JVM metrics support to register collection of all or some
    * of the built-in JVM metrics.
    */

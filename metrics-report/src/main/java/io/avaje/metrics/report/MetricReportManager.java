@@ -222,9 +222,7 @@ public class MetricReportManager {
    * Collect all the non-empty metrics and return them for reporting.
    */
   protected List<MetricStatistics> collectMetrics() {
-    List<MetricStatistics> metrics = sort(MetricManager.collectNonEmptyJvmMetrics());
-    List<MetricStatistics> otherMetrics = sort(MetricManager.collectNonEmptyMetrics());
-    metrics.addAll(otherMetrics);
+    List<MetricStatistics> metrics = sort(MetricManager.collectMetrics());
     for (MetricSupplier supplier : suppliers) {
       metrics.addAll(supplier.collectMetrics());
     }
@@ -274,8 +272,7 @@ public class MetricReportManager {
     private final String namePrefix;
 
     BasicThreadFactory() {
-      SecurityManager s = System.getSecurityManager();
-      group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+      group = Thread.currentThread().getThreadGroup();
       namePrefix = "metric-";
     }
 

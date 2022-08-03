@@ -27,7 +27,7 @@ class TimedMetricTest {
     metric.add(start, useContext);
     metric.addEventSince(true, start);
 
-    List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+    List<MetricStatistics> stats = MetricManager.collectMetrics();
 
     TimedStatistics stat0 = (TimedStatistics) stats.get(0);
 
@@ -42,7 +42,7 @@ class TimedMetricTest {
     metric.addEventSince(false, start);
     metric.addErr(start, useContext);
 
-    stats = MetricManager.collectNonEmptyMetrics();
+    stats = MetricManager.collectMetrics();
     stat0 = (TimedStatistics) stats.get(0);
 
     assertEquals("org.test.mytimed.error", stat0.getName());
@@ -53,7 +53,7 @@ class TimedMetricTest {
     metric.addErr(start, useContext);
     metric.addErr(start, useContext);
 
-    stats = MetricManager.collectNonEmptyMetrics();
+    stats = MetricManager.collectMetrics();
     stat0 = (TimedStatistics) stats.get(0);
     TimedStatistics stat1 = (TimedStatistics) stats.get(1);
 
@@ -65,7 +65,7 @@ class TimedMetricTest {
   }
 
   private void resetStatistics() {
-    MetricManager.collectNonEmptyMetrics();
+    MetricManager.collectMetrics();
   }
 
   @Test
@@ -78,7 +78,7 @@ class TimedMetricTest {
       System.out.println("here");
     });
 
-    final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+    final List<MetricStatistics> stats = MetricManager.collectMetrics();
     TimedStatistics stat0 = (TimedStatistics) stats.get(0);
 
     assertEquals("test.runnable", stat0.getName());
@@ -106,7 +106,7 @@ class TimedMetricTest {
       fail();
     } catch (NullPointerException e) {
 
-      final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+      final List<MetricStatistics> stats = MetricManager.collectMetrics();
       TimedStatistics stat0 = (TimedStatistics) stats.get(0);
 
       assertEquals("test.runnable.error", stat0.getName());
@@ -131,7 +131,7 @@ class TimedMetricTest {
       fail();
     } catch (Exception e) {
 
-      final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+      final List<MetricStatistics> stats = MetricManager.collectMetrics();
       TimedStatistics stat0 = (TimedStatistics) stats.get(0);
 
       assertEquals("test.callable.error", stat0.getName());
@@ -150,7 +150,7 @@ class TimedMetricTest {
     String out = metric.time(() -> "foo");
     assertEquals("foo", out);
 
-    final List<MetricStatistics> stats = MetricManager.collectNonEmptyMetrics();
+    final List<MetricStatistics> stats = MetricManager.collectMetrics();
     TimedStatistics stat0 = (TimedStatistics) stats.get(0);
 
     assertEquals("test.callable", stat0.getName());

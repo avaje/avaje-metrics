@@ -430,23 +430,7 @@ public class DefaultMetricManager implements SpiMetricManager {
     }
   }
 
-  @Override
-  public List<MetricStatistics> collectNonEmptyMetrics() {
-    synchronized (monitor) {
-      DStatsCollector collector = new DStatsCollector();
-      collectAppMetrics(collector);
-      return collector.getList();
-    }
-  }
 
-  @Override
-  public List<MetricStatistics> collectNonEmptyJvmMetrics() {
-    synchronized (monitor) {
-      DStatsCollector collector = new DStatsCollector();
-      collectJvmMetrics(collector);
-      return collector.getList();
-    }
-  }
 
   @Override
   public List<MetricStatistics> collectMetrics() {
@@ -458,10 +442,6 @@ public class DefaultMetricManager implements SpiMetricManager {
     }
   }
 
-//  @Override
-//  public MetricStatisticsAsJson collectAsJson() {
-//    return new DefaultMetricStatisticsAsJson(this);
-//  }
 
   /**
    * Compare Metrics by name for sorting purposes.
