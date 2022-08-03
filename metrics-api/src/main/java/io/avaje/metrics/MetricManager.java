@@ -34,6 +34,13 @@ public class MetricManager {
   }
 
   /**
+   * Collect all the metrics.
+   */
+  public static List<MetricStatistics> collectMetrics() {
+    return mgr.collectMetrics();
+  }
+
+  /**
    * When a request completes it is reported to the manager.
    */
   public static void reportTiming(RequestTiming requestTiming) {
@@ -252,12 +259,12 @@ public class MetricManager {
     return mgr.collectNonEmptyJvmMetrics();
   }
 
-  /**
-   * Collect the JVM metrics with support for writing them as JSON.
-   */
-  public static MetricStatisticsAsJson collectAsJson() {
-    return mgr.collectAsJson();
-  }
+//  /**
+//   * Collect the JVM metrics with support for writing them as JSON.
+//   */
+//  public static MetricStatisticsAsJson collectAsJson() {
+//    return mgr.collectAsJson();
+//  }
 
   /**
    * Return the built-in JVM metrics support to register collection of all or some

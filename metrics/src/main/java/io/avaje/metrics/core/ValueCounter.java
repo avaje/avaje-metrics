@@ -63,10 +63,6 @@ final class ValueCounter {
     max.accumulate(value);
   }
 
-  boolean isEmpty() {
-    return count.sum() == 0;
-  }
-
   TimedStatistics collectStatistics() {
     boolean empty = count.sum() == 0;
     if (empty) {

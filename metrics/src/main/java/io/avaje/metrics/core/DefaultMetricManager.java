@@ -460,10 +460,10 @@ public class DefaultMetricManager implements SpiMetricManager {
     }
   }
 
-  @Override
-  public MetricStatisticsAsJson collectAsJson() {
-    return new DefaultMetricStatisticsAsJson(this);
-  }
+//  @Override
+//  public MetricStatisticsAsJson collectAsJson() {
+//    return new DefaultMetricStatisticsAsJson(this);
+//  }
 
   /**
    * Compare Metrics by name for sorting purposes.

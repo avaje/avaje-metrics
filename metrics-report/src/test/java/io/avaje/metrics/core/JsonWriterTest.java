@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class JsonWriterTest {
 
   private static final long NANOS_TO_MICROS = 1000L;
-
   private static final long NANOS_TO_MILLIS = 1000000L;
 
 

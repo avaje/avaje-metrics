@@ -82,10 +82,10 @@ public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
    */
   List<MetricStatistics> collectNonEmptyJvmMetrics();
 
-  /**
-   * Collect the metrics for writing as JSON (typically to a supplied Appender).
-   */
-  MetricStatisticsAsJson collectAsJson();
+//  /**
+//   * Collect the metrics for writing as JSON (typically to a supplied Appender).
+//   */
+//  MetricStatisticsAsJson collectAsJson();
 
   /**
    * Return a collection of all the metrics.

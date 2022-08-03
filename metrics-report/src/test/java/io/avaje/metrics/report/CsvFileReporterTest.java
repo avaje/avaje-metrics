@@ -1,4 +1,4 @@
-package io.avaje.metrics.core;
+package io.avaje.metrics.report;
 
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.TimedEvent;
