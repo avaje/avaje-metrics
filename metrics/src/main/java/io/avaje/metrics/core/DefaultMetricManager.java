@@ -1,11 +1,9 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
-import io.avaje.metrics.core.noop.NoopBucketTimedFactory;
-import io.avaje.metrics.core.noop.NoopCounterMetricFactory;
-import io.avaje.metrics.core.noop.NoopTimedMetricFactory;
-import io.avaje.metrics.core.noop.NoopValueMetricFactory;
 import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
+import io.avaje.metrics.spi.MetricFactory;
+import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricManager;
 import io.avaje.metrics.statistics.MetricStatistics;
 import io.avaje.metrics.statistics.MetricStatisticsAsJson;
@@ -34,43 +32,18 @@ public class DefaultMetricManager implements SpiMetricManager {
   private boolean withDetails;
   private boolean reportChangesOnly;
 
-  /**
-   * Cache of the code JVM metrics.
-   */
   private final List<Metric> coreJvmMetrics = new ArrayList<>();
-
-  /**
-   * Cache of the created metrics (excluding JVM metrics).
-   */
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
-
-  /**
-   * Factory for creating TimedMetrics.
-   */
   private final MetricFactory<TimedMetric> bucketTimedMetricFactory;
-
-  /**
-   * Factory for creating TimedMetrics.
-   */
   private final MetricFactory<TimedMetric> timedMetricFactory;
-
-  /**
-   * Factory for creating CounterMetrics.
-   */
   private final MetricFactory<CounterMetric> counterMetricFactory;
-
-  /**
-   * Factory for creating ValueMetrics.
-   */
   private final MetricFactory<ValueMetric> valueMetricFactory;
 
   /**
    * Cache of the metric names.
    */
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<>();
-
   private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
-
   private final List<MetricSupplier> suppliers = new ArrayList<>();
 
   /**
@@ -78,18 +51,13 @@ public class DefaultMetricManager implements SpiMetricManager {
    */
   protected final ExternalRequestIdAdapter externalRequestIdAdapter;
 
-  /**
-   * Set to true if collection should be disabled.
-   */
-  protected final boolean disable;
-
   public DefaultMetricManager() {
-    this.disable = isDisableCollection();
-    this.bucketTimedMetricFactory = initBucketTimedFactory(disable);
-    this.timedMetricFactory = initTimedMetricFactory(disable);
-    this.valueMetricFactory = initValueMetricFactory(disable);
-    this.counterMetricFactory = initCounterMetricFactory(disable);
-    this.externalRequestIdAdapter = initExternalRequestIdAdapter(disable);
+    SpiMetricBuilder builder = initBuilder();
+    this.bucketTimedMetricFactory = builder.bucket();
+    this.timedMetricFactory = builder.timed();
+    this.valueMetricFactory = builder.value();
+    this.counterMetricFactory = builder.counter();
+    this.externalRequestIdAdapter = initExternalRequestIdAdapter(isDisableCollection());
   }
 
   private static ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
@@ -101,6 +69,13 @@ public class DefaultMetricManager implements SpiMetricManager {
       return new MdcExternalRequestIdAdapter(mdcKey);
     }
     return null;
+  }
+
+  static SpiMetricBuilder initBuilder() {
+    if (isDisableCollection()) {
+      return ServiceLoader.load(SpiMetricBuilder.class).findFirst().orElseThrow(() -> new IllegalStateException("Missing metrics-noop dependency"));
+    }
+    return new DSpiMetricBuilder();
   }
 
   /**
@@ -121,34 +96,6 @@ public class DefaultMetricManager implements SpiMetricManager {
       }
     }
     requestTimings.add(requestTiming);
-  }
-
-  /**
-   * Return the factory used to create TimedMetric instances.
-   */
-  protected static MetricFactory<TimedMetric> initBucketTimedFactory(boolean disableCollection) {
-    return (disableCollection) ? new NoopBucketTimedFactory() : new BucketTimedMetricFactory();
-  }
-
-  /**
-   * Return the factory used to create TimedMetric instances.
-   */
-  protected static MetricFactory<TimedMetric> initTimedMetricFactory(boolean disableCollection) {
-    return (disableCollection) ? new NoopTimedMetricFactory() : new TimedMetricFactory();
-  }
-
-  /**
-   * Return the factory used to create CounterMetric instances.
-   */
-  protected static MetricFactory<CounterMetric> initCounterMetricFactory(boolean disableCollection) {
-    return (disableCollection) ? new NoopCounterMetricFactory() : new CounterMetricFactory();
-  }
-
-  /**
-   * Return the factory used to create ValueMetric instances.
-   */
-  protected static MetricFactory<ValueMetric> initValueMetricFactory(boolean disableCollection) {
-    return (disableCollection) ? new NoopValueMetricFactory() : new ValueMetricFactory();
   }
 
   @Override

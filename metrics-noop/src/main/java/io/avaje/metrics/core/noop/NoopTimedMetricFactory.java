@@ -2,14 +2,13 @@ package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.core.MetricFactory;
+import io.avaje.metrics.spi.MetricFactory;
 
-public class NoopBucketTimedFactory implements MetricFactory<TimedMetric> {
+public class NoopTimedMetricFactory implements MetricFactory<TimedMetric> {
 
   @Override
   public TimedMetric createMetric(MetricName name, int[] bucketRanges) {
-
-    return new NoopBucketTimedMetric(name);
+    return new NoopTimedMetric(name);
   }
 
 }

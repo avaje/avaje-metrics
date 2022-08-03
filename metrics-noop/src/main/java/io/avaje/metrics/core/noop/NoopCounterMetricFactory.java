@@ -2,7 +2,7 @@ package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.CounterMetric;
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.core.MetricFactory;
+import io.avaje.metrics.spi.MetricFactory;
 
 public class NoopCounterMetricFactory implements MetricFactory<CounterMetric> {
 

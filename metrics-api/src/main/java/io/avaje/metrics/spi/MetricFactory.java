@@ -1,4 +1,4 @@
-package io.avaje.metrics.core;
+package io.avaje.metrics.spi;
 
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricName;
