@@ -34,10 +34,6 @@ public class DefaultMetricManager implements SpiMetricManager {
   private boolean withDetails;
   private boolean reportChangesOnly;
 
-  private String logErrorName = "app.log.error";
-
-  private String logWarnName = "app.log.warn";
-
   /**
    * Cache of the code JVM metrics.
    */
@@ -171,23 +167,6 @@ public class DefaultMetricManager implements SpiMetricManager {
   public JvmMetrics withDetails() {
     withDetails = true;
     return this;
-  }
-
-  @Override
-  public JvmMetrics withLogMetricName(String errorMetricName, String warnMetricName) {
-    this.logErrorName = errorMetricName;
-    this.logWarnName = warnMetricName;
-    return this;
-  }
-
-  @Override
-  public JvmMetrics registerLogbackMetrics() {
-    throw new IllegalArgumentException("Use LogbackMetricRegister.registerWith(logErrorName, logWarnName);");
-  }
-
-  @Override
-  public JvmMetrics registerLog4JMetrics() {
-    throw new IllegalArgumentException("Use Log4JMetricRegister.registerWith(logErrorName, logWarnName);");
   }
 
   /**

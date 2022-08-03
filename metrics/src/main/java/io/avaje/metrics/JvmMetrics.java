@@ -71,22 +71,4 @@ public interface JvmMetrics {
    */
   JvmMetrics registerCGroupMetrics();
 
-  /**
-   * Set the names of the metrics for logging errors and warnings.
-   * <p>
-   * When not set these default to app.log.error and app.log.warn respectively.
-   * </p>
-   */
-  JvmMetrics withLogMetricName(String errorMetricName, String warnMetricName);
-
-  /**
-   * Register metrics for Logback error and warning message counters.
-   */
-  JvmMetrics registerLogbackMetrics();
-
-  /**
-   * Register metrics for Log4J error and warning message counters.
-   */
-  JvmMetrics registerLog4JMetrics();
-
 }
