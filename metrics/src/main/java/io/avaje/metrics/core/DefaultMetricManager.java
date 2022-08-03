@@ -1,8 +1,6 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
-import io.avaje.metrics.core.log4j.Log4JMetricRegister;
-import io.avaje.metrics.core.logback.LogbackMetricRegister;
 import io.avaje.metrics.core.noop.NoopBucketTimedFactory;
 import io.avaje.metrics.core.noop.NoopCounterMetricFactory;
 import io.avaje.metrics.core.noop.NoopTimedMetricFactory;
@@ -184,14 +182,12 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public JvmMetrics registerLogbackMetrics() {
-    LogbackMetricRegister.registerWith(logErrorName, logWarnName);
-    return this;
+    throw new IllegalArgumentException("Use LogbackMetricRegister.registerWith(logErrorName, logWarnName);");
   }
 
   @Override
   public JvmMetrics registerLog4JMetrics() {
-    Log4JMetricRegister.registerWith(logErrorName, logWarnName);
-    return this;
+    throw new IllegalArgumentException("Use Log4JMetricRegister.registerWith(logErrorName, logWarnName);");
   }
 
   /**
