@@ -3,28 +3,27 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.CounterMetric;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.ValueMetric;
-import io.avaje.metrics.spi.MetricFactory;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 
 final class DSpiMetricBuilder implements SpiMetricBuilder {
 
   @Override
-  public MetricFactory<TimedMetric> timed() {
+  public Factory<TimedMetric> timed() {
     return new TimedMetricFactory();
   }
 
   @Override
-  public MetricFactory<TimedMetric> bucket() {
+  public Factory<TimedMetric> bucket() {
     return new BucketTimedMetricFactory();
   }
 
   @Override
-  public MetricFactory<ValueMetric> value() {
+  public Factory<ValueMetric> value() {
     return new ValueMetricFactory();
   }
 
   @Override
-  public MetricFactory<CounterMetric> counter() {
+  public Factory<CounterMetric> counter() {
     return new CounterMetricFactory();
   }
 

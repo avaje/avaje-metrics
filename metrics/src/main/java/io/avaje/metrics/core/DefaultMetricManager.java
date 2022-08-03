@@ -2,11 +2,9 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
 import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
-import io.avaje.metrics.spi.MetricFactory;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricManager;
 import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsAsJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +32,10 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   private final List<Metric> coreJvmMetrics = new ArrayList<>();
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
-  private final MetricFactory<TimedMetric> bucketTimedMetricFactory;
-  private final MetricFactory<TimedMetric> timedMetricFactory;
-  private final MetricFactory<CounterMetric> counterMetricFactory;
-  private final MetricFactory<ValueMetric> valueMetricFactory;
+  private final SpiMetricBuilder.Factory<TimedMetric> bucketTimedMetricFactory;
+  private final SpiMetricBuilder.Factory<TimedMetric> timedMetricFactory;
+  private final SpiMetricBuilder.Factory<CounterMetric> counterMetricFactory;
+  private final SpiMetricBuilder.Factory<ValueMetric> valueMetricFactory;
 
   /**
    * Cache of the metric names.
@@ -261,11 +259,11 @@ public class DefaultMetricManager implements SpiMetricManager {
     return metric;
   }
 
-  private Metric getMetric(MetricName name, MetricFactory<?> factory) {
+  private Metric getMetric(MetricName name, SpiMetricBuilder.Factory<?> factory) {
     return getMetric(name, factory, null);
   }
 
-  private Metric getMetric(MetricName name, MetricFactory<?> factory, int[] bucketRanges) {
+  private Metric getMetric(MetricName name, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
     String cacheKey = name.getSimpleName();
     // try lock free get first
     Metric metric = metricsCache.get(cacheKey);

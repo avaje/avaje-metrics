@@ -1,14 +1,23 @@
 package io.avaje.metrics.spi;
 
-import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.*;
 
 public interface SpiMetricBuilder {
 
-  MetricFactory<TimedMetric> timed();
-  MetricFactory<TimedMetric> bucket();
-  MetricFactory<ValueMetric> value();
-  MetricFactory<CounterMetric> counter();
+  Factory<TimedMetric> timed();
+  Factory<TimedMetric> bucket();
+  Factory<ValueMetric> value();
+  Factory<CounterMetric> counter();
 
+  /**
+   * Factory for creating metrics.
+   */
+  interface Factory<T extends Metric> {
+
+    /**
+     * Create the metric.
+     */
+    T createMetric(MetricName name, int[] bucketRanges);
+
+  }
 }
