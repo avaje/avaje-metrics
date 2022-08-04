@@ -4,9 +4,6 @@ import io.avaje.metrics.*;
 import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricManager;
-import io.avaje.metrics.MetricStats;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,16 +14,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class DefaultMetricManager implements SpiMetricManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(DefaultMetricManager.class);
-
   private static final String METRICS_MDC_REQUEST_ID = "metrics.mdc.requestId";
-
   private static final String JVM = "jvm.";
 
   private final NameComp sortByName = new NameComp();
-
   private final Object monitor = new Object();
-
   private boolean withDetails;
   private boolean reportChangesOnly;
 
@@ -37,9 +29,6 @@ public class DefaultMetricManager implements SpiMetricManager {
   private final SpiMetricBuilder.Factory<CounterMetric> counterMetricFactory;
   private final SpiMetricBuilder.Factory<ValueMetric> valueMetricFactory;
 
-  /**
-   * Cache of the metric names.
-   */
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<>();
   private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
   private final List<MetricSupplier> suppliers = new ArrayList<>();
@@ -284,19 +273,6 @@ public class DefaultMetricManager implements SpiMetricManager {
     return metricsCache.get(name.simpleName());
   }
 
-  public void clear() {
-    synchronized (monitor) {
-      metricsCache.clear();
-    }
-  }
-
-//  @Override
-//  public Collection<Metric> getMetrics() {
-//    synchronized (monitor) {
-//      return Collections.unmodifiableCollection(metricsCache.values());
-//    }
-//  }
-
   @Override
   public boolean setRequestTimingCollection(String fullMetricName, int collectionCount) {
     return setRequestTimingCollection(MetricName.of(fullMetricName), collectionCount);
@@ -343,7 +319,6 @@ public class DefaultMetricManager implements SpiMetricManager {
         TimedMetric timed = (TimedMetric) metric;
         if (like.matches(timed.name().simpleName())) {
           timed.setRequestTiming(collectionCount);
-          logger.debug("setRequestTimingCollection({}) on {}", collectionCount, timed.name().simpleName());
           changes.add(new TimingMetricInfo(timed.name().simpleName(), collectionCount));
         }
       }
@@ -429,7 +404,6 @@ public class DefaultMetricManager implements SpiMetricManager {
       collector.addAll(supplier.collectMetrics());
     }
   }
-
 
 
   @Override

@@ -228,20 +228,6 @@ public class MetricManager {
     return mgr.register(name(name), gauge);
   }
 
-//  /**
-//   * Return all the non-JVM registered metrics.
-//   */
-//  public static Collection<Metric> getMetrics() {
-//    return mgr.getMetrics();
-//  }
-//
-//  /**
-//   * Return the core JVM metrics.
-//   */
-//  public static Collection<Metric> getJvmMetrics() {
-//    return mgr.getJvmMetrics();
-//  }
-
   /**
    * Return the built-in JVM metrics support to register collection of all or some
    * of the built-in JVM metrics.

@@ -1,9 +1,7 @@
 package io.avaje.metrics.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.Manifest;
@@ -13,7 +11,7 @@ import java.util.jar.Manifest;
  */
 public final class MetricManifest {
 
-  private static final Logger logger = LoggerFactory.getLogger(MetricManifest.class);
+  private static final System.Logger log = System.getLogger("io.avaje.metrics");
 
   private static final MetricManifest INSTANCE = read("metrics.mf");
 
@@ -100,7 +98,7 @@ public final class MetricManifest {
         manifest.read(url.openStream());
       }
     } catch (IOException e) {
-      logger.error("Error reading metric.mf manifest file?", e);
+      log.log(Level.ERROR, "Error reading metric.mf manifest file?", e);
     }
     return new MetricManifest(manifest);
   }

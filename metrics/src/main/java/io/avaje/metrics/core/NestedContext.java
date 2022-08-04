@@ -3,9 +3,8 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.RequestTimingEntry;
 import io.avaje.metrics.TimedMetric;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -19,7 +18,7 @@ import java.util.function.Supplier;
  */
 final class NestedContext {
 
-  private static final Logger logger = LoggerFactory.getLogger(NestedContext.class);
+  private static final System.Logger log = System.getLogger("io.avaje.metrics");
 
   private static final long thresholdNanos = 1000 * getThresholdMicros();
 
@@ -31,7 +30,7 @@ final class NestedContext {
     try {
       return Long.parseLong(threshold);
     } catch (NumberFormatException e) {
-      logger.error("Invalid number value [" + threshold + "] for metric.context.threshold.micros", e);
+      log.log(Level.ERROR, "Invalid number value [" + threshold + "] for metric.context.threshold.micros", e);
       return 0;
     }
   }
@@ -145,7 +144,7 @@ final class NestedContext {
    */
   void popMetric() {
     if (--depth < 0) {
-      logger.error("Unexpected depth [" + depth + "] when popping metric");
+      log.log(Level.ERROR, "Unexpected depth [" + depth + "] when popping metric");
       resetContext();
 
     } else {

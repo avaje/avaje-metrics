@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
-import org.slf4j.MDC;
+//import org.slf4j.MDC;
 
 /**
  * Obtains the external request id from MDC context.
@@ -22,6 +22,7 @@ final class MdcExternalRequestIdAdapter implements ExternalRequestIdAdapter {
    */
   @Override
   public String getExternalRequestId() {
-    return MDC.get(key);
+    throw new IllegalArgumentException("Not supported at the moment");
+    //return MDC.get(key);
   }
 }
