@@ -14,31 +14,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * name (for example, on soap operation name or method name).
  * </p>
  */
-final class DefaultMetricNameCache implements MetricNameCache {
+final class DMetricNameCache implements MetricNameCache {
 
   private final MetricName baseName;
-
   private final ConcurrentHashMap<String, MetricName> cache = new ConcurrentHashMap<>();
 
   /**
    * Create basing the name off the Class.
    */
-  DefaultMetricNameCache(Class<?> klass) {
-    this(new DefaultMetricName(klass, ""));
+  DMetricNameCache(Class<?> klass) {
+    this(new DMetricName(klass, ""));
   }
 
   /**
    * Create providing a base MetricName.
    */
-  DefaultMetricNameCache(MetricName baseName) {
+  DMetricNameCache(MetricName baseName) {
     this.baseName = baseName;
   }
 
   /**
    * Return the MetricName from the cache creating it if required.
-   * <p>
-   * Typically the name passed in could be a soap operation name or method name.
-   * </p>
    */
   @Override
   public MetricName get(String name) {

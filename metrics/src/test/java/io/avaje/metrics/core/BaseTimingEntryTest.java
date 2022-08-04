@@ -68,7 +68,7 @@ class BaseTimingEntryTest {
     MetricName metricName;
 
     TDMetric(String name) {
-      metricName = new DefaultMetricName(name);
+      metricName = new DMetricName(name);
     }
 
     @Override

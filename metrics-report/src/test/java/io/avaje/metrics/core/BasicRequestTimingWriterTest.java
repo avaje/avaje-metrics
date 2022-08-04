@@ -18,9 +18,9 @@ class BasicRequestTimingWriterTest {
 
   BasicRequestTimingWriter requestTimingWriter = new BasicRequestTimingWriter();
 
-  TimedMetric m0 = new DefaultTimedMetric(new DefaultMetricName("org.req.Customer.getById"));
-  TimedMetric m1 = new DefaultTimedMetric(new DefaultMetricName("org.service.CustomerService.getById"));
-  TimedMetric m2 = new DefaultTimedMetric(new DefaultMetricName("org.data.CustomerDAO.getById"));
+  TimedMetric m0 = new DTimedMetric(new DMetricName("org.req.Customer.getById"));
+  TimedMetric m1 = new DTimedMetric(new DMetricName("org.service.CustomerService.getById"));
+  TimedMetric m2 = new DTimedMetric(new DMetricName("org.data.CustomerDAO.getById"));
 
   @Test
   void testWrite() throws Exception {

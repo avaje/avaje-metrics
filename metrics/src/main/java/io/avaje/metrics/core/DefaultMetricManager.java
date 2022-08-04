@@ -177,12 +177,12 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public MetricName name(String name) {
-    return new DefaultMetricName(name);
+    return new DMetricName(name);
   }
 
   @Override
   public MetricName name(Class<?> cls, String name) {
-    return new DefaultMetricName(cls, name);
+    return new DMetricName(cls, name);
   }
 
   @Override
@@ -195,7 +195,7 @@ public class DefaultMetricManager implements SpiMetricManager {
     String key = baseName.simpleName();
     MetricNameCache metricNameCache = nameCache.get(key);
     if (metricNameCache == null) {
-      metricNameCache = new DefaultMetricNameCache(baseName);
+      metricNameCache = new DMetricNameCache(baseName);
       MetricNameCache oldNameCache = nameCache.putIfAbsent(key, metricNameCache);
       if (oldNameCache != null) {
         return oldNameCache;
@@ -206,7 +206,7 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public TimedMetricGroup timedGroup(MetricName baseName) {
-    return new DefaultTimedMetricGroup(baseName);
+    return new DTimedMetricGroup(baseName);
   }
 
   @Override
@@ -231,12 +231,12 @@ public class DefaultMetricManager implements SpiMetricManager {
 
   @Override
   public GaugeDoubleMetric register(MetricName name, GaugeDouble gauge) {
-    return put(name, new DefaultGaugeDoubleMetric(name, gauge));
+    return put(name, new DGaugeDoubleMetric(name, gauge));
   }
 
   @Override
   public GaugeLongMetric register(MetricName name, GaugeLong gauge) {
-    return put(name, (GaugeLongMetric) new DefaultGaugeLongMetric(name, gauge));
+    return put(name, (GaugeLongMetric) new DGaugeLongMetric(name, gauge));
   }
 
   private <T extends Metric> T put(MetricName name, T metric) {

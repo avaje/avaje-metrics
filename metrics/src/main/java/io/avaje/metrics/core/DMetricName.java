@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * Typically names are based on a class and method name.
  * </p>
  */
-final class DefaultMetricName implements MetricName {
+final class DMetricName implements MetricName {
 
   private static final String ERROR = ".error";
 
@@ -25,7 +25,7 @@ final class DefaultMetricName implements MetricName {
   /**
    * Creates a new MetricNamegiven the class and method/name.
    */
-  DefaultMetricName(Class<?> klass, String name) {
+  DMetricName(Class<?> klass, String name) {
     this(klassName(klass, name));
   }
 
@@ -41,7 +41,7 @@ final class DefaultMetricName implements MetricName {
   /**
    * Creates a new MetricName.
    */
-  DefaultMetricName(String simpleName) {
+  DMetricName(String simpleName) {
     this.simpleName = simpleName;
   }
 
@@ -50,7 +50,7 @@ final class DefaultMetricName implements MetricName {
    */
   @Override
   public MetricName append(String suffix) {
-    return new DefaultMetricName(simpleName + "." + suffix);
+    return new DMetricName(simpleName + "." + suffix);
   }
 
   /**
@@ -79,7 +79,7 @@ final class DefaultMetricName implements MetricName {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final DefaultMetricName that = (DefaultMetricName) o;
+    final DMetricName that = (DMetricName) o;
     return simpleName.equals(that.simpleName);
   }
 

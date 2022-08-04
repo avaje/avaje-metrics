@@ -25,13 +25,13 @@ final class JvmThreadMetricGroup {
     }
 
     List<Metric> createMetrics(boolean reportChangesOnly, boolean withDetails) {
-      MetricName baseName = new DefaultMetricName("jvm.threads");
+      MetricName baseName = new DMetricName("jvm.threads");
       List<Metric> metrics = new ArrayList<>(3);
 
-      metrics.add(new DefaultGaugeLongMetric(baseName.append("current"), new Count(threadMXBean), reportChangesOnly));
+      metrics.add(new DGaugeLongMetric(baseName.append("current"), new Count(threadMXBean), reportChangesOnly));
       if (withDetails) {
-        metrics.add(new DefaultGaugeLongMetric(baseName.append("peak"), new Peak(threadMXBean), reportChangesOnly));
-        metrics.add(new DefaultGaugeLongMetric(baseName.append("daemon"), new Daemon(threadMXBean), reportChangesOnly));
+        metrics.add(new DGaugeLongMetric(baseName.append("peak"), new Peak(threadMXBean), reportChangesOnly));
+        metrics.add(new DGaugeLongMetric(baseName.append("daemon"), new Daemon(threadMXBean), reportChangesOnly));
       }
       return metrics;
     }

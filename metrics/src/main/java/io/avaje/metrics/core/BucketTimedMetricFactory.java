@@ -17,12 +17,12 @@ final class BucketTimedMetricFactory implements SpiMetricBuilder.Factory<TimedMe
       rangeBottom = rangeTop;
     }
     buckets[bucketRanges.length] = createTimedMetric(name, rangeBottom, 0);
-    return new DefaultBucketTimedMetric(name, bucketRanges, buckets);
+    return new DBucketTimedMetric(name, bucketRanges, buckets);
   }
 
   private static TimedMetric createTimedMetric(MetricName name, int rangeBottom, int rangeTop) {
     String suffix = (rangeTop == 0) ? String.valueOf(rangeBottom) : rangeBottom + "-" + rangeTop;
-    return new DefaultTimedMetric(name, suffix);
+    return new DTimedMetric(name, suffix);
   }
 
 }

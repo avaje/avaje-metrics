@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NestedContextTest {
 
-  TimedMetric skipMetric = new DefaultTimedMetric(new DefaultMetricName("org.req.Customer.skipped"));
+  TimedMetric skipMetric = new DTimedMetric(new DMetricName("org.req.Customer.skipped"));
 
-  TimedMetric m0 = new DefaultTimedMetric(new DefaultMetricName("org.req.Customer.getById"));
-  TimedMetric m1 = new DefaultTimedMetric(new DefaultMetricName("org.service.CustomerService.getById"));
-  TimedMetric m2 = new DefaultTimedMetric(new DefaultMetricName("org.data.CustomerDAO.getById"));
+  TimedMetric m0 = new DTimedMetric(new DMetricName("org.req.Customer.getById"));
+  TimedMetric m1 = new DTimedMetric(new DMetricName("org.service.CustomerService.getById"));
+  TimedMetric m2 = new DTimedMetric(new DMetricName("org.data.CustomerDAO.getById"));
 
 
   @Test

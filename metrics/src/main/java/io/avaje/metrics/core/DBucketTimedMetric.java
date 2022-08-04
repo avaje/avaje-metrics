@@ -10,14 +10,14 @@ import java.util.function.Supplier;
 /**
  * Default implementation of BucketTimedMetric.
  */
-final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
+final class DBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   private final MetricName metricName;
   private final int[] bucketRanges;
   private final TimedMetric[] buckets;
   private final int lastBucketIndex;
 
-  DefaultBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
+  DBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
     this.metricName = metricName;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
@@ -66,7 +66,7 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
 
   @Override
   public TimedEvent startEvent() {
-    return new DefaultTimedMetricEvent(this);
+    return new Event(this);
   }
 
   /**
@@ -143,22 +143,19 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
     }
   }
 
-  protected static final class DefaultTimedMetricEvent implements TimedEvent {
+  protected static final class Event implements TimedEvent {
 
-    private final DefaultBucketTimedMetric metric;
+    private final DBucketTimedMetric metric;
     private final long startNanos;
 
-    /**
-     * Create a TimedMetricEvent.
-     */
-    DefaultTimedMetricEvent(DefaultBucketTimedMetric metric) {
+    Event(DBucketTimedMetric metric) {
       this.metric = metric;
       this.startNanos = System.nanoTime();
     }
 
     @Override
     public String toString() {
-      return metric.toString() + " durationMillis:" + getDuration();
+      return metric.toString() + " durationMillis:" + duration();
     }
 
     /**
@@ -166,7 +163,7 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
      */
     @Override
     public void end(boolean withSuccess) {
-      metric.addEventDuration(withSuccess, getDuration());
+      metric.addEventDuration(withSuccess, duration());
     }
 
     /**
@@ -191,7 +188,7 @@ final class DefaultBucketTimedMetric extends BaseTimedMetric implements TimedMet
     /**
      * Return the duration in nanos.
      */
-    private long getDuration() {
+    private long duration() {
       return System.nanoTime() - startNanos;
     }
 

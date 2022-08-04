@@ -54,14 +54,14 @@ final class JvmProcessMemory {
     }
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
-      MetricName baseName = new DefaultMetricName("jvm.memory.process");
+      MetricName baseName = new DMetricName("jvm.memory.process");
       MetricName vmRssName = baseName.append("vmrss");
       MetricName vmHwmName = baseName.append("vmhwm");
 
       Source source = new Source(procStatus);
 
-      metrics.add(new DefaultGaugeLongMetric(vmRssName, source::getRss, reportChangesOnly));
-      metrics.add(new DefaultGaugeLongMetric(vmHwmName, source::getHwm, reportChangesOnly));
+      metrics.add(new DGaugeLongMetric(vmRssName, source::getRss, reportChangesOnly));
+      metrics.add(new DGaugeLongMetric(vmHwmName, source::getHwm, reportChangesOnly));
     }
     return metrics;
   }

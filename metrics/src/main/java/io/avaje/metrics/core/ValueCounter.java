@@ -81,7 +81,7 @@ final class ValueCounter {
     final long maxVal = max.getThenReset();
     final long totalVal = total.sumThenReset();
     final long countVal = count.sumThenReset();
-    return new DefaultValueStatistics(this, countVal, totalVal, maxVal);
+    return new DValueStats(this, countVal, totalVal, maxVal);
   }
 
   /**

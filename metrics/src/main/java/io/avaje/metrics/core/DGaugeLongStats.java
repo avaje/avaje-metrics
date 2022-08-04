@@ -1,16 +1,16 @@
 package io.avaje.metrics.core;
 
 
-import io.avaje.metrics.GaugeDoubleMetric;
+import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.MetricStatsVisitor;
 
-final class DGaugeDoubleStatistic implements GaugeDoubleMetric.Stats {
+final class DGaugeLongStats implements GaugeLongMetric.Stats {
 
   private final MetricName name;
-  private final double value;
+  private final long value;
 
-  DGaugeDoubleStatistic(MetricName name, double value) {
+  DGaugeLongStats(MetricName name, long value) {
     this.name = name;
     this.value = value;
   }
@@ -31,7 +31,7 @@ final class DGaugeDoubleStatistic implements GaugeDoubleMetric.Stats {
   }
 
   @Override
-  public double value() {
+  public long value() {
     return value;
   }
 }

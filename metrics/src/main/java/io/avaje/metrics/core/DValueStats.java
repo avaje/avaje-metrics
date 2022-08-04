@@ -7,7 +7,7 @@ import io.avaje.metrics.MetricStatsVisitor;
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-final class DefaultValueStatistics implements TimedMetric.Stats {
+final class DValueStats implements TimedMetric.Stats {
 
   final ValueCounter owner;
   final long count;
@@ -17,7 +17,7 @@ final class DefaultValueStatistics implements TimedMetric.Stats {
   /**
    * Construct for TimeCounter.
    */
-  DefaultValueStatistics(ValueCounter owner, long count, long total, long max) {
+  DValueStats(ValueCounter owner, long count, long total, long max) {
     this.owner = owner;
     this.count = count;
     this.total = total;

@@ -9,7 +9,7 @@ import io.avaje.metrics.MetricStatsVisitor;
 /**
  * A Metric that gets its value from a Gauge.
  */
-class DefaultGaugeLongMetric implements GaugeLongMetric {
+class DGaugeLongMetric implements GaugeLongMetric {
 
   protected final MetricName name;
   protected final GaugeLong gauge;
@@ -24,9 +24,8 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
    * <p>
    * This will determine the delta increase in underlying value and return that
    * for the value.
-   * </p>
    */
-  static DefaultGaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
+  static DGaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
     return new Incrementing(name, gauge);
   }
 
@@ -36,11 +35,11 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
    * @param name  the name of the metric.
    * @param gauge the gauge used to get the value.
    */
-  DefaultGaugeLongMetric(MetricName name, GaugeLong gauge) {
+  DGaugeLongMetric(MetricName name, GaugeLong gauge) {
     this(name, gauge, true);
   }
 
-  DefaultGaugeLongMetric(MetricName name, GaugeLong gauge, boolean reportChangesOnly) {
+  DGaugeLongMetric(MetricName name, GaugeLong gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
@@ -67,13 +66,13 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
   @Override
   public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeLongStatistic(name, gauge.value()));
+      collector.visit(new DGaugeLongStats(name, gauge.value()));
     } else {
       long value = gauge.value();
       boolean collect = (value != 0 && value != lastReported);
       if (collect) {
         lastReported = value;
-        collector.visit(new DGaugeLongStatistic(name, value));
+        collector.visit(new DGaugeLongStats(name, value));
       }
     }
   }
@@ -86,7 +85,7 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  static final class Incrementing extends DefaultGaugeLongMetric {
+  static final class Incrementing extends DGaugeLongMetric {
 
     private long runningValue;
 
@@ -98,7 +97,7 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
     public void collect(MetricStatsVisitor collector) {
       long currentValue = super.value();
       if (currentValue > runningValue) {
-        collector.visit(new DGaugeLongStatistic(name, this.value()));
+        collector.visit(new DGaugeLongStats(name, this.value()));
       }
     }
 

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * collecting time duration and provides separate statistics for success and error completion.
  * </p>
  */
-final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
+final class DTimedMetric extends BaseTimedMetric implements TimedMetric {
 
   private static final String noBuckets = "";
 
@@ -24,14 +24,14 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
   private final ValueCounter successCounter;
   private final ValueCounter errorCounter;
 
-  DefaultTimedMetric(MetricName name) {
+  DTimedMetric(MetricName name) {
     this.name = name;
     this.bucketRange = noBuckets;
     this.successCounter = new ValueCounter(name);
     this.errorCounter = new ValueCounter(name.append("error"));
   }
 
-  DefaultTimedMetric(MetricName name, String bucketRange) {
+  DTimedMetric(MetricName name, String bucketRange) {
     this.name = name;
     this.bucketRange = bucketRange;
     this.successCounter = new ValueCounter(name, bucketRange);
@@ -59,7 +59,7 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
     errorCounter.reset();
   }
 
-  static long getTickNanos() {
+  static long tickNanos() {
     return System.nanoTime();
   }
 
@@ -113,7 +113,7 @@ final class DefaultTimedMetric extends BaseTimedMetric implements TimedMetric {
    */
   @Override
   public TimedEvent startEvent() {
-    return new DefaultTimedMetricEvent(this);
+    return new DTimedMetricEvent(this);
   }
 
   /**

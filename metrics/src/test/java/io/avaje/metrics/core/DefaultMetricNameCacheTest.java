@@ -11,7 +11,7 @@ class DefaultMetricNameCacheTest {
   @Test
   void test() {
 
-    DefaultMetricNameCache cache = new DefaultMetricNameCache(DefaultMetricNameCacheTest.class);
+    DMetricNameCache cache = new DMetricNameCache(DefaultMetricNameCacheTest.class);
 
     MetricName metricName = cache.get("foo");
     assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.foo", metricName.simpleName());

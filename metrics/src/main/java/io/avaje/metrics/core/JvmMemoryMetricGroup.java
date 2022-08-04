@@ -55,7 +55,7 @@ final class JvmMemoryMetricGroup {
    * Create the Heap Memory based GaugeMetricGroup.
    */
   static List<Metric> createHeapGroup(boolean reportChangesOnly) {
-    MetricName heapName = new DefaultMetricName("jvm.memory.heap");
+    MetricName heapName = new DMetricName("jvm.memory.heap");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(heapName, source, reportChangesOnly);
   }
@@ -64,7 +64,7 @@ final class JvmMemoryMetricGroup {
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
   static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
-    MetricName nonHeapName = new DefaultMetricName("jvm.memory.nonheap");
+    MetricName nonHeapName = new DMetricName("jvm.memory.nonheap");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
     return createGroup(nonHeapName, source, reportChangesOnly);
   }
@@ -84,16 +84,16 @@ final class JvmMemoryMetricGroup {
 
     public List<Metric> createMetric(boolean reportChangesOnly) {
       List<Metric> metrics = new ArrayList<>();
-      metrics.add(new DefaultGaugeLongMetric(name("init"), new Init(source), reportChangesOnly));
-      metrics.add(new DefaultGaugeLongMetric(name("used"), new Used(source), reportChangesOnly));
-      metrics.add(new DefaultGaugeLongMetric(name("committed"), new Committed(source), reportChangesOnly));
+      metrics.add(new DGaugeLongMetric(name("init"), new Init(source), reportChangesOnly));
+      metrics.add(new DGaugeLongMetric(name("used"), new Used(source), reportChangesOnly));
+      metrics.add(new DGaugeLongMetric(name("committed"), new Committed(source), reportChangesOnly));
 
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.getUsage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
-        metrics.add(new DefaultGaugeLongMetric(name("max"), new Max(source), reportChangesOnly));
-        metrics.add(new DefaultGaugeLongMetric(name("pct"), new Pct(source), reportChangesOnly));
+        metrics.add(new DGaugeLongMetric(name("max"), new Max(source), reportChangesOnly));
+        metrics.add(new DGaugeLongMetric(name("pct"), new Pct(source), reportChangesOnly));
       }
       return metrics;
     }

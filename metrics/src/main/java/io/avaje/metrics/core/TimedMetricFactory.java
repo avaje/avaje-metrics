@@ -8,7 +8,7 @@ final class TimedMetricFactory implements SpiMetricBuilder.Factory<TimedMetric> 
 
   @Override
   public TimedMetric createMetric(MetricName name, int[] bucketRanges) {
-    return new DefaultTimedMetric(name);
+    return new DTimedMetric(name);
   }
 
 }

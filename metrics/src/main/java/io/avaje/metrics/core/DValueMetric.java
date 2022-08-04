@@ -8,10 +8,10 @@ import io.avaje.metrics.MetricStatsVisitor;
 
 /**
  * Measure events that occur with a long value. This long value could be bytes
- * or rows processed or time. Typically you would use TimedMetric for time based
+ * or rows processed or time. Typically, you would use TimedMetric for time based
  * events though.
  */
-final class DefaultValueMetric implements Metric, ValueMetric {
+final class DValueMetric implements Metric, ValueMetric {
 
   private final MetricName name;
   private final ValueCounter valueCounter;
@@ -19,7 +19,7 @@ final class DefaultValueMetric implements Metric, ValueMetric {
   /**
    * Create with a name.
    */
-  DefaultValueMetric(MetricName name) {
+  DValueMetric(MetricName name) {
     this.name = name;
     this.valueCounter = new ValueCounter(name);
   }

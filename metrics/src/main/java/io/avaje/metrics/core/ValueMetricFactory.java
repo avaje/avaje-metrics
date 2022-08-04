@@ -8,7 +8,7 @@ final class ValueMetricFactory implements SpiMetricBuilder.Factory<ValueMetric> 
 
   @Override
   public ValueMetric createMetric(MetricName name, int[] bucketRanges) {
-    return new DefaultValueMetric(name);
+    return new DValueMetric(name);
   }
 
 }

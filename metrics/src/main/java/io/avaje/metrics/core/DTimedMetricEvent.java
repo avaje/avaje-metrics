@@ -11,22 +11,22 @@ import io.avaje.metrics.TimedEvent;
  * separately.
  * </p>
  */
-final class DefaultTimedMetricEvent implements TimedEvent {
+final class DTimedMetricEvent implements TimedEvent {
 
-  private final DefaultTimedMetric metric;
+  private final DTimedMetric metric;
   private final long startNanos;
 
   /**
    * Create a TimedMetricEvent.
    */
-  DefaultTimedMetricEvent(DefaultTimedMetric metric) {
+  DTimedMetricEvent(DTimedMetric metric) {
     this.metric = metric;
-    this.startNanos = DefaultTimedMetric.getTickNanos();
+    this.startNanos = DTimedMetric.tickNanos();
   }
 
   @Override
   public String toString() {
-    return metric.toString() + " durationMillis:" + getDuration();
+    return metric.toString() + " durationMillis:" + duration();
   }
 
   /**
@@ -34,7 +34,7 @@ final class DefaultTimedMetricEvent implements TimedEvent {
    */
   @Override
   public void end(boolean withSuccess) {
-    metric.addEventDuration(withSuccess, getDuration());
+    metric.addEventDuration(withSuccess, duration());
   }
 
   /**
@@ -58,8 +58,8 @@ final class DefaultTimedMetricEvent implements TimedEvent {
   /**
    * Return the duration in nanos.
    */
-  private long getDuration() {
-    return DefaultTimedMetric.getTickNanos() - startNanos;
+  private long duration() {
+    return DTimedMetric.tickNanos() - startNanos;
   }
 
 }

@@ -55,14 +55,14 @@ final class JvmCGroupCpuMetricGroup {
     long quotaPeriod = period.single();
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu.limit"), new FixedGauge(limit));
+      return new DGaugeLongMetric(name("jvm.cgroup.cpu.limit"), new FixedGauge(limit));
     }
     return null;
   }
 
   GaugeLongMetric createCGroupCpuRequests(FileLines cpuShares) {
     final long requests = convertSharesToRequests(cpuShares.single());
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.cpu.requests"), new FixedGauge(requests));
+    return new DGaugeLongMetric(name("jvm.cgroup.cpu.requests"), new FixedGauge(requests));
   }
 
   long convertQuotaToLimits(long cpuQuotaVal, long quotaPeriod) {
@@ -96,15 +96,15 @@ final class JvmCGroupCpuMetricGroup {
   }
 
   private GaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
-    return DefaultGaugeLongMetric.incrementing(name, gauge);
+    return DGaugeLongMetric.incrementing(name, gauge);
   }
 
   private GaugeLongMetric gauge(MetricName name, GaugeLong gauge, boolean reportChangesOnly) {
-    return new DefaultGaugeLongMetric(name, gauge, reportChangesOnly);
+    return new DGaugeLongMetric(name, gauge, reportChangesOnly);
   }
 
   private MetricName name(String s) {
-    return new DefaultMetricName(s);
+    return new DMetricName(s);
   }
 
   static final class CpuUsageMicros implements GaugeLong {

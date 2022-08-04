@@ -9,7 +9,7 @@ import io.avaje.metrics.MetricStatsVisitor;
 /**
  * A Metric that gets its value from a GaugeDouble.
  */
-class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
+class DGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final MetricName name;
   protected final GaugeDouble gauge;
@@ -21,17 +21,16 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
    * <p>
    * This will determine the delta increase in underlying value and return that
    * for the value.
-   * </p>
    */
-  static DefaultGaugeDoubleMetric incrementing(MetricName name, GaugeDouble gauge) {
+  static DGaugeDoubleMetric incrementing(MetricName name, GaugeDouble gauge) {
     return new Incrementing(name, gauge);
   }
 
-  DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
+  DGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
     this(name, gauge, true);
   }
 
-  DefaultGaugeDoubleMetric(MetricName name, GaugeDouble gauge, boolean reportChangesOnly) {
+  DGaugeDoubleMetric(MetricName name, GaugeDouble gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
@@ -58,13 +57,13 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   @Override
   public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeDoubleStatistic(name, gauge.value()));
+      collector.visit(new DGaugeDoubleStats(name, gauge.value()));
     } else {
       double value = gauge.value();
       boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
       if (collect) {
         lastReported = value;
-        collector.visit(new DGaugeDoubleStatistic(name, value));
+        collector.visit(new DGaugeDoubleStats(name, value));
       }
     }
   }
@@ -77,7 +76,7 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  private static final class Incrementing extends DefaultGaugeDoubleMetric {
+  private static final class Incrementing extends DGaugeDoubleMetric {
 
     private double runningValue;
 
@@ -94,7 +93,6 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
         return diffValue;
       }
     }
-
   }
 
 }

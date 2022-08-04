@@ -81,19 +81,19 @@ final class JvmCGroupMemoryMetricGroup {
   }
 
   GaugeLongMetric createMemoryUsage(MemSource source, boolean reportChangesOnly) {
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.usageMb"), source::getUsageMb, reportChangesOnly);
+    return new DGaugeLongMetric(name("jvm.cgroup.memory.usageMb"), source::getUsageMb, reportChangesOnly);
   }
 
   GaugeLongMetric createMemoryPctUsage(MemSource source, boolean reportChangesOnly) {
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.pctUsage"), source::getPctUsage, reportChangesOnly);
+    return new DGaugeLongMetric(name("jvm.cgroup.memory.pctUsage"), source::getPctUsage, reportChangesOnly);
   }
 
   GaugeLongMetric createMemoryLimit(MemSource source, boolean reportChangesOnly) {
-    return new DefaultGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb, reportChangesOnly);
+    return new DGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb, reportChangesOnly);
   }
 
   private MetricName name(String s) {
-    return new DefaultMetricName(s);
+    return new DMetricName(s);
   }
 
 }

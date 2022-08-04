@@ -211,11 +211,11 @@ class JsonWriterTest {
 
   private GaugeDoubleMetric createGaugeMetric() {
     GaugeDouble gauge = () -> 24d;
-    return new DefaultGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
+    return new DGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
   }
 
   private ValueMetric createValueMetric() {
-    ValueMetric metric = new DefaultValueMetric(MetricName.of("org.test.ValueFoo.doStuff"));
+    ValueMetric metric = new DValueMetric(MetricName.of("org.test.ValueFoo.doStuff"));
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
@@ -224,7 +224,7 @@ class JsonWriterTest {
 
   private TimedMetric createTimedMetric() {
 
-    TimedMetric metric = new DefaultTimedMetric(MetricName.of("org.test.TimedFoo.doStuff"));
+    TimedMetric metric = new DTimedMetric(MetricName.of("org.test.TimedFoo.doStuff"));
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MICROS); // 100 micros

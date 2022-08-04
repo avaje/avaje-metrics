@@ -23,7 +23,7 @@ class DefaultGaugeDoubleMetricTest {
   void skipCollection_when_unchanged() {
 
     MyGauge myGauge = new MyGauge();
-    DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(new DefaultMetricName(DefaultGaugeLongMetricTest.MyGauge.class, "test"), myGauge);
+    DGaugeDoubleMetric metric = new DGaugeDoubleMetric(new DMetricName(DefaultGaugeLongMetricTest.MyGauge.class, "test"), myGauge);
 
     assertEquals(0.0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -55,7 +55,7 @@ class DefaultGaugeDoubleMetricTest {
   void test() {
 
     MyGauge myGauge = new MyGauge();
-    DefaultGaugeDoubleMetric metric = new DefaultGaugeDoubleMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
+    DGaugeDoubleMetric metric = new DGaugeDoubleMetric(new DMetricName(MyGauge.class, "test"), myGauge);
 
     assertTrue(0d == metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -64,7 +64,7 @@ class DefaultGaugeDoubleMetricTest {
     assertTrue(100d == metric.value());
     assertThat(collect(metric)).hasSize(1);
 
-    DefaultGaugeDoubleMetric incrementing = DefaultGaugeDoubleMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
+    DGaugeDoubleMetric incrementing = DGaugeDoubleMetric.incrementing(new DMetricName(MyGauge.class, "inc"), myGauge);
 
     myGauge.value = 100d;
     assertTrue(100d == incrementing.value());
