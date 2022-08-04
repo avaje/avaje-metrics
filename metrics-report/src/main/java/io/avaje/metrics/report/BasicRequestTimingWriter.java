@@ -92,7 +92,7 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
     writer.write("  exe:");
     writer.write(String.valueOf(toMillis(totalExeNanos)));
     writer.write("ms  metric:");
-    writer.write(headerEntry.getMetric().getName().getSimpleName());
+    writer.write(headerEntry.getMetric().name().simpleName());
 
     String requestId = requestTiming.getExternalRequestId();
     if (requestId != null) {
@@ -136,10 +136,10 @@ public class BasicRequestTimingWriter implements RequestTimingWriter {
 
       boolean hasAttributes = (attributes != null && !attributes.isEmpty());
       if (!hasAttributes) {
-        writer.append(metric.getName().getSimpleName());
+        writer.append(metric.name().simpleName());
       } else {
         int pad = 30 - (entry.getDepth() * 3);
-        pad(writer, pad, metric.getName().getSimpleName());
+        pad(writer, pad, metric.name().simpleName());
         for (Map.Entry<String, String> attr : attributes.entrySet()) {
           writer.append(" ").append(attr.getKey()).append("[").append(attr.getValue()).append("]");
         }

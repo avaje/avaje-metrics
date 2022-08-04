@@ -3,7 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ class BaseTimingEntryTest {
     }
 
     @Override
-    public MetricName getName() {
+    public MetricName name() {
       return metricName;
     }
 
@@ -82,7 +82,7 @@ class BaseTimingEntryTest {
     }
 
     @Override
-    public String getBucketRange() {
+    public String bucketRange() {
       return null;
     }
 
@@ -152,12 +152,12 @@ class BaseTimingEntryTest {
     }
 
     @Override
-    public void collect(MetricStatisticsVisitor visitor) {
+    public void collect(MetricStatsVisitor visitor) {
 
     }
 
     @Override
-    public void clear() {
+    public void reset() {
 
     }
 

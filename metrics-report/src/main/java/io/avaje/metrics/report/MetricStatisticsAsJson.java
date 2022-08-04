@@ -1,4 +1,4 @@
-package io.avaje.metrics.statistics;
+package io.avaje.metrics.report;
 
 public interface MetricStatisticsAsJson {
 

@@ -14,6 +14,6 @@ public interface GaugeDouble {
   /**
    * Return the current value.
    */
-  double getValue();
+  double value();
 
 }

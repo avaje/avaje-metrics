@@ -3,8 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.ValueMetric;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import io.avaje.metrics.statistics.ValueStatistics;
+import io.avaje.metrics.MetricStatsVisitor;
 
 
 /**
@@ -26,20 +25,20 @@ final class DefaultValueMetric implements Metric, ValueMetric {
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor collector) {
-    ValueStatistics stats = valueCounter.collectStatistics();
+  public void collect(MetricStatsVisitor collector) {
+    Stats stats = valueCounter.collectStatistics();
     if (stats != null) {
       collector.visit(stats);
     }
   }
 
   @Override
-  public void clear() {
+  public void reset() {
     valueCounter.reset();
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return name;
   }
 
@@ -49,22 +48,22 @@ final class DefaultValueMetric implements Metric, ValueMetric {
   }
 
   @Override
-  public long getCount() {
+  public long count() {
     return valueCounter.getCount();
   }
 
   @Override
-  public long getTotal() {
+  public long total() {
     return valueCounter.getTotal();
   }
 
   @Override
-  public long getMax() {
+  public long max() {
     return valueCounter.getMax();
   }
 
   @Override
-  public long getMean() {
+  public long mean() {
     return valueCounter.getMean();
   }
 }

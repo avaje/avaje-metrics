@@ -116,7 +116,7 @@ final class JvmMemoryMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         return source.getUsage().getInit() / MEGABYTES;
       }
     }
@@ -127,7 +127,7 @@ final class JvmMemoryMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         return source.getUsage().getUsed() / MEGABYTES;
       }
     }
@@ -138,7 +138,7 @@ final class JvmMemoryMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         return source.getUsage().getCommitted() / MEGABYTES;
       }
     }
@@ -149,7 +149,7 @@ final class JvmMemoryMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         return source.getUsage().getMax() / MEGABYTES;
       }
     }
@@ -160,7 +160,7 @@ final class JvmMemoryMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         MemoryUsage memoryUsage = source.getUsage();
         return 100 * memoryUsage.getUsed() / memoryUsage.getMax();
       }

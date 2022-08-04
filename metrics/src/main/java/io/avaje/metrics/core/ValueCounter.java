@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.TimedStatistics;
+import io.avaje.metrics.TimedMetric;
 
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
@@ -25,14 +25,14 @@ final class ValueCounter {
   final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
 
   ValueCounter(MetricName name) {
-    this.name = name.getSimpleName();
+    this.name = name.simpleName();
     this.withBucket = false;
     this.bucketRange = noBuckets;
-    this.nameWithBucket = name.getSimpleName();
+    this.nameWithBucket = name.simpleName();
   }
 
   ValueCounter(MetricName name, String bucketRange) {
-    this.name = name.getSimpleName();
+    this.name = name.simpleName();
     this.withBucket = true;
     this.bucketRange = bucketRange;
     this.nameWithBucket = this.name + ";bucket=" + bucketRange;
@@ -63,7 +63,7 @@ final class ValueCounter {
     max.accumulate(value);
   }
 
-  TimedStatistics collectStatistics() {
+  TimedMetric.Stats collectStatistics() {
     boolean empty = count.sum() == 0;
     if (empty) {
       return null;
@@ -75,7 +75,7 @@ final class ValueCounter {
   /**
    * Return the current statistics resetting the internal values if reset is true.
    */
-  private TimedStatistics getStatistics() {
+  private TimedMetric.Stats getStatistics() {
     // Note these values are not guaranteed to be consistent wrt each other
     // but should be reasonably consistent (small time between count and total)
     final long maxVal = max.getThenReset();

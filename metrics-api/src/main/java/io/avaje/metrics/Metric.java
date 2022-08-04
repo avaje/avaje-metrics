@@ -1,7 +1,5 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-
 /**
  * A Metric that collects statistics on events.
  * <ul>
@@ -16,13 +14,13 @@ public interface Metric {
   /**
    * Return the name of the metric.
    */
-  MetricName getName();
+  MetricName name();
 
   /**
    * Typically this is only called by the MetricManager and tells the metric to collect its underlying statistics for
    * reporting purposes and in addition resetting and internal counters it has.
    */
-  void collect(MetricStatisticsVisitor collector);
+  void collect(MetricStatsVisitor collector);
 
   /**
    * Clear the statistics resetting any internal counters etc.
@@ -31,6 +29,6 @@ public interface Metric {
    * it periodically collects and reports all the metrics and you are not expected to use this method.
    * </p>
    */
-  void clear();
+  void reset();
 
 }

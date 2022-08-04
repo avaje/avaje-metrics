@@ -3,7 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
 
 /**
@@ -47,29 +47,29 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return name;
   }
 
   @Override
   public String toString() {
-    return name + " " + getValue();
+    return name + " " + value();
   }
 
   /**
    * Return the value.
    */
   @Override
-  public long getValue() {
-    return gauge.getValue();
+  public long value() {
+    return gauge.value();
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor collector) {
+  public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeLongStatistic(name, gauge.getValue()));
+      collector.visit(new DGaugeLongStatistic(name, gauge.value()));
     } else {
-      long value = gauge.getValue();
+      long value = gauge.value();
       boolean collect = (value != 0 && value != lastReported);
       if (collect) {
         lastReported = value;
@@ -79,7 +79,7 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
   }
 
   @Override
-  public void clear() {
+  public void reset() {
     // No need to do anything - direct to gauge
   }
 
@@ -95,17 +95,17 @@ class DefaultGaugeLongMetric implements GaugeLongMetric {
     }
 
     @Override
-    public void collect(MetricStatisticsVisitor collector) {
-      long currentValue = super.getValue();
+    public void collect(MetricStatsVisitor collector) {
+      long currentValue = super.value();
       if (currentValue > runningValue) {
-        collector.visit(new DGaugeLongStatistic(name, getValue()));
+        collector.visit(new DGaugeLongStatistic(name, this.value()));
       }
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       synchronized (this) {
-        long nowValue = super.getValue();
+        long nowValue = super.value();
         long diffValue = nowValue - runningValue;
         runningValue = nowValue;
         return diffValue;

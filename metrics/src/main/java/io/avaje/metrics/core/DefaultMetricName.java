@@ -57,7 +57,7 @@ final class DefaultMetricName implements MetricName {
    * Return a simple java like name.
    */
   @Override
-  public String getSimpleName() {
+  public String simpleName() {
     return simpleName;
   }
 
@@ -95,7 +95,7 @@ final class DefaultMetricName implements MetricName {
 
   @Override
   public int compareTo(MetricName o) {
-    return simpleName.compareTo(o.getSimpleName());
+    return simpleName.compareTo(o.simpleName());
   }
 
 }

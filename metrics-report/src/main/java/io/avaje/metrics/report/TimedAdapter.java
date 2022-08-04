@@ -1,6 +1,8 @@
-package io.avaje.metrics.statistics;
+package io.avaje.metrics.report;
 
+import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.MetricSupplier;
+import io.avaje.metrics.TimedMetric;
 
 /**
  * Can be used by {@link MetricSupplier} when adapting metrics from an external source.
@@ -8,7 +10,7 @@ import io.avaje.metrics.MetricSupplier;
  * By default this is a non-bucket timed metric.
  * </p>
  */
-public class TimedAdapter implements TimedStatistics {
+public class TimedAdapter implements TimedMetric.Stats {
 
   private final String name;
   private final String bucketName;
@@ -33,42 +35,42 @@ public class TimedAdapter implements TimedStatistics {
   }
 
   @Override
-  public String getBucketRange() {
+  public String bucketRange() {
     return null;
   }
 
   @Override
-  public long getCount() {
+  public long count() {
     return count;
   }
 
   @Override
-  public long getTotal() {
+  public long total() {
     return total;
   }
 
   @Override
-  public long getMax() {
+  public long max() {
     return max;
   }
 
   @Override
-  public long getMean() {
+  public long mean() {
     return (count < 1) ? 0L : Math.round((double) (total / count));
   }
 
   @Override
-  public String getName() {
+  public String name() {
     return name;
   }
 
   @Override
-  public String getNameWithBucket() {
+  public String nameWithBucket() {
     return bucketName;
   }
 
   @Override
-  public void visit(MetricStatisticsVisitor visitor) {
+  public void visit(MetricStatsVisitor visitor) {
     visitor.visit(this);
   }
 }

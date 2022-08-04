@@ -2,7 +2,7 @@ package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.ValueMetric;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
 class NoopValueMetric implements ValueMetric {
 
@@ -15,17 +15,17 @@ class NoopValueMetric implements ValueMetric {
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return metricName;
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor visitor) {
+  public void collect(MetricStatsVisitor visitor) {
     // do nothing
   }
 
   @Override
-  public void clear() {
+  public void reset() {
     // do nothing
   }
 
@@ -35,22 +35,22 @@ class NoopValueMetric implements ValueMetric {
   }
 
   @Override
-  public long getCount() {
+  public long count() {
     return 0;
   }
 
   @Override
-  public long getTotal() {
+  public long total() {
     return 0;
   }
 
   @Override
-  public long getMax() {
+  public long max() {
     return 0;
   }
 
   @Override
-  public long getMean() {
+  public long mean() {
     return 0;
   }
 }

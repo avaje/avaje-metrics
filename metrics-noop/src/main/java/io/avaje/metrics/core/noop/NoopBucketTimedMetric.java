@@ -3,7 +3,7 @@ package io.avaje.metrics.core.noop;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -24,7 +24,7 @@ class NoopBucketTimedMetric implements TimedMetric {
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return name;
   }
 
@@ -34,17 +34,17 @@ class NoopBucketTimedMetric implements TimedMetric {
   }
 
   @Override
-  public String getBucketRange() {
+  public String bucketRange() {
     return "";
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor visitor) {
+  public void collect(MetricStatsVisitor visitor) {
     // do nothing
   }
 
   @Override
-  public void clear() {
+  public void reset() {
     // do nothing
   }
 

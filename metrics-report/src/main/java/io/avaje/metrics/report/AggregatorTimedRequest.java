@@ -1,9 +1,9 @@
 package io.avaje.metrics.report;
 
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import io.avaje.metrics.statistics.TimedStatistics;
+import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.List;
 
@@ -24,11 +24,11 @@ class AggregatorTimedRequest {
     this.name = name;
   }
 
-  void process(List<MetricStatistics> stats) {
+  void process(List<MetricStats> stats) {
 
-    for (MetricStatistics stat : stats) {
+    for (MetricStats stat : stats) {
       if (isMatch(stat)) {
-        add((TimedStatistics) stat);
+        add((TimedMetric.Stats) stat);
       }
     }
 
@@ -40,8 +40,8 @@ class AggregatorTimedRequest {
     }
   }
 
-  private void add(TimedStatistics stat) {
-    if (stat.getName().endsWith(ERROR)) {
+  private void add(TimedMetric.Stats stat) {
+    if (stat.name().endsWith(ERROR)) {
       if (aggTimedError == null) {
         aggTimedError = new AggTimed(name(ERROR));
       }
@@ -58,11 +58,11 @@ class AggregatorTimedRequest {
     return MetricName.of(name + suffix);
   }
 
-  private boolean isMatch(MetricStatistics stat) {
-    return (stat instanceof TimedStatistics) && stat.getName().startsWith(prefix);
+  private boolean isMatch(MetricStats stat) {
+    return (stat instanceof TimedMetric.Stats) && stat.name().startsWith(prefix);
   }
 
-  static class AggTimed implements TimedStatistics {
+  static class AggTimed implements TimedMetric.Stats {
 
     private final MetricName name;
 
@@ -76,42 +76,42 @@ class AggregatorTimedRequest {
     }
 
     @Override
-    public String getBucketRange() {
+    public String bucketRange() {
       return null;
     }
 
     @Override
-    public long getCount() {
+    public long count() {
       return count;
     }
 
     @Override
-    public long getTotal() {
+    public long total() {
       return total;
     }
 
     @Override
-    public long getMax() {
+    public long max() {
       return max;
     }
 
     @Override
-    public long getMean() {
+    public long mean() {
       return (count < 1) ? 0L : Math.round((double) (total / count));
     }
 
     @Override
-    public String getName() {
-      return name.getSimpleName();
+    public String name() {
+      return name.simpleName();
     }
 
     @Override
-    public String getNameWithBucket() {
-      return getName();
+    public String nameWithBucket() {
+      return name();
     }
 
     @Override
-    public void visit(MetricStatisticsVisitor visitor) {
+    public void visit(MetricStatsVisitor visitor) {
       visitor.visit(this);
     }
 
@@ -119,10 +119,10 @@ class AggregatorTimedRequest {
     private long total;
     private long max;
 
-    void add(TimedStatistics stat) {
-      count += stat.getCount();
-      total += stat.getTotal();
-      max = Math.max(max, stat.getMax());
+    void add(TimedMetric.Stats stat) {
+      count += stat.count();
+      total += stat.total();
+      max = Math.max(max, stat.max());
     }
   }
 }

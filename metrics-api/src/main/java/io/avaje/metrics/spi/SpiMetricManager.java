@@ -1,10 +1,8 @@
 package io.avaje.metrics.spi;
 
 import io.avaje.metrics.*;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsAsJson;
+import io.avaje.metrics.MetricStats;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -64,21 +62,6 @@ public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
   MetricNameCache nameCache(MetricName baseName);
 
   /**
-   * Collect all the metrics.
-   */
-  List<MetricStatistics> collectMetrics();
-
-  /**
-   * Return a collection of all the metrics.
-   */
-  Collection<Metric> getMetrics();
-
-  /**
-   * Return a collection of the JVM metrics.
-   */
-  Collection<Metric> getJvmMetrics();
-
-  /**
    * Create and register a GaugeMetric using the gauge supplied (double values).
    */
   GaugeDoubleMetric register(MetricName name, GaugeDouble gauge);
@@ -97,5 +80,10 @@ public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
    * Add a metric supplier.
    */
   void addSupplier(MetricSupplier supplier);
+
+  /**
+   * Collect all the metrics.
+   */
+  List<MetricStats> collectMetrics();
 
 }

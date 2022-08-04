@@ -116,7 +116,7 @@ final class JvmCGroupCpuMetricGroup {
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       return source.singleMicros();
     }
   }
@@ -189,7 +189,7 @@ final class JvmCGroupCpuMetricGroup {
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       return value;
     }
   }

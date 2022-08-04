@@ -139,7 +139,7 @@ public interface TimedMetric extends Metric {
   /**
    * Return the bucket range or empty string if not a bucket.
    */
-  String getBucketRange();
+  String bucketRange();
 
   /**
    * Return true if this timed metric is actively request timing.
@@ -181,4 +181,29 @@ public interface TimedMetric extends Metric {
    * Return extra attributes that can be included in the request logging.
    */
   Map<String, String> attributes();
+
+  /**
+   * Statistics collected by TimedMetric.
+   */
+  interface Stats extends ValueMetric.Stats {
+
+    /**
+     * Return true if this is bucket range based.
+     */
+    boolean isBucket();
+
+    /**
+     * Return the bucket range for these statistics.
+     */
+    String bucketRange();
+
+    /**
+     * Return the metric name with bucket tag if necessary.
+     * <p>
+     * If the timed metric is a bucket it gets a "tag" appended
+     * like <code>";bucket=.."</code>
+     * </p>
+     */
+    String nameWithBucket();
+  }
 }

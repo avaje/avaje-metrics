@@ -1,41 +1,41 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.statistics.*;
+import io.avaje.metrics.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class HelperStatsCollector implements MetricStatisticsVisitor {
+class HelperStatsCollector implements MetricStatsVisitor {
 
-  private final List<MetricStatistics> list = new ArrayList<>();
+  private final List<MetricStats> list = new ArrayList<>();
 
 
-  public List<MetricStatistics> getList() {
+  public List<MetricStats> getList() {
     return list;
   }
 
   @Override
-  public void visit(TimedStatistics metric) {
+  public void visit(TimedMetric.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(ValueStatistics metric) {
+  public void visit(ValueMetric.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(CounterStatistics metric) {
+  public void visit(CounterMetric.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(GaugeDoubleStatistics metric) {
+  public void visit(GaugeDoubleMetric.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(GaugeLongStatistics metric) {
+  public void visit(GaugeLongMetric.Stats metric) {
     list.add(metric);
   }
 

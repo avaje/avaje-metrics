@@ -3,7 +3,7 @@ package io.avaje.metrics.report;
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.RequestTiming;
-import io.avaje.metrics.statistics.MetricStatistics;
+import io.avaje.metrics.MetricStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,7 +194,7 @@ public class MetricReportManager {
     long collectionTime = System.currentTimeMillis();
 
     // collect all the 'non-empty' metrics
-    List<MetricStatistics> metrics = collectMetrics();
+    List<MetricStats> metrics = collectMetrics();
     if (aggregators != null) {
       for (MetricReportAggregator aggregator : aggregators) {
         aggregator.process(metrics);
@@ -221,8 +221,8 @@ public class MetricReportManager {
   /**
    * Collect all the non-empty metrics and return them for reporting.
    */
-  protected List<MetricStatistics> collectMetrics() {
-    List<MetricStatistics> metrics = sort(MetricManager.collectMetrics());
+  protected List<MetricStats> collectMetrics() {
+    List<MetricStats> metrics = sort(MetricManager.collectMetrics());
     for (MetricSupplier supplier : suppliers) {
       metrics.addAll(supplier.collectMetrics());
     }
@@ -232,8 +232,8 @@ public class MetricReportManager {
   /**
    * Sort the metrics into name order.
    */
-  protected static List<MetricStatistics> sort(Collection<MetricStatistics> metrics) {
-    ArrayList<MetricStatistics> sortedList = new ArrayList<>(metrics);
+  protected static List<MetricStats> sort(Collection<MetricStats> metrics) {
+    ArrayList<MetricStats> sortedList = new ArrayList<>(metrics);
     sortedList.sort(NAME_COMPARATOR);
     return sortedList;
   }
@@ -254,11 +254,11 @@ public class MetricReportManager {
   /**
    * Compare Metrics by name for sorting purposes.
    */
-  protected static class NameComp implements Comparator<MetricStatistics> {
+  protected static class NameComp implements Comparator<MetricStats> {
 
     @Override
-    public int compare(MetricStatistics o1, MetricStatistics o2) {
-      return o1.getName().compareTo(o2.getName());
+    public int compare(MetricStats o1, MetricStats o2) {
+      return o1.name().compareTo(o2.name());
     }
 
   }

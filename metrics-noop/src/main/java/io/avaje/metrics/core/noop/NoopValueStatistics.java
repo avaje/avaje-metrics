@@ -1,42 +1,42 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import io.avaje.metrics.statistics.ValueStatistics;
+import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.MetricStatsVisitor;
 
 /**
  * A NOOP placeholder for ValueStatistics.
  */
-class NoopValueStatistics implements ValueStatistics {
+class NoopValueStatistics implements ValueMetric.Stats {
 
   static NoopValueStatistics INSTANCE = new NoopValueStatistics();
 
   @Override
-  public long getCount() {
+  public long count() {
     return 0;
   }
 
   @Override
-  public long getTotal() {
+  public long total() {
     return 0;
   }
 
   @Override
-  public long getMax() {
+  public long max() {
     return 0;
   }
 
   @Override
-  public long getMean() {
+  public long mean() {
     return 0;
   }
 
   @Override
-  public String getName() {
+  public String name() {
     return null;
   }
 
   @Override
-  public void visit(MetricStatisticsVisitor visitor) {
+  public void visit(MetricStatsVisitor visitor) {
     // do nothing
   }
 }

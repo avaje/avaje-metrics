@@ -1,7 +1,6 @@
 package io.avaje.metrics.report;
 
 import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.statistics.MetricStatisticsAsJson;
 
 final class DefaultMetricStatisticsAsJson implements MetricStatisticsAsJson {
 

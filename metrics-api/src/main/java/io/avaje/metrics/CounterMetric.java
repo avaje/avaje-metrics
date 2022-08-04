@@ -36,6 +36,16 @@ public interface CounterMetric extends Metric {
   /**
    * Return the current count.
    */
-  long getCount();
+  long count();
 
+  /**
+   * Statistics provided by the {@link CounterMetric}.
+   */
+  interface Stats extends MetricStats {
+
+    /**
+     * Return the count of values collected.
+     */
+    long count();
+  }
 }

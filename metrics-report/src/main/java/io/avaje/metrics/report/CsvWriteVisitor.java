@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.statistics.*;
+import io.avaje.metrics.*;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -12,7 +12,7 @@ import java.io.Writer;
  * This format is aimed at writing to the local file system to provide simple mechanism for
  * reporting of the collected metrics.
  */
-public class CsvWriteVisitor implements MetricStatisticsVisitor {
+public class CsvWriteVisitor implements MetricStatsVisitor {
 
   /**
    * Code for GaugeLongMetric.
@@ -112,13 +112,13 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
    */
   public void write(ReportMetrics reportMetrics) {
 
-    for (MetricStatistics metric : reportMetrics.getMetrics()) {
+    for (MetricStats metric : reportMetrics.getMetrics()) {
       metric.visit(this);
     }
   }
 
-  private void writeMetricName(MetricStatistics metric, String metricTypeCode) throws IOException {
-    writeMetricName(metric.getName(), metricTypeCode);
+  private void writeMetricName(MetricStats metric, String metricTypeCode) throws IOException {
+    writeMetricName(metric.name(), metricTypeCode);
   }
 
   private void writeMetricName(String metricName, String metricTypeCode) throws IOException {
@@ -137,18 +137,18 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(TimedStatistics metric) {
+  public void visit(TimedMetric.Stats metric) {
 
     try {
       if (thresholdMean > 0) {
-        if (metric.getMean() < thresholdMean) {
+        if (metric.mean() < thresholdMean) {
           // suppress reporting based on threshold mean (typically when discovering which
           // metrics we really want to report on etc).
           return;
         }
       }
 
-      writeMetricName(metric.getNameWithBucket(), TYPE_TIMED_METRIC);
+      writeMetricName(metric.nameWithBucket(), TYPE_TIMED_METRIC);
       writeSummary(metric);
       writeMetricEnd();
     } catch (IOException e) {
@@ -157,7 +157,7 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(ValueStatistics metric) {
+  public void visit(ValueMetric.Stats metric) {
 
     try {
       writeMetricName(metric, TYPE_VALUE_METRIC);
@@ -169,11 +169,11 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(CounterStatistics metric) {
+  public void visit(CounterMetric.Stats metric) {
 
     try {
       writeMetricName(metric, TYPE_COUNTER_METRIC);
-      writeValue(String.valueOf(metric.getCount()));
+      writeValue(String.valueOf(metric.count()));
       writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -181,10 +181,10 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(GaugeDoubleStatistics metric) {
+  public void visit(GaugeDoubleMetric.Stats metric) {
     try {
       writeMetricName(metric, TYPE_DOUBLE_METRIC);
-      writeValue(formattedValue(metric.getValue()));
+      writeValue(formattedValue(metric.value()));
       writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -192,26 +192,26 @@ public class CsvWriteVisitor implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(GaugeLongStatistics metric) {
+  public void visit(GaugeLongMetric.Stats metric) {
     try {
       writeMetricName(metric, TYPE_LONG_METRIC);
-      writeValue(String.valueOf(metric.getValue()));
+      writeValue(String.valueOf(metric.value()));
       writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void writeSummary(ValueStatistics valueStats) throws IOException {
+  private void writeSummary(ValueMetric.Stats valueStats) throws IOException {
 
-    long count = valueStats.getCount();
+    long count = valueStats.count();
     write("count", count);
     if (count == 0) {
       return;
     }
-    write("mean", valueStats.getMean());
-    write("max", valueStats.getMax());
-    write("total", valueStats.getTotal());
+    write("mean", valueStats.mean());
+    write("max", valueStats.max());
+    write("total", valueStats.total());
   }
 
   protected void write(String name, long value) throws IOException {

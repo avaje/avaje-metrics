@@ -30,7 +30,7 @@ final class JvmSystemMetricGroup {
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       final double loadAverage = osMXbean.getSystemLoadAverage();
       return BigDecimal.valueOf(loadAverage).multiply(HUNDRED).setScale(0, RoundingMode.HALF_UP).longValue();
     }

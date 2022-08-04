@@ -1,7 +1,7 @@
 package io.avaje.metrics.report;
 
 
-import io.avaje.metrics.statistics.*;
+import io.avaje.metrics.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,7 +11,7 @@ import static io.avaje.metrics.report.CsvWriteVisitor.*;
 /**
  * Writes the metric information as JSON to a buffer for sending.
  */
-public class JsonWriter implements MetricStatisticsVisitor {
+public class JsonWriter implements MetricStatsVisitor {
 
   private final int decimalPlaces;
 
@@ -19,17 +19,17 @@ public class JsonWriter implements MetricStatisticsVisitor {
 
   private boolean includeType;
 
-  private final List<MetricStatistics> metrics;
+  private final List<MetricStats> metrics;
 
-  public static void writeTo(Appendable writer, List<MetricStatistics> metrics) {
+  public static void writeTo(Appendable writer, List<MetricStats> metrics) {
     new JsonWriter(writer, metrics).write();
   }
 
-  public JsonWriter(Appendable writer, List<MetricStatistics> metrics) {
+  public JsonWriter(Appendable writer, List<MetricStats> metrics) {
     this(2, writer, metrics);
   }
 
-  public JsonWriter(int decimalPlaces, Appendable writer, List<MetricStatistics> metrics) {
+  public JsonWriter(int decimalPlaces, Appendable writer, List<MetricStats> metrics) {
     this.decimalPlaces = decimalPlaces;
     this.buffer = writer;
     this.metrics = metrics;
@@ -52,7 +52,7 @@ public class JsonWriter implements MetricStatisticsVisitor {
         } else {
           buffer.append(" ,");
         }
-        MetricStatistics metric = metrics.get(i);
+        MetricStats metric = metrics.get(i);
         metric.visit(this);
         buffer.append("\n");
       }
@@ -61,8 +61,8 @@ public class JsonWriter implements MetricStatisticsVisitor {
     }
   }
 
-  private void writeMetricStart(String type, MetricStatistics metric) throws IOException {
-    writeMetricStart(type, metric.getName());
+  private void writeMetricStart(String type, MetricStats metric) throws IOException {
+    writeMetricStart(type, metric.name());
   }
 
   private void writeMetricStart(String type, String name) throws IOException {
@@ -87,9 +87,9 @@ public class JsonWriter implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(TimedStatistics metric) {
+  public void visit(TimedMetric.Stats metric) {
     try {
-      writeMetricStart(TYPE_TIMED_METRIC, metric.getNameWithBucket());
+      writeMetricStart(TYPE_TIMED_METRIC, metric.nameWithBucket());
       writeSummary(metric);
       writeMetricEnd();
     } catch (IOException e) {
@@ -98,7 +98,7 @@ public class JsonWriter implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(ValueStatistics metric) {
+  public void visit(ValueMetric.Stats metric) {
     try {
       writeMetricStart(TYPE_VALUE_METRIC, metric);
       writeSummary(metric);
@@ -109,10 +109,10 @@ public class JsonWriter implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(CounterStatistics metric) {
+  public void visit(CounterMetric.Stats metric) {
     try {
       writeMetricStart(TYPE_COUNTER_METRIC, metric);
-      writeKeyNumber("value", metric.getCount());
+      writeKeyNumber("value", metric.count());
       writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -120,10 +120,10 @@ public class JsonWriter implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(GaugeDoubleStatistics metric) {
+  public void visit(GaugeDoubleMetric.Stats metric) {
     try {
       writeMetricStart(TYPE_DOUBLE_METRIC, metric);
-      writeKeyNumber("value", format(metric.getValue()));
+      writeKeyNumber("value", format(metric.value()));
       writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -131,29 +131,29 @@ public class JsonWriter implements MetricStatisticsVisitor {
   }
 
   @Override
-  public void visit(GaugeLongStatistics metric) {
+  public void visit(GaugeLongMetric.Stats metric) {
     try {
       writeMetricStart(TYPE_LONG_METRIC, metric);
-      writeKeyNumber("value", metric.getValue());
+      writeKeyNumber("value", metric.value());
       writeMetricEnd();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void writeSummary(ValueStatistics valueStats) throws IOException {
+  private void writeSummary(ValueMetric.Stats valueStats) throws IOException {
 
     // valueStats == null when BucketTimedMetric and the bucket is empty
-    long count = (valueStats == null) ? 0 : valueStats.getCount();
+    long count = (valueStats == null) ? 0 : valueStats.count();
 
     writeKeyNumber("count", count);
     if (count != 0) {
       buffer.append(",");
-      writeKeyNumber("mean", valueStats.getMean());
+      writeKeyNumber("mean", valueStats.mean());
       buffer.append(",");
-      writeKeyNumber("max", valueStats.getMax());
+      writeKeyNumber("max", valueStats.max());
       buffer.append(",");
-      writeKeyNumber("total", valueStats.getTotal());
+      writeKeyNumber("total", valueStats.total());
     }
   }
 

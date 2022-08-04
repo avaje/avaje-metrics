@@ -27,7 +27,7 @@ class DefaultMetricManagerTest {
     m0.setRequestTiming(1);
     timingMetrics = mgr.getRequestTimingMetrics(null);
     assertEquals(1, timingMetrics.size());
-    assertEquals(m0.getName().getSimpleName(), timingMetrics.get(0).getName());
+    assertEquals(m0.name().simpleName(), timingMetrics.get(0).getName());
 
 
     m2.setRequestTiming(10);

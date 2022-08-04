@@ -9,7 +9,6 @@ import io.avaje.metrics.report.HeaderInfo;
 import io.avaje.metrics.report.JsonWriteVisitor;
 import io.avaje.metrics.report.JsonWriter;
 import io.avaje.metrics.report.ReportMetrics;
-import io.avaje.metrics.statistics.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -40,7 +39,7 @@ class JsonWriterTest {
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
     CounterMetric counter = createCounterMetric();
-    jsonVisitor.visit((CounterStatistics) collectOne(counter));
+    jsonVisitor.visit((CounterMetric.Stats) collectOne(counter));
 
     String counterJson = writer.toString();
 
@@ -53,7 +52,7 @@ class JsonWriterTest {
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
     GaugeDoubleMetric metric = createGaugeMetric();
-    jsonVisitor.visit((GaugeDoubleStatistics) collectOne(metric));
+    jsonVisitor.visit((GaugeDoubleMetric.Stats) collectOne(metric));
     String counterJson = writer.toString();
 
     assertEquals("{\"type\":\"dm\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
@@ -66,7 +65,7 @@ class JsonWriterTest {
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
 
     ValueMetric metric = createValueMetric();
-    jsonVisitor.visit((ValueStatistics) collectOne(metric));
+    jsonVisitor.visit((ValueMetric.Stats) collectOne(metric));
     String counterJson = writer.toString();
 
     assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"total\":42}", counterJson);
@@ -126,9 +125,9 @@ class JsonWriterTest {
 
   private void visitAllTimed(Metric metric, JsonWriter jsonVisitor) {
 
-    List<MetricStatistics> statistics = collectAll(metric);
-    for (MetricStatistics statistic : statistics) {
-      jsonVisitor.visit((TimedStatistics) statistic);
+    List<MetricStats> statistics = collectAll(metric);
+    for (MetricStats statistic : statistics) {
+      jsonVisitor.visit((TimedMetric.Stats) statistic);
     }
   }
 
@@ -143,7 +142,7 @@ class JsonWriterTest {
     metrics.add(createBucketTimedMetricPartial());
     metrics.add(createCounterMetric());
 
-    List<MetricStatistics> statistics = collect(metrics);
+    List<MetricStats> statistics = collect(metrics);
 
     HeaderInfo headerInfo = new HeaderInfo();
     headerInfo.setKey("key-val");
@@ -180,13 +179,13 @@ class JsonWriterTest {
 
   }
 
-  private MetricStatistics collectOne(Metric metric) {
+  private MetricStats collectOne(Metric metric) {
     HelperStatsCollector collector = new HelperStatsCollector();
     metric.collect(collector);
     return collector.getList().get(0);
   }
 
-  private List<MetricStatistics> collect(List<Metric> metrics) {
+  private List<MetricStats> collect(List<Metric> metrics) {
 
     HelperStatsCollector collector = new HelperStatsCollector();
     for (Metric metric : metrics) {
@@ -195,7 +194,7 @@ class JsonWriterTest {
     return collector.getList();
   }
 
-  private List<MetricStatistics> collectAll(Metric... metrics) {
+  private List<MetricStats> collectAll(Metric... metrics) {
 
     HelperStatsCollector collector = new HelperStatsCollector();
     for (Metric metric : metrics) {
@@ -205,7 +204,7 @@ class JsonWriterTest {
   }
 
   private CounterMetric createCounterMetric() {
-    CounterMetric counter = new DefaultCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
+    CounterMetric counter = new DCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
     counter.inc(10);
     return counter;
   }

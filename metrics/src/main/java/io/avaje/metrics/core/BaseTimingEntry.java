@@ -26,7 +26,7 @@ final class BaseTimingEntry implements RequestTimingEntry {
 
   @Override
   public String toString() {
-    return "d:" + depth + " start:" + startNanos + " end:" + endNanos + " metric:" + metric.getName();
+    return "d:" + depth + " start:" + startNanos + " end:" + endNanos + " metric:" + metric.name();
   }
 
   public int getDepth() {

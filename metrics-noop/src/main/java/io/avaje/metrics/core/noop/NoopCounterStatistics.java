@@ -1,24 +1,24 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.statistics.CounterStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.MetricStatsVisitor;
 
-final class NoopCounterStatistics implements CounterStatistics {
+final class NoopCounterStatistics implements CounterMetric.Stats {
 
   static final NoopCounterStatistics INSTANCE = new NoopCounterStatistics();
 
   @Override
-  public void visit(MetricStatisticsVisitor visitor) {
+  public void visit(MetricStatsVisitor visitor) {
 
   }
 
   @Override
-  public long getCount() {
+  public long count() {
     return 0;
   }
 
   @Override
-  public String getName() {
+  public String name() {
     return null;
   }
 }

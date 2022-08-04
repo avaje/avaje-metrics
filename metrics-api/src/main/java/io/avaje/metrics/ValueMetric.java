@@ -31,21 +31,47 @@ public interface ValueMetric extends Metric {
   /**
    * Return the count of values collected (since the last reset/collection).
    */
-  long getCount();
+  long count();
 
   /**
    * Return the total of all the values (since the last reset/collection).
    */
-  long getTotal();
+  long total();
 
   /**
    * Return the Max value collected (since the last reset/collection).
    */
-  long getMax();
+  long max();
 
   /**
    * Return the mean value rounded up for the values collected since the last reset/collection.
    */
-  long getMean();
+  long mean();
 
+  /**
+   * Statistics collected by ValueMetric or TimedMetric.
+   */
+  interface Stats extends MetricStats {
+
+    /**
+     * Return the count of values collected (since the last reset/collection).
+     */
+    long count();
+
+    /**
+     * Return the total of all the values (since the last reset/collection).
+     */
+    long total();
+
+    /**
+     * Return the Max value collected (since the last reset/collection).
+     */
+    long max();
+
+    /**
+     * Return the mean value rounded up for the values collected since the last reset/collection.
+     */
+    long mean();
+
+  }
 }

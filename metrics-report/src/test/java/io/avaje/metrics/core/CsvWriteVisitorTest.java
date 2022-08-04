@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
 import io.avaje.metrics.report.CsvWriteVisitor;
-import io.avaje.metrics.statistics.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -23,17 +22,17 @@ class CsvWriteVisitorTest {
 
     CounterMetric counter = createCounterMetric();
 
-    csvVisitor.visit((CounterStatistics) collect(counter));
+    csvVisitor.visit((CounterMetric.Stats) collect(counter));
     String counterCsv = writer.toString();
 
     assertThat(counterCsv).contains(",org.test.CounterFoo.doStuff,10");
   }
 
-  private MetricStatistics collect(Metric metric) {
+  private MetricStats collect(Metric metric) {
     return collectAll(metric).get(0);
   }
 
-  private List<MetricStatistics> collectAll(Metric metric) {
+  private List<MetricStats> collectAll(Metric metric) {
     HelperStatsCollector collector = new HelperStatsCollector();
     metric.collect(collector);
     return collector.getList();
@@ -52,7 +51,7 @@ class CsvWriteVisitorTest {
 
     GaugeDoubleMetric metric = createGaugeMetric();
 
-    csvVisitor.visit((GaugeDoubleStatistics) collect(metric));
+    csvVisitor.visit((GaugeDoubleMetric.Stats) collect(metric));
     String csvContent = writer.toString();
 
     assertThat(csvContent).contains(",org.test.GaugeFoo.doStuff,");
@@ -67,7 +66,7 @@ class CsvWriteVisitorTest {
 
     ValueMetric metric = createValueMetric();
 
-    csvVisitor.visit((ValueStatistics) collect(metric));
+    csvVisitor.visit((ValueMetric.Stats) collect(metric));
     String csvContent = writer.toString();
 
     assertThat(csvContent).contains(",org.test.ValueFoo.doStuff,");
@@ -86,9 +85,9 @@ class CsvWriteVisitorTest {
 
     TimedMetric metric = createTimedMetric();
 
-    List<MetricStatistics> statistics = collectAll(metric);
-    for (MetricStatistics statistic : statistics) {
-      csvVisitor.visit((ValueStatistics) statistic);
+    List<MetricStats> statistics = collectAll(metric);
+    for (MetricStats statistic : statistics) {
+      csvVisitor.visit((ValueMetric.Stats) statistic);
     }
     String csvContent = writer.toString();
     String[] lines = csvContent.split("\n");
@@ -125,9 +124,9 @@ class CsvWriteVisitorTest {
     metric.addEventDuration(false, 110 * NANOS_TO_MILLIS);
     metric.addEventDuration(false, 110 * NANOS_TO_MILLIS);
 
-    List<MetricStatistics> stats = collectAll(metric);
-    for (MetricStatistics stat : stats) {
-      csvVisitor.visit((TimedStatistics) stat);
+    List<MetricStats> stats = collectAll(metric);
+    for (MetricStats stat : stats) {
+      csvVisitor.visit((TimedMetric.Stats) stat);
     }
     String csvContent = writer.toString();
 
@@ -161,9 +160,9 @@ class CsvWriteVisitorTest {
 
     TimedMetric metric = createBucketTimedMetricPartial();
 
-    List<MetricStatistics> statistics = collectAll(metric);
-    for (MetricStatistics statistic : statistics) {
-      csvVisitor.visit((TimedStatistics) statistic);
+    List<MetricStats> statistics = collectAll(metric);
+    for (MetricStats statistic : statistics) {
+      csvVisitor.visit((TimedMetric.Stats) statistic);
     }
     String csvContent = writer.toString();
 
@@ -179,7 +178,7 @@ class CsvWriteVisitorTest {
 
 
   private CounterMetric createCounterMetric() {
-    CounterMetric counter = new DefaultCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
+    CounterMetric counter = new DCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
     counter.inc(10);
     return counter;
   }

@@ -13,7 +13,7 @@ class DefaultMetricNameTest {
     MetricName name = new DefaultMetricName("org.test.Hello.rob");
 
     assertNotNull(name);
-    assertEquals("org.test.Hello.rob", name.getSimpleName());
+    assertEquals("org.test.Hello.rob", name.simpleName());
   }
 
   @Test
@@ -22,14 +22,14 @@ class DefaultMetricNameTest {
     MetricName name = new DefaultMetricName("Hello.rob");
 
     assertNotNull(name);
-    assertEquals("Hello.rob", name.getSimpleName());
+    assertEquals("Hello.rob", name.simpleName());
   }
 
   @Test
   void partial_onlyOne() {
 
     MetricName name = new DefaultMetricName("test");
-    assertEquals("test", name.getSimpleName());
+    assertEquals("test", name.simpleName());
   }
 
   @Test

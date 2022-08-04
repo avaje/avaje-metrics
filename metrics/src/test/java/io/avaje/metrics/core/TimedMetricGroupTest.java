@@ -15,7 +15,7 @@ class TimedMetricGroupTest {
     TimedMetricGroup timedGroup = MetricManager.timedGroup(MetricName.of("org.test.Hello"));
 
     TimedMetric timedMetric = timedGroup.timed("one");
-    assertEquals("org.test.Hello.one", timedMetric.getName().getSimpleName());
+    assertEquals("org.test.Hello.one", timedMetric.name().simpleName());
 
 
     TimedMetric timedMetric2 = timedGroup.timed("one");
@@ -26,6 +26,6 @@ class TimedMetricGroupTest {
     TimedMetric two = timedGroup.timed("two");
     assertNotSame(timedMetric, two);
 
-    assertEquals("org.test.Hello.two", two.getName().getSimpleName());
+    assertEquals("org.test.Hello.two", two.name().simpleName());
   }
 }

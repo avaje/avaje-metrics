@@ -1,13 +1,13 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
-import io.avaje.metrics.statistics.TimedStatistics;
+import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.MetricStatsVisitor;
 
 
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-final class DefaultValueStatistics implements TimedStatistics {
+final class DefaultValueStatistics implements TimedMetric.Stats {
 
   final ValueCounter owner;
   final long count;
@@ -32,7 +32,7 @@ final class DefaultValueStatistics implements TimedStatistics {
   }
 
   @Override
-  public void visit(MetricStatisticsVisitor visitor) {
+  public void visit(MetricStatsVisitor visitor) {
     visitor.visit(this);
   }
 
@@ -42,17 +42,17 @@ final class DefaultValueStatistics implements TimedStatistics {
   }
 
   @Override
-  public String getBucketRange() {
+  public String bucketRange() {
     return owner.getBucketRange();
   }
 
   @Override
-  public String getName() {
+  public String name() {
     return owner.getName();
   }
 
   @Override
-  public String getNameWithBucket() {
+  public String nameWithBucket() {
     return owner.getNameWithBucket();
   }
 
@@ -60,7 +60,7 @@ final class DefaultValueStatistics implements TimedStatistics {
    * Return the count of values collected.
    */
   @Override
-  public long getCount() {
+  public long count() {
     return count;
   }
 
@@ -68,7 +68,7 @@ final class DefaultValueStatistics implements TimedStatistics {
    * Return the total of all the values.
    */
   @Override
-  public long getTotal() {
+  public long total() {
     return total;
   }
 
@@ -76,7 +76,7 @@ final class DefaultValueStatistics implements TimedStatistics {
    * Return the Max value collected.
    */
   @Override
-  public long getMax() {
+  public long max() {
     return max;
   }
 
@@ -84,7 +84,7 @@ final class DefaultValueStatistics implements TimedStatistics {
    * Return the mean value rounded up.
    */
   @Override
-  public long getMean() {
+  public long mean() {
     return (count < 1) ? 0L : Math.round((double) (total / count));
   }
 

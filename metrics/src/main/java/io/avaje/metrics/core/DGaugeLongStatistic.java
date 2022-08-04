@@ -1,11 +1,11 @@
 package io.avaje.metrics.core;
 
 
+import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.GaugeLongStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
-final class DGaugeLongStatistic implements GaugeLongStatistics {
+final class DGaugeLongStatistic implements GaugeLongMetric.Stats {
 
   private final MetricName name;
   private final long value;
@@ -21,17 +21,17 @@ final class DGaugeLongStatistic implements GaugeLongStatistics {
   }
 
   @Override
-  public void visit(MetricStatisticsVisitor visitor) {
+  public void visit(MetricStatsVisitor visitor) {
     visitor.visit(this);
   }
 
   @Override
-  public String getName() {
-    return name.getSimpleName();
+  public String name() {
+    return name.simpleName();
   }
 
   @Override
-  public long getValue() {
+  public long value() {
     return value;
   }
 }

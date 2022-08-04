@@ -31,6 +31,16 @@ public interface GaugeDoubleMetric extends Metric {
   /**
    * Return the value.
    */
-  double getValue();
+  double value();
 
+  /**
+   * Statistics provided by the {@link GaugeDoubleMetric}.
+   */
+  interface Stats extends MetricStats {
+
+    /**
+     * Return the count of values collected.
+     */
+    double value();
+  }
 }

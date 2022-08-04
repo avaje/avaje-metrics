@@ -3,7 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -74,7 +74,7 @@ final class RequestMetric implements TimedMetric {
   }
 
   @Override
-  public String getBucketRange() {
+  public String bucketRange() {
     return null;
   }
 
@@ -103,17 +103,17 @@ final class RequestMetric implements TimedMetric {
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return null;
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor collector) {
+  public void collect(MetricStatsVisitor collector) {
 
   }
 
   @Override
-  public void clear() {
+  public void reset() {
 
   }
 }

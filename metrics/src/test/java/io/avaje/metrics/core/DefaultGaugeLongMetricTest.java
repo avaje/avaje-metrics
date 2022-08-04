@@ -2,7 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.statistics.MetricStatistics;
+import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -18,34 +18,34 @@ class DefaultGaugeLongMetricTest {
     MyGauge myGauge = new MyGauge();
     DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
 
-    assertEquals(0, metric.getValue());
+    assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
 
     myGauge.value = 100;
-    assertEquals(100, metric.getValue());
+    assertEquals(100, metric.value());
     assertThat(collect(metric)).hasSize(1);
 
-    assertEquals(100, metric.getValue());
+    assertEquals(100, metric.value());
 
     // skip
     assertThat(collect(metric)).isEmpty();
-    assertEquals(100, metric.getValue());
+    assertEquals(100, metric.value());
 
     myGauge.value = 110;
 
     assertThat(collect(metric)).hasSize(1);
-    assertEquals(110, metric.getValue());
+    assertEquals(110, metric.value());
 
     // skip
     assertThat(collect(metric)).isEmpty();
 
     myGauge.value = 90;
     assertThat(collect(metric)).hasSize(1);
-    assertEquals(90, metric.getValue());
+    assertEquals(90, metric.value());
 
   }
 
-  private List<MetricStatistics> collect(Metric metric) {
+  private List<MetricStats> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector();
     metric.collect(collector);
     return collector.getList();
@@ -57,30 +57,30 @@ class DefaultGaugeLongMetricTest {
     MyGauge myGauge = new MyGauge();
     DefaultGaugeLongMetric metric = new DefaultGaugeLongMetric(new DefaultMetricName(MyGauge.class, "test"), myGauge);
 
-    assertEquals(0, metric.getValue());
+    assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
 
     myGauge.value = 100;
-    assertEquals(100, metric.getValue());
+    assertEquals(100, metric.value());
     assertThat(collect(metric)).hasSize(1);
 
     DefaultGaugeLongMetric incrementing = DefaultGaugeLongMetric.incrementing(new DefaultMetricName(MyGauge.class, "inc"), myGauge);
 
     myGauge.value = 100;
     //assertFalse(incrementing.collectStatistics());
-    assertEquals(100, incrementing.getValue());
+    assertEquals(100, incrementing.value());
 
     myGauge.value = 150;
     assertThat(collect(metric)).hasSize(1);
-    assertEquals(50, incrementing.getValue());
+    assertEquals(50, incrementing.value());
 
     myGauge.value = 280;
     assertThat(collect(metric)).hasSize(1);
-    assertEquals(130, incrementing.getValue());
+    assertEquals(130, incrementing.value());
 
     myGauge.value = 280;
     assertThat(collect(metric)).isEmpty();
-    assertEquals(0, incrementing.getValue());
+    assertEquals(0, incrementing.value());
   }
 
   static class MyGauge implements GaugeLong {
@@ -88,7 +88,7 @@ class DefaultGaugeLongMetricTest {
     long value;
 
     @Override
-    public long getValue() {
+    public long value() {
       return value;
     }
 

@@ -14,6 +14,6 @@ public interface GaugeLong {
   /**
    * Return the current value.
    */
-  long getValue();
+  long value();
 
 }

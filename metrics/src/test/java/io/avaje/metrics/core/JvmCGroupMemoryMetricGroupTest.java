@@ -31,13 +31,13 @@ class JvmCGroupMemoryMetricGroupTest {
     assertThat(source.getPctUsage()).isEqualTo(22);
 
     final GaugeLongMetric memoryLimit = me.createMemoryLimit(source, true);
-    assertThat(memoryLimit.getValue()).isEqualTo(1025);
+    assertThat(memoryLimit.value()).isEqualTo(1025);
 
     final GaugeLongMetric memoryUsage = me.createMemoryUsage(source, true);
-    assertThat(memoryUsage.getValue()).isEqualTo(227);
+    assertThat(memoryUsage.value()).isEqualTo(227);
 
     final GaugeLongMetric pctUsage = me.createMemoryPctUsage(source, true);
-    assertThat(pctUsage.getValue()).isEqualTo(22);
+    assertThat(pctUsage.value()).isEqualTo(22);
   }
 
 }

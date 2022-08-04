@@ -1,11 +1,11 @@
 package io.avaje.metrics.core;
 
 
+import io.avaje.metrics.GaugeDoubleMetric;
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.GaugeDoubleStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
-final class DGaugeDoubleStatistic implements GaugeDoubleStatistics {
+final class DGaugeDoubleStatistic implements GaugeDoubleMetric.Stats {
 
   private final MetricName name;
   private final double value;
@@ -21,17 +21,17 @@ final class DGaugeDoubleStatistic implements GaugeDoubleStatistics {
   }
 
   @Override
-  public void visit(MetricStatisticsVisitor visitor) {
+  public void visit(MetricStatsVisitor visitor) {
     visitor.visit(this);
   }
 
   @Override
-  public String getName() {
-    return name.getSimpleName();
+  public String name() {
+    return name.simpleName();
   }
 
   @Override
-  public double getValue() {
+  public double value() {
     return value;
   }
 }

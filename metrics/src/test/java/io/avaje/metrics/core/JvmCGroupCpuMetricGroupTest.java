@@ -32,7 +32,7 @@ class JvmCGroupCpuMetricGroupTest {
 
     final JvmCGroupCpuMetricGroup.CpuUsageMicros usageMicros = new JvmCGroupCpuMetricGroup.CpuUsageMicros(source);
 
-    final long value = usageMicros.getValue();
+    final long value = usageMicros.value();
     assertThat(value).isEqualTo(55035664L);
   }
 
@@ -59,7 +59,7 @@ class JvmCGroupCpuMetricGroupTest {
 
     JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
     final GaugeLongMetric metric = me.createCGroupCpuLimit(cpuQuota, period);
-    final long limit = metric.getValue();
+    final long limit = metric.value();
     assertThat(limit).isEqualTo(600L);
   }
 
@@ -71,7 +71,7 @@ class JvmCGroupCpuMetricGroupTest {
 
     JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
     final GaugeLongMetric metric = me.createCGroupCpuRequests(cpuShares);
-    final long requests = metric.getValue();
+    final long requests = metric.value();
     assertThat(requests).isEqualTo(200L);
   }
 

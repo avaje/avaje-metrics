@@ -14,10 +14,10 @@ class DefaultMetricNameCacheTest {
     DefaultMetricNameCache cache = new DefaultMetricNameCache(DefaultMetricNameCacheTest.class);
 
     MetricName metricName = cache.get("foo");
-    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.foo", metricName.getSimpleName());
+    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.foo", metricName.simpleName());
 
     MetricName metricName2 = cache.get("bar");
-    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.bar", metricName2.getSimpleName());
+    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.bar", metricName2.simpleName());
 
     MetricName metricName3 = cache.get("foo");
     assertSame(metricName, metricName3);

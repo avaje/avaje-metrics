@@ -31,6 +31,16 @@ public interface GaugeLongMetric extends Metric {
   /**
    * Return the value.
    */
-  long getValue();
+  long value();
 
+  /**
+   * Statistics provided by the {@link GaugeLongMetric}.
+   */
+  interface Stats extends MetricStats {
+
+    /**
+     * Return the count of values collected.
+     */
+    long value();
+  }
 }

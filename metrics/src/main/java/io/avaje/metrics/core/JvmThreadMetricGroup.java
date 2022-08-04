@@ -44,7 +44,7 @@ final class JvmThreadMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         return threadMXBean.getThreadCount();
       }
     }
@@ -57,7 +57,7 @@ final class JvmThreadMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         // read and reset the peak
         int peakThreadCount = threadMXBean.getPeakThreadCount();
         threadMXBean.resetPeakThreadCount();
@@ -73,7 +73,7 @@ final class JvmThreadMetricGroup {
       }
 
       @Override
-      public long getValue() {
+      public long value() {
         return threadMXBean.getDaemonThreadCount();
       }
     }

@@ -18,6 +18,5 @@ public interface SpiMetricBuilder {
      * Create the metric.
      */
     T createMetric(MetricName name, int[] bucketRanges);
-
   }
 }

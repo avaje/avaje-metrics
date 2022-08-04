@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.statistics.MetricStatistics;
+import io.avaje.metrics.MetricStats;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ public interface MetricReportAggregator {
   /**
    * Process the metric statistics.
    */
-  void process(List<MetricStatistics> statistics);
+  void process(List<MetricStats> statistics);
 }

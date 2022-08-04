@@ -2,7 +2,7 @@ package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.CounterMetric;
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
 final class NoopCounterMetric implements CounterMetric {
 
@@ -15,17 +15,17 @@ final class NoopCounterMetric implements CounterMetric {
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return metricName;
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor visitor) {
+  public void collect(MetricStatsVisitor visitor) {
     // do nothing
   }
 
   @Override
-  public void clear() {
+  public void reset() {
     // do nothing
   }
 
@@ -40,7 +40,7 @@ final class NoopCounterMetric implements CounterMetric {
   }
 
   @Override
-  public long getCount() {
+  public long count() {
     return 0;
   }
 }

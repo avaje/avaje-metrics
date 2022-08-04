@@ -8,7 +8,7 @@ final class CounterMetricFactory implements SpiMetricBuilder.Factory<CounterMetr
 
   @Override
   public CounterMetric createMetric(MetricName name, int[] bucketRanges) {
-    return new DefaultCounterMetric(name);
+    return new DCounterMetric(name);
   }
 
 }

@@ -51,7 +51,7 @@ final class JvmGarbageCollectionMetricGroup {
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       return gcMXBean.getCollectionCount();
     }
   }
@@ -65,7 +65,7 @@ final class JvmGarbageCollectionMetricGroup {
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       return gcMXBean.getCollectionTime();
     }
   }
@@ -79,7 +79,7 @@ final class JvmGarbageCollectionMetricGroup {
     }
 
     @Override
-    public long getValue() {
+    public long value() {
       long total = 0;
       for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
         total += gcMXBean.getCollectionTime();

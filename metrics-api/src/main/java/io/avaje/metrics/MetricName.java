@@ -25,7 +25,7 @@ public interface MetricName extends Comparable<io.avaje.metrics.MetricName> {
   /**
    * Return a simple java like name.
    */
-  String getSimpleName();
+  String simpleName();
 
   /**
    * Create and return another MetricName by appending the suffix.

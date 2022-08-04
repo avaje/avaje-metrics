@@ -1,10 +1,7 @@
 package io.avaje.metrics;
 
 import io.avaje.metrics.spi.SpiMetricManager;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.MetricStatisticsAsJson;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
 
@@ -36,7 +33,7 @@ public class MetricManager {
   /**
    * Collect all the metrics.
    */
-  public static List<MetricStatistics> collectMetrics() {
+  public static List<MetricStats> collectMetrics() {
     return mgr.collectMetrics();
   }
 
@@ -231,19 +228,19 @@ public class MetricManager {
     return mgr.register(name(name), gauge);
   }
 
-  /**
-   * Return all the non-JVM registered metrics.
-   */
-  public static Collection<Metric> getMetrics() {
-    return mgr.getMetrics();
-  }
-
-  /**
-   * Return the core JVM metrics.
-   */
-  public static Collection<Metric> getJvmMetrics() {
-    return mgr.getJvmMetrics();
-  }
+//  /**
+//   * Return all the non-JVM registered metrics.
+//   */
+//  public static Collection<Metric> getMetrics() {
+//    return mgr.getMetrics();
+//  }
+//
+//  /**
+//   * Return the core JVM metrics.
+//   */
+//  public static Collection<Metric> getJvmMetrics() {
+//    return mgr.getJvmMetrics();
+//  }
 
   /**
    * Return the built-in JVM metrics support to register collection of all or some

@@ -2,8 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.statistics.MetricStatistics;
-import io.avaje.metrics.statistics.TimedStatistics;
+import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -22,20 +21,20 @@ class TimedMetricTest {
     boolean useContext = metric.isRequestTiming();
     long start = System.nanoTime();
 
-    assertEquals("org.test.mytimed", metric.getName().getSimpleName());
+    assertEquals("org.test.mytimed", metric.name().simpleName());
 
     metric.add(start, useContext);
     metric.addEventSince(true, start);
 
-    List<MetricStatistics> stats = MetricManager.collectMetrics();
+    List<MetricStats> stats = MetricManager.collectMetrics();
 
-    TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+    TimedMetric.Stats stat0 = (TimedMetric.Stats) stats.get(0);
 
-    assertEquals("org.test.mytimed", stat0.getName());
-    assertEquals(2, stat0.getCount());
-    assertThat(stat0.getTotal()).isGreaterThan(0);
-    assertThat(stat0.getMean()).isGreaterThan(0);
-    assertThat(stat0.getMax()).isGreaterThan(0);
+    assertEquals("org.test.mytimed", stat0.name());
+    assertEquals(2, stat0.count());
+    assertThat(stat0.total()).isGreaterThan(0);
+    assertThat(stat0.mean()).isGreaterThan(0);
+    assertThat(stat0.max()).isGreaterThan(0);
 
 
     metric.addErr(start, useContext);
@@ -43,25 +42,25 @@ class TimedMetricTest {
     metric.addErr(start, useContext);
 
     stats = MetricManager.collectMetrics();
-    stat0 = (TimedStatistics) stats.get(0);
+    stat0 = (TimedMetric.Stats) stats.get(0);
 
-    assertEquals("org.test.mytimed.error", stat0.getName());
-    assertEquals(3, stat0.getCount());
-    assertThat(stat0.getTotal()).isGreaterThan(0);
+    assertEquals("org.test.mytimed.error", stat0.name());
+    assertEquals(3, stat0.count());
+    assertThat(stat0.total()).isGreaterThan(0);
 
     metric.add(start, useContext);
     metric.addErr(start, useContext);
     metric.addErr(start, useContext);
 
     stats = MetricManager.collectMetrics();
-    stat0 = (TimedStatistics) stats.get(0);
-    TimedStatistics stat1 = (TimedStatistics) stats.get(1);
+    stat0 = (TimedMetric.Stats) stats.get(0);
+    TimedMetric.Stats stat1 = (TimedMetric.Stats) stats.get(1);
 
-    assertEquals("org.test.mytimed.error", stat0.getName());
-    assertEquals(2, stat0.getCount());
+    assertEquals("org.test.mytimed.error", stat0.name());
+    assertEquals(2, stat0.count());
 
-    assertEquals("org.test.mytimed", stat1.getName());
-    assertEquals(1, stat1.getCount());
+    assertEquals("org.test.mytimed", stat1.name());
+    assertEquals(1, stat1.count());
   }
 
   private void resetStatistics() {
@@ -78,14 +77,14 @@ class TimedMetricTest {
       System.out.println("here");
     });
 
-    final List<MetricStatistics> stats = MetricManager.collectMetrics();
-    TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+    final List<MetricStats> stats = MetricManager.collectMetrics();
+    TimedMetric.Stats stat0 = (TimedMetric.Stats) stats.get(0);
 
-    assertEquals("test.runnable", stat0.getName());
-    assertEquals(1, stat0.getCount());
-    assertThat(stat0.getTotal()).isGreaterThan(0);
-    assertThat(stat0.getMean()).isGreaterThan(0);
-    assertThat(stat0.getMax()).isGreaterThan(0);
+    assertEquals("test.runnable", stat0.name());
+    assertEquals(1, stat0.count());
+    assertThat(stat0.total()).isGreaterThan(0);
+    assertThat(stat0.mean()).isGreaterThan(0);
+    assertThat(stat0.max()).isGreaterThan(0);
   }
 
 
@@ -106,14 +105,14 @@ class TimedMetricTest {
       fail();
     } catch (NullPointerException e) {
 
-      final List<MetricStatistics> stats = MetricManager.collectMetrics();
-      TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+      final List<MetricStats> stats = MetricManager.collectMetrics();
+      TimedMetric.Stats stat0 = (TimedMetric.Stats) stats.get(0);
 
-      assertEquals("test.runnable.error", stat0.getName());
-      assertEquals(1, stat0.getCount());
-      assertThat(stat0.getTotal()).isGreaterThan(0);
-      assertThat(stat0.getMean()).isGreaterThan(0);
-      assertThat(stat0.getMax()).isGreaterThan(0);
+      assertEquals("test.runnable.error", stat0.name());
+      assertEquals(1, stat0.count());
+      assertThat(stat0.total()).isGreaterThan(0);
+      assertThat(stat0.mean()).isGreaterThan(0);
+      assertThat(stat0.max()).isGreaterThan(0);
     }
   }
 
@@ -131,14 +130,14 @@ class TimedMetricTest {
       fail();
     } catch (Exception e) {
 
-      final List<MetricStatistics> stats = MetricManager.collectMetrics();
-      TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+      final List<MetricStats> stats = MetricManager.collectMetrics();
+      TimedMetric.Stats stat0 = (TimedMetric.Stats) stats.get(0);
 
-      assertEquals("test.callable.error", stat0.getName());
-      assertEquals(1, stat0.getCount());
-      assertThat(stat0.getTotal()).isGreaterThan(0);
-      assertThat(stat0.getMean()).isGreaterThan(0);
-      assertThat(stat0.getMax()).isGreaterThan(0);
+      assertEquals("test.callable.error", stat0.name());
+      assertEquals(1, stat0.count());
+      assertThat(stat0.total()).isGreaterThan(0);
+      assertThat(stat0.mean()).isGreaterThan(0);
+      assertThat(stat0.max()).isGreaterThan(0);
     }
   }
 
@@ -150,14 +149,14 @@ class TimedMetricTest {
     String out = metric.time(() -> "foo");
     assertEquals("foo", out);
 
-    final List<MetricStatistics> stats = MetricManager.collectMetrics();
-    TimedStatistics stat0 = (TimedStatistics) stats.get(0);
+    final List<MetricStats> stats = MetricManager.collectMetrics();
+    TimedMetric.Stats stat0 = (TimedMetric.Stats) stats.get(0);
 
-    assertEquals("test.callable", stat0.getName());
-    assertEquals(1, stat0.getCount());
-    assertThat(stat0.getTotal()).isGreaterThan(0);
-    assertThat(stat0.getMean()).isGreaterThan(0);
-    assertThat(stat0.getMax()).isGreaterThan(0);
+    assertEquals("test.callable", stat0.name());
+    assertEquals(1, stat0.count());
+    assertThat(stat0.total()).isGreaterThan(0);
+    assertThat(stat0.mean()).isGreaterThan(0);
+    assertThat(stat0.max()).isGreaterThan(0);
   }
 
 //

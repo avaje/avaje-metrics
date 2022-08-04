@@ -3,7 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.GaugeDoubleMetric;
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.MetricStatisticsVisitor;
+import io.avaje.metrics.MetricStatsVisitor;
 
 
 /**
@@ -38,29 +38,29 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   }
 
   @Override
-  public MetricName getName() {
+  public MetricName name() {
     return name;
   }
 
   @Override
   public String toString() {
-    return name + " " + getValue();
+    return name + " " + value();
   }
 
   /**
    * Return the value.
    */
   @Override
-  public double getValue() {
-    return gauge.getValue();
+  public double value() {
+    return gauge.value();
   }
 
   @Override
-  public void collect(MetricStatisticsVisitor collector) {
+  public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeDoubleStatistic(name, gauge.getValue()));
+      collector.visit(new DGaugeDoubleStatistic(name, gauge.value()));
     } else {
-      double value = gauge.getValue();
+      double value = gauge.value();
       boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
       if (collect) {
         lastReported = value;
@@ -70,7 +70,7 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
   }
 
   @Override
-  public void clear() {
+  public void reset() {
     // No need to do anything - direct to gauge
   }
 
@@ -86,9 +86,9 @@ class DefaultGaugeDoubleMetric implements GaugeDoubleMetric {
     }
 
     @Override
-    public double getValue() {
+    public double value() {
       synchronized (this) {
-        double nowValue = super.getValue();
+        double nowValue = super.value();
         double diffValue = nowValue - runningValue;
         runningValue = nowValue;
         return diffValue;
