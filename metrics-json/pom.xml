@@ -6,7 +6,7 @@
   <parent>
     <artifactId>metrics-parent</artifactId>
     <groupId>io.avaje.metrics</groupId>
-    <version>9.0.0-SNAPSHOT</version>
+    <version>9.0.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>metrics-json</artifactId>
