@@ -1,13 +1,15 @@
 package io.avaje.metrics.report;
 
 import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.MetricSupplier;
-import io.avaje.metrics.RequestTiming;
 import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.MetricSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -44,10 +46,10 @@ public class MetricReportManager {
    */
   protected final MetricReporter reporter;
 
-  /**
-   * Optional reporter for request timings.
-   */
-  protected final RequestTimingReporter requestTimingReporter;
+//  /**
+//   * Optional reporter for request timings.
+//   */
+//  protected final RequestTimingReporter requestTimingReporter;
 
   /**
    * The headerInfo which identifies the application, environment and server etc that these metrics
@@ -66,7 +68,7 @@ public class MetricReportManager {
     this.suppliers = config.getSuppliers();
     this.aggregators = config.getAggregators();
     this.executor = defaultExecutor(config.getExecutor());
-    this.requestTimingReporter = defaultReqReporter(config);
+//    this.requestTimingReporter = defaultReqReporter(config);
     this.reporter = defaultReporter(config);
     this.freqInSeconds = config.getFreqInSeconds();
     this.headerInfo = config.getHeaderInfo();
@@ -75,23 +77,23 @@ public class MetricReportManager {
       // Register the metrics collection task to run periodically
       executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
     }
-    if (config.isRequestTiming()) {
-      int requestFreqInSecs = defaultRequestFreqInSecs(config);
-      executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
-    }
+//    if (config.isRequestTiming()) {
+//      int requestFreqInSecs = defaultRequestFreqInSecs(config);
+//      executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
+//    }
   }
 
-  /**
-   * Helper method that provides a default RequestTimingReporter if not specified.
-   */
-  protected static RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
-    if (config.getRequestTimingReporter() != null) {
-      return config.getRequestTimingReporter();
-    }
-    // just use the default implementation based on config
-    RequestTimingReporter fileReporter = new RequestFileReporter(config);
-    return new BaseRequestTimingReporter(fileReporter, config.getRequestTimingListeners());
-  }
+//  /**
+//   * Helper method that provides a default RequestTimingReporter if not specified.
+//   */
+//  protected static RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
+//    if (config.getRequestTimingReporter() != null) {
+//      return config.getRequestTimingReporter();
+//    }
+//    // just use the default implementation based on config
+//    RequestTimingReporter fileReporter = new RequestFileReporter(config);
+//    return new BaseRequestTimingReporter(fileReporter, config.getRequestTimingListeners());
+//  }
 
   /**
    * Helper method that provides a default RequestTimingReporter if not specified.
@@ -124,31 +126,31 @@ public class MetricReportManager {
     }
   }
 
-  /**
-   * Periodic task that reads the collected request timings and sends them to the
-   * appropriate reporter.
-   */
-  protected class WriteRequestTimings implements Runnable {
-    public void run() {
-      reportRequestTimings();
-    }
-  }
+//  /**
+//   * Periodic task that reads the collected request timings and sends them to the
+//   * appropriate reporter.
+//   */
+//  protected class WriteRequestTimings implements Runnable {
+//    public void run() {
+//      reportRequestTimings();
+//    }
+//  }
 
-  /**
-   * Reads the collected request timings and sends them to the reporter.
-   */
-  private void reportRequestTimings() {
-    try {
-      // read and remove any collected request timings
-      List<RequestTiming> requestTimings = MetricManager.requestTimingManager().collectRequestTimings();
-      if (!requestTimings.isEmpty() && requestTimingReporter != null) {
-        // write the request timings out to file log typically
-        requestTimingReporter.report(requestTimings);
-      }
-    } catch (Exception e) {
-      logger.error("Error reporting request timing", e);
-    }
-  }
+//  /**
+//   * Reads the collected request timings and sends them to the reporter.
+//   */
+//  private void reportRequestTimings() {
+//    try {
+//      // read and remove any collected request timings
+//      List<RequestTiming> requestTimings = MetricManager.requestTimingManager().collectRequestTimings();
+//      if (!requestTimings.isEmpty() && requestTimingReporter != null) {
+//        // write the request timings out to file log typically
+//        requestTimingReporter.report(requestTimings);
+//      }
+//    } catch (Exception e) {
+//      logger.error("Error reporting request timing", e);
+//    }
+//  }
 
   /**
    * Periodic task that collects and reports the metrics.
@@ -179,9 +181,9 @@ public class MetricReportManager {
     if (reporter != null) {
       reporter.cleanup();
     }
-    if (requestTimingReporter != null) {
-      requestTimingReporter.cleanup();
-    }
+    //if (requestTimingReporter != null) {
+    //  requestTimingReporter.cleanup();
+    //}
   }
 
   /**

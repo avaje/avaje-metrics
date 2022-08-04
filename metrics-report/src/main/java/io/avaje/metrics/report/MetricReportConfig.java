@@ -25,9 +25,9 @@ public class MetricReportConfig {
 
   private MetricReporter reporter;
 
-  private boolean requestTiming;
-
-  private RequestTimingReporter requestTimingReporter;
+//  private boolean requestTiming;
+//
+//  private RequestTimingReporter requestTimingReporter;
 
   private int requestTimingThreshold;
 
@@ -35,7 +35,7 @@ public class MetricReportConfig {
 
   private ScheduledExecutorService executor;
 
-  private List<RequestTimingListener> requestTimingListeners = new ArrayList<>();
+//  private List<RequestTimingListener> requestTimingListeners = new ArrayList<>();
 
   private List<MetricReportAggregator> aggregators = new ArrayList<>();
 
@@ -248,52 +248,52 @@ public class MetricReportConfig {
     this.reporter = reporter;
   }
 
-  /**
-   * Return the reporter used to report the request timings.
-   */
-  public RequestTimingReporter getRequestTimingReporter() {
-    return requestTimingReporter;
-  }
-
-  /**
-   * Set the reporter used to report the request timings.
-   */
-  public void setRequestTimingReporter(RequestTimingReporter requestTimingReporter) {
-    this.requestTimingReporter = requestTimingReporter;
-  }
-
-  /**
-   * Add a RequestTimingListener.
-   */
-  public void addRequestTimingListener(RequestTimingListener listener) {
-    this.requestTimingListeners.add(listener);
-  }
-
-  /**
-   * Return the list of RequestTimingListener's.
-   */
-  public List<RequestTimingListener> getRequestTimingListeners() {
-    return requestTimingListeners;
-  }
-
-  /**
-   * Set the list of RequestTimingListener's.
-   */
-  public void setRequestTimingListeners(List<RequestTimingListener> requestTimingListeners) {
-    this.requestTimingListeners = requestTimingListeners;
-  }
-
-  /**
-   * Return true if request timing is on.
-   */
-  public boolean isRequestTiming() {
-    return requestTiming;
-  }
-
-  /**
-   * Set to true to collect and report request timing.
-   */
-  public void setRequestTiming(boolean requestTiming) {
-    this.requestTiming = requestTiming;
-  }
+//  /**
+//   * Return the reporter used to report the request timings.
+//   */
+//  public RequestTimingReporter getRequestTimingReporter() {
+//    return requestTimingReporter;
+//  }
+//
+//  /**
+//   * Set the reporter used to report the request timings.
+//   */
+//  public void setRequestTimingReporter(RequestTimingReporter requestTimingReporter) {
+//    this.requestTimingReporter = requestTimingReporter;
+//  }
+//
+//  /**
+//   * Add a RequestTimingListener.
+//   */
+//  public void addRequestTimingListener(RequestTimingListener listener) {
+//    this.requestTimingListeners.add(listener);
+//  }
+//
+//  /**
+//   * Return the list of RequestTimingListener's.
+//   */
+//  public List<RequestTimingListener> getRequestTimingListeners() {
+//    return requestTimingListeners;
+//  }
+//
+//  /**
+//   * Set the list of RequestTimingListener's.
+//   */
+//  public void setRequestTimingListeners(List<RequestTimingListener> requestTimingListeners) {
+//    this.requestTimingListeners = requestTimingListeners;
+//  }
+//
+//  /**
+//   * Return true if request timing is on.
+//   */
+//  public boolean isRequestTiming() {
+//    return requestTiming;
+//  }
+//
+//  /**
+//   * Set to true to collect and report request timing.
+//   */
+//  public void setRequestTiming(boolean requestTiming) {
+//    this.requestTiming = requestTiming;
+//  }
 }

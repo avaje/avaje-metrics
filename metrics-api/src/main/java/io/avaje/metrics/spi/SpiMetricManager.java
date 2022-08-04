@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * The SPI for the underlying implementation that is plugged in via service locator.
  */
-public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
+public interface SpiMetricManager extends JvmMetrics {//}, RequestTimingManager {
 
   /**
    * Create a MetricName based on the class and name.
@@ -71,10 +71,10 @@ public interface SpiMetricManager extends JvmMetrics, RequestTimingManager {
    */
   GaugeLongMetric register(MetricName name, GaugeLong gauge);
 
-  /**
-   * When a request completes it is reported to the manager.
-   */
-  void reportTiming(RequestTiming requestTiming);
+//  /**
+//   * When a request completes it is reported to the manager.
+//   */
+//  void reportTiming(RequestTiming requestTiming);
 
   /**
    * Add a metric supplier.

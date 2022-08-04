@@ -12,7 +12,7 @@ public class NoopTimedMetric implements TimedMetric {
 
   private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
 
-  private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
+  //private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
 
   private final MetricName metricName;
 
@@ -45,20 +45,20 @@ public class NoopTimedMetric implements TimedMetric {
     // do nothing
   }
 
-  @Override
-  public void setRequestTiming(int collectionCount) {
-    // do nothing
-  }
-
-  @Override
-  public int getRequestTiming() {
-    return 0;
-  }
-
-  @Override
-  public void decrementRequestTiming() {
-    // do nothing
-  }
+//  @Override
+//  public void setRequestTiming(int collectionCount) {
+//    // do nothing
+//  }
+//
+//  @Override
+//  public int getRequestTiming() {
+//    return 0;
+//  }
+//
+//  @Override
+//  public void decrementRequestTiming() {
+//    // do nothing
+//  }
 
   @Override
   public void time(Runnable event) {
@@ -85,10 +85,10 @@ public class NoopTimedMetric implements TimedMetric {
     // do nothing
   }
 
-  @Override
-  public boolean isRequestTiming() {
-    return false;
-  }
+//  @Override
+//  public boolean isRequestTiming() {
+//    return false;
+//  }
 
   @Override
   public void add(long startNanos) {
@@ -110,8 +110,8 @@ public class NoopTimedMetric implements TimedMetric {
 
   }
 
-  @Override
-  public Map<String, String> attributes() {
-    return null;
-  }
+//  @Override
+//  public Map<String, String> attributes() {
+//    return null;
+//  }
 }

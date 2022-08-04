@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 /**
  * Default implementation of BucketTimedMetric.
  */
-final class DBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
+final class DBucketTimedMetric implements TimedMetric {
 
   private final MetricName metricName;
   private final int[] bucketRanges;
@@ -106,9 +106,9 @@ final class DBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
   @Override
   public void add(long startNanos, boolean activeThreadContext) {
     addEventSince(true, startNanos);
-    if (activeThreadContext) {
-      NestedContext.pop();
-    }
+//    if (activeThreadContext) {
+//      NestedContext.pop();
+//    }
   }
 
   @Override
@@ -119,9 +119,9 @@ final class DBucketTimedMetric extends BaseTimedMetric implements TimedMetric {
   @Override
   public void addErr(long startNanos, boolean activeThreadContext) {
     addEventSince(false, startNanos);
-    if (activeThreadContext) {
-      NestedContext.pop();
-    }
+//    if (activeThreadContext) {
+//      NestedContext.pop();
+//    }
   }
 
   @Override

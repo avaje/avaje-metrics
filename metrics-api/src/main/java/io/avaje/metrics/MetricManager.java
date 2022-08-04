@@ -10,9 +10,6 @@ import java.util.ServiceLoader;
  * <p>
  * Provides methods to allow agents to go through the registered metrics and gather/report the
  * statistics.
- * <p>
- * This uses a service locator to initialise a underlying PluginMetricManager instance. A default
- * implementation of PluginMetricManager is provided by <em>metric</em>.
  */
 public class MetricManager {
 
@@ -37,12 +34,12 @@ public class MetricManager {
     return mgr.collectMetrics();
   }
 
-  /**
-   * When a request completes it is reported to the manager.
-   */
-  public static void reportTiming(RequestTiming requestTiming) {
-    mgr.reportTiming(requestTiming);
-  }
+//  /**
+//   * When a request completes it is reported to the manager.
+//   */
+//  public static void reportTiming(RequestTiming requestTiming) {
+//    mgr.reportTiming(requestTiming);
+//  }
 
   /**
    * Add a metric supplier to the manager. These metrics are then included in the reporting.
@@ -236,11 +233,11 @@ public class MetricManager {
     return mgr;
   }
 
-  /**
-   * Return the API for managing request timing.
-   */
-  public static RequestTimingManager requestTimingManager() {
-    return mgr;
-  }
+//  /**
+//   * Return the API for managing request timing.
+//   */
+//  public static RequestTimingManager requestTimingManager() {
+//    return mgr;
+//  }
 
 }

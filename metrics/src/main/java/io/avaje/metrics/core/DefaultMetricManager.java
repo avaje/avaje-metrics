@@ -1,13 +1,14 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
-import io.avaje.metrics.core.spi.ExternalRequestIdAdapter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Default implementation of the PluginMetricManager.
@@ -17,7 +18,7 @@ public class DefaultMetricManager implements SpiMetricManager {
   private static final String METRICS_MDC_REQUEST_ID = "metrics.mdc.requestId";
   private static final String JVM = "jvm.";
 
-  private final NameComp sortByName = new NameComp();
+//  private final NameComp sortByName = new NameComp();
   private final Object monitor = new Object();
   private boolean withDetails;
   private boolean reportChangesOnly;
@@ -30,13 +31,13 @@ public class DefaultMetricManager implements SpiMetricManager {
   private final SpiMetricBuilder.Factory<ValueMetric> valueMetricFactory;
 
   private final ConcurrentHashMap<String, MetricNameCache> nameCache = new ConcurrentHashMap<>();
-  private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
+//  private final ConcurrentLinkedQueue<RequestTiming> requestTimings = new ConcurrentLinkedQueue<>();
   private final List<MetricSupplier> suppliers = new ArrayList<>();
 
-  /**
-   * Adapter that can obtain a request id to associate with request timings.
-   */
-  protected final ExternalRequestIdAdapter externalRequestIdAdapter;
+//  /**
+//   * Adapter that can obtain a request id to associate with request timings.
+//   */
+//  protected final ExternalRequestIdAdapter externalRequestIdAdapter;
 
   public DefaultMetricManager() {
     SpiMetricBuilder builder = initBuilder();
@@ -44,19 +45,19 @@ public class DefaultMetricManager implements SpiMetricManager {
     this.timedMetricFactory = builder.timed();
     this.valueMetricFactory = builder.value();
     this.counterMetricFactory = builder.counter();
-    this.externalRequestIdAdapter = initExternalRequestIdAdapter(isDisableCollection());
+//    this.externalRequestIdAdapter = initExternalRequestIdAdapter(isDisableCollection());
   }
 
-  private static ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
-    if (disable) {
-      return null;
-    }
-    String mdcKey = System.getProperty(METRICS_MDC_REQUEST_ID);
-    if (mdcKey != null) {
-      return new MdcExternalRequestIdAdapter(mdcKey);
-    }
-    return null;
-  }
+//  private static ExternalRequestIdAdapter initExternalRequestIdAdapter(boolean disable) {
+//    if (disable) {
+//      return null;
+//    }
+//    String mdcKey = System.getProperty(METRICS_MDC_REQUEST_ID);
+//    if (mdcKey != null) {
+//      return new MdcExternalRequestIdAdapter(mdcKey);
+//    }
+//    return null;
+//  }
 
   static SpiMetricBuilder initBuilder() {
     if (isDisableCollection()) {
@@ -74,16 +75,16 @@ public class DefaultMetricManager implements SpiMetricManager {
     return "true".equalsIgnoreCase(disable);
   }
 
-  @Override
-  public void reportTiming(RequestTiming requestTiming) {
-    if (externalRequestIdAdapter != null) {
-      String requestId = externalRequestIdAdapter.getExternalRequestId();
-      if (requestId != null) {
-        requestTiming.setExternalRequestId(requestId);
-      }
-    }
-    requestTimings.add(requestTiming);
-  }
+//  @Override
+//  public void reportTiming(RequestTiming requestTiming) {
+//    if (externalRequestIdAdapter != null) {
+//      String requestId = externalRequestIdAdapter.getExternalRequestId();
+//      if (requestId != null) {
+//        requestTiming.setExternalRequestId(requestId);
+//      }
+//    }
+//    requestTimings.add(requestTiming);
+//  }
 
   @Override
   public JvmMetrics withReportChangesOnly() {
@@ -273,122 +274,122 @@ public class DefaultMetricManager implements SpiMetricManager {
     return metricsCache.get(name.simpleName());
   }
 
-  @Override
-  public boolean setRequestTimingCollection(String fullMetricName, int collectionCount) {
-    return setRequestTimingCollection(MetricName.of(fullMetricName), collectionCount);
-  }
-
-  @Override
-  public boolean setRequestTimingCollection(Class<?> cls, String name, int collectionCount) {
-    return setRequestTimingCollection(MetricName.of(cls, name), collectionCount);
-  }
-
-  /**
-   * Set request timing collection on a specific timed metric.
-   * Return false if the metric was not found (and timing collection was not set).
-   */
-  protected boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
-    Metric metric = getMetricWithoutCreate(metricName);
-    if (metric instanceof TimedMetric) {
-      TimedMetric timed = (TimedMetric) metric;
-      timed.setRequestTiming(collectionCount);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Set request timing collection on metrics that match the nameMatch expression.
-   *
-   * @param nameMatch       The expression used to match timing metrics
-   * @param collectionCount The number of requests to collect
-   * @return The timing metrics that had the request timing collection set
-   */
-  @Override
-  public List<TimingMetricInfo> setRequestTimingCollectionUsingMatch(String nameMatch, int collectionCount) {
-    if (nameMatch == null || nameMatch.trim().length() == 0) {
-      // not turning on collection globally for empty
-      return Collections.emptyList();
-    }
-
-    LikeMatcher like = new LikeMatcher(nameMatch);
-    List<TimingMetricInfo> changes = new ArrayList<>();
-
-    for (Metric metric : metricsCache.values()) {
-      if (metric instanceof TimedMetric) {
-        TimedMetric timed = (TimedMetric) metric;
-        if (like.matches(timed.name().simpleName())) {
-          timed.setRequestTiming(collectionCount);
-          changes.add(new TimingMetricInfo(timed.name().simpleName(), collectionCount));
-        }
-      }
-    }
-    // ensure we return them in a predicable order
-    Collections.sort(changes, sortByName);
-    return changes;
-  }
-
-  /**
-   * Return currently active timing metrics that match the name expression.
-   */
-  @Override
-  public List<TimingMetricInfo> getRequestTimingMetrics(String nameMatchExpression) {
-    return getRequestTimingMetrics(true, nameMatchExpression);
-  }
-
-  /**
-   * Return the list of all timing metrics that match the name expression.
-   */
-  @Override
-  public List<TimingMetricInfo> getAllTimingMetrics(String nameMatchExpression) {
-    return getRequestTimingMetrics(false, nameMatchExpression);
-  }
-
-  /**
-   * Return the list of timing metrics that we are interested in.
-   *
-   * @param activeOnly          true if we only want timing metrics that are actively collecting request timings.
-   * @param nameMatchExpression the expression used to match/filter metric names. Null or empty means match all.
-   */
-  protected List<TimingMetricInfo> getRequestTimingMetrics(boolean activeOnly, String nameMatchExpression) {
-    synchronized (monitor) {
-      List<TimingMetricInfo> list = new ArrayList<>();
-      LikeMatcher like = new LikeMatcher(nameMatchExpression);
-
-      for (Metric metric : metricsCache.values()) {
-        if (metric instanceof TimedMetric) {
-          TimedMetric timed = (TimedMetric) metric;
-          if (!activeOnly || timed.getRequestTiming() >= 1) {
-            // actively collection or doing the all search
-            if (like.matches(timed.name().simpleName())) {
-              // metric name matches our expression
-              list.add(new TimingMetricInfo(timed.name().simpleName(), timed.getRequestTiming()));
-            }
-          }
-        }
-      }
-      // ensure we return them in a predicable order
-      Collections.sort(list, sortByName);
-      return list;
-    }
-  }
+//  @Override
+//  public boolean setRequestTimingCollection(String fullMetricName, int collectionCount) {
+//    return setRequestTimingCollection(MetricName.of(fullMetricName), collectionCount);
+//  }
+//
+//  @Override
+//  public boolean setRequestTimingCollection(Class<?> cls, String name, int collectionCount) {
+//    return setRequestTimingCollection(MetricName.of(cls, name), collectionCount);
+//  }
+//
+//  /**
+//   * Set request timing collection on a specific timed metric.
+//   * Return false if the metric was not found (and timing collection was not set).
+//   */
+//  protected boolean setRequestTimingCollection(MetricName metricName, int collectionCount) {
+//    Metric metric = getMetricWithoutCreate(metricName);
+//    if (metric instanceof TimedMetric) {
+//      TimedMetric timed = (TimedMetric) metric;
+//      timed.setRequestTiming(collectionCount);
+//      return true;
+//    }
+//    return false;
+//  }
+//
+//  /**
+//   * Set request timing collection on metrics that match the nameMatch expression.
+//   *
+//   * @param nameMatch       The expression used to match timing metrics
+//   * @param collectionCount The number of requests to collect
+//   * @return The timing metrics that had the request timing collection set
+//   */
+//  @Override
+//  public List<TimingMetricInfo> setRequestTimingCollectionUsingMatch(String nameMatch, int collectionCount) {
+//    if (nameMatch == null || nameMatch.trim().length() == 0) {
+//      // not turning on collection globally for empty
+//      return Collections.emptyList();
+//    }
+//
+//    LikeMatcher like = new LikeMatcher(nameMatch);
+//    List<TimingMetricInfo> changes = new ArrayList<>();
+//
+//    for (Metric metric : metricsCache.values()) {
+//      if (metric instanceof TimedMetric) {
+//        TimedMetric timed = (TimedMetric) metric;
+//        if (like.matches(timed.name().simpleName())) {
+//          timed.setRequestTiming(collectionCount);
+//          changes.add(new TimingMetricInfo(timed.name().simpleName(), collectionCount));
+//        }
+//      }
+//    }
+//    // ensure we return them in a predicable order
+//    Collections.sort(changes, sortByName);
+//    return changes;
+//  }
+//
+//  /**
+//   * Return currently active timing metrics that match the name expression.
+//   */
+//  @Override
+//  public List<TimingMetricInfo> getRequestTimingMetrics(String nameMatchExpression) {
+//    return getRequestTimingMetrics(true, nameMatchExpression);
+//  }
+//
+//  /**
+//   * Return the list of all timing metrics that match the name expression.
+//   */
+//  @Override
+//  public List<TimingMetricInfo> getAllTimingMetrics(String nameMatchExpression) {
+//    return getRequestTimingMetrics(false, nameMatchExpression);
+//  }
+//
+//  /**
+//   * Return the list of timing metrics that we are interested in.
+//   *
+//   * @param activeOnly          true if we only want timing metrics that are actively collecting request timings.
+//   * @param nameMatchExpression the expression used to match/filter metric names. Null or empty means match all.
+//   */
+//  protected List<TimingMetricInfo> getRequestTimingMetrics(boolean activeOnly, String nameMatchExpression) {
+//    synchronized (monitor) {
+//      List<TimingMetricInfo> list = new ArrayList<>();
+//      LikeMatcher like = new LikeMatcher(nameMatchExpression);
+//
+//      for (Metric metric : metricsCache.values()) {
+//        if (metric instanceof TimedMetric) {
+//          TimedMetric timed = (TimedMetric) metric;
+//          if (!activeOnly || timed.getRequestTiming() >= 1) {
+//            // actively collection or doing the all search
+//            if (like.matches(timed.name().simpleName())) {
+//              // metric name matches our expression
+//              list.add(new TimingMetricInfo(timed.name().simpleName(), timed.getRequestTiming()));
+//            }
+//          }
+//        }
+//      }
+//      // ensure we return them in a predicable order
+//      Collections.sort(list, sortByName);
+//      return list;
+//    }
+//  }
 
 //  @Override
 //  public Collection<Metric> getJvmMetrics() {
 //    return Collections.unmodifiableList(coreJvmMetrics);
 //  }
 
-  /**
-   * Return the request timings that have been collected since the last collection.
-   */
-  public List<RequestTiming> collectRequestTimings() {
-    List<RequestTiming> list = new ArrayList<>();
-    RequestTiming req;
-    while ((req = requestTimings.poll()) != null) {
-      list.add(req);
-    }
-    return list;
-  }
+//  /**
+//   * Return the request timings that have been collected since the last collection.
+//   */
+//  public List<RequestTiming> collectRequestTimings() {
+//    List<RequestTiming> list = new ArrayList<>();
+//    RequestTiming req;
+//    while ((req = requestTimings.poll()) != null) {
+//      list.add(req);
+//    }
+//    return list;
+//  }
 
   private void collectJvmMetrics(DStatsCollector collector) {
     for (Metric metric : coreJvmMetrics) {

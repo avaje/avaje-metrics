@@ -93,28 +93,28 @@ class NoopBucketTimedMetric implements TimedMetric {
     // do nothing
   }
 
-  @Override
-  public void setRequestTiming(int collectionCount) {
-    // do nothing
-  }
-
-  @Override
-  public int getRequestTiming() {
-    return 0;
-  }
-
-  @Override
-  public void decrementRequestTiming() {
-
-  }
-
-  @Override
-  public boolean isRequestTiming() {
-    return false;
-  }
-
-  @Override
-  public Map<String, String> attributes() {
-    return null;
-  }
+//  @Override
+//  public void setRequestTiming(int collectionCount) {
+//    // do nothing
+//  }
+//
+//  @Override
+//  public int getRequestTiming() {
+//    return 0;
+//  }
+//
+//  @Override
+//  public void decrementRequestTiming() {
+//
+//  }
+//
+//  @Override
+//  public boolean isRequestTiming() {
+//    return false;
+//  }
+//
+//  @Override
+//  public Map<String, String> attributes() {
+//    return null;
+//  }
 }

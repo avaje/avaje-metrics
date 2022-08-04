@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * collecting time duration and provides separate statistics for success and error completion.
  * </p>
  */
-final class DTimedMetric extends BaseTimedMetric implements TimedMetric {
+final class DTimedMetric implements TimedMetric {
 
   private static final String noBuckets = "";
 
@@ -147,9 +147,9 @@ final class DTimedMetric extends BaseTimedMetric implements TimedMetric {
   @Override
   public void add(long startNanos, boolean activeThreadContext) {
     successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
-    if (activeThreadContext) {
-      NestedContext.pop();
-    }
+//    if (activeThreadContext) {
+//      NestedContext.pop();
+//    }
   }
 
   @Override
@@ -160,8 +160,8 @@ final class DTimedMetric extends BaseTimedMetric implements TimedMetric {
   @Override
   public void addErr(long startNanos, boolean activeThreadContext) {
     errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
-    if (activeThreadContext) {
-      NestedContext.pop();
-    }
+//    if (activeThreadContext) {
+//      NestedContext.pop();
+//    }
   }
 }

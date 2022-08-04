@@ -18,7 +18,7 @@ class TimedMetricTest {
 
     TimedMetric metric = MetricManager.timed("org.test.mytimed");
 
-    boolean useContext = metric.isRequestTiming();
+    boolean useContext = false;//metric.isRequestTiming();
     long start = System.nanoTime();
 
     assertEquals("org.test.mytimed", metric.name().simpleName());
