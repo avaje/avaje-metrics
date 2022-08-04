@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.avaje</groupId>
@@ -9,7 +10,7 @@
 
   <groupId>io.avaje.metrics</groupId>
   <artifactId>metrics-parent</artifactId>
-  <version>9.0-SNAPSHOT</version>
+  <version>9.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <url>https://avaje-metrics.github.io</url>
@@ -25,28 +26,26 @@
 
   <modules>
     <module>metrics</module>
-    <module>metrics-noop</module>
-    <module>metrics-json</module>
-    <module>metrics-logback</module>
-    <module>metrics-log4j</module>
     <module>metrics-api</module>
-      <module>metrics-report</module>
   </modules>
 
-
-<!--  <profiles>-->
-<!--    <profile>-->
-<!--      <id>central</id>-->
-<!--    </profile>-->
-<!--    <profile>-->
-<!--      <id>default</id>-->
-<!--      <activation>-->
-<!--        <activeByDefault>true</activeByDefault>-->
-<!--      </activation>-->
-<!--      <modules>-->
-<!--      &lt;!&ndash; <module>examples</module> &ndash;&gt;-->
-<!--      </modules>-->
-<!--    </profile>-->
-<!--  </profiles>-->
+  <profiles>
+    <profile>
+      <id>central</id>
+    </profile>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>metrics-noop</module>
+        <module>metrics-json</module>
+        <module>metrics-logback</module>
+        <module>metrics-log4j</module>
+        <module>metrics-report</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
 
