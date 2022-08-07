@@ -1,11 +1,9 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.MetricName;
+import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.MetricStatsVisitor;
 
-import java.util.Map;
 import java.util.function.Supplier;
 
 class NoopBucketTimedMetric implements TimedMetric {
@@ -16,15 +14,15 @@ class NoopBucketTimedMetric implements TimedMetric {
 
   private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
 
-  private final MetricName name;
+  private final String name;
 
 
-  NoopBucketTimedMetric(MetricName name) {
+  NoopBucketTimedMetric(String name) {
     this.name = name;
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return name;
   }
 

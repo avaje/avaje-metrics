@@ -15,9 +15,8 @@ class ValueMetricTest {
 
   @Test
   void test() {
-    ValueMetric metric = MetricManager.value(new DMetricName("org.test.mycounter"));
-
-    assertEquals("org.test.mycounter", metric.name().simpleName());
+    ValueMetric metric = MetricManager.value("org.test.mycounter");
+    assertEquals("org.test.mycounter", metric.name());
 
     metric.reset();
     assertThat(collect(metric)).isEmpty();
@@ -40,6 +39,6 @@ class ValueMetricTest {
   private List<MetricStats> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector();
     metric.collect(collector);
-    return collector.getList();
+    return collector.list();
   }
 }

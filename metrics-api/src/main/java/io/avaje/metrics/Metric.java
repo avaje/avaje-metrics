@@ -14,7 +14,7 @@ public interface Metric {
   /**
    * Return the name of the metric.
    */
-  MetricName name();
+  String name();
 
   /**
    * Typically this is only called by the MetricManager and tells the metric to collect its underlying statistics for

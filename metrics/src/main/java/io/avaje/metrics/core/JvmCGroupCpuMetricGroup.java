@@ -3,7 +3,6 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
 
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -55,14 +54,14 @@ final class JvmCGroupCpuMetricGroup {
     long quotaPeriod = period.single();
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return new DGaugeLongMetric(name("jvm.cgroup.cpu.limit"), new FixedGauge(limit));
+      return new DGaugeLongMetric("jvm.cgroup.cpu.limit", new FixedGauge(limit));
     }
     return null;
   }
 
   GaugeLongMetric createCGroupCpuRequests(FileLines cpuShares) {
     final long requests = convertSharesToRequests(cpuShares.single());
-    return new DGaugeLongMetric(name("jvm.cgroup.cpu.requests"), new FixedGauge(requests));
+    return new DGaugeLongMetric("jvm.cgroup.cpu.requests", new FixedGauge(requests));
   }
 
   long convertQuotaToLimits(long cpuQuotaVal, long quotaPeriod) {
@@ -84,27 +83,23 @@ final class JvmCGroupCpuMetricGroup {
   }
 
   private GaugeLongMetric createCGroupCpuUsage(FileLines cpu) {
-    return incrementing(name("jvm.cgroup.cpu.usageMicros"), new CpuUsageMicros(cpu));
+    return incrementing("jvm.cgroup.cpu.usageMicros", new CpuUsageMicros(cpu));
   }
 
   private void createCGroupCpuThrottle(FileLines cpuStat, boolean reportChangesOnly) {
     CpuStatsSource source = new CpuStatsSource(cpuStat);
-    metrics.add(gauge(name("jvm.cgroup.cpu.throttleMicros"), source::getThrottleMicros, reportChangesOnly));
-    metrics.add(gauge(name("jvm.cgroup.cpu.numPeriod"), source::getNumPeriod, reportChangesOnly));
-    metrics.add(gauge(name("jvm.cgroup.cpu.numThrottle"), source::getNumThrottle, reportChangesOnly));
-    metrics.add(gauge(name("jvm.cgroup.cpu.pctThrottle"), source::getPctThrottle, reportChangesOnly));
+    metrics.add(gauge("jvm.cgroup.cpu.throttleMicros", source::getThrottleMicros, reportChangesOnly));
+    metrics.add(gauge("jvm.cgroup.cpu.numPeriod", source::getNumPeriod, reportChangesOnly));
+    metrics.add(gauge("jvm.cgroup.cpu.numThrottle", source::getNumThrottle, reportChangesOnly));
+    metrics.add(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
   }
 
-  private GaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
+  private GaugeLongMetric incrementing(String name, GaugeLong gauge) {
     return DGaugeLongMetric.incrementing(name, gauge);
   }
 
-  private GaugeLongMetric gauge(MetricName name, GaugeLong gauge, boolean reportChangesOnly) {
+  private GaugeLongMetric gauge(String name, GaugeLong gauge, boolean reportChangesOnly) {
     return new DGaugeLongMetric(name, gauge, reportChangesOnly);
-  }
-
-  private MetricName name(String s) {
-    return new DMetricName(s);
   }
 
   static final class CpuUsageMicros implements GaugeLong {

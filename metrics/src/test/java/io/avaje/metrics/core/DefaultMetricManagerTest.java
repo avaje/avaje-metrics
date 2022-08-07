@@ -1,14 +1,10 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.TimingMetricInfo;
 import orange.truck.Customer;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class DefaultMetricManagerTest {
 
@@ -49,9 +45,8 @@ class DefaultMetricManagerTest {
 
     DefaultMetricManager mgr = new DefaultMetricManager();
 
-    TimedMetric m0 = mgr.timed(MetricName.of(Customer.class, "doSomething"));
-
-    TimedMetric m0b = mgr.timed(MetricName.of("orange.truck.Customer.doSomething"));
+    TimedMetric m0 = mgr.timed(Customer.class.getName() + ".doSomething");
+    TimedMetric m0b = mgr.timed("orange.truck.Customer.doSomething");
 
     assertSame(m0, m0b);
     //assertEquals("na.Customer.doSomething", m0.getName().getSimpleName());

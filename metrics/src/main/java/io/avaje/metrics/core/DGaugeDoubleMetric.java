@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.GaugeDoubleMetric;
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.MetricStatsVisitor;
 
 
@@ -11,7 +10,7 @@ import io.avaje.metrics.MetricStatsVisitor;
  */
 class DGaugeDoubleMetric implements GaugeDoubleMetric {
 
-  protected final MetricName name;
+  protected final String name;
   protected final GaugeDouble gauge;
   protected final boolean reportChangesOnly;
   private double lastReported;
@@ -22,22 +21,22 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
    * This will determine the delta increase in underlying value and return that
    * for the value.
    */
-  static DGaugeDoubleMetric incrementing(MetricName name, GaugeDouble gauge) {
+  static DGaugeDoubleMetric incrementing(String name, GaugeDouble gauge) {
     return new Incrementing(name, gauge);
   }
 
-  DGaugeDoubleMetric(MetricName name, GaugeDouble gauge) {
+  DGaugeDoubleMetric(String name, GaugeDouble gauge) {
     this(name, gauge, true);
   }
 
-  DGaugeDoubleMetric(MetricName name, GaugeDouble gauge, boolean reportChangesOnly) {
+  DGaugeDoubleMetric(String name, GaugeDouble gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return name;
   }
 
@@ -80,7 +79,7 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
 
     private double runningValue;
 
-    Incrementing(MetricName name, GaugeDouble gauge) {
+    Incrementing(String name, GaugeDouble gauge) {
       super(name, gauge);
     }
 

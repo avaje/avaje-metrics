@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -25,13 +24,12 @@ final class JvmThreadMetricGroup {
     }
 
     List<Metric> createMetrics(boolean reportChangesOnly, boolean withDetails) {
-      MetricName baseName = new DMetricName("jvm.threads");
       List<Metric> metrics = new ArrayList<>(3);
 
-      metrics.add(new DGaugeLongMetric(baseName.append("current"), new Count(threadMXBean), reportChangesOnly));
+      metrics.add(new DGaugeLongMetric("jvm.threads.current", new Count(threadMXBean), reportChangesOnly));
       if (withDetails) {
-        metrics.add(new DGaugeLongMetric(baseName.append("peak"), new Peak(threadMXBean), reportChangesOnly));
-        metrics.add(new DGaugeLongMetric(baseName.append("daemon"), new Daemon(threadMXBean), reportChangesOnly));
+        metrics.add(new DGaugeLongMetric("jvm.threads.peak", new Peak(threadMXBean), reportChangesOnly));
+        metrics.add(new DGaugeLongMetric("jvm.threads.daemon", new Daemon(threadMXBean), reportChangesOnly));
       }
       return metrics;
     }

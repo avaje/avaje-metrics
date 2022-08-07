@@ -1,8 +1,9 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.TimedMetric;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,17 +17,18 @@ class TimedMetricTest {
   @Test
   void add() {
 
-    TimedMetric metric = MetricManager.timed("org.test.mytimed");
+    MetricRegistry registry = MetricManager.createRegistry();
+    TimedMetric metric = registry.timed("org.test.mytimed");
 
     boolean useContext = false;//metric.isRequestTiming();
     long start = System.nanoTime();
 
-    assertEquals("org.test.mytimed", metric.name().simpleName());
+    assertEquals("org.test.mytimed", metric.name());
 
     metric.add(start, useContext);
     metric.addEventSince(true, start);
 
-    List<MetricStats> stats = MetricManager.collectMetrics();
+    List<MetricStats> stats = registry.collectMetrics();
 
     TimedMetric.Stats stat0 = (TimedMetric.Stats) stats.get(0);
 
@@ -41,7 +43,7 @@ class TimedMetricTest {
     metric.addEventSince(false, start);
     metric.addErr(start, useContext);
 
-    stats = MetricManager.collectMetrics();
+    stats = registry.collectMetrics();
     stat0 = (TimedMetric.Stats) stats.get(0);
 
     assertEquals("org.test.mytimed.error", stat0.name());
@@ -52,7 +54,7 @@ class TimedMetricTest {
     metric.addErr(start, useContext);
     metric.addErr(start, useContext);
 
-    stats = MetricManager.collectMetrics();
+    stats = registry.collectMetrics();
     stat0 = (TimedMetric.Stats) stats.get(0);
     TimedMetric.Stats stat1 = (TimedMetric.Stats) stats.get(1);
 

@@ -1,9 +1,8 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
+import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.function.Supplier;
 
@@ -12,12 +11,12 @@ import java.util.function.Supplier;
  */
 final class DBucketTimedMetric implements TimedMetric {
 
-  private final MetricName metricName;
+  private final String metricName;
   private final int[] bucketRanges;
   private final TimedMetric[] buckets;
   private final int lastBucketIndex;
 
-  DBucketTimedMetric(MetricName metricName, int[] bucketRanges, TimedMetric[] buckets) {
+  DBucketTimedMetric(String metricName, int[] bucketRanges, TimedMetric[] buckets) {
     this.metricName = metricName;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
@@ -26,7 +25,7 @@ final class DBucketTimedMetric implements TimedMetric {
 
   @Override
   public String toString() {
-    return metricName.toString();
+    return metricName;
   }
 
   @Override
@@ -125,7 +124,7 @@ final class DBucketTimedMetric implements TimedMetric {
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return metricName;
   }
 

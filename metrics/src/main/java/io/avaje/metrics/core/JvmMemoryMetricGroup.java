@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -55,29 +54,27 @@ final class JvmMemoryMetricGroup {
    * Create the Heap Memory based GaugeMetricGroup.
    */
   static List<Metric> createHeapGroup(boolean reportChangesOnly) {
-    MetricName heapName = new DMetricName("jvm.memory.heap");
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    return createGroup(heapName, source, reportChangesOnly);
+    return createGroup("jvm.memory.heap", source, reportChangesOnly);
   }
 
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
   static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
-    MetricName nonHeapName = new DMetricName("jvm.memory.nonheap");
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    return createGroup(nonHeapName, source, reportChangesOnly);
+    return createGroup("jvm.memory.nonheap", source, reportChangesOnly);
   }
 
-  private static List<Metric> createGroup(MetricName baseName, MemoryUsageSource source, boolean reportChangesOnly) {
+  private static List<Metric> createGroup(String baseName, MemoryUsageSource source, boolean reportChangesOnly) {
     return new MemUsageGauages(source, baseName).createMetric(reportChangesOnly);
   }
 
   static final class MemUsageGauages {
     private final MemoryUsageSource source;
-    private final MetricName baseName;
+    private final String baseName;
 
-    private MemUsageGauages(MemoryUsageSource source, MetricName baseName) {
+    private MemUsageGauages(MemoryUsageSource source, String baseName) {
       this.source = source;
       this.baseName = baseName;
     }
@@ -98,8 +95,8 @@ final class JvmMemoryMetricGroup {
       return metrics;
     }
 
-    private MetricName name(String name) {
-      return baseName.append(name);
+    private String name(String name) {
+      return baseName + "." + name;
     }
 
     private abstract static class Base {

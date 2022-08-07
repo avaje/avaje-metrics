@@ -1,21 +1,20 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.MetricName;
-import io.avaje.metrics.ValueMetric;
 import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.ValueMetric;
 
 class NoopValueMetric implements ValueMetric {
 
   private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
 
-  private final MetricName metricName;
+  private final String metricName;
 
-  NoopValueMetric(MetricName metricName) {
+  NoopValueMetric(String metricName) {
     this.metricName = metricName;
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return metricName;
   }
 

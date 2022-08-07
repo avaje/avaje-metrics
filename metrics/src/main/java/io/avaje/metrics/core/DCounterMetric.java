@@ -1,7 +1,6 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.MetricStatsVisitor;
 
 
@@ -14,7 +13,7 @@ import io.avaje.metrics.MetricStatsVisitor;
  */
 final class DCounterMetric implements CounterMetric {
 
-  private final MetricName name;
+  private final String name;
   private final Counter counter;
 
   /**
@@ -24,7 +23,7 @@ final class DCounterMetric implements CounterMetric {
    * manor - typically events per hour, minute or second.
    * </p>
    */
-  DCounterMetric(MetricName name) {
+  DCounterMetric(String name) {
     this.name = name;
     this.counter = new Counter(name);
   }
@@ -54,7 +53,7 @@ final class DCounterMetric implements CounterMetric {
    * Return the name of the metric.
    */
   @Override
-  public MetricName name() {
+  public String name() {
     return name;
   }
 
@@ -79,13 +78,13 @@ final class DCounterMetric implements CounterMetric {
    */
   static final class DStats implements Stats {
 
-    final MetricName name;
+    final String name;
     final long count;
 
     /**
      * Construct for Counter which doesn't collect time or high water mark.
      */
-    DStats(MetricName name, long count) {
+    DStats(String name, long count) {
       this.name = name;
       this.count = count;
     }
@@ -102,7 +101,7 @@ final class DCounterMetric implements CounterMetric {
 
     @Override
     public String name() {
-      return name.simpleName();
+      return name;
     }
 
     /**

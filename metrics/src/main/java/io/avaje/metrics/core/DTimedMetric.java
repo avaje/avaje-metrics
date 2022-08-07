@@ -1,9 +1,8 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
+import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -19,23 +18,23 @@ final class DTimedMetric implements TimedMetric {
 
   private static final String noBuckets = "";
 
-  private final MetricName name;
+  private final String name;
   private final String bucketRange;
   private final ValueCounter successCounter;
   private final ValueCounter errorCounter;
 
-  DTimedMetric(MetricName name) {
+  DTimedMetric(String name) {
     this.name = name;
     this.bucketRange = noBuckets;
     this.successCounter = new ValueCounter(name);
-    this.errorCounter = new ValueCounter(name.append("error"));
+    this.errorCounter = new ValueCounter(name + ".error");
   }
 
-  DTimedMetric(MetricName name, String bucketRange) {
+  DTimedMetric(String name, String bucketRange) {
     this.name = name;
     this.bucketRange = bucketRange;
     this.successCounter = new ValueCounter(name, bucketRange);
-    this.errorCounter = new ValueCounter(name.append("error"));
+    this.errorCounter = new ValueCounter(name + ".error");
   }
 
   @Override
@@ -75,7 +74,7 @@ final class DTimedMetric implements TimedMetric {
     }
   }
 
-  public MetricName name() {
+  public String name() {
     return name;
   }
 

@@ -1,6 +1,5 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.MetricStatsVisitor;
@@ -54,8 +53,8 @@ class AggregatorTimedRequest {
     }
   }
 
-  private MetricName name(String suffix) {
-    return MetricName.of(name + suffix);
+  private String name(String suffix) {
+    return name + suffix;
   }
 
   private boolean isMatch(MetricStats stat) {
@@ -64,9 +63,9 @@ class AggregatorTimedRequest {
 
   static class AggTimed implements TimedMetric.Stats {
 
-    private final MetricName name;
+    private final String name;
 
-    AggTimed(MetricName name) {
+    AggTimed(String name) {
       this.name = name;
     }
 
@@ -102,7 +101,7 @@ class AggregatorTimedRequest {
 
     @Override
     public String name() {
-      return name.simpleName();
+      return name;
     }
 
     @Override

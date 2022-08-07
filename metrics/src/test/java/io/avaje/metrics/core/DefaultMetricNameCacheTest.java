@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,13 +12,13 @@ class DefaultMetricNameCacheTest {
 
     DMetricNameCache cache = new DMetricNameCache(DefaultMetricNameCacheTest.class);
 
-    MetricName metricName = cache.get("foo");
-    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.foo", metricName.simpleName());
+    String metricName = cache.get("foo");
+    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.foo", metricName);
 
-    MetricName metricName2 = cache.get("bar");
-    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.bar", metricName2.simpleName());
+    String metricName2 = cache.get("bar");
+    assertEquals("io.avaje.metrics.core.DefaultMetricNameCacheTest.bar", metricName2);
 
-    MetricName metricName3 = cache.get("foo");
+    String metricName3 = cache.get("foo");
     assertSame(metricName, metricName3);
   }
 }

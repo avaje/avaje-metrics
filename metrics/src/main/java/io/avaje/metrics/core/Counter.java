@@ -1,7 +1,6 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.MetricName;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -15,9 +14,9 @@ import java.util.concurrent.atomic.LongAdder;
 final class Counter {
 
   private final LongAdder count = new LongAdder();
-  private final MetricName name;
+  private final String name;
 
-  Counter(MetricName name) {
+  Counter(String name) {
     this.name = name;
   }
 

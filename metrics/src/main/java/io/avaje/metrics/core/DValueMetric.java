@@ -1,9 +1,8 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
-import io.avaje.metrics.ValueMetric;
 import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.ValueMetric;
 
 
 /**
@@ -13,13 +12,13 @@ import io.avaje.metrics.MetricStatsVisitor;
  */
 final class DValueMetric implements Metric, ValueMetric {
 
-  private final MetricName name;
+  private final String name;
   private final ValueCounter valueCounter;
 
   /**
    * Create with a name.
    */
-  DValueMetric(MetricName name) {
+  DValueMetric(String name) {
     this.name = name;
     this.valueCounter = new ValueCounter(name);
   }
@@ -38,7 +37,7 @@ final class DValueMetric implements Metric, ValueMetric {
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return name;
   }
 

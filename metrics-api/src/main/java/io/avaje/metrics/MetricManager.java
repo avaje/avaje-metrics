@@ -1,6 +1,6 @@
 package io.avaje.metrics;
 
-import io.avaje.metrics.spi.SpiMetricManager;
+import io.avaje.metrics.spi.SpiMetricProvider;
 
 import java.util.List;
 import java.util.ServiceLoader;
@@ -13,39 +13,36 @@ import java.util.ServiceLoader;
  */
 public class MetricManager {
 
-  /**
-   * The implementation that is found via service loader.
-   */
-  private static final SpiMetricManager mgr = initialiseProvider();
+  private static final SpiMetricProvider defaultRegistry = initialiseProvider();
 
   /**
    * Finds and returns the implementation of PluginMetricManager using the ServiceLoader.
    */
-  private static SpiMetricManager initialiseProvider() {
+  private static SpiMetricProvider initialiseProvider() {
     return ServiceLoader
-      .load(SpiMetricManager.class)
+      .load(SpiMetricProvider.class)
       .findFirst().orElseThrow(() -> new IllegalStateException("io.avaje.metrics:metrics is not in classpath?"));
   }
 
   /**
-   * Collect all the metrics.
+   * Create a new MetricRegistry to attach metrics to.
    */
-  public static List<MetricStats> collectMetrics() {
-    return mgr.collectMetrics();
+  public static MetricRegistry createRegistry() {
+    return defaultRegistry.createRegistry();
   }
 
-//  /**
-//   * When a request completes it is reported to the manager.
-//   */
-//  public static void reportTiming(RequestTiming requestTiming) {
-//    mgr.reportTiming(requestTiming);
-//  }
+  /**
+   * Collect all the metrics from the default registry.
+   */
+  public static List<MetricStats> collectMetrics() {
+    return defaultRegistry.collectMetrics();
+  }
 
   /**
-   * Add a metric supplier to the manager. These metrics are then included in the reporting.
+   * Add a metric supplier to the default registry.
    */
   public static void addSupplier(MetricSupplier supplier) {
-    mgr.addSupplier(supplier);
+    defaultRegistry.addSupplier(supplier);
   }
 
   /**
@@ -53,191 +50,102 @@ public class MetricManager {
    * <p>
    * Often the name maps to a method name.
    */
-  public static MetricName name(Class<?> cls, String name) {
-    return mgr.name(cls, name);
+  public static String name(Class<?> cls, String name) {
+    return cls.getName() + "." +  name;
   }
 
   /**
-   * Create a Metric name by parsing a name that is expected to include periods (dot notation
-   * similar to package.Class.method).
-   */
-  public static MetricName name(String name) {
-    return mgr.name(name);
-  }
-
-  /**
-   * Return a MetricNameCache for the given class.
-   * <p>
-   * The MetricNameCache can be used to derive MetricName objects dynamically with relatively less
-   * overhead.
-   * </p>
-   */
-  public static MetricNameCache nameCache(Class<?> cls) {
-    return mgr.nameCache(cls);
-  }
-
-  /**
-   * Return a MetricNameCache for a given base metric name.
-   * <p>
-   * The MetricNameCache can be used to derive MetricName objects dynamically with relatively less
-   * overhead.
-   * </p>
-   */
-  public static MetricNameCache nameCache(MetricName baseName) {
-    return mgr.nameCache(baseName);
-  }
-
-  /**
-   * Return a BucketTimedMetric given the name and bucket ranges.
-   */
-  public static TimedMetric timed(MetricName name, int... bucketRanges) {
-    return mgr.timed(name, bucketRanges);
-  }
-
-  /**
-   * Return a BucketTimedMetric given the name and bucket ranges.
+   * Return a BucketTimedMetric given the name and bucket ranges using the default registry.
    */
   public static TimedMetric timed(Class<?> cls, String name, int... bucketRanges) {
     return timed(name(cls, name), bucketRanges);
   }
 
   /**
-   * Return a BucketTimedMetric given the name and bucket ranges.
+   * Return a BucketTimedMetric given the name and bucket ranges using the default registry.
    */
   public static TimedMetric timed(String name, int... bucketRanges) {
-    return timed(name(name), bucketRanges);
+    return defaultRegistry.timed(name, bucketRanges);
   }
 
   /**
-   * Return a TimedMetric given the name.
+   * Return a TimedMetric given the name using the default registry.
    */
-  public static TimedMetric timed(MetricName name) {
-    return mgr.timed(name);
+  public static TimedMetric timed(String name) {
+    return defaultRegistry.timed(name);
   }
 
   /**
-   * Return a TimedMetric using the Class, name to derive the MetricName.
+   * Return a TimedMetric using the Class, name to derive the MetricName using the default registry.
    */
   public static TimedMetric timed(Class<?> cls, String eventName) {
     return timed(name(cls, eventName));
   }
 
   /**
-   * Return a TimedMetric given the name.
-   */
-  public static TimedMetric timed(String name) {
-    return timed(name(name));
-  }
-
-  /**
-   * Return a CounterMetric given the name.
-   */
-  public static CounterMetric counter(MetricName name) {
-    return mgr.counter(name);
-  }
-
-  /**
-   * Return a CounterMetric given the name.
+   * Return a CounterMetric given the name using the default registry.
    */
   public static CounterMetric counter(String name) {
-    return counter(name(name));
+    return defaultRegistry.counter(name);
   }
 
   /**
-   * Return a CounterMetric using the Class and name to derive the MetricName.
+   * Return a CounterMetric using the Class and name to derive the MetricName using the default registry.
    */
   public static CounterMetric counter(Class<?> cls, String eventName) {
     return counter(name(cls, eventName));
   }
 
   /**
-   * Return a ValueMetric given the name.
+   * Return a ValueMetric given the name using the default registry.
    */
-  public static ValueMetric value(MetricName name) {
-    return mgr.value(name);
+  public static ValueMetric value(String name) {
+    return defaultRegistry.value(name);
   }
 
   /**
-   * Return a ValueMetric using the Class and name to derive the MetricName.
+   * Return a ValueMetric using the Class and name to derive the MetricName using the default registry.
    */
   public static ValueMetric value(Class<?> cls, String eventName) {
     return value(name(cls, eventName));
   }
 
   /**
-   * Return a ValueMetric given the name.
+   * Return the TimedMetricGroup with a based metric name using the default registry.
    */
-  public static ValueMetric value(String name) {
-    return value(name(name));
+  public static TimedMetricGroup timedGroup(String baseName) {
+    return defaultRegistry.timedGroup(baseName);
   }
 
   /**
-   * Return the TimedMetricGroup with a based metric name.
-   */
-  public static TimedMetricGroup timedGroup(MetricName baseName) {
-    return mgr.timedGroup(baseName);
-  }
-
-  /**
-   * Return the TimedMetricGroup with a class providing the base metric name.
+   * Return the TimedMetricGroup with a class providing the base metric name using the default registry.
    * <p>
    * The package name is the 'group' and the simple class name the 'type'.
    */
   public static TimedMetricGroup timedGroup(Class<?> cls) {
-    return timedGroup(name(cls, ""));
+    return timedGroup(cls.getName());
   }
 
   /**
-   * Return a TimedMetricGroup with a common group and type name.
-   *
-   * @param name the metric name
-   * @return the TimedMetricGroup used to create TimedMetric's that have a common base name.
-   */
-  public static TimedMetricGroup timedGroup(String name) {
-    return timedGroup(MetricName.of(name));
-  }
-
-  /**
-   * Create and register a GaugeMetric using the gauge supplied.
-   */
-  public static GaugeDoubleMetric register(MetricName name, GaugeDouble gauge) {
-    return mgr.register(name, gauge);
-  }
-
-  /**
-   * Create and register a GaugeMetric using the gauge supplied.
+   * Create and register a GaugeMetric using the gauge supplied using the default registry.
    */
   public static GaugeDoubleMetric register(String name, GaugeDouble gauge) {
-    return mgr.register(name(name), gauge);
+    return defaultRegistry.register(name, gauge);
   }
 
   /**
-   * Create and register a GaugeCounterMetric using the gauge supplied.
-   */
-  public static GaugeLongMetric register(MetricName name, GaugeLong gauge) {
-    return mgr.register(name, gauge);
-  }
-
-  /**
-   * Create and register a GaugeCounterMetric using the gauge supplied.
+   * Create and register a GaugeCounterMetric using the gauge supplied using the default registry.
    */
   public static GaugeLongMetric register(String name, GaugeLong gauge) {
-    return mgr.register(name(name), gauge);
+    return defaultRegistry.register(name, gauge);
   }
 
   /**
    * Return the built-in JVM metrics support to register collection of all or some
-   * of the built-in JVM metrics.
+   * of the built-in JVM metrics using the default registry.
    */
   public static JvmMetrics jvmMetrics() {
-    return mgr;
+    return defaultRegistry;
   }
-
-//  /**
-//   * Return the API for managing request timing.
-//   */
-//  public static RequestTimingManager requestTimingManager() {
-//    return mgr;
-//  }
 
 }

@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.GaugeLongMetric;
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.MetricStatsVisitor;
 
 
@@ -11,7 +10,7 @@ import io.avaje.metrics.MetricStatsVisitor;
  */
 class DGaugeLongMetric implements GaugeLongMetric {
 
-  protected final MetricName name;
+  protected final String name;
   protected final GaugeLong gauge;
   protected final boolean reportChangesOnly;
   /**
@@ -25,7 +24,7 @@ class DGaugeLongMetric implements GaugeLongMetric {
    * This will determine the delta increase in underlying value and return that
    * for the value.
    */
-  static DGaugeLongMetric incrementing(MetricName name, GaugeLong gauge) {
+  static DGaugeLongMetric incrementing(String name, GaugeLong gauge) {
     return new Incrementing(name, gauge);
   }
 
@@ -35,18 +34,18 @@ class DGaugeLongMetric implements GaugeLongMetric {
    * @param name  the name of the metric.
    * @param gauge the gauge used to get the value.
    */
-  DGaugeLongMetric(MetricName name, GaugeLong gauge) {
+  DGaugeLongMetric(String name, GaugeLong gauge) {
     this(name, gauge, true);
   }
 
-  DGaugeLongMetric(MetricName name, GaugeLong gauge, boolean reportChangesOnly) {
+  DGaugeLongMetric(String name, GaugeLong gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return name;
   }
 
@@ -89,7 +88,7 @@ class DGaugeLongMetric implements GaugeLongMetric {
 
     private long runningValue;
 
-    Incrementing(MetricName name, GaugeLong gauge) {
+    Incrementing(String name, GaugeLong gauge) {
       super(name, gauge);
     }
 

@@ -16,9 +16,8 @@ class CounterMetricTest {
   @Test
   void test() {
 
-    CounterMetric counterMetric = MetricManager.counter(new DMetricName("org.test.mycountermetric"));
-
-    assertEquals("org.test.mycountermetric", counterMetric.name().simpleName());
+    CounterMetric counterMetric = MetricManager.counter("org.test.mycountermetric");
+    assertEquals("org.test.mycountermetric", counterMetric.name());
 
     counterMetric.reset();
     assertEquals(0, counterMetric.count());
@@ -40,6 +39,6 @@ class CounterMetricTest {
   private List<MetricStats> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector();
     metric.collect(collector);
-    return collector.getList();
+    return collector.list();
   }
 }

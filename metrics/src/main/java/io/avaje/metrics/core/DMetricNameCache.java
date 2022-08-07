@@ -1,8 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
-import io.avaje.metrics.MetricNameCache;
-
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,34 +11,33 @@ import java.util.concurrent.ConcurrentHashMap;
  * name (for example, on soap operation name or method name).
  * </p>
  */
-final class DMetricNameCache implements MetricNameCache {
+final class DMetricNameCache {
 
-  private final MetricName baseName;
-  private final ConcurrentHashMap<String, MetricName> cache = new ConcurrentHashMap<>();
+  private final String baseName;
+  private final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
 
   /**
    * Create basing the name off the Class.
    */
   DMetricNameCache(Class<?> klass) {
-    this(new DMetricName(klass, ""));
+    this(klass.getName());
   }
 
   /**
    * Create providing a base MetricName.
    */
-  DMetricNameCache(MetricName baseName) {
+  DMetricNameCache(String baseName) {
     this.baseName = baseName;
   }
 
   /**
    * Return the MetricName from the cache creating it if required.
    */
-  @Override
-  public MetricName get(String name) {
-    MetricName metricName = cache.get(name);
+  public String get(String name) {
+    String metricName = cache.get(name);
     if (metricName == null) {
       metricName = deriveWithName(name);
-      MetricName oldMetricName = cache.putIfAbsent(name, metricName);
+      String oldMetricName = cache.putIfAbsent(name, metricName);
       if (oldMetricName != null) {
         return oldMetricName;
       }
@@ -55,7 +51,7 @@ final class DMetricNameCache implements MetricNameCache {
    * Typically used via MetricNameCache.
    * </p>
    */
-  private MetricName deriveWithName(String newName) {
-    return baseName.append(newName);
+  private String deriveWithName(String newName) {
+    return baseName + "." + newName;
   }
 }

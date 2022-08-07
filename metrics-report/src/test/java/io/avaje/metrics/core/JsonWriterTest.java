@@ -204,18 +204,18 @@ class JsonWriterTest {
   }
 
   private CounterMetric createCounterMetric() {
-    CounterMetric counter = new DCounterMetric(MetricName.of("org.test.CounterFoo.doStuff"));
+    CounterMetric counter = new DCounterMetric("org.test.CounterFoo.doStuff");
     counter.inc(10);
     return counter;
   }
 
   private GaugeDoubleMetric createGaugeMetric() {
     GaugeDouble gauge = () -> 24d;
-    return new DGaugeDoubleMetric(MetricName.of("org.test.GaugeFoo.doStuff"), gauge);
+    return new DGaugeDoubleMetric("org.test.GaugeFoo.doStuff", gauge);
   }
 
   private ValueMetric createValueMetric() {
-    ValueMetric metric = new DValueMetric(MetricName.of("org.test.ValueFoo.doStuff"));
+    ValueMetric metric = new DValueMetric("org.test.ValueFoo.doStuff");
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
@@ -224,7 +224,7 @@ class JsonWriterTest {
 
   private TimedMetric createTimedMetric() {
 
-    TimedMetric metric = new DTimedMetric(MetricName.of("org.test.TimedFoo.doStuff"));
+    TimedMetric metric = new DTimedMetric("org.test.TimedFoo.doStuff");
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MICROS); // 100 micros
@@ -238,7 +238,7 @@ class JsonWriterTest {
   private TimedMetric createBucketTimedMetricFull() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    TimedMetric metric = factory.createMetric(MetricName.of("org.test.BucketTimedFoo.doStuff"), new int[]{150});
+    TimedMetric metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis
@@ -255,7 +255,7 @@ class JsonWriterTest {
   private TimedMetric createBucketTimedMetricPartial() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    TimedMetric metric = factory.createMetric(MetricName.of("org.test.BucketTimedFoo.doStuff"), new int[]{150, 300});
+    TimedMetric metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150, 300});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis

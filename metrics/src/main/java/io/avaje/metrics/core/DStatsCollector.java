@@ -9,7 +9,7 @@ final class DStatsCollector implements MetricStatsVisitor {
 
   private final List<MetricStats> list = new ArrayList<>();
 
-  List<MetricStats> getList() {
+  List<MetricStats> list() {
     return list;
   }
 

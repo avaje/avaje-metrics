@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -35,11 +34,11 @@ final class JvmGarbageCollectionMetricGroup {
    */
   private static DGaugeLongMetric createTotalGcTime(List<GarbageCollectorMXBean> garbageCollectorMXBeans) {
     GarbageCollectorMXBean[] gcBeans = garbageCollectorMXBeans.toArray(new GarbageCollectorMXBean[0]);
-    return DGaugeLongMetric.incrementing(new DMetricName("jvm.gc.time"), new TotalTime(gcBeans));
+    return DGaugeLongMetric.incrementing("jvm.gc.time", new TotalTime(gcBeans));
   }
 
-  private static MetricName name(String prefix, String gcName) {
-    return new DMetricName("jvm.gc." + prefix + "." + gcName);
+  private static String name(String prefix, String gcName) {
+    return "jvm.gc." + prefix + "." + gcName;
   }
 
   private static final class Count implements GaugeLong {

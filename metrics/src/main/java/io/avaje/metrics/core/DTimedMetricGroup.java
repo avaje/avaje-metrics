@@ -1,6 +1,9 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.*;
+import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.TimedEvent;
+import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.TimedMetricGroup;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,11 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class DTimedMetricGroup implements TimedMetricGroup {
 
-  private final ConcurrentHashMap<String, TimedMetric> cache = new ConcurrentHashMap<String, TimedMetric>();
-  private final MetricNameCache metricNameCache;
+  private final ConcurrentHashMap<String, TimedMetric> cache = new ConcurrentHashMap<>();
+  private final DMetricNameCache metricNameCache;
+  private final MetricRegistry registry;
 
-  DTimedMetricGroup(MetricName baseName) {
-    this.metricNameCache = MetricManager.nameCache(baseName);
+  DTimedMetricGroup(String baseName, MetricRegistry registry) {
+    this.metricNameCache = new DMetricNameCache(baseName);
+    this.registry = registry;
   }
 
   /**
@@ -62,9 +67,9 @@ final class DTimedMetricGroup implements TimedMetricGroup {
       return found;
     }
     // parse name and find/create using MetricManager
-    MetricName metricName = metricNameCache.get(name);
+    String metricName = metricNameCache.get(name);
     // this is safe in that it is single threaded on construction/put
-    TimedMetric timedMetric = MetricManager.timed(metricName);
+    TimedMetric timedMetric = registry.timed(metricName);
     final TimedMetric existing = cache.putIfAbsent(name, timedMetric);
     return (existing != null) ? existing : timedMetric;
   }

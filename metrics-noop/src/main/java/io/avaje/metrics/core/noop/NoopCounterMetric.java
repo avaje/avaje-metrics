@@ -1,21 +1,20 @@
 package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.MetricStatsVisitor;
 
 final class NoopCounterMetric implements CounterMetric {
 
   private static final NoopCounterStatistics NOOP_STATS = NoopCounterStatistics.INSTANCE;
 
-  protected final MetricName metricName;
+  protected final String metricName;
 
-  NoopCounterMetric(MetricName metricName) {
+  NoopCounterMetric(String metricName) {
     this.metricName = metricName;
   }
 
   @Override
-  public MetricName name() {
+  public String name() {
     return metricName;
   }
 

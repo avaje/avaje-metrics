@@ -14,7 +14,7 @@ final class JvmSystemMetricGroup {
 
   static GaugeLongMetric getOsLoadAvgMetric() {
     GaugeLong osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean());
-    return new DGaugeLongMetric(new DMetricName("jvm.os.loadAverage"), osLoadAvg);
+    return new DGaugeLongMetric("jvm.os.loadAverage", osLoadAvg);
   }
 
   static long toLoad(double loadAverage) {

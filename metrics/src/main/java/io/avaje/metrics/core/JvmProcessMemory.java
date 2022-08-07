@@ -1,7 +1,6 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -54,14 +53,9 @@ final class JvmProcessMemory {
     }
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
-      MetricName baseName = new DMetricName("jvm.memory.process");
-      MetricName vmRssName = baseName.append("vmrss");
-      MetricName vmHwmName = baseName.append("vmhwm");
-
       Source source = new Source(procStatus);
-
-      metrics.add(new DGaugeLongMetric(vmRssName, source::getRss, reportChangesOnly));
-      metrics.add(new DGaugeLongMetric(vmHwmName, source::getHwm, reportChangesOnly));
+      metrics.add(new DGaugeLongMetric("jvm.memory.process.vmrss", source::getRss, reportChangesOnly));
+      metrics.add(new DGaugeLongMetric("jvm.memory.process.vmhwm", source::getHwm, reportChangesOnly));
     }
     return metrics;
   }

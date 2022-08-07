@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
 
 import java.util.concurrent.atomic.LongAccumulator;
@@ -24,15 +23,15 @@ final class ValueCounter {
   private final LongAdder total = new LongAdder();
   final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
 
-  ValueCounter(MetricName name) {
-    this.name = name.simpleName();
+  ValueCounter(String name) {
+    this.name = name;
     this.withBucket = false;
     this.bucketRange = noBuckets;
-    this.nameWithBucket = name.simpleName();
+    this.nameWithBucket = name;
   }
 
-  ValueCounter(MetricName name, String bucketRange) {
-    this.name = name.simpleName();
+  ValueCounter(String name, String bucketRange) {
+    this.name = name;
     this.withBucket = true;
     this.bucketRange = bucketRange;
     this.nameWithBucket = this.name + ";bucket=" + bucketRange;

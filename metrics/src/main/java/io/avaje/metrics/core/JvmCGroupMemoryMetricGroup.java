@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,19 +80,15 @@ final class JvmCGroupMemoryMetricGroup {
   }
 
   GaugeLongMetric createMemoryUsage(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLongMetric(name("jvm.cgroup.memory.usageMb"), source::getUsageMb, reportChangesOnly);
+    return new DGaugeLongMetric("jvm.cgroup.memory.usageMb", source::getUsageMb, reportChangesOnly);
   }
 
   GaugeLongMetric createMemoryPctUsage(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLongMetric(name("jvm.cgroup.memory.pctUsage"), source::getPctUsage, reportChangesOnly);
+    return new DGaugeLongMetric("jvm.cgroup.memory.pctUsage", source::getPctUsage, reportChangesOnly);
   }
 
   GaugeLongMetric createMemoryLimit(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLongMetric(name("jvm.cgroup.memory.limit"), source::getLimitMb, reportChangesOnly);
-  }
-
-  private MetricName name(String s) {
-    return new DMetricName(s);
+    return new DGaugeLongMetric("jvm.cgroup.memory.limit", source::getLimitMb, reportChangesOnly);
   }
 
 }
