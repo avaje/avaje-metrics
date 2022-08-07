@@ -58,7 +58,7 @@ import java.util.function.Supplier;
  * </code>
  * </pre>
  */
-public interface TimedMetric extends Metric {
+public interface Timer extends Metric {
 
   /**
    * Times the execution of the event.
@@ -73,8 +73,8 @@ public interface TimedMetric extends Metric {
   /**
    * Start an event.
    * <p>
-   * At the completion of the event one of {@link TimedEvent#end()},
-   * {@link TimedEvent#endWithError()} or {@link TimedEvent#end(boolean)} is called to record the
+   * At the completion of the event one of {@link Event#end()},
+   * {@link Event#endWithError()} or {@link Event#end(boolean)} is called to record the
    * event duration and success or otherwise.
    * <p>
    * This is an alternative to using {@link #addEventSince(boolean, long)} or
@@ -82,7 +82,7 @@ public interface TimedMetric extends Metric {
    * higher overhead as it instantiates a TimedEvent object which must be later GC'ed. In this sense
    * generally addEventSince() is the preferred method to use.
    */
-  TimedEvent startEvent();
+  Event startEvent();
 
   /**
    * Add an event based on a startNanos (determined by {@link System#nanoTime()}).
@@ -184,7 +184,7 @@ public interface TimedMetric extends Metric {
   /**
    * Statistics collected by TimedMetric.
    */
-  interface Stats extends ValueMetric.Stats {
+  interface Stats extends Meter.Stats {
 
     /**
      * Return true if this is bucket range based.
@@ -204,5 +204,51 @@ public interface TimedMetric extends Metric {
      * </p>
      */
     String nameWithBucket();
+  }
+
+  /**
+   * A TimedEvent that is ended with either success or error.
+   * <p>
+   * Note that it is generally preferred to use {@link Timer#addEventSince(boolean, long)} as
+   * that avoids an object creation and the associated GC so has slightly less overhead.
+   * <p>
+   * Example:
+   *
+   * <pre>
+   * <code>
+   *  TimedMetric metric = MetricManager.timed(MyService.class, "sayHello");
+   *  ...
+   *
+   *  TimedEvent timedEvent = metric.startEvent();
+   *  try {
+   *    ...
+   *
+   *  } finally {
+   *    // Add the event to the 'success' statistics
+   *    timedEvent.end();
+   *  }
+   *
+   * </code>
+   * </pre>
+   *
+   * @see Timer#startEvent()
+   */
+  interface Event {
+
+    /**
+     * This timed event ended with successful execution.
+     */
+    void end();
+
+    /**
+     * This timed event ended with an error or fault execution.
+     */
+    void endWithError();
+
+    /**
+     * End specifying whether the event was successful or in error.
+     */
+    void end(boolean withSuccess);
+
   }
 }

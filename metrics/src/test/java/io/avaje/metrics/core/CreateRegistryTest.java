@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.MetricRegistry;
 import org.junit.jupiter.api.Test;
@@ -15,8 +15,8 @@ class CreateRegistryTest {
 
     MetricRegistry registry = MetricManager.createRegistry();
 
-    CounterMetric counterMetric = MetricManager.counter("createNewRegistryCounter");
-    CounterMetric counterMetric2 = registry.counter("createNewRegistryCounter");
+    Counter counterMetric = MetricManager.counter("createNewRegistryCounter");
+    Counter counterMetric2 = registry.counter("createNewRegistryCounter");
 
     assertEquals("createNewRegistryCounter", counterMetric.name());
     assertEquals("createNewRegistryCounter", counterMetric2.name());

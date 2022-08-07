@@ -21,7 +21,7 @@ package io.avaje.metrics;
  * </code>
  * </pre>
  */
-public interface ValueMetric extends Metric {
+public interface Meter extends Metric {
 
   /**
    * Add a value (bytes, time, rows etc).

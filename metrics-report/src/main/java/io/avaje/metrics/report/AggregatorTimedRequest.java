@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.MetricStatsVisitor;
 
@@ -27,7 +27,7 @@ class AggregatorTimedRequest {
 
     for (MetricStats stat : stats) {
       if (isMatch(stat)) {
-        add((TimedMetric.Stats) stat);
+        add((Timer.Stats) stat);
       }
     }
 
@@ -39,7 +39,7 @@ class AggregatorTimedRequest {
     }
   }
 
-  private void add(TimedMetric.Stats stat) {
+  private void add(Timer.Stats stat) {
     if (stat.name().endsWith(ERROR)) {
       if (aggTimedError == null) {
         aggTimedError = new AggTimed(name(ERROR));
@@ -58,10 +58,10 @@ class AggregatorTimedRequest {
   }
 
   private boolean isMatch(MetricStats stat) {
-    return (stat instanceof TimedMetric.Stats) && stat.name().startsWith(prefix);
+    return (stat instanceof Timer.Stats) && stat.name().startsWith(prefix);
   }
 
-  static class AggTimed implements TimedMetric.Stats {
+  static class AggTimed implements Timer.Stats {
 
     private final String name;
 
@@ -118,7 +118,7 @@ class AggregatorTimedRequest {
     private long total;
     private long max;
 
-    void add(TimedMetric.Stats stat) {
+    void add(Timer.Stats stat) {
       count += stat.count();
       total += stat.total();
       max = Math.max(max, stat.max());

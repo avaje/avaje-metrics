@@ -1,7 +1,6 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricName;
-import io.avaje.metrics.TimedEvent;
 import io.avaje.metrics.TimedMetric;
 import io.avaje.metrics.MetricStatsVisitor;
 

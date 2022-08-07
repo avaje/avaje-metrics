@@ -5,7 +5,7 @@ package io.avaje.metrics;
  * <p>
  * This is intended to be used when the full metric name is determined at runtime.
  */
-public interface TimedMetricGroup {
+public interface TimerGroup {
 
   /**
    * Start the event for the given name.
@@ -19,12 +19,12 @@ public interface TimedMetricGroup {
    * @param name the specific name for the metric (group and type name parts are common).
    * @return the TimedMetricEvent that has started.
    */
-  TimedEvent start(String name);
+  Timer.Event start(String name);
 
   /**
    * Return the TimedMetric for the specific name.
    */
-  TimedMetric timed(String name);
+  Timer timed(String name);
 
   /**
    * Add an event based on a startNanos (determined by {@link System#nanoTime()}).

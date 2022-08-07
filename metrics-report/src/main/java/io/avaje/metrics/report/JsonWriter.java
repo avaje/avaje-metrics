@@ -87,7 +87,7 @@ public class JsonWriter implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(TimedMetric.Stats metric) {
+  public void visit(Timer.Stats metric) {
     try {
       writeMetricStart(TYPE_TIMED_METRIC, metric.nameWithBucket());
       writeSummary(metric);
@@ -98,7 +98,7 @@ public class JsonWriter implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(ValueMetric.Stats metric) {
+  public void visit(Meter.Stats metric) {
     try {
       writeMetricStart(TYPE_VALUE_METRIC, metric);
       writeSummary(metric);
@@ -109,7 +109,7 @@ public class JsonWriter implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(CounterMetric.Stats metric) {
+  public void visit(Counter.Stats metric) {
     try {
       writeMetricStart(TYPE_COUNTER_METRIC, metric);
       writeKeyNumber("value", metric.count());
@@ -120,7 +120,7 @@ public class JsonWriter implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(GaugeDoubleMetric.Stats metric) {
+  public void visit(GaugeDouble.Stats metric) {
     try {
       writeMetricStart(TYPE_DOUBLE_METRIC, metric);
       writeKeyNumber("value", format(metric.value()));
@@ -131,7 +131,7 @@ public class JsonWriter implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(GaugeLongMetric.Stats metric) {
+  public void visit(GaugeLong.Stats metric) {
     try {
       writeMetricStart(TYPE_LONG_METRIC, metric);
       writeKeyNumber("value", metric.value());
@@ -141,7 +141,7 @@ public class JsonWriter implements MetricStatsVisitor {
     }
   }
 
-  private void writeSummary(ValueMetric.Stats valueStats) throws IOException {
+  private void writeSummary(Meter.Stats valueStats) throws IOException {
 
     // valueStats == null when BucketTimedMetric and the bucket is empty
     long count = (valueStats == null) ? 0 : valueStats.count();

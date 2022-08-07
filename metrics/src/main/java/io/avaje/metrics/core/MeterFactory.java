@@ -1,13 +1,13 @@
-package io.avaje.metrics.core.noop;
+package io.avaje.metrics.core;
 
 import io.avaje.metrics.Meter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 
-public class NoopValueMetricFactory implements SpiMetricBuilder.Factory<Meter> {
+final class MeterFactory implements SpiMetricBuilder.Factory<Meter> {
 
   @Override
   public Meter createMetric(String name, int[] bucketRanges) {
-    return new NoopValueMetric(name);
+    return new DMeter(name);
   }
 
 }

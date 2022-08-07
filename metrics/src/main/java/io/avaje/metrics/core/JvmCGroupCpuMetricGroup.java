@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLongMetric;
+import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 
 import java.math.RoundingMode;
@@ -49,19 +49,19 @@ final class JvmCGroupCpuMetricGroup {
     return metrics;
   }
 
-  GaugeLongMetric createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
+  GaugeLong createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
     final long cpuQuotaVal = cpuQuota.single();
     long quotaPeriod = period.single();
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return new DGaugeLongMetric("jvm.cgroup.cpu.limit", new FixedGauge(limit));
+      return new DGaugeLong("jvm.cgroup.cpu.limit", new FixedGauge(limit));
     }
     return null;
   }
 
-  GaugeLongMetric createCGroupCpuRequests(FileLines cpuShares) {
+  GaugeLong createCGroupCpuRequests(FileLines cpuShares) {
     final long requests = convertSharesToRequests(cpuShares.single());
-    return new DGaugeLongMetric("jvm.cgroup.cpu.requests", new FixedGauge(requests));
+    return new DGaugeLong("jvm.cgroup.cpu.requests", new FixedGauge(requests));
   }
 
   long convertQuotaToLimits(long cpuQuotaVal, long quotaPeriod) {
@@ -82,7 +82,7 @@ final class JvmCGroupCpuMetricGroup {
       .longValue();
   }
 
-  private GaugeLongMetric createCGroupCpuUsage(FileLines cpu) {
+  private GaugeLong createCGroupCpuUsage(FileLines cpu) {
     return incrementing("jvm.cgroup.cpu.usageMicros", new CpuUsageMicros(cpu));
   }
 
@@ -94,12 +94,12 @@ final class JvmCGroupCpuMetricGroup {
     metrics.add(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
   }
 
-  private GaugeLongMetric incrementing(String name, LongSupplier gauge) {
-    return DGaugeLongMetric.incrementing(name, gauge);
+  private GaugeLong incrementing(String name, LongSupplier gauge) {
+    return DGaugeLong.incrementing(name, gauge);
   }
 
-  private GaugeLongMetric gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {
-    return new DGaugeLongMetric(name, gauge, reportChangesOnly);
+  private GaugeLong gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {
+    return new DGaugeLong(name, gauge, reportChangesOnly);
   }
 
   static final class CpuUsageMicros implements LongSupplier {

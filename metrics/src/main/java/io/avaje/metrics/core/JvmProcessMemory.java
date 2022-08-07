@@ -54,8 +54,8 @@ final class JvmProcessMemory {
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
       Source source = new Source(procStatus);
-      metrics.add(new DGaugeLongMetric("jvm.memory.process.vmrss", source::getRss, reportChangesOnly));
-      metrics.add(new DGaugeLongMetric("jvm.memory.process.vmhwm", source::getHwm, reportChangesOnly));
+      metrics.add(new DGaugeLong("jvm.memory.process.vmrss", source::getRss, reportChangesOnly));
+      metrics.add(new DGaugeLong("jvm.memory.process.vmhwm", source::getHwm, reportChangesOnly));
     }
     return metrics;
   }

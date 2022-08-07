@@ -1,12 +1,12 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.Meter;
 import io.avaje.metrics.MetricStatsVisitor;
 
 /**
  * A NOOP placeholder for ValueStatistics.
  */
-class NoopValueStatistics implements ValueMetric.Stats {
+class NoopValueStatistics implements Meter.Stats {
 
   static NoopValueStatistics INSTANCE = new NoopValueStatistics();
 

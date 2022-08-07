@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
+import io.avaje.metrics.Counter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,27 +15,27 @@ final class DStatsCollector implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(TimedMetric.Stats metric) {
+  public void visit(Timer.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(ValueMetric.Stats metric) {
+  public void visit(Meter.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(CounterMetric.Stats metric) {
+  public void visit(Counter.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(GaugeDoubleMetric.Stats metric) {
+  public void visit(GaugeDouble.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(GaugeLongMetric.Stats metric) {
+  public void visit(GaugeLong.Stats metric) {
     list.add(metric);
   }
 

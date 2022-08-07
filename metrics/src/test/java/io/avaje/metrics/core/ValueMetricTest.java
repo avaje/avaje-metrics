@@ -2,7 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.Meter;
 import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ class ValueMetricTest {
 
   @Test
   void test() {
-    ValueMetric metric = MetricManager.value("org.test.mycounter");
+    Meter metric = MetricManager.meter("org.test.mycounter");
     assertEquals("org.test.mycounter", metric.name());
 
     metric.reset();
@@ -28,7 +28,7 @@ class ValueMetricTest {
     List<MetricStats> stats = collect(metric);
     assertThat(stats).hasSize(1);
 
-    ValueMetric.Stats statistics = (ValueMetric.Stats) stats.get(0);
+    Meter.Stats statistics = (Meter.Stats) stats.get(0);
     assertEquals(3, statistics.count());
     assertEquals(4500, statistics.total());
     assertEquals(2000, statistics.max());

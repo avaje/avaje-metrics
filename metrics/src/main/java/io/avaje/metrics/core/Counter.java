@@ -1,7 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
-
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -31,7 +29,7 @@ final class Counter {
    * Collect statistics and reset underlying counters in the process. This will
    * return null if no statistics were collected since the last collection.
    */
-  CounterMetric.Stats collect() {
+  io.avaje.metrics.Counter.Stats collect() {
     if (count.sum() == 0) {
       return null;
     } else {
@@ -63,7 +61,7 @@ final class Counter {
   /**
    * Return the current statistics reseting the internal values.
    */
-  private CounterMetric.Stats stats() {
+  private io.avaje.metrics.Counter.Stats stats() {
     return new DCounterMetric.DStats(name, count.sumThenReset());
   }
 

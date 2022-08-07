@@ -1,10 +1,10 @@
 package io.avaje.metrics.core;
 
 
-import io.avaje.metrics.GaugeDoubleMetric;
+import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.MetricStatsVisitor;
 
-final class DGaugeDoubleStats implements GaugeDoubleMetric.Stats {
+final class DGaugeDoubleStats implements GaugeDouble.Stats {
 
   private final String name;
   private final double value;

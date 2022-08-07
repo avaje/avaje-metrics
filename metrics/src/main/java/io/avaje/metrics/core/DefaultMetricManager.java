@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.spi.SpiMetricProvider;
@@ -25,10 +26,10 @@ public class DefaultMetricManager implements SpiMetricProvider {
 
   private final List<Metric> coreJvmMetrics = new ArrayList<>();
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
-  private final SpiMetricBuilder.Factory<TimedMetric> bucketTimedMetricFactory;
-  private final SpiMetricBuilder.Factory<TimedMetric> timedMetricFactory;
-  private final SpiMetricBuilder.Factory<CounterMetric> counterMetricFactory;
-  private final SpiMetricBuilder.Factory<ValueMetric> valueMetricFactory;
+  private final SpiMetricBuilder.Factory<Timer> bucketTimedMetricFactory;
+  private final SpiMetricBuilder.Factory<Timer> timedMetricFactory;
+  private final SpiMetricBuilder.Factory<Counter> counterMetricFactory;
+  private final SpiMetricBuilder.Factory<Meter> valueMetricFactory;
 
   private final List<MetricSupplier> suppliers = new ArrayList<>();
 
@@ -116,7 +117,7 @@ public class DefaultMetricManager implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerJvmOsLoadMetric() {
-    GaugeLongMetric osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
+    GaugeLong osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
     if (osLoadAvgMetric.value() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
@@ -168,38 +169,38 @@ public class DefaultMetricManager implements SpiMetricProvider {
 
 
   @Override
-  public TimedMetricGroup timedGroup(String baseName) {
-    return new DTimedMetricGroup(baseName, this);
+  public TimerGroup timedGroup(String baseName) {
+    return new DTimerGroup(baseName, this);
   }
 
   @Override
-  public TimedMetric timed(String name) {
-    return (TimedMetric) getMetric(name, timedMetricFactory);
+  public Timer timed(String name) {
+    return (Timer) getMetric(name, timedMetricFactory);
   }
 
   @Override
-  public TimedMetric timed(String name, int... bucketRanges) {
-    return (TimedMetric) getMetric(name, bucketTimedMetricFactory, bucketRanges);
+  public Timer timed(String name, int... bucketRanges) {
+    return (Timer) getMetric(name, bucketTimedMetricFactory, bucketRanges);
   }
 
   @Override
-  public CounterMetric counter(String name) {
-    return (CounterMetric) getMetric(name, counterMetricFactory);
+  public Counter counter(String name) {
+    return (Counter) getMetric(name, counterMetricFactory);
   }
 
   @Override
-  public ValueMetric value(String name) {
-    return (ValueMetric) getMetric(name, valueMetricFactory);
+  public Meter value(String name) {
+    return (Meter) getMetric(name, valueMetricFactory);
   }
 
   @Override
-  public GaugeDoubleMetric register(String name, DoubleSupplier gauge) {
-    return put(name, new DGaugeDoubleMetric(name, gauge));
+  public GaugeDouble register(String name, DoubleSupplier gauge) {
+    return put(name, new DGaugeDouble(name, gauge));
   }
 
   @Override
-  public GaugeLongMetric register(String name, LongSupplier gauge) {
-    return put(name, (GaugeLongMetric) new DGaugeLongMetric(name, gauge));
+  public GaugeLong register(String name, LongSupplier gauge) {
+    return put(name, (GaugeLong) new DGaugeLong(name, gauge));
   }
 
   private <T extends Metric> T put(String name, T metric) {

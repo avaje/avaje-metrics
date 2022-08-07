@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
@@ -37,11 +37,11 @@ final class ValueCounter {
     this.nameWithBucket = this.name + ";bucket=" + bucketRange;
   }
 
-  String getName() {
+  String name() {
     return name;
   }
 
-  String getNameWithBucket() {
+  String nameWithBucket() {
     return nameWithBucket;
   }
 
@@ -49,7 +49,7 @@ final class ValueCounter {
     return withBucket;
   }
 
-  String getBucketRange() {
+  String bucketRange() {
     return bucketRange;
   }
 
@@ -62,25 +62,25 @@ final class ValueCounter {
     max.accumulate(value);
   }
 
-  TimedMetric.Stats collectStatistics() {
+  Timer.Stats collect() {
     boolean empty = count.sum() == 0;
     if (empty) {
       return null;
     } else {
-      return getStatistics();
+      return stats();
     }
   }
 
   /**
    * Return the current statistics resetting the internal values if reset is true.
    */
-  private TimedMetric.Stats getStatistics() {
+  private Timer.Stats stats() {
     // Note these values are not guaranteed to be consistent wrt each other
     // but should be reasonably consistent (small time between count and total)
     final long maxVal = max.getThenReset();
     final long totalVal = total.sumThenReset();
     final long countVal = count.sumThenReset();
-    return new DValueStats(this, countVal, totalVal, maxVal);
+    return new DTimerStats(this, countVal, totalVal, maxVal);
   }
 
   /**
@@ -95,27 +95,27 @@ final class ValueCounter {
   /**
    * Return the count of values.
    */
-  long getCount() {
+  long count() {
     return count.sum();
   }
 
   /**
    * Return the total of values.
    */
-  long getTotal() {
+  long total() {
     return total.sum();
   }
 
   /**
    * Return the max value.
    */
-  long getMax() {
+  long max() {
     return max.get();
   }
 
-  long getMean() {
-    long count = getCount();
-    long total = getTotal();
+  long mean() {
+    long count = count();
+    long total = total();
     return (count < 1) ? 0L : Math.round((double) (total / count));
   }
 

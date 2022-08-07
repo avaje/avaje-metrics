@@ -3,9 +3,9 @@ package io.avaje.metrics;
 /**
  * A Metric that collects statistics on events.
  * <ul>
- * <li>TimedMetric and BucketTimedMetric are used for monitoring execution time</li>
- * <li>CounterMetric is for counting discrete events like 'user logged in'</li>
- * <li>ValueMetric is used when events have a value like bytes sent, lines read</li>
+ * <li>Timer used for monitoring execution time</li>
+ * <li>Counter is for counting discrete events like 'user logged in'</li>
+ * <li>Meter is used when events have a value like bytes sent, lines read</li>
  * <li>Gauges measure the current value of a resource like 'used memory' or 'active threads'.</li>
  * </ul>
  */
@@ -23,7 +23,7 @@ public interface Metric {
   void collect(MetricStatsVisitor collector);
 
   /**
-   * Clear the statistics resetting any internal counters etc.
+   * Reset the statistics resetting any internal counters etc.
    * <p>
    * Typically the MetricManager takes care of resetting the statistic/counters for the metrics when
    * it periodically collects and reports all the metrics and you are not expected to use this method.

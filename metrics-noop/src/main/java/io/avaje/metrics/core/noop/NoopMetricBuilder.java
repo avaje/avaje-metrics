@@ -1,29 +1,29 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.Counter;
+import io.avaje.metrics.Timer;
+import io.avaje.metrics.Meter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 
 final class NoopMetricBuilder implements SpiMetricBuilder {
 
   @Override
-  public Factory<TimedMetric> timed() {
+  public Factory<Timer> timed() {
     return new NoopTimedMetricFactory();
   }
 
   @Override
-  public Factory<TimedMetric> bucket() {
+  public Factory<Timer> bucket() {
     return new NoopBucketTimedFactory();
   }
 
   @Override
-  public Factory<ValueMetric> value() {
+  public Factory<Meter> value() {
     return new NoopValueMetricFactory();
   }
 
   @Override
-  public Factory<CounterMetric> counter() {
+  public Factory<Counter> counter() {
     return new NoopCounterMetricFactory();
   }
 

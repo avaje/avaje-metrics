@@ -1,13 +1,12 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 import io.avaje.metrics.MetricStatsVisitor;
-
 
 /**
  * Snapshot of the current statistics for a Counter or TimeCounter.
  */
-final class DValueStats implements TimedMetric.Stats {
+final class DTimerStats implements Timer.Stats {
 
   final ValueCounter owner;
   final long count;
@@ -17,7 +16,7 @@ final class DValueStats implements TimedMetric.Stats {
   /**
    * Construct for TimeCounter.
    */
-  DValueStats(ValueCounter owner, long count, long total, long max) {
+  DTimerStats(ValueCounter owner, long count, long total, long max) {
     this.owner = owner;
     this.count = count;
     this.total = total;
@@ -43,17 +42,17 @@ final class DValueStats implements TimedMetric.Stats {
 
   @Override
   public String bucketRange() {
-    return owner.getBucketRange();
+    return owner.bucketRange();
   }
 
   @Override
   public String name() {
-    return owner.getName();
+    return owner.name();
   }
 
   @Override
   public String nameWithBucket() {
-    return owner.getNameWithBucket();
+    return owner.nameWithBucket();
   }
 
   /**

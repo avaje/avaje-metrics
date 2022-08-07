@@ -16,7 +16,7 @@ class DefaultGaugeLongMetricTest {
   void skipCollection_when_unchanged() {
 
     MyGauge myGauge = new MyGauge();
-    DGaugeLongMetric metric = new DGaugeLongMetric(MyGauge.class.getName()+".test", myGauge);
+    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName()+".test", myGauge);
 
     assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -55,7 +55,7 @@ class DefaultGaugeLongMetricTest {
   void test() {
 
     MyGauge myGauge = new MyGauge();
-    DGaugeLongMetric metric = new DGaugeLongMetric(MyGauge.class.getName()+".test", myGauge);
+    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName()+".test", myGauge);
 
     assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -64,7 +64,7 @@ class DefaultGaugeLongMetricTest {
     assertEquals(100, metric.value());
     assertThat(collect(metric)).hasSize(1);
 
-    DGaugeLongMetric incrementing = DGaugeLongMetric.incrementing(MyGauge.class.getName()+".inc", myGauge);
+    DGaugeLong incrementing = DGaugeLong.incrementing(MyGauge.class.getName()+".inc", myGauge);
 
     myGauge.value = 100;
     //assertFalse(incrementing.collectStatistics());

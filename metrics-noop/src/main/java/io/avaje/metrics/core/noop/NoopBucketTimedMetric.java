@@ -1,16 +1,15 @@
 package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.MetricStatsVisitor;
-import io.avaje.metrics.TimedEvent;
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 
 import java.util.function.Supplier;
 
-class NoopBucketTimedMetric implements TimedMetric {
+class NoopBucketTimedMetric implements Timer {
 
   private static final int[] noRange = {};
 
-  private static final TimedMetric[] noBuckets = new TimedMetric[0];
+  private static final Timer[] noBuckets = new Timer[0];
 
   private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
 
@@ -57,7 +56,7 @@ class NoopBucketTimedMetric implements TimedMetric {
   }
 
   @Override
-  public TimedEvent startEvent() {
+  public Event startEvent() {
     return NOOP_TIMED_EVENT;
   }
 

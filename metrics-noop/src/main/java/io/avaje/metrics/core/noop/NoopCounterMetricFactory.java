@@ -1,12 +1,12 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 
-public class NoopCounterMetricFactory implements SpiMetricBuilder.Factory<CounterMetric> {
+public class NoopCounterMetricFactory implements SpiMetricBuilder.Factory<Counter> {
 
   @Override
-  public CounterMetric createMetric(String name, int[] bucketRanges) {
+  public Counter createMetric(String name, int[] bucketRanges) {
     return new NoopCounterMetric(name);
   }
 

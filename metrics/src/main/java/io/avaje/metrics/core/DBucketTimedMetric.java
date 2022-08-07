@@ -1,22 +1,21 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricStatsVisitor;
-import io.avaje.metrics.TimedEvent;
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 
 import java.util.function.Supplier;
 
 /**
  * Default implementation of BucketTimedMetric.
  */
-final class DBucketTimedMetric implements TimedMetric {
+final class DBucketTimedMetric implements Timer {
 
   private final String metricName;
   private final int[] bucketRanges;
-  private final TimedMetric[] buckets;
+  private final Timer[] buckets;
   private final int lastBucketIndex;
 
-  DBucketTimedMetric(String metricName, int[] bucketRanges, TimedMetric[] buckets) {
+  DBucketTimedMetric(String metricName, int[] bucketRanges, Timer[] buckets) {
     this.metricName = metricName;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
@@ -64,7 +63,7 @@ final class DBucketTimedMetric implements TimedMetric {
   }
 
   @Override
-  public TimedEvent startEvent() {
+  public Timer.Event startEvent() {
     return new Event(this);
   }
 
@@ -130,19 +129,19 @@ final class DBucketTimedMetric implements TimedMetric {
 
   @Override
   public void collect(MetricStatsVisitor collector) {
-    for (TimedMetric bucket : buckets) {
+    for (Timer bucket : buckets) {
       bucket.collect(collector);
     }
   }
 
   @Override
   public void reset() {
-    for (TimedMetric bucket : buckets) {
+    for (Timer bucket : buckets) {
       bucket.reset();
     }
   }
 
-  protected static final class Event implements TimedEvent {
+  protected static final class Event implements Timer.Event {
 
     private final DBucketTimedMetric metric;
     private final long startNanos;

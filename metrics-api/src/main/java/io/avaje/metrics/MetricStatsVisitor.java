@@ -8,29 +8,29 @@ import java.util.Collection;
 public interface MetricStatsVisitor {
 
   /**
-   * Visit TimedStatistics.
+   * Visit Timer stats.
    */
-  void visit(TimedMetric.Stats timed);
+  void visit(Timer.Stats timed);
 
   /**
-   * Visit ValueStatistics.
+   * Visit meter stats.
    */
-  void visit(ValueMetric.Stats value);
+  void visit(Meter.Stats meter);
 
   /**
-   * Visit CounterStatistics.
+   * Visit Counter stats.
    */
-  void visit(CounterMetric.Stats counter);
+  void visit(Counter.Stats counter);
 
   /**
-   * Visit GaugeDoubleStatistics
+   * Visit GaugeDouble stats.
    */
-  void visit(GaugeDoubleMetric.Stats gauge);
+  void visit(GaugeDouble.Stats gauge);
 
   /**
-   * Visit GaugeLongStatistics.
+   * Visit GaugeLong stats.
    */
-  void visit(GaugeLongMetric.Stats gauge);
+  void visit(GaugeLong.Stats gauge);
 
   /**
    * Visit all the metrics.

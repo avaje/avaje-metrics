@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLongMetric;
+import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.function.LongSupplier;
@@ -9,7 +9,7 @@ import java.util.function.LongSupplier;
 /**
  * A Metric that gets its value from a Gauge.
  */
-class DGaugeLongMetric implements GaugeLongMetric {
+class DGaugeLong implements GaugeLong {
 
   protected final String name;
   protected final LongSupplier gauge;
@@ -25,7 +25,7 @@ class DGaugeLongMetric implements GaugeLongMetric {
    * This will determine the delta increase in underlying value and return that
    * for the value.
    */
-  static DGaugeLongMetric incrementing(String name, LongSupplier gauge) {
+  static DGaugeLong incrementing(String name, LongSupplier gauge) {
     return new Incrementing(name, gauge);
   }
 
@@ -35,11 +35,11 @@ class DGaugeLongMetric implements GaugeLongMetric {
    * @param name  the name of the metric.
    * @param gauge the gauge used to get the value.
    */
-  DGaugeLongMetric(String name, LongSupplier gauge) {
+  DGaugeLong(String name, LongSupplier gauge) {
     this(name, gauge, true);
   }
 
-  DGaugeLongMetric(String name, LongSupplier gauge, boolean reportChangesOnly) {
+  DGaugeLong(String name, LongSupplier gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
@@ -85,7 +85,7 @@ class DGaugeLongMetric implements GaugeLongMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  static final class Incrementing extends DGaugeLongMetric {
+  static final class Incrementing extends DGaugeLong {
 
     private long runningValue;
 

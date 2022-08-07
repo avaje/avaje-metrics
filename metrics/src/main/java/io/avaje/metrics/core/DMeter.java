@@ -2,30 +2,30 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStatsVisitor;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.Meter;
 
 
 /**
  * Measure events that occur with a long value. This long value could be bytes
- * or rows processed or time. Typically, you would use TimedMetric for time based
+ * or rows processed or time. Typically, you would use Timer for time based
  * events though.
  */
-final class DValueMetric implements Metric, ValueMetric {
+final class DMeter implements Metric, Meter {
 
   private final String name;
-  private final ValueCounter valueCounter;
+  private final ValueCounter values;
 
   /**
    * Create with a name.
    */
-  DValueMetric(String name) {
+  DMeter(String name) {
     this.name = name;
-    this.valueCounter = new ValueCounter(name);
+    this.values = new ValueCounter(name);
   }
 
   @Override
   public void collect(MetricStatsVisitor collector) {
-    Stats stats = valueCounter.collectStatistics();
+    Stats stats = values.collect();
     if (stats != null) {
       collector.visit(stats);
     }
@@ -33,7 +33,7 @@ final class DValueMetric implements Metric, ValueMetric {
 
   @Override
   public void reset() {
-    valueCounter.reset();
+    values.reset();
   }
 
   @Override
@@ -43,26 +43,26 @@ final class DValueMetric implements Metric, ValueMetric {
 
   @Override
   public void addEvent(long value) {
-    valueCounter.add(value);
+    values.add(value);
   }
 
   @Override
   public long count() {
-    return valueCounter.getCount();
+    return values.count();
   }
 
   @Override
   public long total() {
-    return valueCounter.getTotal();
+    return values.total();
   }
 
   @Override
   public long max() {
-    return valueCounter.getMax();
+    return values.max();
   }
 
   @Override
   public long mean() {
-    return valueCounter.getMean();
+    return values.mean();
   }
 }

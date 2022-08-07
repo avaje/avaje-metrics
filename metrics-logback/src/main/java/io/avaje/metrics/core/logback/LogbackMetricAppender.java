@@ -3,7 +3,7 @@ package io.avaje.metrics.core.logback;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricManager;
 
 /**
@@ -11,9 +11,9 @@ import io.avaje.metrics.MetricManager;
  */
 public final class LogbackMetricAppender extends AppenderBase<ILoggingEvent> {
 
-  private final CounterMetric errorMetric;
+  private final Counter errorMetric;
 
-  private final CounterMetric warnMetric;
+  private final Counter warnMetric;
 
   public LogbackMetricAppender() {
     this("app.log.error", "app.log.warn");

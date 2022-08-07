@@ -1,9 +1,8 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricRegistry;
-import io.avaje.metrics.TimedEvent;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.TimedMetricGroup;
+import io.avaje.metrics.Timer;
+import io.avaje.metrics.TimerGroup;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,13 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * the TimedMetrics only differ by the operation name - the operation name is
  * specific and the rest (group, type etc) is common to all the metrics.
  */
-final class DTimedMetricGroup implements TimedMetricGroup {
+final class DTimerGroup implements TimerGroup {
 
-  private final ConcurrentHashMap<String, TimedMetric> cache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Timer> cache = new ConcurrentHashMap<>();
   private final DMetricNameCache metricNameCache;
   private final MetricRegistry registry;
 
-  DTimedMetricGroup(String baseName, MetricRegistry registry) {
+  DTimerGroup(String baseName, MetricRegistry registry) {
     this.metricNameCache = new DMetricNameCache(baseName);
     this.registry = registry;
   }
@@ -38,8 +37,8 @@ final class DTimedMetricGroup implements TimedMetricGroup {
    * @return the TimedMetricEvent that has started.
    */
   @Override
-  public TimedEvent start(String name) {
-    TimedMetric timedMetric = timed(name);
+  public Timer.Event start(String name) {
+    Timer timedMetric = timed(name);
     return timedMetric.startEvent();
   }
 
@@ -52,7 +51,7 @@ final class DTimedMetricGroup implements TimedMetricGroup {
 
   @Override
   public void addEventDuration(String name, boolean success, long durationNanos) {
-    TimedMetric timedMetric = timed(name);
+    Timer timedMetric = timed(name);
     timedMetric.addEventDuration(success, durationNanos);
   }
 
@@ -60,17 +59,17 @@ final class DTimedMetricGroup implements TimedMetricGroup {
    * Return the TimedMetric for the specific name.
    */
   @Override
-  public TimedMetric timed(String name) {
+  public Timer timed(String name) {
     // try local cache first to try and avoid the name parse
-    TimedMetric found = cache.get(name);
+    Timer found = cache.get(name);
     if (found != null) {
       return found;
     }
     // parse name and find/create using MetricManager
     String metricName = metricNameCache.get(name);
     // this is safe in that it is single threaded on construction/put
-    TimedMetric timedMetric = registry.timed(metricName);
-    final TimedMetric existing = cache.putIfAbsent(name, timedMetric);
+    Timer timedMetric = registry.timed(metricName);
+    final Timer existing = cache.putIfAbsent(name, timedMetric);
     return (existing != null) ? existing : timedMetric;
   }
 

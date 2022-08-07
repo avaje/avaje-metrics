@@ -1,9 +1,9 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricStatsVisitor;
 
-final class NoopCounterMetric implements CounterMetric {
+final class NoopCounterMetric implements Counter {
 
   private static final NoopCounterStatistics NOOP_STATS = NoopCounterStatistics.INSTANCE;
 

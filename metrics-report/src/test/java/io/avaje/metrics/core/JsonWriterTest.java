@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.avaje.metrics.*;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.report.HeaderInfo;
 import io.avaje.metrics.report.JsonWriteVisitor;
 import io.avaje.metrics.report.JsonWriter;
@@ -39,8 +40,8 @@ class JsonWriterTest {
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
-    CounterMetric counter = createCounterMetric();
-    jsonVisitor.visit((CounterMetric.Stats) collectOne(counter));
+    Counter counter = createCounterMetric();
+    jsonVisitor.visit((Counter.Stats) collectOne(counter));
 
     String counterJson = writer.toString();
 
@@ -52,8 +53,8 @@ class JsonWriterTest {
 
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
-    GaugeDoubleMetric metric = createGaugeMetric();
-    jsonVisitor.visit((GaugeDoubleMetric.Stats) collectOne(metric));
+    GaugeDouble metric = createGaugeMetric();
+    jsonVisitor.visit((GaugeDouble.Stats) collectOne(metric));
     String counterJson = writer.toString();
 
     assertEquals("{\"type\":\"dm\",\"name\":\"org.test.GaugeFoo.doStuff\",\"value\":24.0}", counterJson);
@@ -65,8 +66,8 @@ class JsonWriterTest {
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
 
-    ValueMetric metric = createValueMetric();
-    jsonVisitor.visit((ValueMetric.Stats) collectOne(metric));
+    Meter metric = createValueMetric();
+    jsonVisitor.visit((Meter.Stats) collectOne(metric));
     String counterJson = writer.toString();
 
     assertEquals("{\"type\":\"vm\",\"name\":\"org.test.ValueFoo.doStuff\",\"count\":3,\"mean\":14,\"max\":16,\"total\":42}", counterJson);
@@ -78,7 +79,7 @@ class JsonWriterTest {
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
-    TimedMetric metric = createTimedMetric();
+    Timer metric = createTimedMetric();
     visitAllTimed(metric, jsonVisitor);
 
     String counterJson = writer.toString();
@@ -98,7 +99,7 @@ class JsonWriterTest {
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer).withType(true);
 
-    TimedMetric metric = createBucketTimedMetricFull();
+    Timer metric = createBucketTimedMetricFull();
     visitAllTimed(metric, jsonVisitor);
     String bucketJson = writer.toString();
 
@@ -115,7 +116,7 @@ class JsonWriterTest {
     StringWriter writer = new StringWriter();
     JsonWriter jsonVisitor = newJsonMetricVisitor(writer);
 
-    TimedMetric metric = createBucketTimedMetricPartial();
+    Timer metric = createBucketTimedMetricPartial();
     visitAllTimed(metric, jsonVisitor);
 
     String bucketJson = writer.toString();
@@ -128,7 +129,7 @@ class JsonWriterTest {
 
     List<MetricStats> statistics = collectAll(metric);
     for (MetricStats statistic : statistics) {
-      jsonVisitor.visit((TimedMetric.Stats) statistic);
+      jsonVisitor.visit((Timer.Stats) statistic);
     }
   }
 
@@ -204,28 +205,28 @@ class JsonWriterTest {
     return collector.getList();
   }
 
-  private CounterMetric createCounterMetric() {
-    CounterMetric counter = new DCounterMetric("org.test.CounterFoo.doStuff");
+  private Counter createCounterMetric() {
+    Counter counter = new DCounterMetric("org.test.CounterFoo.doStuff");
     counter.inc(10);
     return counter;
   }
 
-  private GaugeDoubleMetric createGaugeMetric() {
+  private GaugeDouble createGaugeMetric() {
     DoubleSupplier gauge = () -> 24d;
-    return new DGaugeDoubleMetric("org.test.GaugeFoo.doStuff", gauge);
+    return new DGaugeDouble("org.test.GaugeFoo.doStuff", gauge);
   }
 
-  private ValueMetric createValueMetric() {
-    ValueMetric metric = new DValueMetric("org.test.ValueFoo.doStuff");
+  private Meter createValueMetric() {
+    Meter metric = new DMeter("org.test.ValueFoo.doStuff");
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
     return metric;
   }
 
-  private TimedMetric createTimedMetric() {
+  private Timer createTimedMetric() {
 
-    TimedMetric metric = new DTimedMetric("org.test.TimedFoo.doStuff");
+    Timer metric = new DTimer("org.test.TimedFoo.doStuff");
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MICROS); // 100 micros
@@ -236,10 +237,10 @@ class JsonWriterTest {
     return metric;
   }
 
-  private TimedMetric createBucketTimedMetricFull() {
+  private Timer createBucketTimedMetricFull() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    TimedMetric metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150});
+    Timer metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis
@@ -253,10 +254,10 @@ class JsonWriterTest {
   /**
    * Create a BucketTimedMetric with some buckets completely empty
    */
-  private TimedMetric createBucketTimedMetricPartial() {
+  private Timer createBucketTimedMetricPartial() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    TimedMetric metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150, 300});
+    Timer metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150, 300});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis

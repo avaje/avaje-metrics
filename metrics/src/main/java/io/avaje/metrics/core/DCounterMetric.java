@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricStatsVisitor;
 
 
@@ -11,10 +11,10 @@ import io.avaje.metrics.MetricStatsVisitor;
  * via log4j or logback.
  * </p>
  */
-final class DCounterMetric implements CounterMetric {
+final class DCounterMetric implements Counter {
 
   private final String name;
-  private final Counter counter;
+  private final io.avaje.metrics.core.Counter counter;
 
   /**
    * Create the metric with a name and rateUnit.
@@ -25,7 +25,7 @@ final class DCounterMetric implements CounterMetric {
    */
   DCounterMetric(String name) {
     this.name = name;
-    this.counter = new Counter(name);
+    this.counter = new io.avaje.metrics.core.Counter(name);
   }
 
   /**

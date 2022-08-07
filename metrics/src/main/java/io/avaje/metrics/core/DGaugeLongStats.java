@@ -1,10 +1,10 @@
 package io.avaje.metrics.core;
 
 
-import io.avaje.metrics.GaugeLongMetric;
+import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.MetricStatsVisitor;
 
-final class DGaugeLongStats implements GaugeLongMetric.Stats {
+final class DGaugeLongStats implements GaugeLong.Stats {
 
   private final String name;
   private final long value;
@@ -16,7 +16,7 @@ final class DGaugeLongStats implements GaugeLongMetric.Stats {
 
   @Override
   public String toString() {
-    return name.toString();
+    return name;
   }
 
   @Override

@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.report.CsvWriteVisitor;
 import org.junit.jupiter.api.Test;
 
@@ -21,9 +22,9 @@ class CsvWriteVisitorTest {
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
 
-    CounterMetric counter = createCounterMetric();
+    Counter counter = createCounterMetric();
 
-    csvVisitor.visit((CounterMetric.Stats) collect(counter));
+    csvVisitor.visit((Counter.Stats) collect(counter));
     String counterCsv = writer.toString();
 
     assertThat(counterCsv).contains(",org.test.CounterFoo.doStuff,10");
@@ -50,9 +51,9 @@ class CsvWriteVisitorTest {
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
 
-    GaugeDoubleMetric metric = createGaugeMetric();
+    GaugeDouble metric = createGaugeMetric();
 
-    csvVisitor.visit((GaugeDoubleMetric.Stats) collect(metric));
+    csvVisitor.visit((GaugeDouble.Stats) collect(metric));
     String csvContent = writer.toString();
 
     assertThat(csvContent).contains(",org.test.GaugeFoo.doStuff,");
@@ -65,9 +66,9 @@ class CsvWriteVisitorTest {
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
 
-    ValueMetric metric = createValueMetric();
+    Meter metric = createValueMetric();
 
-    csvVisitor.visit((ValueMetric.Stats) collect(metric));
+    csvVisitor.visit((Meter.Stats) collect(metric));
     String csvContent = writer.toString();
 
     assertThat(csvContent).contains(",org.test.ValueFoo.doStuff,");
@@ -84,11 +85,11 @@ class CsvWriteVisitorTest {
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
 
-    TimedMetric metric = createTimedMetric();
+    Timer metric = createTimedMetric();
 
     List<MetricStats> statistics = collectAll(metric);
     for (MetricStats statistic : statistics) {
-      csvVisitor.visit((ValueMetric.Stats) statistic);
+      csvVisitor.visit((Meter.Stats) statistic);
     }
     String csvContent = writer.toString();
     String[] lines = csvContent.split("\n");
@@ -118,7 +119,7 @@ class CsvWriteVisitorTest {
     StringWriter writer = new StringWriter();
     CsvWriteVisitor csvVisitor = createVisitor(writer);
 
-    TimedMetric metric = createBucketTimedMetricFull();
+    Timer metric = createBucketTimedMetricFull();
 
     metric.addEventDuration(false, 220 * NANOS_TO_MILLIS);
     metric.addEventDuration(false, 110 * NANOS_TO_MILLIS);
@@ -127,7 +128,7 @@ class CsvWriteVisitorTest {
 
     List<MetricStats> stats = collectAll(metric);
     for (MetricStats stat : stats) {
-      csvVisitor.visit((TimedMetric.Stats) stat);
+      csvVisitor.visit((Timer.Stats) stat);
     }
     String csvContent = writer.toString();
 
@@ -159,11 +160,11 @@ class CsvWriteVisitorTest {
     CsvWriteVisitor csvVisitor = createVisitor(writer);
 
 
-    TimedMetric metric = createBucketTimedMetricPartial();
+    Timer metric = createBucketTimedMetricPartial();
 
     List<MetricStats> statistics = collectAll(metric);
     for (MetricStats statistic : statistics) {
-      csvVisitor.visit((TimedMetric.Stats) statistic);
+      csvVisitor.visit((Timer.Stats) statistic);
     }
     String csvContent = writer.toString();
 
@@ -178,28 +179,28 @@ class CsvWriteVisitorTest {
   }
 
 
-  private CounterMetric createCounterMetric() {
-    CounterMetric counter = new DCounterMetric("org.test.CounterFoo.doStuff");
+  private Counter createCounterMetric() {
+    Counter counter = new DCounterMetric("org.test.CounterFoo.doStuff");
     counter.inc(10);
     return counter;
   }
 
-  private GaugeDoubleMetric createGaugeMetric() {
+  private GaugeDouble createGaugeMetric() {
     DoubleSupplier gauge = () -> 24d;
-    return new DGaugeDoubleMetric("org.test.GaugeFoo.doStuff", gauge);
+    return new DGaugeDouble("org.test.GaugeFoo.doStuff", gauge);
   }
 
-  private ValueMetric createValueMetric() {
-    ValueMetric metric = new DValueMetric("org.test.ValueFoo.doStuff");
+  private Meter createValueMetric() {
+    Meter metric = new DMeter("org.test.ValueFoo.doStuff");
     metric.addEvent(12);
     metric.addEvent(14);
     metric.addEvent(16);
     return metric;
   }
 
-  private TimedMetric createTimedMetric() {
+  private Timer createTimedMetric() {
 
-    TimedMetric metric = new DTimedMetric("org.test.TimedFoo.doStuff");
+    Timer metric = new DTimer("org.test.TimedFoo.doStuff");
 
     // add duration times in nanos
     long NANOS_TO_MICROS = 1000L;
@@ -211,10 +212,10 @@ class CsvWriteVisitorTest {
     return metric;
   }
 
-  private TimedMetric createBucketTimedMetricFull() {
+  private Timer createBucketTimedMetricFull() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    TimedMetric metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150});
+    Timer metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis
@@ -228,10 +229,10 @@ class CsvWriteVisitorTest {
   /**
    * Create a BucketTimedMetric with some buckets completely empty.
    */
-  private TimedMetric createBucketTimedMetricPartial() {
+  private Timer createBucketTimedMetricPartial() {
 
     BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
-    TimedMetric metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150, 300});
+    Timer metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150, 300});
 
     // add duration times in nanos
     metric.addEventDuration(true, 100 * NANOS_TO_MILLIS); // 100 millis

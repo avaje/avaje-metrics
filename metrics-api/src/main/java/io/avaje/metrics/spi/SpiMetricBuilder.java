@@ -4,10 +4,10 @@ import io.avaje.metrics.*;
 
 public interface SpiMetricBuilder {
 
-  Factory<TimedMetric> timed();
-  Factory<TimedMetric> bucket();
-  Factory<ValueMetric> value();
-  Factory<CounterMetric> counter();
+  Factory<Timer> timed();
+  Factory<Timer> bucket();
+  Factory<Meter> value();
+  Factory<Counter> counter();
 
   /**
    * Factory for creating metrics.

@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 
-import io.avaje.metrics.GaugeLongMetric;
+import io.avaje.metrics.GaugeLong;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +58,7 @@ class JvmCGroupCpuMetricGroupTest {
     assertTrue(period.exists());
 
     JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
-    final GaugeLongMetric metric = me.createCGroupCpuLimit(cpuQuota, period);
+    final GaugeLong metric = me.createCGroupCpuLimit(cpuQuota, period);
     final long limit = metric.value();
     assertThat(limit).isEqualTo(600L);
   }
@@ -70,7 +70,7 @@ class JvmCGroupCpuMetricGroupTest {
     assertTrue(cpuShares.exists());
 
     JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
-    final GaugeLongMetric metric = me.createCGroupCpuRequests(cpuShares);
+    final GaugeLong metric = me.createCGroupCpuRequests(cpuShares);
     final long requests = metric.value();
     assertThat(requests).isEqualTo(200L);
   }

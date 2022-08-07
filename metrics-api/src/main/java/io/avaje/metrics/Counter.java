@@ -3,7 +3,7 @@ package io.avaje.metrics;
 /**
  * Metric based on a counter (long value) typically used to count discrete events.
  * <p>
- * Can be used to count discrete events like 'user login'. {@link ValueMetric} would typically
+ * Can be used to count discrete events like 'user login'. {@link Meter} would typically
  * be used when the event has a value (bytes sent, bytes received, lines read etc).
  * <pre>
  * <code>
@@ -21,7 +21,7 @@ package io.avaje.metrics;
  * </code>
  * </pre>
  */
-public interface CounterMetric extends Metric {
+public interface Counter extends Metric {
 
   /**
    * Increment the counter by 1.
@@ -39,7 +39,7 @@ public interface CounterMetric extends Metric {
   long count();
 
   /**
-   * Statistics provided by the {@link CounterMetric}.
+   * Statistics provided by the {@link Counter}.
    */
   interface Stats extends MetricStats {
 

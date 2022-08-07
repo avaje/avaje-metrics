@@ -1,8 +1,8 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.TimedMetricGroup;
+import io.avaje.metrics.Timer;
+import io.avaje.metrics.TimerGroup;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,18 +11,18 @@ class TimedMetricGroupTest {
 
   @Test
   void test() {
-    TimedMetricGroup timedGroup = MetricManager.timedGroup("org.test.Hello");
+    TimerGroup timedGroup = MetricManager.timerGroup("org.test.Hello");
 
-    TimedMetric timedMetric = timedGroup.timed("one");
+    Timer timedMetric = timedGroup.timed("one");
     assertEquals("org.test.Hello.one", timedMetric.name());
 
 
-    TimedMetric timedMetric2 = timedGroup.timed("one");
+    Timer timedMetric2 = timedGroup.timed("one");
 
     assertSame(timedMetric, timedMetric2);
 
 
-    TimedMetric two = timedGroup.timed("two");
+    Timer two = timedGroup.timed("two");
     assertNotSame(timedMetric, two);
 
     assertEquals("org.test.Hello.two", two.name());

@@ -137,7 +137,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(TimedMetric.Stats metric) {
+  public void visit(Timer.Stats metric) {
 
     try {
       if (thresholdMean > 0) {
@@ -157,7 +157,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(ValueMetric.Stats metric) {
+  public void visit(Meter.Stats metric) {
 
     try {
       writeMetricName(metric, TYPE_VALUE_METRIC);
@@ -169,7 +169,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(CounterMetric.Stats metric) {
+  public void visit(Counter.Stats metric) {
 
     try {
       writeMetricName(metric, TYPE_COUNTER_METRIC);
@@ -181,7 +181,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(GaugeDoubleMetric.Stats metric) {
+  public void visit(GaugeDouble.Stats metric) {
     try {
       writeMetricName(metric, TYPE_DOUBLE_METRIC);
       writeValue(formattedValue(metric.value()));
@@ -192,7 +192,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
   }
 
   @Override
-  public void visit(GaugeLongMetric.Stats metric) {
+  public void visit(GaugeLong.Stats metric) {
     try {
       writeMetricName(metric, TYPE_LONG_METRIC);
       writeValue(String.valueOf(metric.value()));
@@ -202,7 +202,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
     }
   }
 
-  private void writeSummary(ValueMetric.Stats valueStats) throws IOException {
+  private void writeSummary(Meter.Stats valueStats) throws IOException {
 
     long count = valueStats.count();
     write("count", count);

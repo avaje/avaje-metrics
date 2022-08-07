@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeDoubleMetric;
+import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.function.DoubleSupplier;
@@ -9,7 +9,7 @@ import java.util.function.DoubleSupplier;
 /**
  * A Metric that gets its value from a GaugeDouble.
  */
-class DGaugeDoubleMetric implements GaugeDoubleMetric {
+class DGaugeDouble implements GaugeDouble {
 
   protected final String name;
   protected final DoubleSupplier gauge;
@@ -22,15 +22,15 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
    * This will determine the delta increase in underlying value and return that
    * for the value.
    */
-  static DGaugeDoubleMetric incrementing(String name, DoubleSupplier gauge) {
+  static DGaugeDouble incrementing(String name, DoubleSupplier gauge) {
     return new Incrementing(name, gauge);
   }
 
-  DGaugeDoubleMetric(String name, DoubleSupplier gauge) {
+  DGaugeDouble(String name, DoubleSupplier gauge) {
     this(name, gauge, true);
   }
 
-  DGaugeDoubleMetric(String name, DoubleSupplier gauge, boolean reportChangesOnly) {
+  DGaugeDouble(String name, DoubleSupplier gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
@@ -76,7 +76,7 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
   /**
    * Supports monotonically increasing gauges.
    */
-  private static final class Incrementing extends DGaugeDoubleMetric {
+  private static final class Incrementing extends DGaugeDouble {
 
     private double runningValue;
 

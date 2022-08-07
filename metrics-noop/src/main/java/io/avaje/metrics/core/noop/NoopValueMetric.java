@@ -1,9 +1,9 @@
 package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.MetricStatsVisitor;
-import io.avaje.metrics.ValueMetric;
+import io.avaje.metrics.Meter;
 
-class NoopValueMetric implements ValueMetric {
+class NoopValueMetric implements Meter {
 
   private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
 

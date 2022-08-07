@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.TimedEvent;
+import io.avaje.metrics.Timer;
 
 
 /**
@@ -11,17 +11,17 @@ import io.avaje.metrics.TimedEvent;
  * separately.
  * </p>
  */
-final class DTimedMetricEvent implements TimedEvent {
+final class DTimerEvent implements Timer.Event {
 
-  private final DTimedMetric metric;
+  private final DTimer metric;
   private final long startNanos;
 
   /**
    * Create a TimedMetricEvent.
    */
-  DTimedMetricEvent(DTimedMetric metric) {
+  DTimerEvent(DTimer metric) {
     this.metric = metric;
-    this.startNanos = DTimedMetric.tickNanos();
+    this.startNanos = DTimer.tickNanos();
   }
 
   @Override
@@ -59,7 +59,7 @@ final class DTimedMetricEvent implements TimedEvent {
    * Return the duration in nanos.
    */
   private long duration() {
-    return DTimedMetric.tickNanos() - startNanos;
+    return DTimer.tickNanos() - startNanos;
   }
 
 }

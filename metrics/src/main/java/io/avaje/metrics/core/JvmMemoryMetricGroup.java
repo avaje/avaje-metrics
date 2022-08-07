@@ -81,16 +81,16 @@ final class JvmMemoryMetricGroup {
 
     public List<Metric> createMetric(boolean reportChangesOnly) {
       List<Metric> metrics = new ArrayList<>();
-      metrics.add(new DGaugeLongMetric(name("init"), new Init(source), reportChangesOnly));
-      metrics.add(new DGaugeLongMetric(name("used"), new Used(source), reportChangesOnly));
-      metrics.add(new DGaugeLongMetric(name("committed"), new Committed(source), reportChangesOnly));
+      metrics.add(new DGaugeLong(name("init"), new Init(source), reportChangesOnly));
+      metrics.add(new DGaugeLong(name("used"), new Used(source), reportChangesOnly));
+      metrics.add(new DGaugeLong(name("committed"), new Committed(source), reportChangesOnly));
 
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.getUsage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
-        metrics.add(new DGaugeLongMetric(name("max"), new Max(source), reportChangesOnly));
-        metrics.add(new DGaugeLongMetric(name("pct"), new Pct(source), reportChangesOnly));
+        metrics.add(new DGaugeLong(name("max"), new Max(source), reportChangesOnly));
+        metrics.add(new DGaugeLong(name("pct"), new Pct(source), reportChangesOnly));
       }
       return metrics;
     }

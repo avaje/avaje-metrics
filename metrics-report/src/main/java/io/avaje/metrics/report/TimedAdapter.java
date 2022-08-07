@@ -2,7 +2,7 @@ package io.avaje.metrics.report;
 
 import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.MetricSupplier;
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 
 /**
  * Can be used by {@link MetricSupplier} when adapting metrics from an external source.
@@ -10,7 +10,7 @@ import io.avaje.metrics.TimedMetric;
  * By default this is a non-bucket timed metric.
  * </p>
  */
-public class TimedAdapter implements TimedMetric.Stats {
+public class TimedAdapter implements Timer.Stats {
 
   private final String name;
   private final String bucketName;

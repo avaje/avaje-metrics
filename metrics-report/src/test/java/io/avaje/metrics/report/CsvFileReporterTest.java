@@ -1,10 +1,7 @@
 package io.avaje.metrics.report;
 
 import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.TimedEvent;
-import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.report.MetricReportConfig;
-import io.avaje.metrics.report.MetricReportManager;
+import io.avaje.metrics.Timer;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -26,12 +23,12 @@ class CsvFileReporterTest {
 
     MetricReportManager report = new MetricReportManager(config);
 
-    TimedMetric timedMetric = MetricManager.timed("group.type.junk");
+    Timer timedMetric = MetricManager.timer("group.type.junk");
 
     Random random = new Random();
 
     for (int i = 0; i < 50; i++) {
-      TimedEvent event = timedMetric.startEvent();
+      Timer.Event event = timedMetric.startEvent();
       int plus = random.nextInt(20);
       Thread.sleep(20 + plus);
       event.end();

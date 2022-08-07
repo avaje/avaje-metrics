@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricManager;
 import io.avaje.metrics.MetricStats;
@@ -16,7 +16,7 @@ class CounterMetricTest {
   @Test
   void test() {
 
-    CounterMetric counterMetric = MetricManager.counter("org.test.mycountermetric");
+    Counter counterMetric = MetricManager.counter("org.test.mycountermetric");
     assertEquals("org.test.mycountermetric", counterMetric.name());
 
     counterMetric.reset();

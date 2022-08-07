@@ -1,13 +1,13 @@
-package io.avaje.metrics.core.noop;
+package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 
-public class NoopTimedMetricFactory implements SpiMetricBuilder.Factory<Timer> {
+final class TimerFactory implements SpiMetricBuilder.Factory<Timer> {
 
   @Override
   public Timer createMetric(String name, int[] bucketRanges) {
-    return new NoopTimedMetric(name);
+    return new DTimer(name);
   }
 
 }

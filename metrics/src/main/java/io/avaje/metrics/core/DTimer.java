@@ -1,8 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricStatsVisitor;
-import io.avaje.metrics.TimedEvent;
-import io.avaje.metrics.TimedMetric;
+import io.avaje.metrics.Timer;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -14,7 +13,7 @@ import java.util.function.Supplier;
  * collecting time duration and provides separate statistics for success and error completion.
  * </p>
  */
-final class DTimedMetric implements TimedMetric {
+final class DTimer implements Timer {
 
   private static final String noBuckets = "";
 
@@ -23,14 +22,14 @@ final class DTimedMetric implements TimedMetric {
   private final ValueCounter successCounter;
   private final ValueCounter errorCounter;
 
-  DTimedMetric(String name) {
+  DTimer(String name) {
     this.name = name;
     this.bucketRange = noBuckets;
     this.successCounter = new ValueCounter(name);
     this.errorCounter = new ValueCounter(name + ".error");
   }
 
-  DTimedMetric(String name, String bucketRange) {
+  DTimer(String name, String bucketRange) {
     this.name = name;
     this.bucketRange = bucketRange;
     this.successCounter = new ValueCounter(name, bucketRange);
@@ -39,7 +38,7 @@ final class DTimedMetric implements TimedMetric {
 
   @Override
   public String toString() {
-    return name.toString();
+    return name;
   }
 
   @Override
@@ -64,11 +63,11 @@ final class DTimedMetric implements TimedMetric {
 
   @Override
   public void collect(MetricStatsVisitor collector) {
-    Stats errStats = errorCounter.collectStatistics();
+    Stats errStats = errorCounter.collect();
     if (errStats != null) {
       collector.visit(errStats);
     }
-    Stats successStats = successCounter.collectStatistics();
+    Stats successStats = successCounter.collect();
     if (successStats != null) {
       collector.visit(successStats);
     }
@@ -106,13 +105,12 @@ final class DTimedMetric implements TimedMetric {
   /**
    * Start an event.
    * <p>
-   * The {@link TimedEvent#end()} or {@link TimedEvent#endWithError()} are called at the
+   * The {@link Event#end()} or {@link Event#endWithError()} are called at the
    * completion of the timed event.
-   * </p>
    */
   @Override
-  public TimedEvent startEvent() {
-    return new DTimedMetricEvent(this);
+  public Event startEvent() {
+    return new DTimerEvent(this);
   }
 
   /**

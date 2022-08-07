@@ -1,6 +1,6 @@
 package io.avaje.metrics.core.log4j;
 
-import io.avaje.metrics.CounterMetric;
+import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -11,9 +11,9 @@ import org.apache.logging.log4j.core.config.Property;
  */
 public class Log4JMetricAppender extends AbstractAppender {
 
-  private final CounterMetric errorMetric;
+  private final Counter errorMetric;
 
-  private final CounterMetric warnMetric;
+  private final Counter warnMetric;
 
   public Log4JMetricAppender() {
     this("app.log.error", "app.log.warn");
