@@ -1,11 +1,11 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,12 +80,12 @@ class DefaultGaugeDoubleMetricTest {
 
   }
 
-  static class MyGauge implements GaugeDouble {
+  static class MyGauge implements DoubleSupplier {
 
     double value;
 
     @Override
-    public double value() {
+    public double getAsDouble() {
       return value;
     }
 

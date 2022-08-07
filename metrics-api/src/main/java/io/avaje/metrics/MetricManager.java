@@ -4,6 +4,8 @@ import io.avaje.metrics.spi.SpiMetricProvider;
 
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.DoubleSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Manages the creation and registration of Metrics.
@@ -129,14 +131,14 @@ public class MetricManager {
   /**
    * Create and register a GaugeMetric using the gauge supplied using the default registry.
    */
-  public static GaugeDoubleMetric register(String name, GaugeDouble gauge) {
+  public static GaugeDoubleMetric register(String name, DoubleSupplier gauge) {
     return defaultRegistry.register(name, gauge);
   }
 
   /**
    * Create and register a GaugeCounterMetric using the gauge supplied using the default registry.
    */
-  public static GaugeLongMetric register(String name, GaugeLong gauge) {
+  public static GaugeLongMetric register(String name, LongSupplier gauge) {
     return defaultRegistry.register(name, gauge);
   }
 

@@ -1,8 +1,9 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.MetricStatsVisitor;
+
+import java.util.function.LongSupplier;
 
 
 /**
@@ -11,7 +12,7 @@ import io.avaje.metrics.MetricStatsVisitor;
 class DGaugeLongMetric implements GaugeLongMetric {
 
   protected final String name;
-  protected final GaugeLong gauge;
+  protected final LongSupplier gauge;
   protected final boolean reportChangesOnly;
   /**
    * The last reported value.
@@ -24,7 +25,7 @@ class DGaugeLongMetric implements GaugeLongMetric {
    * This will determine the delta increase in underlying value and return that
    * for the value.
    */
-  static DGaugeLongMetric incrementing(String name, GaugeLong gauge) {
+  static DGaugeLongMetric incrementing(String name, LongSupplier gauge) {
     return new Incrementing(name, gauge);
   }
 
@@ -34,11 +35,11 @@ class DGaugeLongMetric implements GaugeLongMetric {
    * @param name  the name of the metric.
    * @param gauge the gauge used to get the value.
    */
-  DGaugeLongMetric(String name, GaugeLong gauge) {
+  DGaugeLongMetric(String name, LongSupplier gauge) {
     this(name, gauge, true);
   }
 
-  DGaugeLongMetric(String name, GaugeLong gauge, boolean reportChangesOnly) {
+  DGaugeLongMetric(String name, LongSupplier gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
@@ -59,15 +60,15 @@ class DGaugeLongMetric implements GaugeLongMetric {
    */
   @Override
   public long value() {
-    return gauge.value();
+    return gauge.getAsLong();
   }
 
   @Override
   public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeLongStats(name, gauge.value()));
+      collector.visit(new DGaugeLongStats(name, gauge.getAsLong()));
     } else {
-      long value = gauge.value();
+      long value = gauge.getAsLong();
       boolean collect = (value != 0 && value != lastReported);
       if (collect) {
         lastReported = value;
@@ -88,7 +89,7 @@ class DGaugeLongMetric implements GaugeLongMetric {
 
     private long runningValue;
 
-    Incrementing(String name, GaugeLong gauge) {
+    Incrementing(String name, LongSupplier gauge) {
       super(name, gauge);
     }
 

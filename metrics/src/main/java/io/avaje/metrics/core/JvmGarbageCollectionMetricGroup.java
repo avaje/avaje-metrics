@@ -1,12 +1,12 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 /**
  * Collect statistics on the rate of garbage collection.
@@ -41,7 +41,7 @@ final class JvmGarbageCollectionMetricGroup {
     return "jvm.gc." + prefix + "." + gcName;
   }
 
-  private static final class Count implements GaugeLong {
+  private static final class Count implements LongSupplier {
 
     final GarbageCollectorMXBean gcMXBean;
 
@@ -50,12 +50,12 @@ final class JvmGarbageCollectionMetricGroup {
     }
 
     @Override
-    public long value() {
+    public long getAsLong() {
       return gcMXBean.getCollectionCount();
     }
   }
 
-  private static final class Time implements GaugeLong {
+  private static final class Time implements LongSupplier {
 
     final GarbageCollectorMXBean gcMXBean;
 
@@ -64,12 +64,12 @@ final class JvmGarbageCollectionMetricGroup {
     }
 
     @Override
-    public long value() {
+    public long getAsLong() {
       return gcMXBean.getCollectionTime();
     }
   }
 
-  private static final class TotalTime implements GaugeLong {
+  private static final class TotalTime implements LongSupplier {
 
     final GarbageCollectorMXBean[] gcMXBeans;
 
@@ -78,7 +78,7 @@ final class JvmGarbageCollectionMetricGroup {
     }
 
     @Override
-    public long value() {
+    public long getAsLong() {
       long total = 0;
       for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
         total += gcMXBean.getCollectionTime();

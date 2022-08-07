@@ -1,12 +1,12 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 final class JvmThreadMetricGroup {
 
@@ -34,7 +34,7 @@ final class JvmThreadMetricGroup {
       return metrics;
     }
 
-    static final class Count implements GaugeLong {
+    static final class Count implements LongSupplier {
       private final ThreadMXBean threadMXBean;
 
       Count(ThreadMXBean threadMXBean) {
@@ -42,12 +42,12 @@ final class JvmThreadMetricGroup {
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         return threadMXBean.getThreadCount();
       }
     }
 
-    static final class Peak implements GaugeLong {
+    static final class Peak implements LongSupplier {
       private final ThreadMXBean threadMXBean;
 
       Peak(ThreadMXBean threadMXBean) {
@@ -55,7 +55,7 @@ final class JvmThreadMetricGroup {
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         // read and reset the peak
         int peakThreadCount = threadMXBean.getPeakThreadCount();
         threadMXBean.resetPeakThreadCount();
@@ -63,7 +63,7 @@ final class JvmThreadMetricGroup {
       }
     }
 
-    static final class Daemon implements GaugeLong {
+    static final class Daemon implements LongSupplier {
       private final ThreadMXBean threadMXBean;
 
       Daemon(ThreadMXBean threadMXBean) {
@@ -71,7 +71,7 @@ final class JvmThreadMetricGroup {
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         return threadMXBean.getDaemonThreadCount();
       }
     }

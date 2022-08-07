@@ -1,12 +1,12 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.GaugeLongMetric;
 import io.avaje.metrics.Metric;
 
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 import static java.math.BigDecimal.valueOf;
 
@@ -94,15 +94,15 @@ final class JvmCGroupCpuMetricGroup {
     metrics.add(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
   }
 
-  private GaugeLongMetric incrementing(String name, GaugeLong gauge) {
+  private GaugeLongMetric incrementing(String name, LongSupplier gauge) {
     return DGaugeLongMetric.incrementing(name, gauge);
   }
 
-  private GaugeLongMetric gauge(String name, GaugeLong gauge, boolean reportChangesOnly) {
+  private GaugeLongMetric gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {
     return new DGaugeLongMetric(name, gauge, reportChangesOnly);
   }
 
-  static final class CpuUsageMicros implements GaugeLong {
+  static final class CpuUsageMicros implements LongSupplier {
 
     private final FileLines source;
 
@@ -111,7 +111,7 @@ final class JvmCGroupCpuMetricGroup {
     }
 
     @Override
-    public long value() {
+    public long getAsLong() {
       return source.singleMicros();
     }
   }
@@ -175,7 +175,7 @@ final class JvmCGroupCpuMetricGroup {
     }
   }
 
-  static final class FixedGauge implements GaugeLong {
+  static final class FixedGauge implements LongSupplier {
 
     private final long value;
 
@@ -184,7 +184,7 @@ final class JvmCGroupCpuMetricGroup {
     }
 
     @Override
-    public long value() {
+    public long getAsLong() {
       return value;
     }
   }

@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 
 import java.lang.management.ManagementFactory;
@@ -8,6 +7,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 final class JvmMemoryMetricGroup {
 
@@ -107,57 +107,57 @@ final class JvmMemoryMetricGroup {
       }
     }
 
-    private static final class Init extends Base implements GaugeLong {
+    private static final class Init extends Base implements LongSupplier {
       Init(MemoryUsageSource source) {
         super(source);
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         return source.getUsage().getInit() / MEGABYTES;
       }
     }
 
-    private static final class Used extends Base implements GaugeLong {
+    private static final class Used extends Base implements LongSupplier {
       Used(MemoryUsageSource source) {
         super(source);
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         return source.getUsage().getUsed() / MEGABYTES;
       }
     }
 
-    private static final class Committed extends Base implements GaugeLong {
+    private static final class Committed extends Base implements LongSupplier {
       Committed(MemoryUsageSource source) {
         super(source);
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         return source.getUsage().getCommitted() / MEGABYTES;
       }
     }
 
-    private static class Max extends Base implements GaugeLong {
+    private static class Max extends Base implements LongSupplier {
       Max(MemoryUsageSource source) {
         super(source);
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         return source.getUsage().getMax() / MEGABYTES;
       }
     }
 
-    private static class Pct extends Base implements GaugeLong {
+    private static class Pct extends Base implements LongSupplier {
       Pct(MemoryUsageSource source) {
         super(source);
       }
 
       @Override
-      public long value() {
+      public long getAsLong() {
         MemoryUsage memoryUsage = source.getUsage();
         return 100 * memoryUsage.getUsed() / memoryUsage.getMax();
       }

@@ -1,11 +1,11 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.LongSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,12 +83,12 @@ class DefaultGaugeLongMetricTest {
     assertEquals(0, incrementing.value());
   }
 
-  static class MyGauge implements GaugeLong {
+  static class MyGauge implements LongSupplier {
 
     long value;
 
     @Override
-    public long value() {
+    public long getAsLong() {
       return value;
     }
 

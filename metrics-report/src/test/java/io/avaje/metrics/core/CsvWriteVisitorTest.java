@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -184,7 +185,7 @@ class CsvWriteVisitorTest {
   }
 
   private GaugeDoubleMetric createGaugeMetric() {
-    GaugeDouble gauge = () -> 24d;
+    DoubleSupplier gauge = () -> 24d;
     return new DGaugeDoubleMetric("org.test.GaugeFoo.doStuff", gauge);
   }
 

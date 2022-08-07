@@ -32,7 +32,7 @@ class JvmCGroupCpuMetricGroupTest {
 
     final JvmCGroupCpuMetricGroup.CpuUsageMicros usageMicros = new JvmCGroupCpuMetricGroup.CpuUsageMicros(source);
 
-    final long value = usageMicros.value();
+    final long value = usageMicros.getAsLong();
     assertThat(value).isEqualTo(55035664L);
   }
 

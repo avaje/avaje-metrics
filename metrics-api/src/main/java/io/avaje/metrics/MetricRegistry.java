@@ -1,6 +1,8 @@
 package io.avaje.metrics;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * The SPI for the underlying implementation that is plugged in via service locator.
@@ -46,12 +48,12 @@ public interface MetricRegistry extends JvmMetrics {
   /**
    * Create and register a GaugeMetric using the gauge supplied (double values).
    */
-  GaugeDoubleMetric register(String name, GaugeDouble gauge);
+  GaugeDoubleMetric register(String name, DoubleSupplier gauge);
 
   /**
    * Create and register a GaugeCounterMetric using the gauge supplied (long values).
    */
-  GaugeLongMetric register(String name, GaugeLong gauge);
+  GaugeLongMetric register(String name, LongSupplier gauge);
 
   /**
    * Add a metric supplier.

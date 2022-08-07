@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.DoubleSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Default implementation of the PluginMetricManager.
@@ -191,12 +193,12 @@ public class DefaultMetricManager implements SpiMetricProvider {
   }
 
   @Override
-  public GaugeDoubleMetric register(String name, GaugeDouble gauge) {
+  public GaugeDoubleMetric register(String name, DoubleSupplier gauge) {
     return put(name, new DGaugeDoubleMetric(name, gauge));
   }
 
   @Override
-  public GaugeLongMetric register(String name, GaugeLong gauge) {
+  public GaugeLongMetric register(String name, LongSupplier gauge) {
     return put(name, (GaugeLongMetric) new DGaugeLongMetric(name, gauge));
   }
 

@@ -1,8 +1,9 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.GaugeDoubleMetric;
 import io.avaje.metrics.MetricStatsVisitor;
+
+import java.util.function.DoubleSupplier;
 
 
 /**
@@ -11,7 +12,7 @@ import io.avaje.metrics.MetricStatsVisitor;
 class DGaugeDoubleMetric implements GaugeDoubleMetric {
 
   protected final String name;
-  protected final GaugeDouble gauge;
+  protected final DoubleSupplier gauge;
   protected final boolean reportChangesOnly;
   private double lastReported;
 
@@ -21,15 +22,15 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
    * This will determine the delta increase in underlying value and return that
    * for the value.
    */
-  static DGaugeDoubleMetric incrementing(String name, GaugeDouble gauge) {
+  static DGaugeDoubleMetric incrementing(String name, DoubleSupplier gauge) {
     return new Incrementing(name, gauge);
   }
 
-  DGaugeDoubleMetric(String name, GaugeDouble gauge) {
+  DGaugeDoubleMetric(String name, DoubleSupplier gauge) {
     this(name, gauge, true);
   }
 
-  DGaugeDoubleMetric(String name, GaugeDouble gauge, boolean reportChangesOnly) {
+  DGaugeDoubleMetric(String name, DoubleSupplier gauge, boolean reportChangesOnly) {
     this.name = name;
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
@@ -50,15 +51,15 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
    */
   @Override
   public double value() {
-    return gauge.value();
+    return gauge.getAsDouble();
   }
 
   @Override
   public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeDoubleStats(name, gauge.value()));
+      collector.visit(new DGaugeDoubleStats(name, gauge.getAsDouble()));
     } else {
-      double value = gauge.value();
+      double value = gauge.getAsDouble();
       boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
       if (collect) {
         lastReported = value;
@@ -79,7 +80,7 @@ class DGaugeDoubleMetric implements GaugeDoubleMetric {
 
     private double runningValue;
 
-    Incrementing(String name, GaugeDouble gauge) {
+    Incrementing(String name, DoubleSupplier gauge) {
       super(name, gauge);
     }
 
