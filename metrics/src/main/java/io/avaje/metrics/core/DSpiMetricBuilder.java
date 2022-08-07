@@ -14,7 +14,7 @@ final class DSpiMetricBuilder implements SpiMetricBuilder {
 
   @Override
   public Factory<Timer> bucket() {
-    return new BucketTimedMetricFactory();
+    return new BucketTimerFactory();
   }
 
   @Override
@@ -24,7 +24,7 @@ final class DSpiMetricBuilder implements SpiMetricBuilder {
 
   @Override
   public Factory<Counter> counter() {
-    return new CounterMetricFactory();
+    return new CounterFactory();
   }
 
 }

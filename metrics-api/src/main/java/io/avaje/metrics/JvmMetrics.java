@@ -8,7 +8,7 @@ package io.avaje.metrics;
  * </p>
  * <pre>{@code
  *
- *   MetricManager.jvmMetrics()
+ *   Metrics.jvmMetrics()
  *     .registerStandardJvmMetrics()
  *     .registerLogbackMetrics();
  *

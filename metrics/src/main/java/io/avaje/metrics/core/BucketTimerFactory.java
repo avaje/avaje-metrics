@@ -3,7 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 
-final class BucketTimedMetricFactory implements SpiMetricBuilder.Factory<Timer> {
+final class BucketTimerFactory implements SpiMetricBuilder.Factory<Timer> {
 
   @Override
   public Timer createMetric(String name, int[] bucketRanges) {
@@ -16,7 +16,7 @@ final class BucketTimedMetricFactory implements SpiMetricBuilder.Factory<Timer> 
       rangeBottom = rangeTop;
     }
     buckets[bucketRanges.length] = createTimedMetric(name, rangeBottom, 0);
-    return new DBucketTimedMetric(name, bucketRanges, buckets);
+    return new DBucketTimer(name, bucketRanges, buckets);
   }
 
   private static Timer createTimedMetric(String name, int rangeBottom, int rangeTop) {

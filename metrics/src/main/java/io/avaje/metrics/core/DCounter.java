@@ -11,7 +11,7 @@ import io.avaje.metrics.MetricStatsVisitor;
  * via log4j or logback.
  * </p>
  */
-final class DCounterMetric implements Counter {
+final class DCounter implements Counter {
 
   private final String name;
   private final io.avaje.metrics.core.Counter counter;
@@ -23,7 +23,7 @@ final class DCounterMetric implements Counter {
    * manor - typically events per hour, minute or second.
    * </p>
    */
-  DCounterMetric(String name) {
+  DCounter(String name) {
     this.name = name;
     this.counter = new io.avaje.metrics.core.Counter(name);
   }

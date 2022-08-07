@@ -180,7 +180,7 @@ class CsvWriteVisitorTest {
 
 
   private Counter createCounterMetric() {
-    Counter counter = new DCounterMetric("org.test.CounterFoo.doStuff");
+    Counter counter = new DCounter("org.test.CounterFoo.doStuff");
     counter.inc(10);
     return counter;
   }
@@ -214,7 +214,7 @@ class CsvWriteVisitorTest {
 
   private Timer createBucketTimedMetricFull() {
 
-    BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
+    BucketTimerFactory factory = new BucketTimerFactory();
     Timer metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150});
 
     // add duration times in nanos
@@ -231,7 +231,7 @@ class CsvWriteVisitorTest {
    */
   private Timer createBucketTimedMetricPartial() {
 
-    BucketTimedMetricFactory factory = new BucketTimedMetricFactory();
+    BucketTimerFactory factory = new BucketTimerFactory();
     Timer metric = factory.createMetric("org.test.BucketTimedFoo.doStuff", new int[]{150, 300});
 
     // add duration times in nanos

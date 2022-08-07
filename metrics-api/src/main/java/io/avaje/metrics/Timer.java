@@ -3,9 +3,11 @@ package io.avaje.metrics;
 import java.util.function.Supplier;
 
 /**
- * A TimedMetric for measuring execution time for methods and events.
+ * A Timer for measuring execution time for methods and events.
+ * <p>
+ * Timers have microsecond precision.
  *
- * <h3>Adding TimedMetric via <code>@Timed</code> and enhancement</h3>
+ * <h3>Adding Timer via <code>@Timed</code> and enhancement</h3>
  * <p>
  * We can use timed metric by putting <code>@Timed</code> annotation on
  * a class. When we do that all public methods of that class will have timing
@@ -16,23 +18,23 @@ import java.util.function.Supplier;
  * <p>
  * We can put <code>@NotTimed</code> on public methods that we don't want timing on.
  *
- * <h3>Adding TimedMetric via code</h3>
+ * <h3>Adding Timer via code</h3>
  * <p>
- * Alternatively we can use TimedMetric via writing code ourselves to get the
- * TimedMetric and use TimedEvent like the following example:
+ * Alternatively we can use Timer via writing code ourselves to get the
+ * Timer and use timer event like the following example:
  *
  * <pre>
  * <code>
- *  TimedMetric metric = MetricManager.timed(MyService.class, "sayHello");
+ *  Timer timer = Metrics.timer(MyService.class, "sayHello");
  *  ...
  *
- *  TimedEvent timedEvent = metric.startEvent();
+ *  Timer.Event event = timer.startEvent();
  *  try {
  *    ...
  *
  *  } finally {
  *    // Add the event to the 'success' statistics
- *    timedEvent.end();
+ *    event.end();
  *  }
  *
  * </code>
@@ -44,7 +46,7 @@ import java.util.function.Supplier;
  *
  * <pre>
  * <code>
- *  TimedMetric metric = MetricManager.timed(MyService.class, "sayHello");
+ *  Timer timer = Metrics.timer(MyService.class, "sayHello");
  *  ...
  *
  *  long startNanos = System.nanoTime();
@@ -52,7 +54,7 @@ import java.util.function.Supplier;
  *    ...
  *
  *  } finally {
- *    metric.add(startNanos);
+ *    timer.add(startNanos);
  *  }
  *
  * </code>
@@ -182,7 +184,7 @@ public interface Timer extends Metric {
 //  Map<String, String> attributes();
 
   /**
-   * Statistics collected by TimedMetric.
+   * Statistics collected by Timer.
    */
   interface Stats extends Meter.Stats {
 
@@ -216,16 +218,16 @@ public interface Timer extends Metric {
    *
    * <pre>
    * <code>
-   *  TimedMetric metric = MetricManager.timed(MyService.class, "sayHello");
+   *  Timer timer = Metrics.timer(MyService.class, "sayHello");
    *  ...
    *
-   *  TimedEvent timedEvent = metric.startEvent();
+   *  Timer.Event event = timer.startEvent();
    *  try {
    *    ...
    *
    *  } finally {
    *    // Add the event to the 'success' statistics
-   *    timedEvent.end();
+   *    event.end();
    *  }
    *
    * </code>

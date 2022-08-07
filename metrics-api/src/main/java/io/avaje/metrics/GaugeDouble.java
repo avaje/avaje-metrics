@@ -2,23 +2,21 @@ package io.avaje.metrics;
 
 /**
  * Metric based on a gauge returning double values.
- * <p>
- * A GaugeDoubleMetric is created by {@link Metrics#register(MetricName, GaugeDouble)}.
  *
  * <p>
  * Example:
  *
  * <pre>
  * <code>
- *   class FreeMemoryGauge implements GaugeDouble {
+ *   class FreeMemoryGauge implements DoubleSupplier {
  *
- *       public double getValue() {
+ *       public double getAsDouble() {
  *         return mxBean.getFreeMemory() / mxBean.getTotalMemory();
  *       }
  *     }
  *
  *
- *   GaugeDoubleMetric gauge = MetricManager.register("jvm.memory.pctfree", freeMemoryGauge);
+ *   GaugeDouble gauge = Metrics.gauge("jvm.memory.pctfree", freeMemoryGauge);
  *
  * </code>
  * </pre>

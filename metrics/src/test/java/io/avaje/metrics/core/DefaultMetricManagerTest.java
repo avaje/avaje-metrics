@@ -43,7 +43,7 @@ class DefaultMetricManagerTest {
   @Test
   void testSetCollection() {
 
-    DefaultMetricManager mgr = new DefaultMetricManager();
+    DefaultMetricProvider mgr = new DefaultMetricProvider();
 
     Timer m0 = mgr.timed(Customer.class.getName() + ".doSomething");
     Timer m0b = mgr.timed("orange.truck.Customer.doSomething");

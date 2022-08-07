@@ -16,12 +16,12 @@ public interface MetricRegistry extends JvmMetrics {
   String name(Class<?> cls, String name);
 
   /**
-   * Return the TimedMetric using the metric name.
+   * Return the timer using the metric name.
    */
   Timer timed(String name);
 
   /**
-   * Return the BucketTimedMetric using the given base metric name and bucketRanges.
+   * Return the bucket timer using the given base metric name and bucketRanges.
    *
    * @param name         The metric name
    * @param bucketRanges Time in milliseconds which are used to create buckets.
@@ -29,31 +29,29 @@ public interface MetricRegistry extends JvmMetrics {
   Timer timed(String name, int... bucketRanges);
 
   /**
-   * Return the CounterMetric using the metric name.
+   * Return the Counter using the metric name.
    */
   Counter counter(String name);
 
   /**
-   * Return the ValueMetric using the metric name.
+   * Return the Meter using the metric name.
    */
   Meter value(String name);
 
   /**
-   * Return the TimedMetricGroup using the given base metric name.
+   * Return the TimerGroup using the given base metric name.
    */
   TimerGroup timedGroup(String baseName);
 
-
+  /**
+   * Create and register a gauge using the supplied double values.
+   */
+  GaugeDouble gauge(String name, DoubleSupplier supplier);
 
   /**
-   * Create and register a GaugeMetric using the gauge supplied (double values).
+   * Create and register a gauge using the supplied long values.
    */
-  GaugeDouble register(String name, DoubleSupplier gauge);
-
-  /**
-   * Create and register a GaugeCounterMetric using the gauge supplied (long values).
-   */
-  GaugeLong register(String name, LongSupplier gauge);
+  GaugeLong gauge(String name, LongSupplier supplier);
 
   /**
    * Add a metric supplier.

@@ -14,9 +14,9 @@ import java.util.function.DoubleSupplier;
 import java.util.function.LongSupplier;
 
 /**
- * Default implementation of the PluginMetricManager.
+ * Default implementation of the SpiMetricProvider.
  */
-public class DefaultMetricManager implements SpiMetricProvider {
+public class DefaultMetricProvider implements SpiMetricProvider {
 
   private static final String JVM = "jvm.";
 
@@ -33,7 +33,7 @@ public class DefaultMetricManager implements SpiMetricProvider {
 
   private final List<MetricSupplier> suppliers = new ArrayList<>();
 
-  public DefaultMetricManager() {
+  public DefaultMetricProvider() {
     SpiMetricBuilder builder = initBuilder();
     this.bucketTimedMetricFactory = builder.bucket();
     this.timedMetricFactory = builder.timed();
@@ -41,7 +41,7 @@ public class DefaultMetricManager implements SpiMetricProvider {
     this.counterMetricFactory = builder.counter();
   }
 
-  DefaultMetricManager(DefaultMetricManager parent) {
+  DefaultMetricProvider(DefaultMetricProvider parent) {
     this.bucketTimedMetricFactory = parent.bucketTimedMetricFactory;
     this.timedMetricFactory = parent.timedMetricFactory;
     this.valueMetricFactory = parent.valueMetricFactory;
@@ -68,7 +68,7 @@ public class DefaultMetricManager implements SpiMetricProvider {
 
   @Override
   public MetricRegistry createRegistry() {
-    return new DefaultMetricManager(this);
+    return new DefaultMetricProvider(this);
   }
 
   @Override
@@ -175,31 +175,31 @@ public class DefaultMetricManager implements SpiMetricProvider {
 
   @Override
   public Timer timed(String name) {
-    return (Timer) getMetric(name, timedMetricFactory);
+    return (Timer) metric(name, timedMetricFactory);
   }
 
   @Override
   public Timer timed(String name, int... bucketRanges) {
-    return (Timer) getMetric(name, bucketTimedMetricFactory, bucketRanges);
+    return (Timer) metric(name, bucketTimedMetricFactory, bucketRanges);
   }
 
   @Override
   public Counter counter(String name) {
-    return (Counter) getMetric(name, counterMetricFactory);
+    return (Counter) metric(name, counterMetricFactory);
   }
 
   @Override
   public Meter value(String name) {
-    return (Meter) getMetric(name, valueMetricFactory);
+    return (Meter) metric(name, valueMetricFactory);
   }
 
   @Override
-  public GaugeDouble register(String name, DoubleSupplier gauge) {
-    return put(name, new DGaugeDouble(name, gauge));
+  public GaugeDouble gauge(String name, DoubleSupplier supplier) {
+    return put(name, new DGaugeDouble(name, supplier));
   }
 
   @Override
-  public GaugeLong register(String name, LongSupplier gauge) {
+  public GaugeLong gauge(String name, LongSupplier gauge) {
     return put(name, (GaugeLong) new DGaugeLong(name, gauge));
   }
 
@@ -212,11 +212,11 @@ public class DefaultMetricManager implements SpiMetricProvider {
     return metric;
   }
 
-  private Metric getMetric(String name, SpiMetricBuilder.Factory<?> factory) {
-    return getMetric(name, factory, null);
+  private Metric metric(String name, SpiMetricBuilder.Factory<?> factory) {
+    return metric(name, factory, null);
   }
 
-  private Metric getMetric(String name, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+  private Metric metric(String name, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
     // try lock free get first
     Metric metric = metricsCache.get(name);
     if (metric == null) {

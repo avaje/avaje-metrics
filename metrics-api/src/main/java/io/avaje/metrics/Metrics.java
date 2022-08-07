@@ -10,6 +10,8 @@ import java.util.function.LongSupplier;
 /**
  * Manages the creation and registration of Metrics.
  * <p>
+ * Provides access to the global default registry.
+ * <p>
  * Provides methods to allow agents to go through the registered metrics and gather/report the
  * statistics.
  */
@@ -27,7 +29,7 @@ public class Metrics {
   }
 
   /**
-   * Create a new registry to attach metrics to.
+   * Create a new registry to create and register metrics to.
    */
   public static MetricRegistry createRegistry() {
     return defaultRegistry.createRegistry();
@@ -48,7 +50,7 @@ public class Metrics {
   }
 
   /**
-   * Create a MetricName based on a class and name.
+   * Create a name based on a class and name suffix.
    * <p>
    * Often the name maps to a method name.
    */
@@ -57,56 +59,56 @@ public class Metrics {
   }
 
   /**
-   * Return a BucketTimedMetric given the name and bucket ranges using the default registry.
+   * Return a bucket timer given the name and bucket ranges using the default registry.
    */
   public static Timer timer(Class<?> cls, String name, int... bucketRanges) {
     return timer(name(cls, name), bucketRanges);
   }
 
   /**
-   * Return a BucketTimedMetric given the name and bucket ranges using the default registry.
+   * Return a bucket timer given the name and bucket ranges using the default registry.
    */
   public static Timer timer(String name, int... bucketRanges) {
     return defaultRegistry.timed(name, bucketRanges);
   }
 
   /**
-   * Return a TimedMetric given the name using the default registry.
+   * Return a Timer given the name using the default registry.
    */
   public static Timer timer(String name) {
     return defaultRegistry.timed(name);
   }
 
   /**
-   * Return a TimedMetric using the Class, name to derive the MetricName using the default registry.
+   * Return a Timer using the class, name to derive the MetricName using the default registry.
    */
   public static Timer timer(Class<?> cls, String eventName) {
     return timer(name(cls, eventName));
   }
 
   /**
-   * Return a CounterMetric given the name using the default registry.
+   * Return a Counter given the name using the default registry.
    */
   public static Counter counter(String name) {
     return defaultRegistry.counter(name);
   }
 
   /**
-   * Return a CounterMetric using the Class and name to derive the MetricName using the default registry.
+   * Return a Counter using the class and name to derive the name using the default registry.
    */
   public static Counter counter(Class<?> cls, String eventName) {
     return counter(name(cls, eventName));
   }
 
   /**
-   * Return a ValueMetric given the name using the default registry.
+   * Return a Meter given the name using the default registry.
    */
   public static Meter meter(String name) {
     return defaultRegistry.value(name);
   }
 
   /**
-   * Return a Meter using the Class and name to derive the MetricName using the default registry.
+   * Return a Meter using the class and name using the default registry.
    */
   public static Meter meter(Class<?> cls, String eventName) {
     return meter(name(cls, eventName));
@@ -121,25 +123,23 @@ public class Metrics {
 
   /**
    * Return the TimerGroup with a class providing the base metric name using the default registry.
-   * <p>
-   * The package name is the 'group' and the simple class name the 'type'.
    */
   public static TimerGroup timerGroup(Class<?> cls) {
     return timerGroup(cls.getName());
   }
 
   /**
-   * Create and register a GaugeMetric using the gauge supplied using the default registry.
+   * Create and register a gauge with the supplied values using the default registry.
    */
-  public static GaugeDouble gauge(String name, DoubleSupplier gauge) {
-    return defaultRegistry.register(name, gauge);
+  public static GaugeDouble gauge(String name, DoubleSupplier supplier) {
+    return defaultRegistry.gauge(name, supplier);
   }
 
   /**
-   * Create and register a GaugeCounterMetric using the gauge supplied using the default registry.
+   * Create and register a gauge with the supplied long values using the default registry.
    */
-  public static GaugeLong gauge(String name, LongSupplier gauge) {
-    return defaultRegistry.register(name, gauge);
+  public static GaugeLong gauge(String name, LongSupplier supplier) {
+    return defaultRegistry.gauge(name, supplier);
   }
 
   /**

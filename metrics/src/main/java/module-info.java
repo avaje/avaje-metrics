@@ -1,3 +1,4 @@
+import io.avaje.metrics.core.DefaultMetricProvider;
 import io.avaje.metrics.spi.SpiMetricProvider;
 
 module io.avaje.metrics {
@@ -6,6 +7,6 @@ module io.avaje.metrics {
   requires static java.management;
 
   uses io.avaje.metrics.spi.SpiMetricBuilder;
-  provides SpiMetricProvider with io.avaje.metrics.core.DefaultMetricManager;
+  provides SpiMetricProvider with DefaultMetricProvider;
 
 }

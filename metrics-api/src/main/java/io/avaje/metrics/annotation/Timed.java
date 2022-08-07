@@ -56,7 +56,7 @@ public @interface Timed {
    *    300+       milliseconds
    * </pre>
    * <p>
-   * Defining buckets means a BucketTimedMetric will be used instead of a TimedMetric.
+   * Defining buckets means a bucket tTimer will be used instead of a Timer.
    */
   int[] buckets() default {};
 }

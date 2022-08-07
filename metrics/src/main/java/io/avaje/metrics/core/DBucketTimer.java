@@ -8,14 +8,14 @@ import java.util.function.Supplier;
 /**
  * Default implementation of BucketTimedMetric.
  */
-final class DBucketTimedMetric implements Timer {
+final class DBucketTimer implements Timer {
 
   private final String metricName;
   private final int[] bucketRanges;
   private final Timer[] buckets;
   private final int lastBucketIndex;
 
-  DBucketTimedMetric(String metricName, int[] bucketRanges, Timer[] buckets) {
+  DBucketTimer(String metricName, int[] bucketRanges, Timer[] buckets) {
     this.metricName = metricName;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
@@ -143,10 +143,10 @@ final class DBucketTimedMetric implements Timer {
 
   protected static final class Event implements Timer.Event {
 
-    private final DBucketTimedMetric metric;
+    private final DBucketTimer metric;
     private final long startNanos;
 
-    Event(DBucketTimedMetric metric) {
+    Event(DBucketTimer metric) {
       this.metric = metric;
       this.startNanos = System.nanoTime();
     }

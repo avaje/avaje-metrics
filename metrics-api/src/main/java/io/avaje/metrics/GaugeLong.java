@@ -2,23 +2,21 @@ package io.avaje.metrics;
 
 /**
  * Metric based on an underlying gauge that reports long values.
- * <p>
- * A GaugeLongMetric is created by {@link Metrics#register(MetricName, GaugeLong)}.
  *
  * <p>
  * Example:
  *
  * <pre>
  * <code>
- *   class ThreadCountGauge implements GaugeLong {
+ *   class ThreadCountGauge implements LongSupplier {
  *
- *       public long getValue() {
+ *       public long getAsLong() {
  *         return threadMXBean.getThreadCount();
  *       }
  *     }
  *
  *
- *   GaugeLongMetric gauge = MetricManager.register("jvm.thread.count", threadCountGauge);
+ *   GaugeLong gauge = Metrics.gauge("jvm.thread.count", threadCountGauge);
  *
  * </code>
  * </pre>

@@ -8,7 +8,7 @@ package io.avaje.metrics;
  * <pre>
  * <code>
  *  // Declare the counter (typically as a static field)
- *  static final CounterMetric userLoginCounter = MetricManager.counter(MyService.class, "userLogin");
+ *  static final Counter userLoginCounter = Metrics.counter(MyService.class, "userLogin");
  *  ...
  *
  *  void performUserLogin() {

@@ -1,7 +1,7 @@
 package io.avaje.metrics;
 
 /**
- * A group of TimedMetric that share a common base name.
+ * A group of timers that share a common base name.
  * <p>
  * This is intended to be used when the full metric name is determined at runtime.
  */
@@ -10,19 +10,15 @@ public interface TimerGroup {
   /**
    * Start the event for the given name.
    * <p>
-   * The group and type parts of the metric name are common and the metrics only differ by this
-   * name.
-   * <p>
-   * Typically the underlying implementation uses a cache to lookup the TimedMetric and create it if
-   * necessary.
+   * The group and type parts of the metric name are common and the metrics only differ by this name.
    *
    * @param name the specific name for the metric (group and type name parts are common).
-   * @return the TimedMetricEvent that has started.
+   * @return the timer event that has started.
    */
   Timer.Event start(String name);
 
   /**
-   * Return the TimedMetric for the specific name.
+   * Return the Timer for the specific name.
    */
   Timer timed(String name);
 

@@ -1,1 +1,1 @@
-io.avaje.metrics.core.DefaultMetricManager
+io.avaje.metrics.core.DefaultMetricProvider

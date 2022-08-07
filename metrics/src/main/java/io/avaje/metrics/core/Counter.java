@@ -62,7 +62,7 @@ final class Counter {
    * Return the current statistics reseting the internal values.
    */
   private io.avaje.metrics.Counter.Stats stats() {
-    return new DCounterMetric.DStats(name, count.sumThenReset());
+    return new DCounter.DStats(name, count.sumThenReset());
   }
 
   /**

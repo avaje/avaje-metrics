@@ -7,7 +7,7 @@ package io.avaje.metrics;
  * <pre>
  * <code>
  *  // Declare the metric (typically as a static field)
- *  static final ValueMetric totalBytesSentMetric = MetricManager.value(MyService.class, "totalBytesSent");
+ *  static final Meter totalBytesSentMetric = Metrics.meter(MyService.class, "totalBytesSent");
  *  ...
  *
  *  public void performSomeIO() {
@@ -49,7 +49,7 @@ public interface Meter extends Metric {
   long mean();
 
   /**
-   * Statistics collected by ValueMetric or TimedMetric.
+   * Statistics collected by Meter or Timer.
    */
   interface Stats extends MetricStats {
 
