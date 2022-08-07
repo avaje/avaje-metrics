@@ -1,8 +1,8 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metrics;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.Timer;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ class TimedMetricTest {
 
     assertEquals("org.test.mytimed", metric.name());
 
-    metric.add(start, useContext);
+    metric.add(start);//, useContext);
     metric.addEventSince(true, start);
 
     List<MetricStats> stats = registry.collectMetrics();
@@ -39,9 +39,9 @@ class TimedMetricTest {
     assertThat(stat0.max()).isGreaterThan(0);
 
 
-    metric.addErr(start, useContext);
+    metric.addErr(start);//, useContext);
     metric.addEventSince(false, start);
-    metric.addErr(start, useContext);
+    metric.addErr(start);//, useContext);
 
     stats = registry.collectMetrics();
     stat0 = (Timer.Stats) stats.get(0);
@@ -50,9 +50,9 @@ class TimedMetricTest {
     assertEquals(3, stat0.count());
     assertThat(stat0.total()).isGreaterThan(0);
 
-    metric.add(start, useContext);
-    metric.addErr(start, useContext);
-    metric.addErr(start, useContext);
+    metric.add(start);//, useContext);
+    metric.addErr(start);//, useContext);
+    metric.addErr(start);//, useContext);
 
     stats = registry.collectMetrics();
     stat0 = (Timer.Stats) stats.get(0);

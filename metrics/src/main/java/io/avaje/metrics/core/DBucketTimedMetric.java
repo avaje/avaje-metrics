@@ -101,26 +101,26 @@ final class DBucketTimedMetric implements Timer {
     addEventSince(true, startNanos);
   }
 
-  @Override
-  public void add(long startNanos, boolean activeThreadContext) {
-    addEventSince(true, startNanos);
-//    if (activeThreadContext) {
-//      NestedContext.pop();
-//    }
-  }
+//  @Override
+//  public void add(long startNanos, boolean activeThreadContext) {
+//    addEventSince(true, startNanos);
+////    if (activeThreadContext) {
+////      NestedContext.pop();
+////    }
+//  }
 
   @Override
   public void addErr(long startNanos) {
     addEventSince(false, startNanos);
   }
 
-  @Override
-  public void addErr(long startNanos, boolean activeThreadContext) {
-    addEventSince(false, startNanos);
-//    if (activeThreadContext) {
-//      NestedContext.pop();
-//    }
-  }
+//  @Override
+//  public void addErr(long startNanos, boolean activeThreadContext) {
+//    addEventSince(false, startNanos);
+////    if (activeThreadContext) {
+////      NestedContext.pop();
+////    }
+//  }
 
   @Override
   public String name() {

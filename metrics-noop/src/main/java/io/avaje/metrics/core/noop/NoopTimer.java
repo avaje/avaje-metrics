@@ -5,15 +5,15 @@ import io.avaje.metrics.Timer;
 
 import java.util.function.Supplier;
 
-public class NoopTimedMetric implements Timer {
+public class NoopTimer implements Timer {
 
-  private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
+  private static final NoopTimerEvent NOOP_TIMED_EVENT = new NoopTimerEvent();
 
   //private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
 
   private final String metricName;
 
-  public NoopTimedMetric(String metricName) {
+  public NoopTimer(String metricName) {
     this.metricName = metricName;
   }
 
@@ -92,20 +92,20 @@ public class NoopTimedMetric implements Timer {
 
   }
 
-  @Override
-  public void add(long startNanos, boolean activeThreadContext) {
-
-  }
+//  @Override
+//  public void add(long startNanos, boolean activeThreadContext) {
+//
+//  }
 
   @Override
   public void addErr(long startNanos) {
 
   }
 
-  @Override
-  public void addErr(long startNanos, boolean activeThreadContext) {
-
-  }
+//  @Override
+//  public void addErr(long startNanos, boolean activeThreadContext) {
+//
+//  }
 
 //  @Override
 //  public Map<String, String> attributes() {

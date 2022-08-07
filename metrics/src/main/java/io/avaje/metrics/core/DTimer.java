@@ -11,7 +11,6 @@ import java.util.function.Supplier;
  * <p>
  * The major difference compared with ValueMetric is that it is specifically oriented towards
  * collecting time duration and provides separate statistics for success and error completion.
- * </p>
  */
 final class DTimer implements Timer {
 
@@ -117,7 +116,6 @@ final class DTimer implements Timer {
    * Add an event duration in nanoseconds noting if it was a success or failure result.
    * <p>
    * Success and failure statistics are kept separately.
-   * </p>
    */
   @Override
   public void addEventDuration(boolean success, long durationNanos) {
@@ -141,24 +139,24 @@ final class DTimer implements Timer {
     successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
 
-  @Override
-  public void add(long startNanos, boolean activeThreadContext) {
-    successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
-//    if (activeThreadContext) {
-//      NestedContext.pop();
-//    }
-  }
+//  @Override
+//  public void add(long startNanos, boolean activeThreadContext) {
+//    successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
+////    if (activeThreadContext) {
+////      NestedContext.pop();
+////    }
+//  }
 
   @Override
   public void addErr(long startNanos) {
     errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
 
-  @Override
-  public void addErr(long startNanos, boolean activeThreadContext) {
-    errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
-//    if (activeThreadContext) {
-//      NestedContext.pop();
-//    }
-  }
+//  @Override
+//  public void addErr(long startNanos, boolean activeThreadContext) {
+//    errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
+////    if (activeThreadContext) {
+////      NestedContext.pop();
+////    }
+//  }
 }

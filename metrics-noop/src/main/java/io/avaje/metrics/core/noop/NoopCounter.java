@@ -3,13 +3,13 @@ package io.avaje.metrics.core.noop;
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricStatsVisitor;
 
-final class NoopCounterMetric implements Counter {
+final class NoopCounter implements Counter {
 
-  private static final NoopCounterStatistics NOOP_STATS = NoopCounterStatistics.INSTANCE;
+  private static final NoopCounterStats NOOP_STATS = NoopCounterStats.INSTANCE;
 
   protected final String metricName;
 
-  NoopCounterMetric(String metricName) {
+  NoopCounter(String metricName) {
     this.metricName = metricName;
   }
 

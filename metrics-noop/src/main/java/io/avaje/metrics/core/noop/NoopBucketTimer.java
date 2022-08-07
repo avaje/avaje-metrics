@@ -5,18 +5,18 @@ import io.avaje.metrics.Timer;
 
 import java.util.function.Supplier;
 
-class NoopBucketTimedMetric implements Timer {
+class NoopBucketTimer implements Timer {
 
   private static final int[] noRange = {};
 
   private static final Timer[] noBuckets = new Timer[0];
 
-  private static final NoopTimedEvent NOOP_TIMED_EVENT = new NoopTimedEvent();
+  private static final NoopTimerEvent NOOP_TIMED_EVENT = new NoopTimerEvent();
 
   private final String name;
 
 
-  NoopBucketTimedMetric(String name) {
+  NoopBucketTimer(String name) {
     this.name = name;
   }
 
@@ -75,20 +75,20 @@ class NoopBucketTimedMetric implements Timer {
     // do nothing
   }
 
-  @Override
-  public void add(long startNanos, boolean activeThreadContext) {
-    // do nothing
-  }
+//  @Override
+//  public void add(long startNanos, boolean activeThreadContext) {
+//    // do nothing
+//  }
 
   @Override
   public void addErr(long startNanos) {
     // do nothing
   }
 
-  @Override
-  public void addErr(long startNanos, boolean activeThreadContext) {
-    // do nothing
-  }
+//  @Override
+//  public void addErr(long startNanos, boolean activeThreadContext) {
+//    // do nothing
+//  }
 
 //  @Override
 //  public void setRequestTiming(int collectionCount) {

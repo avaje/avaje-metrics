@@ -9,22 +9,22 @@ final class NoopMetricBuilder implements SpiMetricBuilder {
 
   @Override
   public Factory<Timer> timed() {
-    return new NoopTimedMetricFactory();
+    return new NoopTimerFactory();
   }
 
   @Override
   public Factory<Timer> bucket() {
-    return new NoopBucketTimedFactory();
+    return new NoopBucketTimerFactory();
   }
 
   @Override
   public Factory<Meter> value() {
-    return new NoopValueMetricFactory();
+    return new NoopMeterFactory();
   }
 
   @Override
   public Factory<Counter> counter() {
-    return new NoopCounterMetricFactory();
+    return new NoopCounterFactory();
   }
 
 }

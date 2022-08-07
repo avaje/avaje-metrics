@@ -2,7 +2,7 @@ package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.Timer;
 
-class NoopTimedEvent implements Timer.Event {
+class NoopTimerEvent implements Timer.Event {
 
   @Override
   public void end(boolean withSuccess) {

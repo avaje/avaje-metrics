@@ -100,10 +100,10 @@ public interface Timer extends Metric {
    */
   void add(long startNanos);
 
-  /**
-   * Add a successful event duration with request timing.
-   */
-  void add(long startNanos, boolean requestTiming);
+//  /**
+//   * Add a successful event duration with request timing.
+//   */
+//  void add(long startNanos, boolean requestTiming);
 
   /**
    * Add an error event duration to the error.
@@ -112,12 +112,12 @@ public interface Timer extends Metric {
    */
   void addErr(long startNanos);
 
-  /**
-   * Add an error event duration with request timing.
-   * <p>
-   * Success and error execution are kept on separate metrics.
-   */
-  void addErr(long startNanos, boolean requestTiming);
+//  /**
+//   * Add an error event duration with request timing.
+//   * <p>
+//   * Success and error execution are kept on separate metrics.
+//   */
+//  void addErr(long startNanos, boolean requestTiming);
 
   /**
    * Add an event duration in nanoseconds noting if it was a success or failure result.

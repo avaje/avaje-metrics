@@ -6,9 +6,9 @@ import io.avaje.metrics.MetricStatsVisitor;
 /**
  * A NOOP placeholder for ValueStatistics.
  */
-class NoopValueStatistics implements Meter.Stats {
+class NoopMeterStats implements Meter.Stats {
 
-  static NoopValueStatistics INSTANCE = new NoopValueStatistics();
+  static NoopMeterStats INSTANCE = new NoopMeterStats();
 
   @Override
   public long count() {

@@ -3,9 +3,9 @@ package io.avaje.metrics.core.noop;
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricStatsVisitor;
 
-final class NoopCounterStatistics implements Counter.Stats {
+final class NoopCounterStats implements Counter.Stats {
 
-  static final NoopCounterStatistics INSTANCE = new NoopCounterStatistics();
+  static final NoopCounterStats INSTANCE = new NoopCounterStats();
 
   @Override
   public void visit(MetricStatsVisitor visitor) {
