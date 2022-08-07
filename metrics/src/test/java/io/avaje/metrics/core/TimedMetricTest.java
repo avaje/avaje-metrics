@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.Timer;
@@ -17,7 +17,7 @@ class TimedMetricTest {
   @Test
   void add() {
 
-    MetricRegistry registry = MetricManager.createRegistry();
+    MetricRegistry registry = Metrics.createRegistry();
     Timer metric = registry.timed("org.test.mytimed");
 
     boolean useContext = false;//metric.isRequestTiming();
@@ -66,7 +66,7 @@ class TimedMetricTest {
   }
 
   private void resetStatistics() {
-    MetricManager.collectMetrics();
+    Metrics.collectMetrics();
   }
 
   @Test
@@ -74,12 +74,12 @@ class TimedMetricTest {
 
     resetStatistics();
 
-    Timer metric = MetricManager.timer("test.runnable");
+    Timer metric = Metrics.timer("test.runnable");
     metric.time(() -> {
       System.out.println("here");
     });
 
-    final List<MetricStats> stats = MetricManager.collectMetrics();
+    final List<MetricStats> stats = Metrics.collectMetrics();
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
     assertEquals("test.runnable", stat0.name());
@@ -100,14 +100,14 @@ class TimedMetricTest {
 
     resetStatistics();
 
-    Timer metric = MetricManager.timer("test.runnable");
+    Timer metric = Metrics.timer("test.runnable");
 
     try {
       metric.time(this::runAndThrow);
       fail();
     } catch (NullPointerException e) {
 
-      final List<MetricStats> stats = MetricManager.collectMetrics();
+      final List<MetricStats> stats = Metrics.collectMetrics();
       Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
       assertEquals("test.runnable.error", stat0.name());
@@ -126,13 +126,13 @@ class TimedMetricTest {
   @Test
   void timeCallable_when_error() {
     resetStatistics();
-    Timer metric = MetricManager.timer("test.callable");
+    Timer metric = Metrics.timer("test.callable");
     try {
       metric.time(this::callAndThrow);
       fail();
     } catch (Exception e) {
 
-      final List<MetricStats> stats = MetricManager.collectMetrics();
+      final List<MetricStats> stats = Metrics.collectMetrics();
       Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
       assertEquals("test.callable.error", stat0.name());
@@ -146,12 +146,12 @@ class TimedMetricTest {
   @Test
   void timeCallable_when_success() {
     resetStatistics();
-    Timer metric = MetricManager.timer("test.callable");
+    Timer metric = Metrics.timer("test.callable");
 
     String out = metric.time(() -> "foo");
     assertEquals("foo", out);
 
-    final List<MetricStats> stats = MetricManager.collectMetrics();
+    final List<MetricStats> stats = Metrics.collectMetrics();
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
     assertEquals("test.callable", stat0.name());

@@ -1,12 +1,12 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 
 final class DefaultMetricStatisticsAsJson implements MetricStatisticsAsJson {
 
   @Override
   public void write(Appendable appendable) {
-    JsonWriter.writeTo(appendable, MetricManager.collectMetrics());
+    JsonWriter.writeTo(appendable, Metrics.collectMetrics());
   }
 
   @Override

@@ -1,7 +1,7 @@
 package io.avaje.metrics.core.log4j;
 
 import io.avaje.metrics.Counter;
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
@@ -21,8 +21,8 @@ public class Log4JMetricAppender extends AbstractAppender {
 
   public Log4JMetricAppender(String errorName, String warnName) {
     super("metrics", null, null, true, Property.EMPTY_ARRAY);
-    this.errorMetric = MetricManager.counter(errorName);
-    this.warnMetric = MetricManager.counter(warnName);
+    this.errorMetric = Metrics.counter(errorName);
+    this.warnMetric = Metrics.counter(warnName);
   }
 
   @Override

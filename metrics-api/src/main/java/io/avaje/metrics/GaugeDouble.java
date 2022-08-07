@@ -3,7 +3,7 @@ package io.avaje.metrics;
 /**
  * Metric based on a gauge returning double values.
  * <p>
- * A GaugeDoubleMetric is created by {@link MetricManager#register(MetricName, GaugeDouble)}.
+ * A GaugeDoubleMetric is created by {@link Metrics#register(MetricName, GaugeDouble)}.
  *
  * <p>
  * Example:

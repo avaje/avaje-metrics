@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.Timer;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ class CsvFileReporterTest {
 
     MetricReportManager report = new MetricReportManager(config);
 
-    Timer timedMetric = MetricManager.timer("group.type.junk");
+    Timer timedMetric = Metrics.timer("group.type.junk");
 
     Random random = new Random();
 

@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import io.avaje.metrics.Counter;
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 
 /**
  * Logback appender that counts errors and warnings.
@@ -20,8 +20,8 @@ public final class LogbackMetricAppender extends AppenderBase<ILoggingEvent> {
   }
 
   public LogbackMetricAppender(String errorName, String warnName) {
-    this.errorMetric = MetricManager.counter(errorName);
-    this.warnMetric = MetricManager.counter(warnName);
+    this.errorMetric = Metrics.counter(errorName);
+    this.warnMetric = Metrics.counter(warnName);
   }
 
   /**

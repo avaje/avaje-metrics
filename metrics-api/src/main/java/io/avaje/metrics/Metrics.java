@@ -13,7 +13,7 @@ import java.util.function.LongSupplier;
  * Provides methods to allow agents to go through the registered metrics and gather/report the
  * statistics.
  */
-public class MetricManager {
+public class Metrics {
 
   private static final SpiMetricProvider defaultRegistry = initialiseProvider();
 

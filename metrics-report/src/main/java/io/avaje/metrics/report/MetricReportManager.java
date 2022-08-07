@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.MetricSupplier;
 import org.slf4j.Logger;
@@ -224,7 +224,7 @@ public class MetricReportManager {
    * Collect all the non-empty metrics and return them for reporting.
    */
   protected List<MetricStats> collectMetrics() {
-    List<MetricStats> metrics = sort(MetricManager.collectMetrics());
+    List<MetricStats> metrics = sort(Metrics.collectMetrics());
     for (MetricSupplier supplier : suppliers) {
       metrics.addAll(supplier.collectMetrics());
     }

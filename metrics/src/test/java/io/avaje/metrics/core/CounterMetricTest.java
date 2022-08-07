@@ -2,7 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ class CounterMetricTest {
   @Test
   void test() {
 
-    Counter counterMetric = MetricManager.counter("org.test.mycountermetric");
+    Counter counterMetric = Metrics.counter("org.test.mycountermetric");
     assertEquals("org.test.mycountermetric", counterMetric.name());
 
     counterMetric.reset();

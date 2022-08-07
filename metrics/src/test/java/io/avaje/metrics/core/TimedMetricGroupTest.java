@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.TimerGroup;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ class TimedMetricGroupTest {
 
   @Test
   void test() {
-    TimerGroup timedGroup = MetricManager.timerGroup("org.test.Hello");
+    TimerGroup timedGroup = Metrics.timerGroup("org.test.Hello");
 
     Timer timedMetric = timedGroup.timed("one");
     assertEquals("org.test.Hello.one", timedMetric.name());

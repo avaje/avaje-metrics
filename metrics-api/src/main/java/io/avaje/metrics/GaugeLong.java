@@ -3,7 +3,7 @@ package io.avaje.metrics;
 /**
  * Metric based on an underlying gauge that reports long values.
  * <p>
- * A GaugeLongMetric is created by {@link MetricManager#register(MetricName, GaugeLong)}.
+ * A GaugeLongMetric is created by {@link Metrics#register(MetricName, GaugeLong)}.
  *
  * <p>
  * Example:

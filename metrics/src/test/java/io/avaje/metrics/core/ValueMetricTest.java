@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricManager;
+import io.avaje.metrics.Metrics;
 import io.avaje.metrics.Meter;
 import io.avaje.metrics.MetricStats;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ class ValueMetricTest {
 
   @Test
   void test() {
-    Meter metric = MetricManager.meter("org.test.mycounter");
+    Meter metric = Metrics.meter("org.test.mycounter");
     assertEquals("org.test.mycounter", metric.name());
 
     metric.reset();
