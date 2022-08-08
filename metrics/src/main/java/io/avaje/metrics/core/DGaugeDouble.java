@@ -5,13 +5,11 @@ import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.function.DoubleSupplier;
 
-
 /**
  * A Metric that gets its value from a GaugeDouble.
  */
-class DGaugeDouble implements GaugeDouble {
+class DGaugeDouble extends BaseReportName implements GaugeDouble {
 
-  protected final String name;
   protected final DoubleSupplier gauge;
   protected final boolean reportChangesOnly;
   private double lastReported;
@@ -31,7 +29,7 @@ class DGaugeDouble implements GaugeDouble {
   }
 
   DGaugeDouble(String name, DoubleSupplier gauge, boolean reportChangesOnly) {
-    this.name = name;
+    super(name);
     this.gauge = gauge;
     this.reportChangesOnly = reportChangesOnly;
   }
@@ -57,12 +55,14 @@ class DGaugeDouble implements GaugeDouble {
   @Override
   public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
+      final String name = reportName != null ? reportName : reportName(collector);
       collector.visit(new DGaugeDoubleStats(name, gauge.getAsDouble()));
     } else {
       double value = gauge.getAsDouble();
       boolean collect = (Double.compare(value, 0.0d) != 0) && (Double.compare(value, lastReported) != 0);
       if (collect) {
         lastReported = value;
+        final String name = reportName != null ? reportName : reportName(collector);
         collector.visit(new DGaugeDoubleStats(name, value));
       }
     }

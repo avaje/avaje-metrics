@@ -13,7 +13,7 @@ import io.avaje.metrics.Timer;
 public class TimedAdapter implements Timer.Stats {
 
   private final String name;
-  private final String bucketName;
+  private final String bucketRange;
   private final long count;
   private final long total;
   private final long max;
@@ -21,22 +21,22 @@ public class TimedAdapter implements Timer.Stats {
   /**
    * Create with the metric name and values.
    */
-  public TimedAdapter(String name, String bucketName, long count, long total, long max) {
+  public TimedAdapter(String name, String bucketRange, long count, long total, long max) {
     this.name = name;
-    this.bucketName = bucketName;
+    this.bucketRange = bucketRange;
     this.count = count;
     this.total = total;
     this.max = max;
   }
 
   @Override
-  public boolean isBucket() {
-    return false;
+  public String name() {
+    return name;
   }
 
   @Override
   public String bucketRange() {
-    return null;
+    return bucketRange;
   }
 
   @Override
@@ -57,16 +57,6 @@ public class TimedAdapter implements Timer.Stats {
   @Override
   public long mean() {
     return (count < 1) ? 0L : Math.round((double) (total / count));
-  }
-
-  @Override
-  public String name() {
-    return name;
-  }
-
-  @Override
-  public String nameWithBucket() {
-    return bucketName;
   }
 
   @Override

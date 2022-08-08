@@ -9,10 +9,9 @@ import java.util.function.LongSupplier;
 /**
  * A Metric that gets its value from a Gauge.
  */
-class DGaugeLong implements GaugeLong {
+class DGaugeLong extends BaseReportName implements GaugeLong {
 
-  protected final String name;
-  protected final LongSupplier gauge;
+  protected final LongSupplier supplier;
   protected final boolean reportChangesOnly;
   /**
    * The last reported value.
@@ -29,19 +28,13 @@ class DGaugeLong implements GaugeLong {
     return new Incrementing(name, gauge);
   }
 
-  /**
-   * Create a GaugeMetric.
-   *
-   * @param name  the name of the metric.
-   * @param gauge the gauge used to get the value.
-   */
-  DGaugeLong(String name, LongSupplier gauge) {
-    this(name, gauge, true);
+  DGaugeLong(String name, LongSupplier supplier) {
+    this(name, supplier, true);
   }
 
-  DGaugeLong(String name, LongSupplier gauge, boolean reportChangesOnly) {
-    this.name = name;
-    this.gauge = gauge;
+  DGaugeLong(String name, LongSupplier supplier, boolean reportChangesOnly) {
+    super(name);
+    this.supplier = supplier;
     this.reportChangesOnly = reportChangesOnly;
   }
 
@@ -60,18 +53,20 @@ class DGaugeLong implements GaugeLong {
    */
   @Override
   public long value() {
-    return gauge.getAsLong();
+    return supplier.getAsLong();
   }
 
   @Override
   public void collect(MetricStatsVisitor collector) {
     if (!reportChangesOnly) {
-      collector.visit(new DGaugeLongStats(name, gauge.getAsLong()));
+      final String name = reportName != null ? reportName : reportName(collector);
+      collector.visit(new DGaugeLongStats(name, supplier.getAsLong()));
     } else {
-      long value = gauge.getAsLong();
+      long value = supplier.getAsLong();
       boolean collect = (value != 0 && value != lastReported);
       if (collect) {
         lastReported = value;
+        final String name = reportName != null ? reportName : reportName(collector);
         collector.visit(new DGaugeLongStats(name, value));
       }
     }
@@ -95,8 +90,9 @@ class DGaugeLong implements GaugeLong {
 
     @Override
     public void collect(MetricStatsVisitor collector) {
-      long currentValue = super.value();
+      final long currentValue = super.value();
       if (currentValue > runningValue) {
+        final String name = reportName != null ? reportName : reportName(collector);
         collector.visit(new DGaugeLongStats(name, this.value()));
       }
     }
@@ -104,13 +100,12 @@ class DGaugeLong implements GaugeLong {
     @Override
     public long value() {
       synchronized (this) {
-        long nowValue = super.value();
-        long diffValue = nowValue - runningValue;
+        final long nowValue = super.value();
+        final long diffValue = nowValue - runningValue;
         runningValue = nowValue;
         return diffValue;
       }
     }
-
   }
 
 }

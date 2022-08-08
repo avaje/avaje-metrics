@@ -132,12 +132,6 @@ public interface Timer extends Metric {
   void addEventDuration(boolean success, long durationNanos);
 
   /**
-   * Return true if this timed metric is part of a bucket range (and hence only hold statistics for the
-   * bucket range returned by <code>bucketRange()</code>.
-   */
-  boolean isBucket();
-
-  /**
    * Return the bucket range or empty string if not a bucket.
    */
   String bucketRange();
@@ -189,23 +183,11 @@ public interface Timer extends Metric {
   interface Stats extends Meter.Stats {
 
     /**
-     * Return true if this is bucket range based.
-     */
-    boolean isBucket();
-
-    /**
      * Return the bucket range for these statistics.
      */
-    String bucketRange();
-
-    /**
-     * Return the metric name with bucket tag if necessary.
-     * <p>
-     * If the timed metric is a bucket it gets a "tag" appended
-     * like <code>";bucket=.."</code>
-     * </p>
-     */
-    String nameWithBucket();
+    default String bucketRange() {
+      return null;
+    }
   }
 
   /**

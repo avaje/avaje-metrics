@@ -23,11 +23,6 @@ public class NoopTimer implements Timer {
   }
 
   @Override
-  public boolean isBucket() {
-    return false;
-  }
-
-  @Override
   public String bucketRange() {
     return "";
   }

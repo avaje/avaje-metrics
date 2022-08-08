@@ -25,7 +25,7 @@ final class DMeter implements Metric, Meter {
 
   @Override
   public void collect(MetricStatsVisitor collector) {
-    Stats stats = values.collect();
+    final Stats stats = values.collect(collector);
     if (stats != null) {
       collector.visit(stats);
     }

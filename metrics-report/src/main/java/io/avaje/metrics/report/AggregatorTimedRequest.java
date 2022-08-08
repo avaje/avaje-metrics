@@ -1,8 +1,8 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.Timer;
 import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.Timer;
 
 import java.util.List;
 
@@ -70,13 +70,8 @@ class AggregatorTimedRequest {
     }
 
     @Override
-    public boolean isBucket() {
-      return false;
-    }
-
-    @Override
-    public String bucketRange() {
-      return null;
+    public String name() {
+      return name;
     }
 
     @Override
@@ -97,16 +92,6 @@ class AggregatorTimedRequest {
     @Override
     public long mean() {
       return (count < 1) ? 0L : Math.round((double) (total / count));
-    }
-
-    @Override
-    public String name() {
-      return name;
-    }
-
-    @Override
-    public String nameWithBucket() {
-      return name();
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 
 /**
@@ -20,18 +21,17 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   private static final String JVM = "jvm.";
 
-  private final Object monitor = new Object();
-  private boolean withDetails;
-  private boolean reportChangesOnly;
-
   private final List<Metric> coreJvmMetrics = new ArrayList<>();
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimedMetricFactory;
   private final SpiMetricBuilder.Factory<Timer> timedMetricFactory;
   private final SpiMetricBuilder.Factory<Counter> counterMetricFactory;
   private final SpiMetricBuilder.Factory<Meter> valueMetricFactory;
-
   private final List<MetricSupplier> suppliers = new ArrayList<>();
+  private final Object monitor = new Object();
+  private boolean withDetails;
+  private boolean reportChangesOnly;
+  private Function<String, String> namingConvention = NamingMatch.INSTANCE;
 
   public DefaultMetricProvider() {
     SpiMetricBuilder builder = initBuilder();
@@ -46,6 +46,9 @@ public class DefaultMetricProvider implements SpiMetricProvider {
     this.timedMetricFactory = parent.timedMetricFactory;
     this.valueMetricFactory = parent.valueMetricFactory;
     this.counterMetricFactory = parent.counterMetricFactory;
+    this.namingConvention = parent.namingConvention;
+    this.withDetails = parent.withDetails;
+    this.reportChangesOnly = parent.reportChangesOnly;
   }
 
   static SpiMetricBuilder initBuilder() {
@@ -69,6 +72,12 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   @Override
   public MetricRegistry createRegistry() {
     return new DefaultMetricProvider(this);
+  }
+
+  @Override
+  public MetricRegistry naming(Function<String, String> namingConvention) {
+    this.namingConvention = namingConvention;
+    return this;
   }
 
   @Override
@@ -161,13 +170,6 @@ public class DefaultMetricProvider implements SpiMetricProvider {
     suppliers.add(supplier);
   }
 
-
-  @Override
-  public String name(Class<?> cls, String name) {
-    return cls.getName() + "." + name;
-  }
-
-
   @Override
   public TimerGroup timedGroup(String baseName) {
     return new DTimerGroup(baseName, this);
@@ -250,7 +252,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   @Override
   public List<MetricStats> collectMetrics() {
     synchronized (monitor) {
-      DStatsCollector collector = new DStatsCollector();
+      DStatsCollector collector = new DStatsCollector(namingConvention);
       collectJvmMetrics(collector);
       collectAppMetrics(collector);
       return collector.list();

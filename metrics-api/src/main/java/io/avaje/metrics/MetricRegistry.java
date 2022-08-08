@@ -2,18 +2,13 @@ package io.avaje.metrics;
 
 import java.util.List;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 
 /**
  * The SPI for the underlying implementation that is plugged in via service locator.
  */
 public interface MetricRegistry extends JvmMetrics {
-
-  /**
-   * Create a MetricName based on the class and name.
-   * Typically, name is a method name.
-   */
-  String name(Class<?> cls, String name);
 
   /**
    * Return the timer using the metric name.
@@ -54,9 +49,14 @@ public interface MetricRegistry extends JvmMetrics {
   GaugeLong gauge(String name, LongSupplier supplier);
 
   /**
-   * Add a metric supplier.
+   * Add an external metric supplier.
    */
   void addSupplier(MetricSupplier supplier);
+
+  /**
+   * Set the naming convention to use when reporting metrics.
+   */
+  MetricRegistry naming(Function<String, String> namingConvention);
 
   /**
    * Collect all the metrics.

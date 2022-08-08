@@ -3,18 +3,17 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.MetricStatsVisitor;
 
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Count events that occur.
  * <p>
  * For example, this is used to count the error events and warning events logged
  * via log4j or logback.
- * </p>
  */
-final class DCounter implements Counter {
+final class DCounter extends BaseReportName implements Counter {
 
-  private final String name;
-  private final io.avaje.metrics.core.Counter counter;
+  private final LongAdder count = new LongAdder();
 
   /**
    * Create the metric with a name and rateUnit.
@@ -24,8 +23,7 @@ final class DCounter implements Counter {
    * </p>
    */
   DCounter(String name) {
-    this.name = name;
-    this.counter = new io.avaje.metrics.core.Counter(name);
+    super(name);
   }
 
   /**
@@ -33,20 +31,21 @@ final class DCounter implements Counter {
    */
   @Override
   public void reset() {
-    counter.reset();
+    count.reset();
   }
 
   @Override
   public void collect(MetricStatsVisitor collector) {
-    Stats stats = counter.collect();
-    if (stats != null) {
-      collector.visit(stats);
+    final long sum = count.sumThenReset();
+    if (sum != 0) {
+      final String name = reportName != null ? reportName : reportName(collector);
+      collector.visit(new DCounter.DStats(name, sum));
     }
   }
 
   @Override
   public long count() {
-    return counter.count();
+    return count.sum();
   }
 
   /**
@@ -62,7 +61,7 @@ final class DCounter implements Counter {
    */
   @Override
   public void inc() {
-    counter.increment();
+    count.increment();
   }
 
   /**
@@ -70,7 +69,12 @@ final class DCounter implements Counter {
    */
   @Override
   public void inc(long numberOfEventsOccurred) {
-    counter.add(numberOfEventsOccurred);
+    count.add(numberOfEventsOccurred);
+  }
+
+  //@Override
+  public void decrement() {
+    count.decrement();
   }
 
   /**

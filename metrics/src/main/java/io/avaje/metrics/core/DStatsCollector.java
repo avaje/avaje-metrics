@@ -5,13 +5,24 @@ import io.avaje.metrics.Counter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 final class DStatsCollector implements MetricStatsVisitor {
 
   private final List<MetricStats> list = new ArrayList<>();
+  private final  Function<String, String> namingConvention;
+
+  public DStatsCollector(Function<String, String> namingConvention) {
+    this.namingConvention = namingConvention;
+  }
 
   List<MetricStats> list() {
     return list;
+  }
+
+  @Override
+  public Function<String, String> namingConvention() {
+    return namingConvention;
   }
 
   @Override

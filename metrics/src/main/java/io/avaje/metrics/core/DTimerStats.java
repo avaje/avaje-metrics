@@ -8,6 +8,7 @@ import io.avaje.metrics.MetricStatsVisitor;
  */
 final class DTimerStats implements Timer.Stats {
 
+  final String name;
   final ValueCounter owner;
   final long count;
   final long total;
@@ -16,7 +17,8 @@ final class DTimerStats implements Timer.Stats {
   /**
    * Construct for TimeCounter.
    */
-  DTimerStats(ValueCounter owner, long count, long total, long max) {
+  DTimerStats(String name, ValueCounter owner, long count, long total, long max) {
+    this.name = name;
     this.owner = owner;
     this.count = count;
     this.total = total;
@@ -36,23 +38,13 @@ final class DTimerStats implements Timer.Stats {
   }
 
   @Override
-  public boolean isBucket() {
-    return owner.isBucket();
-  }
-
-  @Override
   public String bucketRange() {
     return owner.bucketRange();
   }
 
   @Override
   public String name() {
-    return owner.name();
-  }
-
-  @Override
-  public String nameWithBucket() {
-    return owner.nameWithBucket();
+    return name;
   }
 
   /**

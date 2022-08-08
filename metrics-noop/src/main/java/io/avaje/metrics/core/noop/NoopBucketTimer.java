@@ -7,14 +7,9 @@ import java.util.function.Supplier;
 
 class NoopBucketTimer implements Timer {
 
-  private static final int[] noRange = {};
-
-  private static final Timer[] noBuckets = new Timer[0];
-
   private static final NoopTimerEvent NOOP_TIMED_EVENT = new NoopTimerEvent();
 
   private final String name;
-
 
   NoopBucketTimer(String name) {
     this.name = name;
@@ -23,11 +18,6 @@ class NoopBucketTimer implements Timer {
   @Override
   public String name() {
     return name;
-  }
-
-  @Override
-  public boolean isBucket() {
-    return false;
   }
 
   @Override

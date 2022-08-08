@@ -62,11 +62,10 @@ public class JsonWriter implements MetricStatsVisitor {
   }
 
   private void writeMetricStart(String type, MetricStats metric) throws IOException {
-    writeMetricStart(type, metric.name());
+    writeMetricStart(type, metric.name(), null);
   }
 
-  private void writeMetricStart(String type, String name) throws IOException {
-
+  private void writeMetricStart(String type, String name, String bucket) throws IOException {
     buffer.append("{");
     if (includeType) {
       writeKey("type");
@@ -74,7 +73,13 @@ public class JsonWriter implements MetricStatsVisitor {
       buffer.append(",");
     }
     writeKey("name");
-    writeValue(name);
+    buffer.append("\"");
+    buffer.append(name);
+    if (bucket != null) {
+      buffer.append(";bucket=");
+      buffer.append(bucket);
+    }
+    buffer.append("\"");
     buffer.append(",");
   }
 
@@ -89,7 +94,7 @@ public class JsonWriter implements MetricStatsVisitor {
   @Override
   public void visit(Timer.Stats metric) {
     try {
-      writeMetricStart(TYPE_TIMED_METRIC, metric.nameWithBucket());
+      writeMetricStart(TYPE_TIMED_METRIC, metric.name(), metric.bucketRange());
       writeSummary(metric);
       writeMetricEnd();
     } catch (IOException e) {

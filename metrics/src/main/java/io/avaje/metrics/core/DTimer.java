@@ -14,8 +14,6 @@ import java.util.function.Supplier;
  */
 final class DTimer implements Timer {
 
-  private static final String noBuckets = "";
-
   private final String name;
   private final String bucketRange;
   private final ValueCounter successCounter;
@@ -23,7 +21,7 @@ final class DTimer implements Timer {
 
   DTimer(String name) {
     this.name = name;
-    this.bucketRange = noBuckets;
+    this.bucketRange = null;
     this.successCounter = new ValueCounter(name);
     this.errorCounter = new ValueCounter(name + ".error");
   }
@@ -38,11 +36,6 @@ final class DTimer implements Timer {
   @Override
   public String toString() {
     return name;
-  }
-
-  @Override
-  public boolean isBucket() {
-    return !noBuckets.equals(bucketRange);
   }
 
   @Override
@@ -62,11 +55,11 @@ final class DTimer implements Timer {
 
   @Override
   public void collect(MetricStatsVisitor collector) {
-    Stats errStats = errorCounter.collect();
+    final Stats errStats = errorCounter.collect(collector);
     if (errStats != null) {
       collector.visit(errStats);
     }
-    Stats successStats = successCounter.collect();
+    final Stats successStats = successCounter.collect(collector);
     if (successStats != null) {
       collector.visit(successStats);
     }

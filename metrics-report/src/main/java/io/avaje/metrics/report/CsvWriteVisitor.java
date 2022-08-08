@@ -118,11 +118,10 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
   }
 
   private void writeMetricName(MetricStats metric, String metricTypeCode) throws IOException {
-    writeMetricName(metric.name(), metricTypeCode);
+    writeMetricName(metric.name(), null, metricTypeCode);
   }
 
-  private void writeMetricName(String metricName, String metricTypeCode) throws IOException {
-
+  private void writeMetricName(String metricName, String bucket, String metricTypeCode) throws IOException {
     writer.write(collectTimeFormatted);
     writer.write(delimiter);
     if (includeType) {
@@ -130,6 +129,10 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
       writer.write(delimiter);
     }
     writer.write(metricName);
+    if (bucket != null) {
+      writer.write(";bucket=");
+      writer.write(bucket);
+    }
   }
 
   private void writeMetricEnd() throws IOException {
@@ -138,7 +141,6 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
 
   @Override
   public void visit(Timer.Stats metric) {
-
     try {
       if (thresholdMean > 0) {
         if (metric.mean() < thresholdMean) {
@@ -147,8 +149,7 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
           return;
         }
       }
-
-      writeMetricName(metric.nameWithBucket(), TYPE_TIMED_METRIC);
+      writeMetricName(metric.name(), metric.bucketRange(), TYPE_TIMED_METRIC);
       writeSummary(metric);
       writeMetricEnd();
     } catch (IOException e) {

@@ -2,6 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.NamingMatch;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,7 +17,7 @@ class DefaultGaugeLongMetricTest {
   void skipCollection_when_unchanged() {
 
     MyGauge myGauge = new MyGauge();
-    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName()+".test", myGauge);
+    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName() + ".test", myGauge);
 
     assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -46,7 +47,7 @@ class DefaultGaugeLongMetricTest {
   }
 
   private List<MetricStats> collect(Metric metric) {
-    DStatsCollector collector = new DStatsCollector();
+    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
     return collector.list();
   }
@@ -55,7 +56,7 @@ class DefaultGaugeLongMetricTest {
   void test() {
 
     MyGauge myGauge = new MyGauge();
-    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName()+".test", myGauge);
+    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName() + ".test", myGauge);
 
     assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -64,7 +65,7 @@ class DefaultGaugeLongMetricTest {
     assertEquals(100, metric.value());
     assertThat(collect(metric)).hasSize(1);
 
-    DGaugeLong incrementing = DGaugeLong.incrementing(MyGauge.class.getName()+".inc", myGauge);
+    DGaugeLong incrementing = DGaugeLong.incrementing(MyGauge.class.getName() + ".inc", myGauge);
 
     myGauge.value = 100;
     //assertFalse(incrementing.collectStatistics());

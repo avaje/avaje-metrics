@@ -2,6 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.NamingMatch;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DefaultGaugeDoubleMetricTest {
 
   private List<MetricStats> collect(Metric metric) {
-    DStatsCollector collector = new DStatsCollector();
+    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
     return collector.list();
   }

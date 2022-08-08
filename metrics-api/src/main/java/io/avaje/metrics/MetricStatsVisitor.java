@@ -1,11 +1,19 @@
 package io.avaje.metrics;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 /**
  * Typically used for reporting metrics.
  */
 public interface MetricStatsVisitor {
+
+  /**
+   * Return the naming convention to use when reporting metrics.
+   */
+  default Function<String, String> namingConvention() {
+    return NamingMatch.INSTANCE;
+  }
 
   /**
    * Visit Timer stats.
