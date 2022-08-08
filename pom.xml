@@ -26,6 +26,7 @@
   <modules>
     <module>metrics</module>
     <module>metrics-api</module>
+    <module>metrics-graphite</module>
   </modules>
 
   <profiles>
