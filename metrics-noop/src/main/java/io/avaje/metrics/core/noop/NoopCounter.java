@@ -5,17 +5,15 @@ import io.avaje.metrics.MetricStatsVisitor;
 
 final class NoopCounter implements Counter {
 
-  private static final NoopCounterStats NOOP_STATS = NoopCounterStats.INSTANCE;
+  private final String name;
 
-  protected final String metricName;
-
-  NoopCounter(String metricName) {
-    this.metricName = metricName;
+  NoopCounter(String name) {
+    this.name = name;
   }
 
   @Override
   public String name() {
-    return metricName;
+    return name;
   }
 
   @Override
@@ -35,6 +33,16 @@ final class NoopCounter implements Counter {
 
   @Override
   public void inc(long numberOfEventsOccurred) {
+    // do nothing
+  }
+
+  @Override
+  public void dec() {
+    // do nothing
+  }
+
+  @Override
+  public void dec(long value) {
     // do nothing
   }
 

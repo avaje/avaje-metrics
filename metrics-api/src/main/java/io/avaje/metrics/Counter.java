@@ -34,6 +34,16 @@ public interface Counter extends Metric {
   void inc(long value);
 
   /**
+   * Decrement the counter by 1.
+   */
+  void dec();
+
+  /**
+   * Decrement the counter by the given value.
+   */
+  void dec(long value);
+
+  /**
    * Return the current count.
    */
   long count();

@@ -72,9 +72,14 @@ final class DCounter extends BaseReportName implements Counter {
     count.add(numberOfEventsOccurred);
   }
 
-  //@Override
-  public void decrement() {
+  @Override
+  public void dec() {
     count.decrement();
+  }
+
+  @Override
+  public void dec(long value) {
+    count.add(-value);
   }
 
   /**
