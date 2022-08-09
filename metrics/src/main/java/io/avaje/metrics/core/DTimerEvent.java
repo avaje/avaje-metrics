@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
 
-
 /**
  * A Timed Event typically used to time a SOAP operation or a SQL execution etc.
  * <p>

@@ -4,7 +4,6 @@ import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.Meter;
 
-
 /**
  * Measure events that occur with a long value. This long value could be bytes
  * or rows processed or time. Typically, you would use Timer for time based

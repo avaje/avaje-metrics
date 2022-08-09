@@ -126,7 +126,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerJvmOsLoadMetric() {
-    GaugeLong osLoadAvgMetric = JvmSystemMetricGroup.getOsLoadAvgMetric();
+    GaugeLong osLoadAvgMetric = JvmSystemMetricGroup.osLoadAvgMetric();
     if (osLoadAvgMetric.value() >= 0) {
       // OS Load Average is supported on this system
       registerJvmMetric(osLoadAvgMetric);
@@ -191,7 +191,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
-  public Meter value(String name) {
+  public Meter meter(String name) {
     return (Meter) metric(name, valueMetricFactory);
   }
 

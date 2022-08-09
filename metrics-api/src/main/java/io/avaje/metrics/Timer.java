@@ -102,24 +102,12 @@ public interface Timer extends Metric {
    */
   void add(long startNanos);
 
-//  /**
-//   * Add a successful event duration with request timing.
-//   */
-//  void add(long startNanos, boolean requestTiming);
-
   /**
    * Add an error event duration to the error.
    * <p>
    * Success and error execution are kept on separate metrics.
    */
   void addErr(long startNanos);
-
-//  /**
-//   * Add an error event duration with request timing.
-//   * <p>
-//   * Success and error execution are kept on separate metrics.
-//   */
-//  void addErr(long startNanos, boolean requestTiming);
 
   /**
    * Add an event duration in nanoseconds noting if it was a success or failure result.
@@ -135,47 +123,6 @@ public interface Timer extends Metric {
    * Return the bucket range or empty string if not a bucket.
    */
   String bucketRange();
-
-//  /**
-//   * Return true if this timed metric is actively request timing.
-//   * <p>
-//   * This means that the current thread is actively collecting timing entries and this metric
-//   * has been pushed onto the nested context.
-//   */
-//  boolean isRequestTiming();
-//
-//  /**
-//   * Specify to collect per request detailed timing collection. The collectionCount is the number
-//   * of requests to collect detailed timing for and then automatically turn off.
-//   * <p>
-//   * This is expected to only be explicitly called on 'top level' metrics such as web endpoints.
-//   * Once a request timing context has been created by the top level metric then 'nested metrics'
-//   * (typically service and data access layers) can append to that existing context.  In this way
-//   * detailed per request level timing entries can be collected for only selected endpoints.
-//   */
-//  void setRequestTiming(int collectionCount);
-//
-//  /**
-//   * Return the number of remaining requests to collect detailed timing on.
-//   * <p>
-//   * This value starts out as the value set by #setRequestTimingCollection and then decrements
-//   * after a request timing is reported until it reaches 0 at which point request timing automatically
-//   * turns off for this metric.
-//   */
-//  int getRequestTiming();
-//
-//  /**
-//   * Decrement the request timing collection count.
-//   * <p>
-//   * This is typically called internally when a request timing is reported and generally not
-//   * expected to be called by application code.
-//   */
-//  void decrementRequestTiming();
-//
-//  /**
-//   * Return extra attributes that can be included in the request logging.
-//   */
-//  Map<String, String> attributes();
 
   /**
    * Statistics collected by Timer.
@@ -233,6 +180,5 @@ public interface Timer extends Metric {
      * End specifying whether the event was successful or in error.
      */
     void end(boolean withSuccess);
-
   }
 }

@@ -33,7 +33,7 @@ final class DMetricNameCache {
   /**
    * Return the MetricName from the cache creating it if required.
    */
-  public String get(String name) {
+  String get(String name) {
     String metricName = cache.get(name);
     if (metricName == null) {
       metricName = deriveWithName(name);

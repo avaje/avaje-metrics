@@ -11,6 +11,26 @@ import java.util.function.LongSupplier;
 public interface MetricRegistry extends JvmMetrics {
 
   /**
+   * Return the Counter using the metric name.
+   */
+  Counter counter(String name);
+
+  /**
+   * Return the Meter using the metric name.
+   */
+  Meter meter(String name);
+
+  /**
+   * Create and register a gauge using the supplied double values.
+   */
+  GaugeDouble gauge(String name, DoubleSupplier supplier);
+
+  /**
+   * Create and register a gauge using the supplied long values.
+   */
+  GaugeLong gauge(String name, LongSupplier supplier);
+
+  /**
    * Return the timer using the metric name.
    */
   Timer timed(String name);
@@ -24,29 +44,9 @@ public interface MetricRegistry extends JvmMetrics {
   Timer timed(String name, int... bucketRanges);
 
   /**
-   * Return the Counter using the metric name.
-   */
-  Counter counter(String name);
-
-  /**
-   * Return the Meter using the metric name.
-   */
-  Meter value(String name);
-
-  /**
    * Return the TimerGroup using the given base metric name.
    */
   TimerGroup timedGroup(String baseName);
-
-  /**
-   * Create and register a gauge using the supplied double values.
-   */
-  GaugeDouble gauge(String name, DoubleSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied long values.
-   */
-  GaugeLong gauge(String name, LongSupplier supplier);
 
   /**
    * Add an external metric supplier.

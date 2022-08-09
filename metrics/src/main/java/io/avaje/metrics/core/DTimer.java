@@ -132,24 +132,8 @@ final class DTimer implements Timer {
     successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
 
-//  @Override
-//  public void add(long startNanos, boolean activeThreadContext) {
-//    successCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
-////    if (activeThreadContext) {
-////      NestedContext.pop();
-////    }
-//  }
-
   @Override
   public void addErr(long startNanos) {
     errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
   }
-
-//  @Override
-//  public void addErr(long startNanos, boolean activeThreadContext) {
-//    errorCounter.add(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startNanos));
-////    if (activeThreadContext) {
-////      NestedContext.pop();
-////    }
-//  }
 }

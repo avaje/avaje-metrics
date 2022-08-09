@@ -65,11 +65,11 @@ final class JvmCGroupMemoryMetricGroup {
       }
     }
 
-    long getLimitMb() {
+    long limitMb() {
       return limitMb;
     }
 
-    long getUsageMb() {
+    long usageMb() {
       read();
       return usageMb;
     }
@@ -80,7 +80,7 @@ final class JvmCGroupMemoryMetricGroup {
   }
 
   GaugeLong createMemoryUsage(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLong("jvm.cgroup.memory.usageMb", source::getUsageMb, reportChangesOnly);
+    return new DGaugeLong("jvm.cgroup.memory.usageMb", source::usageMb, reportChangesOnly);
   }
 
   GaugeLong createMemoryPctUsage(MemSource source, boolean reportChangesOnly) {
@@ -88,7 +88,7 @@ final class JvmCGroupMemoryMetricGroup {
   }
 
   GaugeLong createMemoryLimit(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLong("jvm.cgroup.memory.limit", source::getLimitMb, reportChangesOnly);
+    return new DGaugeLong("jvm.cgroup.memory.limit", source::limitMb, reportChangesOnly);
   }
 
 }

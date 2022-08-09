@@ -26,8 +26,8 @@ class JvmCGroupMemoryMetricGroupTest {
 
     JvmCGroupMemoryMetricGroup.MemSource source = new JvmCGroupMemoryMetricGroup.MemSource(limit, useSource);
 
-    assertThat(source.getLimitMb()).isEqualTo(1025);
-    assertThat(source.getUsageMb()).isEqualTo(227);
+    assertThat(source.limitMb()).isEqualTo(1025);
+    assertThat(source.usageMb()).isEqualTo(227);
     assertThat(source.getPctUsage()).isEqualTo(22);
 
     final GaugeLong memoryLimit = me.createMemoryLimit(source, true);

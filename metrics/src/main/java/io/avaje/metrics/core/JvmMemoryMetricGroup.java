@@ -17,7 +17,7 @@ final class JvmMemoryMetricGroup {
    * Helper interface for Heap and NonHeap MemorySource.
    */
   interface MemoryUsageSource {
-    MemoryUsage getUsage();
+    MemoryUsage usage();
   }
 
   /**
@@ -30,7 +30,7 @@ final class JvmMemoryMetricGroup {
       this.memoryMXBean = memoryMXBean;
     }
 
-    public MemoryUsage getUsage() {
+    public MemoryUsage usage() {
       return memoryMXBean.getHeapMemoryUsage();
     }
   }
@@ -45,7 +45,7 @@ final class JvmMemoryMetricGroup {
       this.memoryMXBean = memoryMXBean;
     }
 
-    public MemoryUsage getUsage() {
+    public MemoryUsage usage() {
       return memoryMXBean.getNonHeapMemoryUsage();
     }
   }
@@ -86,7 +86,7 @@ final class JvmMemoryMetricGroup {
       metrics.add(new DGaugeLong(name("committed"), new Committed(source), reportChangesOnly));
 
       // JRE 8 is not reporting max for non-heap memory
-      boolean hasMax = (source.getUsage().getMax() > 0);
+      boolean hasMax = (source.usage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
         metrics.add(new DGaugeLong(name("max"), new Max(source), reportChangesOnly));
@@ -114,7 +114,7 @@ final class JvmMemoryMetricGroup {
 
       @Override
       public long getAsLong() {
-        return source.getUsage().getInit() / MEGABYTES;
+        return source.usage().getInit() / MEGABYTES;
       }
     }
 
@@ -125,7 +125,7 @@ final class JvmMemoryMetricGroup {
 
       @Override
       public long getAsLong() {
-        return source.getUsage().getUsed() / MEGABYTES;
+        return source.usage().getUsed() / MEGABYTES;
       }
     }
 
@@ -136,7 +136,7 @@ final class JvmMemoryMetricGroup {
 
       @Override
       public long getAsLong() {
-        return source.getUsage().getCommitted() / MEGABYTES;
+        return source.usage().getCommitted() / MEGABYTES;
       }
     }
 
@@ -147,7 +147,7 @@ final class JvmMemoryMetricGroup {
 
       @Override
       public long getAsLong() {
-        return source.getUsage().getMax() / MEGABYTES;
+        return source.usage().getMax() / MEGABYTES;
       }
     }
 
@@ -158,7 +158,7 @@ final class JvmMemoryMetricGroup {
 
       @Override
       public long getAsLong() {
-        MemoryUsage memoryUsage = source.getUsage();
+        MemoryUsage memoryUsage = source.usage();
         return 100 * memoryUsage.getUsed() / memoryUsage.getMax();
       }
     }

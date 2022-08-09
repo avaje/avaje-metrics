@@ -5,7 +5,6 @@ import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.function.LongSupplier;
 
-
 /**
  * A Metric that gets its value from a Gauge.
  */

@@ -104,7 +104,7 @@ public class Metrics {
    * Return a Meter given the name using the default registry.
    */
   public static Meter meter(String name) {
-    return defaultRegistry.value(name);
+    return defaultRegistry.meter(name);
   }
 
   /**

@@ -6,7 +6,6 @@ import io.avaje.metrics.TimerGroup;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-
 /**
  * Used when many TimedMetrics share a common base name (group, type etc) and
  * only differ by their name.

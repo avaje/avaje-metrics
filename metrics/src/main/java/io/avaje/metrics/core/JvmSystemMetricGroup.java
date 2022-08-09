@@ -12,9 +12,8 @@ final class JvmSystemMetricGroup {
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
-  static GaugeLong getOsLoadAvgMetric() {
-    LongSupplier osLoadAvg = new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean());
-    return new DGaugeLong("jvm.os.loadAverage", osLoadAvg);
+  static GaugeLong osLoadAvgMetric() {
+    return new DGaugeLong("jvm.os.loadAverage", new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()));
   }
 
   static long toLoad(double loadAverage) {

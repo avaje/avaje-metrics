@@ -65,43 +65,8 @@ class NoopBucketTimer implements Timer {
     // do nothing
   }
 
-//  @Override
-//  public void add(long startNanos, boolean activeThreadContext) {
-//    // do nothing
-//  }
-
   @Override
   public void addErr(long startNanos) {
     // do nothing
   }
-
-//  @Override
-//  public void addErr(long startNanos, boolean activeThreadContext) {
-//    // do nothing
-//  }
-
-//  @Override
-//  public void setRequestTiming(int collectionCount) {
-//    // do nothing
-//  }
-//
-//  @Override
-//  public int getRequestTiming() {
-//    return 0;
-//  }
-//
-//  @Override
-//  public void decrementRequestTiming() {
-//
-//  }
-//
-//  @Override
-//  public boolean isRequestTiming() {
-//    return false;
-//  }
-//
-//  @Override
-//  public Map<String, String> attributes() {
-//    return null;
-//  }
 }

@@ -9,8 +9,6 @@ public class NoopTimer implements Timer {
 
   private static final NoopTimerEvent NOOP_TIMED_EVENT = new NoopTimerEvent();
 
-  //private static final NoopValueStatistics NOOP_STATS = NoopValueStatistics.INSTANCE;
-
   private final String metricName;
 
   public NoopTimer(String metricName) {
@@ -37,21 +35,6 @@ public class NoopTimer implements Timer {
     // do nothing
   }
 
-//  @Override
-//  public void setRequestTiming(int collectionCount) {
-//    // do nothing
-//  }
-//
-//  @Override
-//  public int getRequestTiming() {
-//    return 0;
-//  }
-//
-//  @Override
-//  public void decrementRequestTiming() {
-//    // do nothing
-//  }
-
   @Override
   public void time(Runnable event) {
     event.run();
@@ -77,33 +60,13 @@ public class NoopTimer implements Timer {
     // do nothing
   }
 
-//  @Override
-//  public boolean isRequestTiming() {
-//    return false;
-//  }
-
   @Override
   public void add(long startNanos) {
 
   }
 
-//  @Override
-//  public void add(long startNanos, boolean activeThreadContext) {
-//
-//  }
-
   @Override
   public void addErr(long startNanos) {
 
   }
-
-//  @Override
-//  public void addErr(long startNanos, boolean activeThreadContext) {
-//
-//  }
-
-//  @Override
-//  public Map<String, String> attributes() {
-//    return null;
-//  }
 }
