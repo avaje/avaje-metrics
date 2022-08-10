@@ -1,44 +1,29 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
-import io.avaje.metrics.Metric;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.avaje.metrics.MetricRegistry;
 
 final class JvmCGroupMemoryMetricGroup {
 
   private static final long MEG = 1_048_576;
 
-  private final List<Metric> metrics = new ArrayList<>();
-
-  /**
-   * Return the list of OS process memory metrics.
-   */
-  static List<Metric> createGauges(boolean reportChangesOnly) {
-    return new JvmCGroupMemoryMetricGroup().metrics(reportChangesOnly);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
+    new JvmCGroupMemoryMetricGroup().metrics(registry, reportChangesOnly);
   }
 
-  private void add(Metric metric) {
-    if (metric != null) {
-      metrics.add(metric);
-    }
-  }
-
-  private List<Metric> metrics(boolean reportChangesOnly) {
+  private void metrics(MetricRegistry registry, boolean reportChangesOnly) {
     FileLines memLimit = new FileLines("/sys/fs/cgroup/memory/memory.limit_in_bytes");
     FileLines memUsage = new FileLines("/sys/fs/cgroup/memory/memory.usage_in_bytes");
     if (memLimit.exists() && memUsage.exists()) {
       long limitInBytes = memLimit.single();
       MemSource source = new MemSource(limitInBytes, memUsage);
-      add(createMemoryUsage(source, reportChangesOnly));
+      registry.register(createMemoryUsage(source, reportChangesOnly));
       if (limitInBytes < 1_000_000_000_000L) {
         // only include when limit is in effect
-        add(createMemoryLimit(source, reportChangesOnly));
-        add(createMemoryPctUsage(source, reportChangesOnly));
+        registry.register(createMemoryLimit(source, reportChangesOnly));
+        registry.register(createMemoryPctUsage(source, reportChangesOnly));
       }
     }
-    return metrics;
   }
 
   static long toMegaBytes(long bytes) {

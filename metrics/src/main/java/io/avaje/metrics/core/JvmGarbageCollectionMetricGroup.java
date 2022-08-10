@@ -1,10 +1,10 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metric;
+import io.avaje.metrics.GaugeLong;
+import io.avaje.metrics.MetricRegistry;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongSupplier;
 
@@ -13,28 +13,25 @@ import java.util.function.LongSupplier;
  */
 final class JvmGarbageCollectionMetricGroup {
 
-  static List<Metric> createGauges(boolean withDetails) {
-    List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
-
-    List<Metric> metrics = new ArrayList<>();
-    metrics.add(createTotalGcTime(garbageCollectorMXBeans));
+  static void createGauges(MetricRegistry registry, boolean withDetails) {
+    List<GarbageCollectorMXBean> gcMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
+    createTotalGcTime(registry, gcMXBeans);
     if (withDetails) {
-      for (GarbageCollectorMXBean gcMXBean : garbageCollectorMXBeans) {
+      for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
         // modify collector name replacing spaces with hyphens.
         String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-').replace(".", "");
-        metrics.add(DGaugeLong.incrementing(name("count", gcName), new Count(gcMXBean)));
-        metrics.add(DGaugeLong.incrementing(name("time", gcName), new Time(gcMXBean)));
+        registry.gauge(name("count", gcName), GaugeLong.incrementing(new Count(gcMXBean)));
+        registry.gauge(name("time", gcName), GaugeLong.incrementing(new Time(gcMXBean)));
       }
     }
-    return metrics;
   }
 
   /**
    * Return a Gauge for the total GC time in millis. Gives us a single metric to measure aggregate GC activity.
    */
-  private static DGaugeLong createTotalGcTime(List<GarbageCollectorMXBean> garbageCollectorMXBeans) {
+  private static void createTotalGcTime(MetricRegistry registry, List<GarbageCollectorMXBean> garbageCollectorMXBeans) {
     GarbageCollectorMXBean[] gcBeans = garbageCollectorMXBeans.toArray(new GarbageCollectorMXBean[0]);
-    return DGaugeLong.incrementing("jvm.gc.time", new TotalTime(gcBeans));
+    registry.gauge("jvm.gc.time", GaugeLong.incrementing(new TotalTime(gcBeans)));
   }
 
   private static String name(String prefix, String gcName) {

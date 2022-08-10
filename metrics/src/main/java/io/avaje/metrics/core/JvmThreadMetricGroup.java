@@ -1,18 +1,16 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metric;
+import io.avaje.metrics.MetricRegistry;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.LongSupplier;
 
 final class JvmThreadMetricGroup {
 
-  static List<Metric> createThreadMetricGroup(boolean reportChangesOnly, boolean withDetails) {
+  static void createThreadMetricGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
     ThreadGauges threadGauges = new ThreadGauges(ManagementFactory.getThreadMXBean());
-    return threadGauges.createMetrics(reportChangesOnly, withDetails);
+    threadGauges.createMetrics(registry, reportChangesOnly, withDetails);
   }
 
   private static final class ThreadGauges {
@@ -23,14 +21,12 @@ final class JvmThreadMetricGroup {
       this.threadMXBean = threadMXBean;
     }
 
-    List<Metric> createMetrics(boolean reportChangesOnly, boolean withDetails) {
-      List<Metric> metrics = new ArrayList<>(3);
-      metrics.add(new DGaugeLong("jvm.threads.current", new Count(threadMXBean), reportChangesOnly));
+    void createMetrics(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+      registry.register(new DGaugeLong("jvm.threads.current", new Count(threadMXBean), reportChangesOnly));
       if (withDetails) {
-        metrics.add(new DGaugeLong("jvm.threads.peak", new Peak(threadMXBean), reportChangesOnly));
-        metrics.add(new DGaugeLong("jvm.threads.daemon", new Daemon(threadMXBean), reportChangesOnly));
+        registry.register(new DGaugeLong("jvm.threads.peak", new Peak(threadMXBean), reportChangesOnly));
+        registry.register(new DGaugeLong("jvm.threads.daemon", new Daemon(threadMXBean), reportChangesOnly));
       }
-      return metrics;
     }
 
     static final class Count implements LongSupplier {

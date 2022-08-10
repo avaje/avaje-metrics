@@ -1,12 +1,10 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metric;
+import io.avaje.metrics.MetricRegistry;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.LongSupplier;
 
 final class JvmMemoryMetricGroup {
@@ -53,21 +51,21 @@ final class JvmMemoryMetricGroup {
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  static List<Metric> createHeapGroup(boolean reportChangesOnly) {
+  static void createHeapGroup(MetricRegistry registry, boolean reportChangesOnly) {
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    return createGroup("jvm.memory.heap", source, reportChangesOnly);
+    createGroup(registry, "jvm.memory.heap", source, reportChangesOnly);
   }
 
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  static List<Metric> createNonHeapGroup(boolean reportChangesOnly) {
+  static void createNonHeapGroup(MetricRegistry registry, boolean reportChangesOnly) {
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    return createGroup("jvm.memory.nonheap", source, reportChangesOnly);
+    createGroup(registry, "jvm.memory.nonheap", source, reportChangesOnly);
   }
 
-  private static List<Metric> createGroup(String baseName, MemoryUsageSource source, boolean reportChangesOnly) {
-    return new MemUsageGauages(source, baseName).createMetric(reportChangesOnly);
+  private static void createGroup(MetricRegistry registry, String baseName, MemoryUsageSource source, boolean reportChangesOnly) {
+    new MemUsageGauages(source, baseName).createMetric(registry, reportChangesOnly);
   }
 
   static final class MemUsageGauages {
@@ -79,20 +77,18 @@ final class JvmMemoryMetricGroup {
       this.baseName = baseName;
     }
 
-    public List<Metric> createMetric(boolean reportChangesOnly) {
-      List<Metric> metrics = new ArrayList<>();
-      metrics.add(new DGaugeLong(name("init"), new Init(source), reportChangesOnly));
-      metrics.add(new DGaugeLong(name("used"), new Used(source), reportChangesOnly));
-      metrics.add(new DGaugeLong(name("committed"), new Committed(source), reportChangesOnly));
+    void createMetric(MetricRegistry registry, boolean reportChangesOnly) {
+      registry.register(new DGaugeLong(name("init"), new Init(source), reportChangesOnly));
+      registry.register(new DGaugeLong(name("used"), new Used(source), reportChangesOnly));
+      registry.register(new DGaugeLong(name("committed"), new Committed(source), reportChangesOnly));
 
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.usage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
-        metrics.add(new DGaugeLong(name("max"), new Max(source), reportChangesOnly));
-        metrics.add(new DGaugeLong(name("pct"), new Pct(source), reportChangesOnly));
+        registry.register(new DGaugeLong(name("max"), new Max(source), reportChangesOnly));
+        registry.register(new DGaugeLong(name("pct"), new Pct(source), reportChangesOnly));
       }
-      return metrics;
     }
 
     private String name(String name) {

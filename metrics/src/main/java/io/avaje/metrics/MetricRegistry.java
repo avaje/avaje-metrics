@@ -49,6 +49,11 @@ public interface MetricRegistry extends JvmMetrics {
   TimerGroup timedGroup(String baseName);
 
   /**
+   * Register a metric that was created externally with the registry.
+   */
+  void register(Metric metric);
+
+  /**
    * Add an external metric supplier.
    */
   void addSupplier(MetricSupplier supplier);

@@ -1,10 +1,8 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metric;
+import io.avaje.metrics.MetricRegistry;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * OS process memory metrics VmRSS and VmHWM to collect when running on Linux.
@@ -18,8 +16,8 @@ final class JvmProcessMemory {
   /**
    * Return the list of OS process memory metrics.
    */
-  static List<Metric> createGauges(boolean reportChangesOnly) {
-    return new JvmProcessMemory().metrics(reportChangesOnly);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
+    new JvmProcessMemory().metrics(registry, reportChangesOnly);
   }
 
   /**
@@ -46,18 +44,16 @@ final class JvmProcessMemory {
   /**
    * Return the metrics for VmRSS and VmHWM.
    */
-  public List<Metric> metrics(boolean reportChangesOnly) {
-    List<Metric> metrics = new ArrayList<>();
+  public void metrics(MetricRegistry registry, boolean reportChangesOnly) {
     if (pid == null || MetricManifest.get().disableProcessMemory()) {
-      return metrics;
+      return;
     }
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
       Source source = new Source(procStatus);
-      metrics.add(new DGaugeLong("jvm.memory.process.vmrss", source::rss, reportChangesOnly));
-      metrics.add(new DGaugeLong("jvm.memory.process.vmhwm", source::hwm, reportChangesOnly));
+      registry.register(new DGaugeLong("jvm.memory.process.vmrss", source::rss, reportChangesOnly));
+      registry.register(new DGaugeLong("jvm.memory.process.vmhwm", source::hwm, reportChangesOnly));
     }
-    return metrics;
   }
 
   /**

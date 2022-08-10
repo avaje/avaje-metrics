@@ -1,12 +1,11 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
-import io.avaje.metrics.Counter;
 import io.avaje.metrics.spi.SpiMetricBuilder;
-import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.spi.SpiMetricProvider;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,9 +18,6 @@ import java.util.function.LongSupplier;
  */
 public class DefaultMetricProvider implements SpiMetricProvider {
 
-  private static final String JVM = "jvm.";
-
-  private final List<Metric> coreJvmMetrics = new ArrayList<>();
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimedMetricFactory;
   private final SpiMetricBuilder.Factory<Timer> timedMetricFactory;
@@ -70,6 +66,15 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public String toString() {
+    return String.valueOf(metricsCache.values());
+  }
+
+  Collection<Metric> metrics() {
+    return metricsCache.values();
+  }
+
+  @Override
   public MetricRegistry createRegistry() {
     return new DefaultMetricProvider(this);
   }
@@ -113,14 +118,14 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerProcessMemoryMetrics() {
-    registerAll(JvmProcessMemory.createGauges(reportChangesOnly));
+    JvmProcessMemory.createGauges(this, reportChangesOnly);
     return this;
   }
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    registerAll(JvmCGroupCpuMetricGroup.createGauges(reportChangesOnly));
-    registerAll(JvmCGroupMemoryMetricGroup.createGauges(reportChangesOnly));
+    JvmCGroupCpuMetricGroup.createGauges(this, reportChangesOnly);
+    JvmCGroupMemoryMetricGroup.createGauges(this, reportChangesOnly);
     return this;
   }
 
@@ -129,40 +134,28 @@ public class DefaultMetricProvider implements SpiMetricProvider {
     GaugeLong osLoadAvgMetric = JvmSystemMetricGroup.osLoadAvgMetric();
     if (osLoadAvgMetric.value() >= 0) {
       // OS Load Average is supported on this system
-      registerJvmMetric(osLoadAvgMetric);
+      register(osLoadAvgMetric);
     }
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmThreadMetrics() {
-    registerAll(JvmThreadMetricGroup.createThreadMetricGroup(reportChangesOnly, withDetails));
+    JvmThreadMetricGroup.createThreadMetricGroup(this, reportChangesOnly, withDetails);
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmGCMetrics() {
-    registerAll(JvmGarbageCollectionMetricGroup.createGauges(withDetails));
+    JvmGarbageCollectionMetricGroup.createGauges(this, withDetails);
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmMemoryMetrics() {
-    registerAll(JvmMemoryMetricGroup.createHeapGroup(reportChangesOnly));
-    registerAll(JvmMemoryMetricGroup.createNonHeapGroup(reportChangesOnly));
+    JvmMemoryMetricGroup.createHeapGroup(this, reportChangesOnly);
+    JvmMemoryMetricGroup.createNonHeapGroup(this, reportChangesOnly);
     return this;
-  }
-
-  private void registerAll(List<Metric> groups) {
-    for (Metric metric : groups) {
-      registerJvmMetric(metric);
-    }
-  }
-
-  private void registerJvmMetric(Metric m) {
-    synchronized (monitor) {
-      coreJvmMetrics.add(m);
-    }
   }
 
   @Override
@@ -206,11 +199,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   private <T extends Metric> T put(String name, T metric) {
-    if (name.startsWith(JVM)) {
-      registerJvmMetric(metric);
-    } else {
-      metricsCache.put(name, metric);
-    }
+    metricsCache.put(name, metric);
     return metric;
   }
 
@@ -234,9 +223,17 @@ public class DefaultMetricProvider implements SpiMetricProvider {
     return metric;
   }
 
-  private void collectJvmMetrics(DStatsCollector collector) {
-    for (Metric metric : coreJvmMetrics) {
-      metric.collect(collector);
+  @Override
+  public void register(Metric metric) {
+    metricsCache.put(metric.name(), metric);
+  }
+
+  @Override
+  public List<MetricStats> collectMetrics() {
+    synchronized (monitor) {
+      DStatsCollector collector = new DStatsCollector(namingConvention);
+      collectAppMetrics(collector);
+      return collector.list();
     }
   }
 
@@ -248,15 +245,4 @@ public class DefaultMetricProvider implements SpiMetricProvider {
       collector.addAll(supplier.collectMetrics());
     }
   }
-
-  @Override
-  public List<MetricStats> collectMetrics() {
-    synchronized (monitor) {
-      DStatsCollector collector = new DStatsCollector(namingConvention);
-      collectJvmMetrics(collector);
-      collectAppMetrics(collector);
-      return collector.list();
-    }
-  }
-
 }

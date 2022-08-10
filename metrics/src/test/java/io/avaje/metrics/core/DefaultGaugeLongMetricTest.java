@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.NamingMatch;
@@ -46,6 +47,11 @@ class DefaultGaugeLongMetricTest {
 
   }
 
+  private GaugeLong.Stats collectGauge(Metric metric) {
+    List<MetricStats> collect = collect(metric);
+    return collect.isEmpty() ? null : (GaugeLong.Stats)collect.get(0);
+  }
+
   private List<MetricStats> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
@@ -53,34 +59,30 @@ class DefaultGaugeLongMetricTest {
   }
 
   @Test
-  void test() {
-
+  void test_incrementing() {
     MyGauge myGauge = new MyGauge();
     DGaugeLong metric = new DGaugeLong(MyGauge.class.getName() + ".test", myGauge);
 
     assertEquals(0, metric.value());
-    assertThat(collect(metric)).isEmpty();
+    assertThat(collectGauge(metric)).isNull();
 
     myGauge.value = 100;
     assertEquals(100, metric.value());
-    assertThat(collect(metric)).hasSize(1);
+    assertThat(collectGauge(metric).value()).isEqualTo(100);
 
-    DGaugeLong incrementing = DGaugeLong.incrementing(MyGauge.class.getName() + ".inc", myGauge);
+    DGaugeLong incrementing = new DGaugeLong(MyGauge.class.getName() + ".inc", GaugeLong.incrementing(myGauge));
 
     myGauge.value = 100;
-    //assertFalse(incrementing.collectStatistics());
     assertEquals(100, incrementing.value());
 
     myGauge.value = 150;
-    assertThat(collect(metric)).hasSize(1);
-    assertEquals(50, incrementing.value());
+    assertThat(collectGauge(incrementing).value()).isEqualTo(50);
 
     myGauge.value = 280;
-    assertThat(collect(metric)).hasSize(1);
-    assertEquals(130, incrementing.value());
+    assertThat(collectGauge(incrementing).value()).isEqualTo(130);
 
     myGauge.value = 280;
-    assertThat(collect(metric)).isEmpty();
+    assertThat(collectGauge(incrementing)).isNull();
     assertEquals(0, incrementing.value());
   }
 
