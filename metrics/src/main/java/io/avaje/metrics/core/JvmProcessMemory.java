@@ -45,7 +45,7 @@ final class JvmProcessMemory {
    * Return the metrics for VmRSS and VmHWM.
    */
   public void metrics(MetricRegistry registry, boolean reportChangesOnly) {
-    if (pid == null || MetricManifest.get().disableProcessMemory()) {
+    if (pid == null) {
       return;
     }
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");

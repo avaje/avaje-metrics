@@ -110,7 +110,6 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   public JvmMetrics registerJvmMetrics() {
     registerJvmGCMetrics();
     registerJvmMemoryMetrics();
-    registerProcessMemoryMetrics();
     registerJvmThreadMetrics();
     registerJvmOsLoadMetric();
     return this;
