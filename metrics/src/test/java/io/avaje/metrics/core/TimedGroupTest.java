@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TimedMetricGroupTest {
+class TimedGroupTest {
 
   @Test
   void test() {

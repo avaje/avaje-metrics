@@ -4,9 +4,9 @@ import io.avaje.metrics.*;
 
 public interface SpiMetricBuilder {
 
-  Factory<Timer> timed();
+  Factory<Timer> timer();
   Factory<Timer> bucket();
-  Factory<Meter> value();
+  Factory<Meter> meter();
   Factory<Counter> counter();
 
   /**

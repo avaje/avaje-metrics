@@ -8,7 +8,7 @@ import io.avaje.metrics.spi.SpiMetricBuilder;
 final class NoopMetricBuilder implements SpiMetricBuilder {
 
   @Override
-  public Factory<Timer> timed() {
+  public Factory<Timer> timer() {
     return new NoopTimerFactory();
   }
 
@@ -18,7 +18,7 @@ final class NoopMetricBuilder implements SpiMetricBuilder {
   }
 
   @Override
-  public Factory<Meter> value() {
+  public Factory<Meter> meter() {
     return new NoopMeterFactory();
   }
 

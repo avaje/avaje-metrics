@@ -19,10 +19,10 @@ import java.util.function.LongSupplier;
 public class DefaultMetricProvider implements SpiMetricProvider {
 
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
-  private final SpiMetricBuilder.Factory<Timer> bucketTimedMetricFactory;
-  private final SpiMetricBuilder.Factory<Timer> timedMetricFactory;
-  private final SpiMetricBuilder.Factory<Counter> counterMetricFactory;
-  private final SpiMetricBuilder.Factory<Meter> valueMetricFactory;
+  private final SpiMetricBuilder.Factory<Timer> bucketTimerFactory;
+  private final SpiMetricBuilder.Factory<Timer> timerFactory;
+  private final SpiMetricBuilder.Factory<Counter> counterFactory;
+  private final SpiMetricBuilder.Factory<Meter> meterFactory;
   private final List<MetricSupplier> suppliers = new ArrayList<>();
   private final Object monitor = new Object();
   private boolean withDetails;
@@ -31,17 +31,17 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   public DefaultMetricProvider() {
     SpiMetricBuilder builder = initBuilder();
-    this.bucketTimedMetricFactory = builder.bucket();
-    this.timedMetricFactory = builder.timed();
-    this.valueMetricFactory = builder.value();
-    this.counterMetricFactory = builder.counter();
+    this.bucketTimerFactory = builder.bucket();
+    this.timerFactory = builder.timer();
+    this.meterFactory = builder.meter();
+    this.counterFactory = builder.counter();
   }
 
   DefaultMetricProvider(DefaultMetricProvider parent) {
-    this.bucketTimedMetricFactory = parent.bucketTimedMetricFactory;
-    this.timedMetricFactory = parent.timedMetricFactory;
-    this.valueMetricFactory = parent.valueMetricFactory;
-    this.counterMetricFactory = parent.counterMetricFactory;
+    this.bucketTimerFactory = parent.bucketTimerFactory;
+    this.timerFactory = parent.timerFactory;
+    this.meterFactory = parent.meterFactory;
+    this.counterFactory = parent.counterFactory;
     this.namingConvention = parent.namingConvention;
     this.withDetails = parent.withDetails;
     this.reportChangesOnly = parent.reportChangesOnly;
@@ -169,22 +169,22 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public Timer timed(String name) {
-    return (Timer) metric(name, timedMetricFactory);
+    return (Timer) metric(name, timerFactory);
   }
 
   @Override
   public Timer timed(String name, int... bucketRanges) {
-    return (Timer) metric(name, bucketTimedMetricFactory, bucketRanges);
+    return (Timer) metric(name, bucketTimerFactory, bucketRanges);
   }
 
   @Override
   public Counter counter(String name) {
-    return (Counter) metric(name, counterMetricFactory);
+    return (Counter) metric(name, counterFactory);
   }
 
   @Override
   public Meter meter(String name) {
-    return (Meter) metric(name, valueMetricFactory);
+    return (Meter) metric(name, meterFactory);
   }
 
   @Override
