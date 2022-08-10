@@ -25,7 +25,7 @@
 
   <modules>
     <module>metrics</module>
-    <module>metrics-api</module>
+<!--    <module>metrics-api</module>-->
     <module>metrics-graphite</module>
     <module>metrics-ebean</module>
     <module>metrics-supplier</module>

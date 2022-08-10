@@ -19,7 +19,7 @@
 
     <dependency>
       <groupId>io.avaje.metrics</groupId>
-      <artifactId>metrics-api</artifactId>
+      <artifactId>metrics</artifactId>
       <version>9.0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
