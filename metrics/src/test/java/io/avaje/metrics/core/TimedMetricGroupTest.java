@@ -16,15 +16,26 @@ class TimedMetricGroupTest {
     Timer timedMetric = timedGroup.timed("one");
     assertEquals("org.test.Hello.one", timedMetric.name());
 
-
     Timer timedMetric2 = timedGroup.timed("one");
-
     assertSame(timedMetric, timedMetric2);
-
 
     Timer two = timedGroup.timed("two");
     assertNotSame(timedMetric, two);
-
     assertEquals("org.test.Hello.two", two.name());
+  }
+
+  @Test
+  void testUsingClass() {
+    TimerGroup timedGroup = Metrics.timerGroup(Object.class);
+
+    Timer timedMetric = timedGroup.timed("one");
+    assertEquals("java.lang.Object.one", timedMetric.name());
+
+    Timer timedMetric2 = timedGroup.timed("one");
+    assertSame(timedMetric, timedMetric2);
+
+    Timer two = timedGroup.timed("two");
+    assertNotSame(timedMetric, two);
+    assertEquals("java.lang.Object.two", two.name());
   }
 }

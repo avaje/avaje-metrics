@@ -8,9 +8,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.LongSupplier;
 
 /**
- * Manages the creation and registration of Metrics.
- * <p>
- * Provides access to the global default registry.
+ * Manages the creation of the default registry and convenience methods to register
+ * metrics with the default registry.
  * <p>
  * Provides methods to allow agents to go through the registered metrics and gather/report the
  * statistics.
@@ -29,7 +28,14 @@ public class Metrics {
   }
 
   /**
-   * Create a new registry to create and register metrics to.
+   * Return the underlying default registry.
+   */
+  public static MetricRegistry registry() {
+    return defaultRegistry;
+  }
+
+  /**
+   * Create a new metric registry to create and register metrics with.
    */
   public static MetricRegistry createRegistry() {
     return defaultRegistry.createRegistry();

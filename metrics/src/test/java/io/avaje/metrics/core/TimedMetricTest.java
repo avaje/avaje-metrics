@@ -68,13 +68,10 @@ class TimedMetricTest {
 
   @Test
   void timeRunnable() {
-
     resetStatistics();
 
     Timer metric = Metrics.timer("test.runnable");
-    metric.time(() -> {
-      System.out.println("here");
-    });
+    metric.time(() -> System.out.println("here"));
 
     final List<Metric.Statistics> stats = Metrics.collectMetrics();
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
@@ -148,7 +145,7 @@ class TimedMetricTest {
     String out = metric.time(() -> "foo");
     assertEquals("foo", out);
 
-    final List<Metric.Statistics> stats = Metrics.collectMetrics();
+    final List<Metric.Statistics> stats = Metrics.registry().collectMetrics();
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
     assertEquals("test.callable", stat0.name());
