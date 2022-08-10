@@ -11,7 +11,7 @@ import java.util.function.LongSupplier;
 /**
  * Collect statistics on the rate of garbage collection.
  */
-final class JvmGarbageCollectionMetricGroup {
+final class JvmGarbageCollection {
 
   static void createGauges(MetricRegistry registry, boolean withDetails) {
     List<GarbageCollectorMXBean> gcMXBeans = ManagementFactory.getGarbageCollectorMXBeans();

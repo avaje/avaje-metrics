@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JvmCGroupMemoryMetricGroupTest {
 
-  private final JvmCGroupMemoryMetricGroup me = new JvmCGroupMemoryMetricGroup();
+  private final JvmCGroupMemory me = new JvmCGroupMemory();
 
   @Test
   void toMegaBytes() {
-    assertThat(JvmCGroupMemoryMetricGroup.toMegaBytes(1074790400)).isEqualTo(1025);
-    assertThat(JvmCGroupMemoryMetricGroup.toMegaBytes(238493696)).isEqualTo(227);
+    assertThat(JvmCGroupMemory.toMegaBytes(1074790400)).isEqualTo(1025);
+    assertThat(JvmCGroupMemory.toMegaBytes(238493696)).isEqualTo(227);
   }
 
   @Test
@@ -24,7 +24,7 @@ class JvmCGroupMemoryMetricGroupTest {
     FileLines useSource = new FileLines("src/test/resources/cgroup/memory.usage_in_bytes");
     assertTrue(useSource.exists());
 
-    JvmCGroupMemoryMetricGroup.MemSource source = new JvmCGroupMemoryMetricGroup.MemSource(limit, useSource);
+    JvmCGroupMemory.MemSource source = new JvmCGroupMemory.MemSource(limit, useSource);
 
     assertThat(source.limitMb()).isEqualTo(1025);
     assertThat(source.usageMb()).isEqualTo(227);

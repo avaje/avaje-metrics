@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.function.LongSupplier;
 
-final class JvmSystemMetricGroup {
+final class JvmOsLoad {
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
-  static GaugeLong osLoadAvgMetric() {
+  static GaugeLong osLoadAverage() {
     return new DGaugeLong("jvm.os.loadAverage", new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()));
   }
 

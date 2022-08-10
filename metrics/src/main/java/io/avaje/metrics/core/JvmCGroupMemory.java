@@ -3,12 +3,12 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.MetricRegistry;
 
-final class JvmCGroupMemoryMetricGroup {
+final class JvmCGroupMemory {
 
   private static final long MEG = 1_048_576;
 
   static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
-    new JvmCGroupMemoryMetricGroup().metrics(registry, reportChangesOnly);
+    new JvmCGroupMemory().metrics(registry, reportChangesOnly);
   }
 
   private void metrics(MetricRegistry registry, boolean reportChangesOnly) {

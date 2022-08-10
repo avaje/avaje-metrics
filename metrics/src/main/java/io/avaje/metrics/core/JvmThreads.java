@@ -6,7 +6,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.function.LongSupplier;
 
-final class JvmThreadMetricGroup {
+final class JvmThreads {
 
   static void createThreadMetricGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
     ThreadGauges threadGauges = new ThreadGauges(ManagementFactory.getThreadMXBean());

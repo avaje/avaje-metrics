@@ -7,7 +7,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.function.LongSupplier;
 
-final class JvmMemoryMetricGroup {
+final class JvmMemory {
 
   private static final long MEGABYTES = 1024 * 1024L;
 

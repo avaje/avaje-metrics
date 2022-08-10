@@ -124,14 +124,14 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    JvmCGroupCpuMetricGroup.createGauges(this, reportChangesOnly);
-    JvmCGroupMemoryMetricGroup.createGauges(this, reportChangesOnly);
+    JvmCGroupCpu.createGauges(this, reportChangesOnly);
+    JvmCGroupMemory.createGauges(this, reportChangesOnly);
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmOsLoadMetric() {
-    GaugeLong osLoadAvgMetric = JvmSystemMetricGroup.osLoadAvgMetric();
+    GaugeLong osLoadAvgMetric = JvmOsLoad.osLoadAverage();
     if (osLoadAvgMetric.value() >= 0) {
       // OS Load Average is supported on this system
       register(osLoadAvgMetric);
@@ -141,20 +141,20 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerJvmThreadMetrics() {
-    JvmThreadMetricGroup.createThreadMetricGroup(this, reportChangesOnly, withDetails);
+    JvmThreads.createThreadMetricGroup(this, reportChangesOnly, withDetails);
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmGCMetrics() {
-    JvmGarbageCollectionMetricGroup.createGauges(this, withDetails);
+    JvmGarbageCollection.createGauges(this, withDetails);
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmMemoryMetrics() {
-    JvmMemoryMetricGroup.createHeapGroup(this, reportChangesOnly);
-    JvmMemoryMetricGroup.createNonHeapGroup(this, reportChangesOnly);
+    JvmMemory.createHeapGroup(this, reportChangesOnly);
+    JvmMemory.createNonHeapGroup(this, reportChangesOnly);
     return this;
   }
 

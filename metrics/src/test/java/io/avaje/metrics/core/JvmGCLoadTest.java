@@ -12,7 +12,7 @@ class JvmGCLoadTest {
   @Test
   void test() throws InterruptedException {
     DefaultMetricProvider registry = new DefaultMetricProvider();
-    JvmGarbageCollectionMetricGroup.createGauges(registry, true);
+    JvmGarbageCollection.createGauges(registry, true);
     for (int i = 0; i < 3; i++) {
       doSomething(registry);
     }

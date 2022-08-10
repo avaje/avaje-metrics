@@ -8,10 +8,10 @@ import java.util.function.LongSupplier;
 
 import static java.math.BigDecimal.valueOf;
 
-final class JvmCGroupCpuMetricGroup {
+final class JvmCGroupCpu {
 
   static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
-    new JvmCGroupCpuMetricGroup().create(registry, reportChangesOnly);
+    new JvmCGroupCpu().create(registry, reportChangesOnly);
   }
 
   void create(MetricRegistry registry, boolean reportChangesOnly) {
