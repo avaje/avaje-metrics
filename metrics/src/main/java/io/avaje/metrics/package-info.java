@@ -1,7 +1,5 @@
 /**
- * The main public API for Avaje Metrics.
- * <p>
- * Avaje metrics provides various metrics for.
+ * Avaje Metrics provides Timers, Counters, Gauges and Meters.
  * <ul>
  * <li> Timers - used to collect timing statistics on methods or sections of code.</li>
  * <li> Gauges - used to monitor resource values like memory (used, max etc) and threads (active, max etc).</li>
@@ -10,5 +8,7 @@
  * </ul>
  * <p>
  * Each of the metrics collect statistics. Periodically collect and report the statistics collected.
+ *
+ * @see io.avaje.metrics.Metrics
  */
 package io.avaje.metrics;
