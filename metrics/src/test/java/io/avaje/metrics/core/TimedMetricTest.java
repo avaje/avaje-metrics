@@ -1,9 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricRegistry;
-import io.avaje.metrics.MetricStats;
-import io.avaje.metrics.Metrics;
-import io.avaje.metrics.Timer;
+import io.avaje.metrics.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -28,7 +25,7 @@ class TimedMetricTest {
     metric.add(start);//, useContext);
     metric.addEventSince(true, start);
 
-    List<MetricStats> stats = registry.collectMetrics();
+    List<Metric.Statistics> stats = registry.collectMetrics();
 
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
@@ -79,7 +76,7 @@ class TimedMetricTest {
       System.out.println("here");
     });
 
-    final List<MetricStats> stats = Metrics.collectMetrics();
+    final List<Metric.Statistics> stats = Metrics.collectMetrics();
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
     assertEquals("test.runnable", stat0.name());
@@ -107,7 +104,7 @@ class TimedMetricTest {
       fail();
     } catch (NullPointerException e) {
 
-      final List<MetricStats> stats = Metrics.collectMetrics();
+      final List<Metric.Statistics> stats = Metrics.collectMetrics();
       Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
       assertEquals("test.runnable.error", stat0.name());
@@ -132,7 +129,7 @@ class TimedMetricTest {
       fail();
     } catch (Exception e) {
 
-      final List<MetricStats> stats = Metrics.collectMetrics();
+      final List<Metric.Statistics> stats = Metrics.collectMetrics();
       Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
       assertEquals("test.callable.error", stat0.name());
@@ -151,7 +148,7 @@ class TimedMetricTest {
     String out = metric.time(() -> "foo");
     assertEquals("foo", out);
 
-    final List<MetricStats> stats = Metrics.collectMetrics();
+    final List<Metric.Statistics> stats = Metrics.collectMetrics();
     Timer.Stats stat0 = (Timer.Stats) stats.get(0);
 
     assertEquals("test.callable", stat0.name());

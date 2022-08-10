@@ -12,7 +12,7 @@ import java.io.Writer;
  * This format is aimed at writing to the local file system to provide simple mechanism for
  * reporting of the collected metrics.
  */
-public class CsvWriteVisitor implements MetricStatsVisitor {
+public class CsvWriteVisitor implements Metric.Visitor {
 
   /**
    * Code for GaugeLongMetric.
@@ -112,12 +112,12 @@ public class CsvWriteVisitor implements MetricStatsVisitor {
    */
   public void write(ReportMetrics reportMetrics) {
 
-    for (MetricStats metric : reportMetrics.getMetrics()) {
+    for (Metric.Statistics metric : reportMetrics.getMetrics()) {
       metric.visit(this);
     }
   }
 
-  private void writeMetricName(MetricStats metric, String metricTypeCode) throws IOException {
+  private void writeMetricName(Metric.Statistics metric, String metricTypeCode) throws IOException {
     writeMetricName(metric.name(), null, metricTypeCode);
   }
 

@@ -30,11 +30,11 @@ class CsvWriteVisitorTest {
     assertThat(counterCsv).contains(",org.test.CounterFoo.doStuff,10");
   }
 
-  private MetricStats collect(Metric metric) {
+  private Metric.Statistics collect(Metric metric) {
     return collectAll(metric).get(0);
   }
 
-  private List<MetricStats> collectAll(Metric metric) {
+  private List<Metric.Statistics> collectAll(Metric metric) {
     HelperStatsCollector collector = new HelperStatsCollector();
     metric.collect(collector);
     return collector.getList();
@@ -87,8 +87,8 @@ class CsvWriteVisitorTest {
 
     Timer metric = createTimedMetric();
 
-    List<MetricStats> statistics = collectAll(metric);
-    for (MetricStats statistic : statistics) {
+    List<Metric.Statistics> statistics = collectAll(metric);
+    for (Metric.Statistics statistic : statistics) {
       csvVisitor.visit((Meter.Stats) statistic);
     }
     String csvContent = writer.toString();
@@ -126,8 +126,8 @@ class CsvWriteVisitorTest {
     metric.addEventDuration(false, 110 * NANOS_TO_MILLIS);
     metric.addEventDuration(false, 110 * NANOS_TO_MILLIS);
 
-    List<MetricStats> stats = collectAll(metric);
-    for (MetricStats stat : stats) {
+    List<Metric.Statistics> stats = collectAll(metric);
+    for (Metric.Statistics stat : stats) {
       csvVisitor.visit((Timer.Stats) stat);
     }
     String csvContent = writer.toString();
@@ -162,8 +162,8 @@ class CsvWriteVisitorTest {
 
     Timer metric = createBucketTimedMetricPartial();
 
-    List<MetricStats> statistics = collectAll(metric);
-    for (MetricStats statistic : statistics) {
+    List<Metric.Statistics> statistics = collectAll(metric);
+    for (Metric.Statistics statistic : statistics) {
       csvVisitor.visit((Timer.Stats) statistic);
     }
     String csvContent = writer.toString();

@@ -1,6 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.Metric;
 
 abstract class BaseReportName {
 
@@ -11,7 +11,7 @@ abstract class BaseReportName {
     this.name = name;
   }
 
-  final String reportName(MetricStatsVisitor collector) {
+  final String reportName(Metric.Visitor collector) {
     final String tmp = collector.namingConvention().apply(name);
     this.reportName = tmp;
     return tmp;

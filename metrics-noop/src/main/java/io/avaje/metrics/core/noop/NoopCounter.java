@@ -1,7 +1,6 @@
 package io.avaje.metrics.core.noop;
 
 import io.avaje.metrics.Counter;
-import io.avaje.metrics.MetricStatsVisitor;
 
 final class NoopCounter implements Counter {
 
@@ -17,7 +16,7 @@ final class NoopCounter implements Counter {
   }
 
   @Override
-  public void collect(MetricStatsVisitor visitor) {
+  public void collect(Visitor visitor) {
     // do nothing
   }
 

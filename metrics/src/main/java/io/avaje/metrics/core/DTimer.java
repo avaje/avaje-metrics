@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.Timer;
 
 import java.util.concurrent.TimeUnit;
@@ -54,7 +53,7 @@ final class DTimer implements Timer {
   }
 
   @Override
-  public void collect(MetricStatsVisitor collector) {
+  public void collect(Visitor collector) {
     final Stats errStats = errorCounter.collect(collector);
     if (errStats != null) {
       collector.visit(errStats);

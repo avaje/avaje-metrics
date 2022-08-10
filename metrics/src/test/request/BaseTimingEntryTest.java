@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricName;
 import io.avaje.metrics.TimedMetric;
-import io.avaje.metrics.MetricStatsVisitor;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

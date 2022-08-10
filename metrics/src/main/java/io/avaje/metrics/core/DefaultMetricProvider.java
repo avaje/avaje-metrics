@@ -229,7 +229,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
-  public List<MetricStats> collectMetrics() {
+  public List<Metric.Statistics> collectMetrics() {
     synchronized (monitor) {
       DStatsCollector collector = new DStatsCollector(namingConvention);
       collectAppMetrics(collector);

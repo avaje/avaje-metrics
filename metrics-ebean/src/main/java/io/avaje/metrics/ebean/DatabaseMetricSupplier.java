@@ -1,9 +1,9 @@
 package io.avaje.metrics.ebean;
 
-import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricSupplier;
-import io.avaje.metrics.supplier.CounterStats;
-import io.avaje.metrics.supplier.TimerStats;
+import io.avaje.metrics.stats.CounterStats;
+import io.avaje.metrics.stats.TimerStats;
 import io.ebean.Database;
 import io.ebean.meta.MetaCountMetric;
 import io.ebean.meta.MetaQueryMetric;
@@ -22,15 +22,15 @@ public class DatabaseMetricSupplier implements MetricSupplier {
   }
 
   @Override
-  public List<MetricStats> collectMetrics() {
-    List<MetricStats> metrics = new ArrayList<>();
+  public List<Metric.Statistics> collectMetrics() {
+    List<Metric.Statistics> metrics = new ArrayList<>();
     ServerMetrics dbMetrics = database.metaInfo().collectMetrics();
-   //log.info("dbMetrics {} {} {} {}", database.name(), dbMetrics.timedMetrics(), dbMetrics.queryMetrics(), dbMetrics.countMetrics());
+    //log.info("dbMetrics {} {} {} {}", database.name(), dbMetrics.timedMetrics(), dbMetrics.queryMetrics(), dbMetrics.countMetrics());
     for (MetaTimedMetric timedMetric : dbMetrics.timedMetrics()) {
-      metrics.add(new TimerStats(timedMetric.name(), timedMetric.count(), timedMetric.total(), timedMetric.max(), timedMetric.mean()));
+      metrics.add(new TimerStats(timedMetric.name(), timedMetric.count(), timedMetric.total(), timedMetric.max()));
     }
     for (MetaQueryMetric metric : dbMetrics.queryMetrics()) {
-      metrics.add(new TimerStats(metric.name(), metric.count(), metric.total(), metric.max(), metric.mean()));
+      metrics.add(new TimerStats(metric.name(), metric.count(), metric.total(), metric.max()));
     }
     for (MetaCountMetric metric : dbMetrics.countMetrics()) {
       metrics.add(new CounterStats(metric.name(), metric.count()));

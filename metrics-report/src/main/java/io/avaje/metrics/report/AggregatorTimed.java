@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.Metric;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ class AggregatorTimed implements MetricReportAggregator {
   }
 
   @Override
-  public void process(List<MetricStats> stats) {
+  public void process(List<Metric.Statistics> stats) {
     new AggregatorTimedRequest(prefix, name).process(stats);
   }
 }

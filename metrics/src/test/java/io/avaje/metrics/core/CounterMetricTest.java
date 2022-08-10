@@ -33,7 +33,7 @@ class CounterMetricTest {
     assertEquals(0, counterMetric.count());
   }
 
-  private List<MetricStats> collect(Metric metric) {
+  private List<Metric.Statistics> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
     return collector.list();

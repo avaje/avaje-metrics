@@ -11,7 +11,7 @@ import static io.avaje.metrics.report.CsvWriteVisitor.*;
 /**
  * Writes the metric information as JSON to a buffer for sending.
  */
-public class JsonWriter implements MetricStatsVisitor {
+public class JsonWriter implements Metric.Visitor {
 
   private final int decimalPlaces;
 
@@ -19,17 +19,17 @@ public class JsonWriter implements MetricStatsVisitor {
 
   private boolean includeType;
 
-  private final List<MetricStats> metrics;
+  private final List<Metric.Statistics> metrics;
 
-  public static void writeTo(Appendable writer, List<MetricStats> metrics) {
+  public static void writeTo(Appendable writer, List<Metric.Statistics> metrics) {
     new JsonWriter(writer, metrics).write();
   }
 
-  public JsonWriter(Appendable writer, List<MetricStats> metrics) {
+  public JsonWriter(Appendable writer, List<Metric.Statistics> metrics) {
     this(2, writer, metrics);
   }
 
-  public JsonWriter(int decimalPlaces, Appendable writer, List<MetricStats> metrics) {
+  public JsonWriter(int decimalPlaces, Appendable writer, List<Metric.Statistics> metrics) {
     this.decimalPlaces = decimalPlaces;
     this.buffer = writer;
     this.metrics = metrics;
@@ -52,7 +52,7 @@ public class JsonWriter implements MetricStatsVisitor {
         } else {
           buffer.append(" ,");
         }
-        MetricStats metric = metrics.get(i);
+        Metric.Statistics metric = metrics.get(i);
         metric.visit(this);
         buffer.append("\n");
       }
@@ -61,7 +61,7 @@ public class JsonWriter implements MetricStatsVisitor {
     }
   }
 
-  private void writeMetricStart(String type, MetricStats metric) throws IOException {
+  private void writeMetricStart(String type, Metric.Statistics metric) throws IOException {
     writeMetricStart(type, metric.name(), null);
   }
 

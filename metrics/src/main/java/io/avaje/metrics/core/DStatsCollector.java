@@ -7,16 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-final class DStatsCollector implements MetricStatsVisitor {
+final class DStatsCollector implements Metric.Visitor {
 
-  private final List<MetricStats> list = new ArrayList<>();
+  private final List<Metric.Statistics> list = new ArrayList<>();
   private final  Function<String, String> namingConvention;
 
   public DStatsCollector(Function<String, String> namingConvention) {
     this.namingConvention = namingConvention;
   }
 
-  List<MetricStats> list() {
+  List<Metric.Statistics> list() {
     return list;
   }
 
@@ -50,7 +50,7 @@ final class DStatsCollector implements MetricStatsVisitor {
     list.add(metric);
   }
 
-  void addAll(List<MetricStats> metrics) {
+  void addAll(List<Metric.Statistics> metrics) {
     list.addAll(metrics);
   }
 }

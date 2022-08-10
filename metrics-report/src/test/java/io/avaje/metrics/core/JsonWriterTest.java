@@ -127,8 +127,8 @@ class JsonWriterTest {
 
   private void visitAllTimed(Metric metric, JsonWriter jsonVisitor) {
 
-    List<MetricStats> statistics = collectAll(metric);
-    for (MetricStats statistic : statistics) {
+    List<Metric.Statistics> statistics = collectAll(metric);
+    for (Metric.Statistics statistic : statistics) {
       jsonVisitor.visit((Timer.Stats) statistic);
     }
   }
@@ -144,7 +144,7 @@ class JsonWriterTest {
     metrics.add(createBucketTimedMetricPartial());
     metrics.add(createCounterMetric());
 
-    List<MetricStats> statistics = collect(metrics);
+    List<Metric.Statistics> statistics = collect(metrics);
 
     HeaderInfo headerInfo = new HeaderInfo();
     headerInfo.setKey("key-val");
@@ -181,13 +181,13 @@ class JsonWriterTest {
 
   }
 
-  private MetricStats collectOne(Metric metric) {
+  private Metric.Statistics collectOne(Metric metric) {
     HelperStatsCollector collector = new HelperStatsCollector();
     metric.collect(collector);
     return collector.getList().get(0);
   }
 
-  private List<MetricStats> collect(List<Metric> metrics) {
+  private List<Metric.Statistics> collect(List<Metric> metrics) {
 
     HelperStatsCollector collector = new HelperStatsCollector();
     for (Metric metric : metrics) {
@@ -196,7 +196,7 @@ class JsonWriterTest {
     return collector.getList();
   }
 
-  private List<MetricStats> collectAll(Metric... metrics) {
+  private List<Metric.Statistics> collectAll(Metric... metrics) {
 
     HelperStatsCollector collector = new HelperStatsCollector();
     for (Metric metric : metrics) {

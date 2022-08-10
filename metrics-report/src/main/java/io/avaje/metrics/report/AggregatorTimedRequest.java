@@ -1,7 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricStats;
-import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.Timer;
 
 import java.util.List;
@@ -23,9 +22,9 @@ class AggregatorTimedRequest {
     this.name = name;
   }
 
-  void process(List<MetricStats> stats) {
+  void process(List<Metric.Statistics> stats) {
 
-    for (MetricStats stat : stats) {
+    for (Metric.Statistics stat : stats) {
       if (isMatch(stat)) {
         add((Timer.Stats) stat);
       }
@@ -57,7 +56,7 @@ class AggregatorTimedRequest {
     return name + suffix;
   }
 
-  private boolean isMatch(MetricStats stat) {
+  private boolean isMatch(Metric.Statistics stat) {
     return (stat instanceof Timer.Stats) && stat.name().startsWith(prefix);
   }
 
@@ -95,7 +94,7 @@ class AggregatorTimedRequest {
     }
 
     @Override
-    public void visit(MetricStatsVisitor visitor) {
+    public void visit(Metric.Visitor visitor) {
       visitor.visit(this);
     }
 

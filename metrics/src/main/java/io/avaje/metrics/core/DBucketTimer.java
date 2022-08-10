@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.Timer;
 
 import java.util.function.Supplier;
@@ -107,7 +106,7 @@ final class DBucketTimer implements Timer {
   }
 
   @Override
-  public void collect(MetricStatsVisitor collector) {
+  public void collect(Visitor collector) {
     for (Timer bucket : buckets) {
       bucket.collect(collector);
     }

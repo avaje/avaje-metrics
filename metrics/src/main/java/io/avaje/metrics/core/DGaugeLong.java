@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
-import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.stats.GaugeLongStats;
 
 import java.util.function.LongSupplier;
 
@@ -56,9 +56,9 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
     }
 
     @Override
-    public void collect(MetricStatsVisitor collector) {
+    public void collect(Visitor collector) {
       final String name = reportName != null ? reportName : reportName(collector);
-      collector.visit(new DGaugeLongStats(name, supplier.getAsLong()));
+      collector.visit(new GaugeLongStats(name, supplier.getAsLong()));
     }
   }
 
@@ -70,13 +70,13 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
     }
 
     @Override
-    public void collect(MetricStatsVisitor collector) {
+    public void collect(Visitor collector) {
       long value = supplier.getAsLong();
       boolean collect = (value != 0 && value != lastReported);
       if (collect) {
         lastReported = value;
         final String name = reportName != null ? reportName : reportName(collector);
-        collector.visit(new DGaugeLongStats(name, value));
+        collector.visit(new GaugeLongStats(name, value));
       }
     }
   }
@@ -88,10 +88,10 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
     }
 
     @Override
-    public void collect(MetricStatsVisitor collector) {
+    public void collect(Visitor collector) {
       if (reportName == null) {
         String name = reportName(collector);
-        collector.visit(new DGaugeLongStats(name, supplier.getAsLong()));
+        collector.visit(new GaugeLongStats(name, supplier.getAsLong()));
       }
     }
   }

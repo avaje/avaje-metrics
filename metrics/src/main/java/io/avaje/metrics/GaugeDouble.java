@@ -21,7 +21,7 @@ package io.avaje.metrics;
  * </code>
  * </pre>
  * <p>
- * Note that <em>metric-core</em> registers some core JVM gauges that include threads, memory
+ * Note that <em>metrics</em> registers some core JVM gauges that include threads, memory
  * and garbage collection.
  */
 public interface GaugeDouble extends Metric {
@@ -34,7 +34,7 @@ public interface GaugeDouble extends Metric {
   /**
    * Statistics provided by the {@link GaugeDouble}.
    */
-  interface Stats extends MetricStats {
+  interface Stats extends Statistics {
 
     /**
      * Return the count of values collected.

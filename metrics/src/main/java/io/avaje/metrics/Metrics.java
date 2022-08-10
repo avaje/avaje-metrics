@@ -38,7 +38,7 @@ public class Metrics {
   /**
    * Collect all the metrics from the default registry.
    */
-  public static List<MetricStats> collectMetrics() {
+  public static List<Metric.Statistics> collectMetrics() {
     return defaultRegistry.collectMetrics();
   }
 

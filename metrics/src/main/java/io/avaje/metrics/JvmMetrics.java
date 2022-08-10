@@ -3,14 +3,13 @@ package io.avaje.metrics;
 /**
  * Standard JVM metrics built in that we often register.
  * <p>
- * Typically we want the standard JVM metrics and either Logback or Log4J metrics
- * and this provides a relatively easy way to register those.
+ * Typically we want the standard JVM metrics via {@link #registerJvmMetrics()}.
  * </p>
  * <pre>{@code
  *
  *   Metrics.jvmMetrics()
- *     .registerStandardJvmMetrics()
- *     .registerLogbackMetrics();
+ *     .withReportAlways()
+ *     .registerJvmMetrics();
  *
  * }</pre>
  */
@@ -22,8 +21,7 @@ public interface JvmMetrics {
   JvmMetrics withDetails();
 
   /**
-   * Set to only report when the metrics change. This is the default and means
-   * that metrics that don't change are not reported.
+   * Set to only report when the metrics change.
    */
   JvmMetrics withReportChangesOnly();
 

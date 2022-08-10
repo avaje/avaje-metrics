@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeDouble;
-import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.stats.GaugeDoubleStats;
 
 import java.util.function.DoubleSupplier;
 
@@ -36,11 +36,11 @@ final class DGaugeDouble extends BaseReportName implements GaugeDouble {
   }
 
   @Override
-  public void collect(MetricStatsVisitor collector) {
+  public void collect(Visitor collector) {
     final double value = gauge.getAsDouble();
     if (Double.compare(value, 0.0d) != 0) {
       final String name = reportName != null ? reportName : reportName(collector);
-      collector.visit(new DGaugeDoubleStats(name, value));
+      collector.visit(new GaugeDoubleStats(name, value));
     }
   }
 

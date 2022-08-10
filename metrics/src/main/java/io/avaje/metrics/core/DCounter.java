@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Counter;
-import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.stats.CounterStats;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -35,11 +35,11 @@ final class DCounter extends BaseReportName implements Counter {
   }
 
   @Override
-  public void collect(MetricStatsVisitor collector) {
+  public void collect(Visitor collector) {
     final long sum = count.sumThenReset();
     if (sum != 0) {
       final String name = reportName != null ? reportName : reportName(collector);
-      collector.visit(new DCounter.DStats(name, sum));
+      collector.visit(new CounterStats(name, sum));
     }
   }
 
@@ -82,43 +82,4 @@ final class DCounter extends BaseReportName implements Counter {
     count.add(-value);
   }
 
-  /**
-   * Snapshot of the current statistics for a Counter or TimeCounter.
-   */
-  static final class DStats implements Stats {
-
-    final String name;
-    final long count;
-
-    /**
-     * Construct for Counter which doesn't collect time or high water mark.
-     */
-    DStats(String name, long count) {
-      this.name = name;
-      this.count = count;
-    }
-
-    @Override
-    public void visit(MetricStatsVisitor visitor) {
-      visitor.visit(this);
-    }
-
-    @Override
-    public String toString() {
-      return "count:" + count;
-    }
-
-    @Override
-    public String name() {
-      return name;
-    }
-
-    /**
-     * Return the count of values collected.
-     */
-    @Override
-    public long count() {
-      return count;
-    }
-  }
 }

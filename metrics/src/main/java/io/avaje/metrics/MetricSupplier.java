@@ -10,5 +10,5 @@ public interface MetricSupplier {
   /**
    * Return extra metrics that should be included in metrics reporting.
    */
-  List<MetricStats> collectMetrics();
+  List<Metric.Statistics> collectMetrics();
 }

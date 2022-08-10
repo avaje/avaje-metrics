@@ -1,6 +1,5 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.Timer;
 
 import java.util.function.Supplier;
@@ -26,7 +25,7 @@ public class NoopTimer implements Timer {
   }
 
   @Override
-  public void collect(MetricStatsVisitor metricStatisticsVisitor) {
+  public void collect(Visitor metricStatisticsVisitor) {
     // do nothing
   }
 

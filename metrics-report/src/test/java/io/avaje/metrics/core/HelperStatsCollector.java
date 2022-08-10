@@ -6,12 +6,12 @@ import io.avaje.metrics.Counter;
 import java.util.ArrayList;
 import java.util.List;
 
-class HelperStatsCollector implements MetricStatsVisitor {
+class HelperStatsCollector implements Metric.Visitor {
 
-  private final List<MetricStats> list = new ArrayList<>();
+  private final List<Metric.Statistics> list = new ArrayList<>();
 
 
-  public List<MetricStats> getList() {
+  public List<Metric.Statistics> getList() {
     return list;
   }
 

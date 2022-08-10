@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricStatsVisitor;
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.Timer;
 
@@ -60,7 +60,7 @@ public class TimedAdapter implements Timer.Stats {
   }
 
   @Override
-  public void visit(MetricStatsVisitor visitor) {
+  public void visit(Metric.Visitor visitor) {
     visitor.visit(this);
   }
 }

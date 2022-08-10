@@ -2,7 +2,6 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.NamingMatch;
 import org.junit.jupiter.api.Test;
 
@@ -48,11 +47,11 @@ class DGaugeLongTest {
   }
 
   private GaugeLong.Stats collectGauge(Metric metric) {
-    List<MetricStats> collect = collect(metric);
+    List<Metric.Statistics> collect = collect(metric);
     return collect.isEmpty() ? null : (GaugeLong.Stats)collect.get(0);
   }
 
-  private List<MetricStats> collect(Metric metric) {
+  private List<Metric.Statistics> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
     return collector.list();

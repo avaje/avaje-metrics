@@ -1,7 +1,7 @@
 package io.avaje.metrics.report;
 
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.Metrics;
-import io.avaje.metrics.MetricStats;
 import io.avaje.metrics.MetricSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +196,7 @@ public class MetricReportManager {
     long collectionTime = System.currentTimeMillis();
 
     // collect all the 'non-empty' metrics
-    List<MetricStats> metrics = collectMetrics();
+    List<Metric.Statistics> metrics = collectMetrics();
     if (aggregators != null) {
       for (MetricReportAggregator aggregator : aggregators) {
         aggregator.process(metrics);
@@ -223,8 +223,8 @@ public class MetricReportManager {
   /**
    * Collect all the non-empty metrics and return them for reporting.
    */
-  protected List<MetricStats> collectMetrics() {
-    List<MetricStats> metrics = sort(Metrics.collectMetrics());
+  protected List<Metric.Statistics> collectMetrics() {
+    List<Metric.Statistics> metrics = sort(Metrics.collectMetrics());
     for (MetricSupplier supplier : suppliers) {
       metrics.addAll(supplier.collectMetrics());
     }
@@ -234,8 +234,8 @@ public class MetricReportManager {
   /**
    * Sort the metrics into name order.
    */
-  protected static List<MetricStats> sort(Collection<MetricStats> metrics) {
-    ArrayList<MetricStats> sortedList = new ArrayList<>(metrics);
+  protected static List<Metric.Statistics> sort(Collection<Metric.Statistics> metrics) {
+    ArrayList<Metric.Statistics> sortedList = new ArrayList<>(metrics);
     sortedList.sort(NAME_COMPARATOR);
     return sortedList;
   }
@@ -256,10 +256,10 @@ public class MetricReportManager {
   /**
    * Compare Metrics by name for sorting purposes.
    */
-  protected static class NameComp implements Comparator<MetricStats> {
+  protected static class NameComp implements Comparator<Metric.Statistics> {
 
     @Override
-    public int compare(MetricStats o1, MetricStats o2) {
+    public int compare(Metric.Statistics o1, Metric.Statistics o2) {
       return o1.name().compareTo(o2.name());
     }
 

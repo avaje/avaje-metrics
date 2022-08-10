@@ -31,7 +31,7 @@ class CreateRegistryTest {
 
     assertThat(counterMetric2).isNotSameAs(counterMetric);
 
-    List<MetricStats> stats = registry.collectMetrics();
+    List<Metric.Statistics> stats = registry.collectMetrics();
     assertThat(stats).hasSize(1);
     assertThat(stats.get(0).name()).isEqualTo("create_newRegistry_counter");
     assertEquals(0, counterMetric2.count());
@@ -39,7 +39,7 @@ class CreateRegistryTest {
     counterMetric2.inc();
     counterMetric2.inc();
 
-    List<MetricStats> stats2 = registry.collectMetrics();
+    List<Metric.Statistics> stats2 = registry.collectMetrics();
     assertThat(stats2).hasSize(1);
     assertThat(stats2.get(0).name()).isEqualTo("create_newRegistry_counter");
   }

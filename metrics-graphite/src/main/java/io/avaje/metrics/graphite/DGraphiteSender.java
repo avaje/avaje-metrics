@@ -71,14 +71,14 @@ final class DGraphiteSender implements GraphiteSender {
   }
 
   @Override
-  public void send(List<MetricStats> metrics) {
+  public void send(List<Metric.Statistics> metrics) {
     var visitor = new MetricsVisitor();
-    for (MetricStats metric : metrics) {
+    for (Metric.Statistics metric : metrics) {
       metric.visit(visitor);
     }
   }
 
-  private class MetricsVisitor implements MetricStatsVisitor {
+  private class MetricsVisitor implements Metric.Visitor {
 
     final long epochSecs = System.currentTimeMillis() / 1000;
 

@@ -1,6 +1,6 @@
 package io.avaje.metrics.report;
 
-import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.Metric;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class ReportMetrics {
    * The metrics that were collected that were not empty. Metrics that didn't have events occur are
    * considered empty and not reported.
    */
-  protected final List<MetricStats> metrics;
+  protected final List<Metric.Statistics> metrics;
 
   /**
    * The reporting frequency in seconds.
@@ -40,7 +40,7 @@ public class ReportMetrics {
    * @param metrics        The metrics that were collected that were not empty. Metrics that didn't have events
    * @param freqInSeconds  The reporting frequency in seconds.
    */
-  public ReportMetrics(HeaderInfo headerInfo, long collectionTime, List<MetricStats> metrics, int freqInSeconds) {
+  public ReportMetrics(HeaderInfo headerInfo, long collectionTime, List<Metric.Statistics> metrics, int freqInSeconds) {
     this.headerInfo = headerInfo;
     this.collectionTime = collectionTime;
     this.metrics = metrics;
@@ -64,7 +64,7 @@ public class ReportMetrics {
   /**
    * Return the metrics that were collected.
    */
-  public List<MetricStats> getMetrics() {
+  public List<Metric.Statistics> getMetrics() {
     return metrics;
   }
 

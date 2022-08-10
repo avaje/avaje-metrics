@@ -22,7 +22,7 @@ class ValueMetricTest {
     metric.addEvent(2000);
     metric.addEvent(1500);
 
-    List<MetricStats> stats = collect(metric);
+    List<Metric.Statistics> stats = collect(metric);
     assertThat(stats).hasSize(1);
 
     Meter.Stats statistics = (Meter.Stats) stats.get(0);
@@ -33,7 +33,7 @@ class ValueMetricTest {
     assertThat(collect(metric)).isEmpty();
   }
 
-  private List<MetricStats> collect(Metric metric) {
+  private List<Metric.Statistics> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
     return collector.list();

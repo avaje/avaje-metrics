@@ -66,6 +66,6 @@ public interface MetricRegistry extends JvmMetrics {
   /**
    * Collect all the metrics.
    */
-  List<MetricStats> collectMetrics();
+  List<Metric.Statistics> collectMetrics();
 
 }

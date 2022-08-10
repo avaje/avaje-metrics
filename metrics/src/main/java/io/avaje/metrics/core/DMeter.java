@@ -1,7 +1,6 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.Meter;
 
 /**
@@ -23,7 +22,7 @@ final class DMeter implements Metric, Meter {
   }
 
   @Override
-  public void collect(MetricStatsVisitor collector) {
+  public void collect(Visitor collector) {
     final Stats stats = values.collect(collector);
     if (stats != null) {
       collector.visit(stats);

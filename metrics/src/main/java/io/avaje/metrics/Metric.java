@@ -1,5 +1,8 @@
 package io.avaje.metrics;
 
+import java.util.Collection;
+import java.util.function.Function;
+
 /**
  * A Metric that collects statistics on events.
  * <ul>
@@ -20,7 +23,7 @@ public interface Metric {
    * Typically this is only called by the MetricManager and tells the metric to collect its underlying statistics for
    * reporting purposes and in addition resetting and internal counters it has.
    */
-  void collect(MetricStatsVisitor collector);
+  void collect(Visitor collector);
 
   /**
    * Reset the statistics resetting any internal counters etc.
@@ -31,4 +34,67 @@ public interface Metric {
    */
   void reset();
 
+  /**
+   * Common for statistics of all metrics.
+   */
+  interface Statistics {
+
+    /**
+     * Return the associated metric name.
+     */
+    String name();
+
+    /**
+     * Visit the reporter for the given metric type.
+     */
+    void visit(Visitor reporter);
+
+  }
+
+  /**
+   * Used for reporting to visit all the different types of metric statistics.
+   */
+  interface Visitor {
+
+    /**
+     * Return the naming convention to use when reporting metrics.
+     */
+    default Function<String, String> namingConvention() {
+      return NamingMatch.INSTANCE;
+    }
+
+    /**
+     * Visit Timer stats.
+     */
+    void visit(Timer.Stats timed);
+
+    /**
+     * Visit meter stats.
+     */
+    void visit(Meter.Stats meter);
+
+    /**
+     * Visit Counter stats.
+     */
+    void visit(Counter.Stats counter);
+
+    /**
+     * Visit GaugeDouble stats.
+     */
+    void visit(GaugeDouble.Stats gauge);
+
+    /**
+     * Visit GaugeLong stats.
+     */
+    void visit(GaugeLong.Stats gauge);
+
+    /**
+     * Visit all the metrics.
+     */
+    default void visitAll(Collection<Statistics> all) {
+      for (Statistics stats : all) {
+        stats.visit(this);
+      }
+    }
+  }
 }

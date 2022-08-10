@@ -23,7 +23,7 @@ import java.util.function.LongSupplier;
  * </code>
  * </pre>
  * <p>
- * Note that <em>metric-core</em> registers some core JVM gauges that include
+ * Note that <em>metrics</em> registers some core JVM gauges that include
  * threads, memory and garbage collection.
  */
 public interface GaugeLong extends Metric {
@@ -36,7 +36,7 @@ public interface GaugeLong extends Metric {
   /**
    * Statistics provided by the {@link GaugeLong}.
    */
-  interface Stats extends MetricStats {
+  interface Stats extends Statistics {
 
     /**
      * Return the count of values collected.

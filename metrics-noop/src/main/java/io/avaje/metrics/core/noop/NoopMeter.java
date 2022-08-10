@@ -1,11 +1,8 @@
 package io.avaje.metrics.core.noop;
 
-import io.avaje.metrics.MetricStatsVisitor;
 import io.avaje.metrics.Meter;
 
 class NoopMeter implements Meter {
-
-  private static final NoopMeterStats NOOP_STATS = NoopMeterStats.INSTANCE;
 
   private final String metricName;
 
@@ -19,7 +16,7 @@ class NoopMeter implements Meter {
   }
 
   @Override
-  public void collect(MetricStatsVisitor visitor) {
+  public void collect(Visitor visitor) {
     // do nothing
   }
 

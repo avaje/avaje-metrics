@@ -1,6 +1,6 @@
 package io.avaje.metrics.graphite;
 
-import io.avaje.metrics.MetricStats;
+import io.avaje.metrics.Metric;
 
 import javax.net.SocketFactory;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public interface GraphiteSender {
   /**
    * Send all the metrics.
    */
-  void send(List<MetricStats> metrics);
+  void send(List<Metric.Statistics> metrics);
 
   /**
    * Flush and send all the metrics.

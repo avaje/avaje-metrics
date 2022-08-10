@@ -25,14 +25,6 @@
     </dependency>
 
     <dependency>
-      <groupId>io.avaje.metrics</groupId>
-      <artifactId>metrics-supplier</artifactId>
-      <version>9.0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-
-
-    <dependency>
       <groupId>io.ebean</groupId>
       <artifactId>ebean-api</artifactId>
       <version>13.6.6</version>

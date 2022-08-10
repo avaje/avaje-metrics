@@ -1,25 +1,32 @@
-package io.avaje.metrics.core;
+package io.avaje.metrics.stats;
 
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.Timer;
-import io.avaje.metrics.MetricStatsVisitor;
 
 /**
- * Snapshot of the current statistics for a Counter or TimeCounter.
+ * Snapshot of the current statistics for a Meter or Timer.
  */
-final class DTimerStats implements Timer.Stats {
+public final class TimerStats implements Timer.Stats {
 
   final String name;
-  final ValueCounter owner;
+  final String bucketRange;
   final long count;
   final long total;
   final long max;
 
   /**
-   * Construct for TimeCounter.
+   * Create with no bucketRange.
    */
-  DTimerStats(String name, ValueCounter owner, long count, long total, long max) {
+  public TimerStats(String name, long count, long total, long max) {
+    this(name, null, count, total, max);
+  }
+
+  /**
+   * Create with all parameters including bucketRange.
+   */
+  public TimerStats(String name, String bucketRange, long count, long total, long max) {
     this.name = name;
-    this.owner = owner;
+    this.bucketRange = bucketRange;
     this.count = count;
     this.total = total;
     // collection is racy so sanitize the max value if it has not been set
@@ -33,13 +40,13 @@ final class DTimerStats implements Timer.Stats {
   }
 
   @Override
-  public void visit(MetricStatsVisitor visitor) {
+  public void visit(Metric.Visitor visitor) {
     visitor.visit(this);
   }
 
   @Override
   public String bucketRange() {
-    return owner.bucketRange();
+    return bucketRange;
   }
 
   @Override

@@ -51,7 +51,7 @@ public interface Meter extends Metric {
   /**
    * Statistics collected by Meter or Timer.
    */
-  interface Stats extends MetricStats {
+  interface Stats extends Statistics {
 
     /**
      * Return the count of values collected (since the last reset/collection).

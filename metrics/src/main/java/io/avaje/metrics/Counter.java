@@ -51,7 +51,7 @@ public interface Counter extends Metric {
   /**
    * Statistics provided by the {@link Counter}.
    */
-  interface Stats extends MetricStats {
+  interface Stats extends Statistics {
 
     /**
      * Return the count of values collected.
