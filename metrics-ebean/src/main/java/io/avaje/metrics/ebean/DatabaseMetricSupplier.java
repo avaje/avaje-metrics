@@ -1,5 +1,6 @@
 package io.avaje.metrics.ebean;
 
+import io.avaje.applog.AppLog;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.stats.CounterStats;
@@ -10,10 +11,16 @@ import io.ebean.meta.MetaQueryMetric;
 import io.ebean.meta.MetaTimedMetric;
 import io.ebean.meta.ServerMetrics;
 
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseMetricSupplier implements MetricSupplier {
+/**
+ * Supplies Ebean metrics to avaje-metrics for reporting.
+ */
+public final class DatabaseMetricSupplier implements MetricSupplier {
+
+  private static final System.Logger log = AppLog.getLogger("io.avaje.metrics.ebean");
 
   final Database database;
 
@@ -25,7 +32,9 @@ public class DatabaseMetricSupplier implements MetricSupplier {
   public List<Metric.Statistics> collectMetrics() {
     List<Metric.Statistics> metrics = new ArrayList<>();
     ServerMetrics dbMetrics = database.metaInfo().collectMetrics();
-    //log.info("dbMetrics {} {} {} {}", database.name(), dbMetrics.timedMetrics(), dbMetrics.queryMetrics(), dbMetrics.countMetrics());
+    if (log.isLoggable(Level.DEBUG)) {
+      log.log(Level.DEBUG, dbMetrics.asJson().withHash(false).withNewLine(false).json());
+    }
     for (MetaTimedMetric timedMetric : dbMetrics.timedMetrics()) {
       metrics.add(new TimerStats(timedMetric.name(), timedMetric.count(), timedMetric.total(), timedMetric.max()));
     }
