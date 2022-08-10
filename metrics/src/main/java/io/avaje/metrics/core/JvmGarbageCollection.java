@@ -19,7 +19,7 @@ final class JvmGarbageCollection {
     if (withDetails) {
       for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
         // modify collector name replacing spaces with hyphens.
-        String gcName = gcMXBean.getName().toLowerCase().replace(' ', '-').replace(".", "");
+        String gcName = gcMXBean.getName().toLowerCase().replace(' ', '_').replace(".", "");
         registry.gauge(name("count", gcName), GaugeLong.incrementing(new Count(gcMXBean)));
         registry.gauge(name("time", gcName), GaugeLong.incrementing(new Time(gcMXBean)));
       }
