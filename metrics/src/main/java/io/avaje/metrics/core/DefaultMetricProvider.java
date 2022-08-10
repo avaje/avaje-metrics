@@ -16,7 +16,7 @@ import java.util.function.LongSupplier;
 /**
  * Default implementation of the SpiMetricProvider.
  */
-public class DefaultMetricProvider implements SpiMetricProvider {
+public final class DefaultMetricProvider implements SpiMetricProvider {
 
   private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimerFactory;
@@ -230,7 +230,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
   @Override
   public List<Metric.Statistics> collectMetrics() {
     synchronized (monitor) {
-      DStatsCollector collector = new DStatsCollector(namingConvention);
+      final DStatsCollector collector = new DStatsCollector(namingConvention);
       collectAppMetrics(collector);
       return collector.list();
     }

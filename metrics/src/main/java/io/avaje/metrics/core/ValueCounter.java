@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.LongAdder;
 final class ValueCounter extends BaseReportName {
 
   private final String bucketRange;
-  final LongAdder count = new LongAdder();
+  private final LongAdder count = new LongAdder();
   private final LongAdder total = new LongAdder();
-  final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
+  private final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
 
   ValueCounter(String name) {
     super(name);
@@ -28,10 +28,6 @@ final class ValueCounter extends BaseReportName {
   ValueCounter(String name, String bucketRange) {
     super(name);
     this.bucketRange = bucketRange;
-  }
-
-  String bucketRange() {
-    return bucketRange;
   }
 
   /**
