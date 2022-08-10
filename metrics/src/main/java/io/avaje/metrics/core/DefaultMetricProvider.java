@@ -195,7 +195,7 @@ public class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public GaugeLong gauge(String name, LongSupplier gauge) {
-    return put(name, (GaugeLong) new DGaugeLong(name, gauge));
+    return put(name, DGaugeLong.of(name, gauge));
   }
 
   private <T extends Metric> T put(String name, T metric) {

@@ -13,7 +13,7 @@ final class JvmOsLoad {
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
   static GaugeLong osLoadAverage() {
-    return new DGaugeLong("jvm.os.loadAverage", new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()));
+    return DGaugeLong.of("jvm.os.loadAverage", new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()));
   }
 
   static long toLoad(double loadAverage) {

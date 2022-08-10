@@ -5,29 +5,34 @@ import io.avaje.metrics.MetricStatsVisitor;
 
 import java.util.function.LongSupplier;
 
-class DGaugeLong extends BaseReportName implements GaugeLong {
+abstract class DGaugeLong extends BaseReportName implements GaugeLong {
 
-  protected final LongSupplier supplier;
-  protected final boolean reportChangesOnly;
-  private long lastReported;
-
-  DGaugeLong(String name, LongSupplier supplier) {
-    this(name, supplier, true);
+  static DGaugeLong of(String name, LongSupplier supplier) {
+    return new All(name, supplier);
   }
 
-  DGaugeLong(String name, LongSupplier supplier, boolean reportChangesOnly) {
+  static DGaugeLong of(String name, LongSupplier supplier, boolean changesOnly) {
+    return changesOnly ? new ChangesOnly(name, supplier) : new All(name, supplier);
+  }
+
+  static DGaugeLong once(String name, LongSupplier supplier) {
+    return new Once(name, supplier);
+  }
+
+  protected final LongSupplier supplier;
+
+  protected DGaugeLong(String name, LongSupplier supplier) {
     super(name);
     this.supplier = supplier;
-    this.reportChangesOnly = reportChangesOnly;
   }
 
   @Override
-  public String name() {
+  public final String name() {
     return name;
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return name;
   }
 
@@ -35,16 +40,37 @@ class DGaugeLong extends BaseReportName implements GaugeLong {
    * Return the value.
    */
   @Override
-  public long value() {
+  public final long value() {
     return supplier.getAsLong();
   }
 
   @Override
-  public void collect(MetricStatsVisitor collector) {
-    if (!reportChangesOnly) {
+  public final void reset() {
+    // No need to do anything
+  }
+
+  static final class All extends DGaugeLong {
+
+    All(String name, LongSupplier supplier) {
+      super(name, supplier);
+    }
+
+    @Override
+    public void collect(MetricStatsVisitor collector) {
       final String name = reportName != null ? reportName : reportName(collector);
       collector.visit(new DGaugeLongStats(name, supplier.getAsLong()));
-    } else {
+    }
+  }
+
+  static final class ChangesOnly extends DGaugeLong {
+    private long lastReported;
+
+    ChangesOnly(String name, LongSupplier supplier) {
+      super(name, supplier);
+    }
+
+    @Override
+    public void collect(MetricStatsVisitor collector) {
       long value = supplier.getAsLong();
       boolean collect = (value != 0 && value != lastReported);
       if (collect) {
@@ -55,9 +81,18 @@ class DGaugeLong extends BaseReportName implements GaugeLong {
     }
   }
 
-  @Override
-  public void reset() {
-    // No need to do anything
-  }
+  static final class Once extends DGaugeLong {
 
+    Once(String name, LongSupplier supplier) {
+      super(name, supplier);
+    }
+
+    @Override
+    public void collect(MetricStatsVisitor collector) {
+      if (reportName == null) {
+        String name = reportName(collector);
+        collector.visit(new DGaugeLongStats(name, supplier.getAsLong()));
+      }
+    }
+  }
 }

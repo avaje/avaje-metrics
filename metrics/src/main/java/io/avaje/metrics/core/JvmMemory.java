@@ -78,16 +78,15 @@ final class JvmMemory {
     }
 
     void createMetric(MetricRegistry registry, boolean reportChangesOnly) {
-      registry.register(new DGaugeLong(name("init"), new Init(source), reportChangesOnly));
-      registry.register(new DGaugeLong(name("used"), new Used(source), reportChangesOnly));
-      registry.register(new DGaugeLong(name("committed"), new Committed(source), reportChangesOnly));
-
+      registry.register(DGaugeLong.once(name("init"), new Init(source)));
+      registry.register(DGaugeLong.of(name("used"), new Used(source), reportChangesOnly));
+      registry.register(DGaugeLong.of(name("committed"), new Committed(source), reportChangesOnly));
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.usage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
-        registry.register(new DGaugeLong(name("max"), new Max(source), reportChangesOnly));
-        registry.register(new DGaugeLong(name("pct"), new Pct(source), reportChangesOnly));
+        registry.register(DGaugeLong.once(name("max"), new Max(source)));
+        registry.register(DGaugeLong.of(name("pct"), new Pct(source), reportChangesOnly));
       }
     }
 

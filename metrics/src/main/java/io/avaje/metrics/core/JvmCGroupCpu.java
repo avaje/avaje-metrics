@@ -39,14 +39,14 @@ final class JvmCGroupCpu {
     long quotaPeriod = period.single();
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return new DGaugeLong("jvm.cgroup.cpu.limit", new FixedGauge(limit));
+      return DGaugeLong.once("jvm.cgroup.cpu.limit", new FixedGauge(limit));
     }
     return null;
   }
 
   GaugeLong createCGroupCpuRequests(FileLines cpuShares) {
     final long requests = convertSharesToRequests(cpuShares.single());
-    return new DGaugeLong("jvm.cgroup.cpu.requests", new FixedGauge(requests));
+    return DGaugeLong.once("jvm.cgroup.cpu.requests", new FixedGauge(requests));
   }
 
   long convertQuotaToLimits(long cpuQuotaVal, long quotaPeriod) {
@@ -80,7 +80,7 @@ final class JvmCGroupCpu {
   }
 
   private GaugeLong gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {
-    return new DGaugeLong(name, gauge, reportChangesOnly);
+    return DGaugeLong.of(name, gauge, reportChangesOnly);
   }
 
   static final class CpuUsageMicros implements LongSupplier {

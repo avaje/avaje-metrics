@@ -22,10 +22,10 @@ final class JvmThreads {
     }
 
     void createMetrics(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
-      registry.register(new DGaugeLong("jvm.threads.current", new Count(threadMXBean), reportChangesOnly));
+      registry.register(DGaugeLong.of("jvm.threads.current", new Count(threadMXBean), reportChangesOnly));
       if (withDetails) {
-        registry.register(new DGaugeLong("jvm.threads.peak", new Peak(threadMXBean), reportChangesOnly));
-        registry.register(new DGaugeLong("jvm.threads.daemon", new Daemon(threadMXBean), reportChangesOnly));
+        registry.register(DGaugeLong.of("jvm.threads.peak", new Peak(threadMXBean), reportChangesOnly));
+        registry.register(DGaugeLong.of("jvm.threads.daemon", new Daemon(threadMXBean), reportChangesOnly));
       }
     }
 

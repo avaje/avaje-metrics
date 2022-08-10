@@ -11,7 +11,7 @@ import java.util.function.DoubleSupplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DefaultGaugeDoubleMetricTest {
+class DGaugeDoubleTest {
 
   private List<MetricStats> collect(Metric metric) {
     DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
@@ -22,7 +22,7 @@ class DefaultGaugeDoubleMetricTest {
   @Test
   void notSkip_when_unchanged() {
     MyGauge myGauge = new MyGauge();
-    DGaugeDouble metric = new DGaugeDouble(DefaultGaugeLongMetricTest.MyGauge.class.getName() + ".test", myGauge);
+    DGaugeDouble metric = new DGaugeDouble(DGaugeLongTest.MyGauge.class.getName() + ".test", myGauge);
 
     assertEquals(0.0, metric.value());
     assertThat(collect(metric)).isEmpty();

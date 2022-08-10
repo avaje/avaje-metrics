@@ -12,13 +12,13 @@ import java.util.function.LongSupplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DefaultGaugeLongMetricTest {
+class DGaugeLongTest {
 
   @Test
   void skipCollection_when_unchanged() {
 
     MyGauge myGauge = new MyGauge();
-    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName() + ".test", myGauge);
+    DGaugeLong metric = DGaugeLong.of(MyGauge.class.getName() + ".test", myGauge, true);
 
     assertEquals(0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -61,7 +61,7 @@ class DefaultGaugeLongMetricTest {
   @Test
   void test_incrementing() {
     MyGauge myGauge = new MyGauge();
-    DGaugeLong metric = new DGaugeLong(MyGauge.class.getName() + ".test", myGauge);
+    DGaugeLong metric = DGaugeLong.of(MyGauge.class.getName() + ".test", myGauge, true);
 
     assertEquals(0, metric.value());
     assertThat(collectGauge(metric)).isNull();
@@ -70,7 +70,7 @@ class DefaultGaugeLongMetricTest {
     assertEquals(100, metric.value());
     assertThat(collectGauge(metric).value()).isEqualTo(100);
 
-    DGaugeLong incrementing = new DGaugeLong(MyGauge.class.getName() + ".inc", GaugeLong.incrementing(myGauge));
+    DGaugeLong incrementing = DGaugeLong.of(MyGauge.class.getName() + ".inc", GaugeLong.incrementing(myGauge), true);
 
     myGauge.value = 100;
     assertEquals(100, incrementing.value());

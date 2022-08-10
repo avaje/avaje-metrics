@@ -17,11 +17,11 @@ final class JvmCGroupMemory {
     if (memLimit.exists() && memUsage.exists()) {
       long limitInBytes = memLimit.single();
       MemSource source = new MemSource(limitInBytes, memUsage);
-      registry.register(createMemoryUsage(source, reportChangesOnly));
+      registry.register(usage(source, reportChangesOnly));
       if (limitInBytes < 1_000_000_000_000L) {
         // only include when limit is in effect
-        registry.register(createMemoryLimit(source, reportChangesOnly));
-        registry.register(createMemoryPctUsage(source, reportChangesOnly));
+        registry.register(limit(source, reportChangesOnly));
+        registry.register(pctUsage(source, reportChangesOnly));
       }
     }
   }
@@ -59,21 +59,21 @@ final class JvmCGroupMemory {
       return usageMb;
     }
 
-    long getPctUsage() {
+    long pctUsage() {
       return pctUsage;
     }
   }
 
-  GaugeLong createMemoryUsage(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLong("jvm.cgroup.memory.usageMb", source::usageMb, reportChangesOnly);
+  GaugeLong usage(MemSource source, boolean reportChangesOnly) {
+    return DGaugeLong.of("jvm.cgroup.memory.usageMb", source::usageMb, reportChangesOnly);
   }
 
-  GaugeLong createMemoryPctUsage(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLong("jvm.cgroup.memory.pctUsage", source::getPctUsage, reportChangesOnly);
+  GaugeLong pctUsage(MemSource source, boolean reportChangesOnly) {
+    return DGaugeLong.of("jvm.cgroup.memory.pctUsage", source::pctUsage, reportChangesOnly);
   }
 
-  GaugeLong createMemoryLimit(MemSource source, boolean reportChangesOnly) {
-    return new DGaugeLong("jvm.cgroup.memory.limit", source::limitMb, reportChangesOnly);
+  GaugeLong limit(MemSource source, boolean reportChangesOnly) {
+    return DGaugeLong.of("jvm.cgroup.memory.limit", source::limitMb, reportChangesOnly);
   }
 
 }

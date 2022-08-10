@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class JvmCGroupMemoryMetricGroupTest {
+class JvmCGroupMemoryTest {
 
   private final JvmCGroupMemory me = new JvmCGroupMemory();
 
@@ -28,15 +28,15 @@ class JvmCGroupMemoryMetricGroupTest {
 
     assertThat(source.limitMb()).isEqualTo(1025);
     assertThat(source.usageMb()).isEqualTo(227);
-    assertThat(source.getPctUsage()).isEqualTo(22);
+    assertThat(source.pctUsage()).isEqualTo(22);
 
-    final GaugeLong memoryLimit = me.createMemoryLimit(source, true);
+    final GaugeLong memoryLimit = me.limit(source, true);
     assertThat(memoryLimit.value()).isEqualTo(1025);
 
-    final GaugeLong memoryUsage = me.createMemoryUsage(source, true);
+    final GaugeLong memoryUsage = me.usage(source, true);
     assertThat(memoryUsage.value()).isEqualTo(227);
 
-    final GaugeLong pctUsage = me.createMemoryPctUsage(source, true);
+    final GaugeLong pctUsage = me.pctUsage(source, true);
     assertThat(pctUsage.value()).isEqualTo(22);
   }
 
