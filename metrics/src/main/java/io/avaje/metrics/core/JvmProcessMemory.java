@@ -1,11 +1,8 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricName;
+import io.avaje.metrics.MetricRegistry;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * OS process memory metrics VmRSS and VmHWM to collect when running on Linux.
@@ -19,8 +16,8 @@ final class JvmProcessMemory {
   /**
    * Return the list of OS process memory metrics.
    */
-  static List<Metric> createGauges(boolean reportChangesOnly) {
-    return new JvmProcessMemory().metrics(reportChangesOnly);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
+    new JvmProcessMemory().metrics(registry, reportChangesOnly);
   }
 
   /**
@@ -47,23 +44,16 @@ final class JvmProcessMemory {
   /**
    * Return the metrics for VmRSS and VmHWM.
    */
-  public List<Metric> metrics(boolean reportChangesOnly) {
-    List<Metric> metrics = new ArrayList<>();
-    if (pid == null || MetricManifest.get().disableProcessMemory()) {
-      return metrics;
+  public void metrics(MetricRegistry registry, boolean reportChangesOnly) {
+    if (pid == null) {
+      return;
     }
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
-      MetricName baseName = new DefaultMetricName("jvm.memory.process");
-      MetricName vmRssName = baseName.append("vmrss");
-      MetricName vmHwmName = baseName.append("vmhwm");
-
       Source source = new Source(procStatus);
-
-      metrics.add(new DefaultGaugeLongMetric(vmRssName, source::getRss, reportChangesOnly));
-      metrics.add(new DefaultGaugeLongMetric(vmHwmName, source::getHwm, reportChangesOnly));
+      registry.register(DGaugeLong.of("jvm.memory.process.vmrss", source::rss, reportChangesOnly));
+      registry.register(DGaugeLong.of("jvm.memory.process.vmhwm", source::hwm, reportChangesOnly));
     }
-    return metrics;
   }
 
   /**
@@ -96,12 +86,12 @@ final class JvmProcessMemory {
       });
     }
 
-    long getRss() {
+    long rss() {
       load();
       return vmRSS;
     }
 
-    long getHwm() {
+    long hwm() {
       return vmHWM;
     }
 

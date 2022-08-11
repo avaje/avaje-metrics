@@ -13,8 +13,8 @@ class JvmProcessMemoryTest {
     assertTrue(statusFile.exists());
 
     JvmProcessMemory.Source source = new JvmProcessMemory.Source(statusFile);
-    assertThat(source.getRss()).isEqualTo(36);
-    assertThat(source.getHwm()).isEqualTo(66);
+    assertThat(source.rss()).isEqualTo(36);
+    assertThat(source.hwm()).isEqualTo(66);
   }
 
 }

@@ -1,9 +1,6 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.CounterMetric;
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricManager;
-import io.avaje.metrics.statistics.MetricStatistics;
+import io.avaje.metrics.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,30 +13,29 @@ class CounterMetricTest {
   @Test
   void test() {
 
-    CounterMetric counterMetric = MetricManager.counter(new DefaultMetricName("org.test.mycountermetric"));
+    Counter counterMetric = Metrics.counter("org.test.mycountermetric");
+    assertEquals("org.test.mycountermetric", counterMetric.name());
 
-    assertEquals("org.test.mycountermetric", counterMetric.getName().getSimpleName());
-
-    counterMetric.clear();
-    assertEquals(0, counterMetric.getCount());
+    counterMetric.reset();
+    assertEquals(0, counterMetric.count());
 
     counterMetric.inc();
-    assertEquals(1, counterMetric.getCount());
+    assertEquals(1, counterMetric.count());
     counterMetric.inc();
-    assertEquals(2, counterMetric.getCount());
+    assertEquals(2, counterMetric.count());
     counterMetric.inc();
 
-    assertEquals(3, counterMetric.getCount());
+    assertEquals(3, counterMetric.count());
     counterMetric.inc(100);
-    assertEquals(103, counterMetric.getCount());
+    assertEquals(103, counterMetric.count());
 
     assertThat(collect(counterMetric)).hasSize(1);
-    assertEquals(0, counterMetric.getCount());
+    assertEquals(0, counterMetric.count());
   }
 
-  private List<MetricStatistics> collect(Metric metric) {
-    DStatsCollector collector = new DStatsCollector();
+  private List<Metric.Statistics> collect(Metric metric) {
+    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
     metric.collect(collector);
-    return collector.getList();
+    return collector.list();
   }
 }

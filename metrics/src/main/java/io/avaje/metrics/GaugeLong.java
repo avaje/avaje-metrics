@@ -1,19 +1,55 @@
 package io.avaje.metrics;
 
+import java.util.function.LongSupplier;
+
 /**
- * A Gauge returning a long value providing the 'source' for a {@link GaugeLongMetric}.
- * <p>
- * A Gauge typically doesn't represent an "Event" but the current value of a resource like threads,
- * memory etc.
+ * Metric based on an underlying gauge that reports long values.
  *
- * @see GaugeLongMetric
+ * <p>
+ * Example:
+ *
+ * <pre>
+ * <code>
+ *   class ThreadCountGauge implements LongSupplier {
+ *
+ *       public long getAsLong() {
+ *         return threadMXBean.getThreadCount();
+ *       }
+ *     }
+ *
+ *
+ *   GaugeLong gauge = Metrics.gauge("jvm.thread.count", threadCountGauge);
+ *
+ * </code>
+ * </pre>
+ * <p>
+ * Note that <em>metrics</em> registers some core JVM gauges that include
+ * threads, memory and garbage collection.
  */
-@FunctionalInterface
-public interface GaugeLong {
+public interface GaugeLong extends Metric {
 
   /**
-   * Return the current value.
+   * Return the value.
    */
-  long getValue();
+  long value();
 
+  /**
+   * Statistics provided by the {@link GaugeLong}.
+   */
+  interface Stats extends Statistics {
+
+    /**
+     * Return the count of values collected.
+     */
+    long value();
+  }
+
+  /**
+   * Return a LongSupplier for an always increasing supplier.
+   * <p>
+   * The value of the gauge will be the difference between each collected value.
+   */
+  static LongSupplier incrementing(LongSupplier supplier) {
+    return new Incrementing(supplier);
+  }
 }

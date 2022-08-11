@@ -1,7 +1,7 @@
 package io.avaje.metrics.core;
 
 
-import io.avaje.metrics.GaugeLongMetric;
+import io.avaje.metrics.GaugeLong;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JvmCGroupCpuMetricGroupTest {
 
-  private final JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
+  private final JvmCGroupCpu me = new JvmCGroupCpu();
 
   @Test
   void convertQuotaToLimits() {
@@ -30,9 +30,9 @@ class JvmCGroupCpuMetricGroupTest {
     FileLines source = new FileLines("src/test/resources/cgroup/cpuacct.usage");
     assertTrue(source.exists());
 
-    final JvmCGroupCpuMetricGroup.CpuUsageMicros usageMicros = new JvmCGroupCpuMetricGroup.CpuUsageMicros(source);
+    final JvmCGroupCpu.CpuUsageMicros usageMicros = new JvmCGroupCpu.CpuUsageMicros(source);
 
-    final long value = usageMicros.getValue();
+    final long value = usageMicros.getAsLong();
     assertThat(value).isEqualTo(55035664L);
   }
 
@@ -42,7 +42,7 @@ class JvmCGroupCpuMetricGroupTest {
     FileLines source = new FileLines("src/test/resources/cgroup/cpu.stat");
     assertTrue(source.exists());
 
-    final JvmCGroupCpuMetricGroup.CpuStatsSource cpuStats = new JvmCGroupCpuMetricGroup.CpuStatsSource(source);
+    final JvmCGroupCpu.CpuStatsSource cpuStats = new JvmCGroupCpu.CpuStatsSource(source);
 
     assertThat(cpuStats.getThrottleMicros()).isEqualTo(87738876L);
     assertThat(cpuStats.getNumPeriod()).isEqualTo(19295);
@@ -57,9 +57,9 @@ class JvmCGroupCpuMetricGroupTest {
     assertTrue(cpuQuota.exists());
     assertTrue(period.exists());
 
-    JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
-    final GaugeLongMetric metric = me.createCGroupCpuLimit(cpuQuota, period);
-    final long limit = metric.getValue();
+    JvmCGroupCpu me = new JvmCGroupCpu();
+    final GaugeLong metric = me.createCGroupCpuLimit(cpuQuota, period);
+    final long limit = metric.value();
     assertThat(limit).isEqualTo(600L);
   }
 
@@ -69,9 +69,9 @@ class JvmCGroupCpuMetricGroupTest {
     FileLines cpuShares = new FileLines("src/test/resources/cgroup/cpu.shares");
     assertTrue(cpuShares.exists());
 
-    JvmCGroupCpuMetricGroup me = new JvmCGroupCpuMetricGroup();
-    final GaugeLongMetric metric = me.createCGroupCpuRequests(cpuShares);
-    final long requests = metric.getValue();
+    JvmCGroupCpu me = new JvmCGroupCpu();
+    final GaugeLong metric = me.createCGroupCpuRequests(cpuShares);
+    final long requests = metric.value();
     assertThat(requests).isEqualTo(200L);
   }
 

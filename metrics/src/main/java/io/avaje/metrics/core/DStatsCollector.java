@@ -1,44 +1,56 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.statistics.*;
+import io.avaje.metrics.*;
+import io.avaje.metrics.Counter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
-final class DStatsCollector implements MetricStatisticsVisitor {
+final class DStatsCollector implements Metric.Visitor {
 
-  private final List<MetricStatistics> list = new ArrayList<>();
+  private final List<Metric.Statistics> list = new ArrayList<>();
+  private final  Function<String, String> namingConvention;
 
-  List<MetricStatistics> getList() {
+  public DStatsCollector(Function<String, String> namingConvention) {
+    this.namingConvention = namingConvention;
+  }
+
+  List<Metric.Statistics> list() {
     return list;
   }
 
   @Override
-  public void visit(TimedStatistics metric) {
+  public Function<String, String> namingConvention() {
+    return namingConvention;
+  }
+
+  @Override
+  public void visit(Timer.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(ValueStatistics metric) {
+  public void visit(Meter.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(CounterStatistics metric) {
+  public void visit(Counter.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(GaugeDoubleStatistics metric) {
+  public void visit(GaugeDouble.Stats metric) {
     list.add(metric);
   }
 
   @Override
-  public void visit(GaugeLongStatistics metric) {
+  public void visit(GaugeLong.Stats metric) {
     list.add(metric);
   }
 
-  void addAll(List<MetricStatistics> metrics) {
+  void addAll(List<Metric.Statistics> metrics) {
     list.addAll(metrics);
   }
 }

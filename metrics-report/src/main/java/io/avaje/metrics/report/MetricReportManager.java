@@ -1,0 +1,292 @@
+package io.avaje.metrics.report;
+
+import io.avaje.metrics.Metric;
+import io.avaje.metrics.Metrics;
+import io.avaje.metrics.MetricSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Writes the collected metrics to registered reporters.
+ * <p>
+ * Typically, you configure the frequency in seconds in which statistics are collected and reported
+ * as well as a base directory where the metric files go. By default, the base directory will be read
+ * from a system property 'metric.directory' and otherwise defaults to the current directory.
+ */
+public class MetricReportManager {
+
+  private static final Logger logger = LoggerFactory.getLogger(MetricReportManager.class);
+
+  private static final int EIGHT_HOURS = 60 * 60 * 8;
+
+  private static final NameComp NAME_COMPARATOR = new NameComp();
+
+  /**
+   * Timer used to periodically execute the metrics collection and reporting.
+   */
+  protected final ScheduledExecutorService executor;
+
+  /**
+   * Frequency in seconds of which the reporting will execute.
+   */
+  protected final int freqInSeconds;
+
+  /**
+   * Optional first reporter.
+   */
+  protected final MetricReporter reporter;
+
+//  /**
+//   * Optional reporter for request timings.
+//   */
+//  protected final RequestTimingReporter requestTimingReporter;
+
+  /**
+   * The headerInfo which identifies the application, environment and server etc that these metrics
+   * are collected for.
+   */
+  protected final HeaderInfo headerInfo;
+
+  private final List<MetricReportAggregator> aggregators;
+
+  private final List<MetricSupplier> suppliers;
+
+  /**
+   * Create using the MetricReportConfig bean.
+   */
+  public MetricReportManager(MetricReportConfig config) {
+    this.suppliers = config.getSuppliers();
+    this.aggregators = config.getAggregators();
+    this.executor = defaultExecutor(config.getExecutor());
+//    this.requestTimingReporter = defaultReqReporter(config);
+    this.reporter = defaultReporter(config);
+    this.freqInSeconds = config.getFreqInSeconds();
+    this.headerInfo = config.getHeaderInfo();
+
+    if (freqInSeconds > 0) {
+      // Register the metrics collection task to run periodically
+      executor.scheduleAtFixedRate(new WriteTask(), freqInSeconds, freqInSeconds, TimeUnit.SECONDS);
+    }
+//    if (config.isRequestTiming()) {
+//      int requestFreqInSecs = defaultRequestFreqInSecs(config);
+//      executor.scheduleAtFixedRate(new WriteRequestTimings(), requestFreqInSecs, requestFreqInSecs, TimeUnit.SECONDS);
+//    }
+  }
+
+//  /**
+//   * Helper method that provides a default RequestTimingReporter if not specified.
+//   */
+//  protected static RequestTimingReporter defaultReqReporter(MetricReportConfig config) {
+//    if (config.getRequestTimingReporter() != null) {
+//      return config.getRequestTimingReporter();
+//    }
+//    // just use the default implementation based on config
+//    RequestTimingReporter fileReporter = new RequestFileReporter(config);
+//    return new BaseRequestTimingReporter(fileReporter, config.getRequestTimingListeners());
+//  }
+
+  /**
+   * Helper method that provides a default RequestTimingReporter if not specified.
+   */
+  protected static MetricReporter defaultReporter(MetricReportConfig config) {
+    if (config.getReporter() != null) {
+      return config.getReporter();
+    }
+    return new FileReporter(config.getDirectory(), config.getMetricsFileName(), new CsvReportWriter(config.getThresholdMean()));
+  }
+
+  /**
+   * Helper method that provides a default ScheduledExecutorService if not specified.
+   */
+  protected static ScheduledExecutorService defaultExecutor(ScheduledExecutorService executor) {
+    return (executor != null) ? executor : Executors.newScheduledThreadPool(1, new BasicThreadFactory());
+  }
+
+  /**
+   * Helper method to default the freqInSeconds used for request collection.
+   */
+  protected static int defaultRequestFreqInSecs(MetricReportConfig config) {
+    int freqInSeconds = config.getRequestsFreqInSeconds();
+    return freqInSeconds > 1 ? freqInSeconds : 3;
+  }
+
+  public void shutdown() {
+    if (executor != null) {
+      executor.shutdown();
+    }
+  }
+
+//  /**
+//   * Periodic task that reads the collected request timings and sends them to the
+//   * appropriate reporter.
+//   */
+//  protected class WriteRequestTimings implements Runnable {
+//    public void run() {
+//      reportRequestTimings();
+//    }
+//  }
+
+//  /**
+//   * Reads the collected request timings and sends them to the reporter.
+//   */
+//  private void reportRequestTimings() {
+//    try {
+//      // read and remove any collected request timings
+//      List<RequestTiming> requestTimings = MetricManager.requestTimingManager().collectRequestTimings();
+//      if (!requestTimings.isEmpty() && requestTimingReporter != null) {
+//        // write the request timings out to file log typically
+//        requestTimingReporter.report(requestTimings);
+//      }
+//    } catch (Exception e) {
+//      logger.error("Error reporting request timing", e);
+//    }
+//  }
+
+  /**
+   * Periodic task that collects and reports the metrics.
+   */
+  protected class WriteTask implements Runnable {
+    int cleanupCounter;
+    public void run() {
+      try {
+        cleanupCounter++;
+        reportMetrics();
+        if (cleanupCounter * freqInSeconds > EIGHT_HOURS) {
+          // cleanup old metric files about every 8 hours
+          cleanupCounter = 0;
+          periodicCleanUp();
+        }
+      } catch (Exception e) {
+        logger.error("Error writing metrics", e);
+      }
+    }
+  }
+
+  /**
+   * Perform periodic (defaults to every 8 hours) cleanup.
+   * <p/>
+   * This is used by file reporters to limit the number of metrics files held.
+   */
+  protected void periodicCleanUp() {
+    if (reporter != null) {
+      reporter.cleanup();
+    }
+    //if (requestTimingReporter != null) {
+    //  requestTimingReporter.cleanup();
+    //}
+  }
+
+  /**
+   * Report all the metrics.
+   * <p/>
+   * This typically means appending the metrics to a file or sending over a network.
+   */
+  protected void reportMetrics() {
+    long startNanos = System.nanoTime();
+    long collectionTime = System.currentTimeMillis();
+
+    // collect all the 'non-empty' metrics
+    List<Metric.Statistics> metrics = collectMetrics();
+    if (aggregators != null) {
+      for (MetricReportAggregator aggregator : aggregators) {
+        aggregator.process(metrics);
+      }
+    }
+
+    long collectNanos = System.nanoTime() - startNanos;
+
+    // report metrics locally and remotely as necessary
+    ReportMetrics reportMetrics = new ReportMetrics(headerInfo, collectionTime, metrics, freqInSeconds);
+    report(reportMetrics, reporter);
+
+    long reportNanos = System.nanoTime() - startNanos - collectNanos;
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("reported [{}] metrics - collectMicros:{} reportMicros:{}", metrics.size(), asMicros(collectNanos), asMicros(reportNanos));
+    }
+  }
+
+  private static long asMicros(long collectNanos) {
+    return TimeUnit.MICROSECONDS.convert(collectNanos, TimeUnit.NANOSECONDS);
+  }
+
+  /**
+   * Collect all the non-empty metrics and return them for reporting.
+   */
+  protected List<Metric.Statistics> collectMetrics() {
+    List<Metric.Statistics> metrics = sort(Metrics.collectMetrics());
+    for (MetricSupplier supplier : suppliers) {
+      metrics.addAll(supplier.collectMetrics());
+    }
+    return metrics;
+  }
+
+  /**
+   * Sort the metrics into name order.
+   */
+  protected static List<Metric.Statistics> sort(Collection<Metric.Statistics> metrics) {
+    ArrayList<Metric.Statistics> sortedList = new ArrayList<>(metrics);
+    sortedList.sort(NAME_COMPARATOR);
+    return sortedList;
+  }
+
+  /**
+   * Visit the metrics sorted by name.
+   */
+  protected static void report(ReportMetrics reportMetrics, MetricReporter reporter) {
+    if (reporter != null) {
+      try {
+        reporter.report(reportMetrics);
+      } catch (Exception e) {
+        logger.error("Error trying to report metrics", e);
+      }
+    }
+  }
+
+  /**
+   * Compare Metrics by name for sorting purposes.
+   */
+  protected static class NameComp implements Comparator<Metric.Statistics> {
+
+    @Override
+    public int compare(Metric.Statistics o1, Metric.Statistics o2) {
+      return o1.name().compareTo(o2.name());
+    }
+
+  }
+
+  /**
+   * The default thread factory
+   */
+  protected static class BasicThreadFactory implements ThreadFactory {
+    private final ThreadGroup group;
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final String namePrefix;
+
+    BasicThreadFactory() {
+      group = Thread.currentThread().getThreadGroup();
+      namePrefix = "metric-";
+    }
+
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+      if (t.isDaemon()) {
+        t.setDaemon(false);
+      }
+      if (t.getPriority() != Thread.NORM_PRIORITY) {
+        t.setPriority(Thread.NORM_PRIORITY);
+      }
+      return t;
+    }
+  }
+}

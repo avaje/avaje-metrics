@@ -1,9 +1,9 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.MetricName;
-import io.avaje.metrics.statistics.TimedStatistics;
+import io.avaje.metrics.Metric;
+import io.avaje.metrics.Timer;
+import io.avaje.metrics.stats.TimerStats;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -13,47 +13,21 @@ import java.util.concurrent.atomic.LongAdder;
  * It is intended for high concurrent updates to the statistics and relatively infrequent reads.
  * </p>
  */
-final class ValueCounter {
+final class ValueCounter extends BaseReportName {
 
-  private static final String noBuckets = "";
-
-  private final String name;
-  private final boolean withBucket;
-  private final String nameWithBucket;
   private final String bucketRange;
-  final LongAdder count = new LongAdder();
+  private final LongAdder count = new LongAdder();
   private final LongAdder total = new LongAdder();
-  final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
-  private final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
+  private final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
 
-  ValueCounter(MetricName name) {
-    this.name = name.getSimpleName();
-    this.withBucket = false;
-    this.bucketRange = noBuckets;
-    this.nameWithBucket = name.getSimpleName();
+  ValueCounter(String name) {
+    super(name);
+    this.bucketRange = null;
   }
 
-  ValueCounter(MetricName name, String bucketRange) {
-    this.name = name.getSimpleName();
-    this.withBucket = true;
+  ValueCounter(String name, String bucketRange) {
+    super(name);
     this.bucketRange = bucketRange;
-    this.nameWithBucket = this.name + ";bucket=" + bucketRange;
-  }
-
-  String getName() {
-    return name;
-  }
-
-  String getNameWithBucket() {
-    return nameWithBucket;
-  }
-
-  boolean isBucket() {
-    return withBucket;
-  }
-
-  String getBucketRange() {
-    return bucketRange;
   }
 
   /**
@@ -65,81 +39,51 @@ final class ValueCounter {
     max.accumulate(value);
   }
 
-  boolean isEmpty() {
-    return count.sum() == 0;
-  }
-
-  TimedStatistics collectStatistics() {
-    boolean empty = count.sum() == 0;
-    if (empty) {
-      startTime.set(System.currentTimeMillis());
+  Timer.Stats collect(Metric.Visitor collector) {
+    final long count = this.count.sumThenReset();
+    if (count == 0) {
       return null;
     } else {
-      return getStatistics();
+      final long maxVal = max.getThenReset();
+      final long totalVal = total.sumThenReset();
+      final String name = reportName != null ? reportName : reportName(collector);
+      return new TimerStats(name, bucketRange, count, totalVal, maxVal);
     }
-  }
-
-  /**
-   * Return the current statistics resetting the internal values if reset is true.
-   */
-  private TimedStatistics getStatistics() {
-    // Note these values are not guaranteed to be consistent wrt each other
-    // but should be reasonably consistent (small time between count and total)
-    final long maxVal = max.getThenReset();
-    final long totalVal = total.sumThenReset();
-    final long countVal = count.sumThenReset();
-    final long startTimeVal = startTime.getAndSet(System.currentTimeMillis());
-    return new DefaultValueStatistics(this, startTimeVal, countVal, totalVal, maxVal);
-  }
-
-  /**
-   * Reset just the start time.
-   */
-  public void resetStartTime() {
-    startTime.set(System.currentTimeMillis());
   }
 
   /**
    * Reset all the internal counters and start time.
    */
   void reset() {
-    startTime.set(System.currentTimeMillis());
     max.reset();
     count.reset();
     total.reset();
   }
 
   /**
-   * Return the start time.
-   */
-  long getStartTime() {
-    return startTime.get();
-  }
-
-  /**
    * Return the count of values.
    */
-  long getCount() {
+  long count() {
     return count.sum();
   }
 
   /**
    * Return the total of values.
    */
-  long getTotal() {
+  long total() {
     return total.sum();
   }
 
   /**
    * Return the max value.
    */
-  long getMax() {
+  long max() {
     return max.get();
   }
 
-  long getMean() {
-    long count = getCount();
-    long total = getTotal();
+  long mean() {
+    long count = count();
+    long total = total();
     return (count < 1) ? 0L : Math.round((double) (total / count));
   }
 

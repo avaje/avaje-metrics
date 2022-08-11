@@ -1,19 +1,44 @@
 package io.avaje.metrics;
 
 /**
- * A Gauge returning a double value providing the 'source' for a {@link GaugeDoubleMetric}.
- * <p>
- * A Gauge typically doesn't represent an "Event" but the current value of a resource like 'active
- * threads' or 'used memory' etc.
+ * Metric based on a gauge returning double values.
  *
- * @see GaugeDoubleMetric
+ * <p>
+ * Example:
+ *
+ * <pre>
+ * <code>
+ *   class FreeMemoryGauge implements DoubleSupplier {
+ *
+ *       public double getAsDouble() {
+ *         return mxBean.getFreeMemory() / mxBean.getTotalMemory();
+ *       }
+ *     }
+ *
+ *
+ *   GaugeDouble gauge = Metrics.gauge("jvm.memory.pctfree", freeMemoryGauge);
+ *
+ * </code>
+ * </pre>
+ * <p>
+ * Note that <em>metrics</em> registers some core JVM gauges that include threads, memory
+ * and garbage collection.
  */
-@FunctionalInterface
-public interface GaugeDouble {
+public interface GaugeDouble extends Metric {
 
   /**
-   * Return the current value.
+   * Return the value.
    */
-  double getValue();
+  double value();
 
+  /**
+   * Statistics provided by the {@link GaugeDouble}.
+   */
+  interface Stats extends Statistics {
+
+    /**
+     * Return the count of values collected.
+     */
+    double value();
+  }
 }
