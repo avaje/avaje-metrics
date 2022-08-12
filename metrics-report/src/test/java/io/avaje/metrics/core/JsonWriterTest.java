@@ -85,7 +85,7 @@ class JsonWriterTest {
     String counterJson = writer.toString();
 
     // values converted into microseconds
-    String match = "{\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"total\":420}{\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"total\":360}";
+    String match = "{\"name\":\"org.test.TimedFoo.doStuff\",\"count\":3,\"mean\":120,\"max\":140,\"total\":360}{\"name\":\"org.test.TimedFoo.doStuff.error\",\"count\":2,\"mean\":210,\"max\":220,\"total\":420}";
     assertEquals(match, counterJson);
   }
 

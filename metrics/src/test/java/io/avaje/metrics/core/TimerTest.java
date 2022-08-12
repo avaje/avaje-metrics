@@ -55,11 +55,10 @@ class TimerTest {
     stat0 = (Timer.Stats) stats.get(0);
     Timer.Stats stat1 = (Timer.Stats) stats.get(1);
 
-    assertEquals("org.test.mytimed.error", stat0.name());
-    assertEquals(2, stat0.count());
-
-    assertEquals("org.test.mytimed", stat1.name());
-    assertEquals(1, stat1.count());
+    assertEquals("org.test.mytimed", stat0.name());
+    assertEquals(1, stat0.count());
+    assertEquals("org.test.mytimed.error", stat1.name());
+    assertEquals(2, stat1.count());
   }
 
   private void resetStatistics() {

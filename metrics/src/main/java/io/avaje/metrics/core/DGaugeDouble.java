@@ -24,7 +24,7 @@ final class DGaugeDouble extends BaseReportName implements GaugeDouble {
 
   @Override
   public String toString() {
-    return name + " " + value();
+    return name + ":" + value();
   }
 
   /**

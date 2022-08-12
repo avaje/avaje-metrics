@@ -95,18 +95,18 @@ class CsvWriteVisitorTest {
     String[] lines = csvContent.split("\n");
     assertEquals(2, lines.length);
 
-    assertThat(lines[0]).contains(",org.test.TimedFoo.doStuff.error,");
-    assertThat(lines[0]).contains(",count=2,");
-    assertThat(lines[0]).contains(",mean=210,");
-    assertThat(lines[0]).contains(",max=220,");
-    assertThat(lines[0]).contains(",total=420");
-
     // values converted into microseconds
-    assertThat(lines[1]).contains(",org.test.TimedFoo.doStuff,");
-    assertThat(lines[1]).contains(",count=3,");
-    assertThat(lines[1]).contains(",mean=120,");
-    assertThat(lines[1]).contains(",max=140,");
-    assertThat(lines[1]).contains(",total=360");
+    assertThat(lines[0]).contains(",org.test.TimedFoo.doStuff,");
+    assertThat(lines[0]).contains(",count=3,");
+    assertThat(lines[0]).contains(",mean=120,");
+    assertThat(lines[0]).contains(",max=140,");
+    assertThat(lines[0]).contains(",total=360");
+
+    assertThat(lines[1]).contains(",org.test.TimedFoo.doStuff.error,");
+    assertThat(lines[1]).contains(",count=2,");
+    assertThat(lines[1]).contains(",mean=210,");
+    assertThat(lines[1]).contains(",max=220,");
+    assertThat(lines[1]).contains(",total=420");
   }
 
 
@@ -135,13 +135,13 @@ class CsvWriteVisitorTest {
     String[] lines = csvContent.split("\n");
     assertEquals(3, lines.length);
 
-    assertThat(lines[0]).contains("org.test.BucketTimedFoo.doStuff.error,count=4,mean=137500,max=220000,total=550000");
+    assertThat(lines[0]).contains(",org.test.BucketTimedFoo.doStuff;bucket=0-150");
+    assertThat(lines[0]).contains(",count=3,");
+    assertThat(lines[0]).contains(",mean=120000,");
+    assertThat(lines[0]).contains(",max=140000,");
+    assertThat(lines[0]).contains(",total=360000");
 
-    assertThat(lines[1]).contains(",org.test.BucketTimedFoo.doStuff;bucket=0-150");
-    assertThat(lines[1]).contains(",count=3,");
-    assertThat(lines[1]).contains(",mean=120000,");
-    assertThat(lines[1]).contains(",max=140000,");
-    assertThat(lines[1]).contains(",total=360000");
+    assertThat(lines[1]).contains("org.test.BucketTimedFoo.doStuff.error,count=4,mean=137500,max=220000,total=550000");
 
     assertThat(lines[2]).contains(",org.test.BucketTimedFoo.doStuff;bucket=150");
     assertThat(lines[2]).contains(",count=2,");

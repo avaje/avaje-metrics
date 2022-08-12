@@ -22,6 +22,11 @@ final class DMeter implements Metric, Meter {
   }
 
   @Override
+  public String toString() {
+    return name + ":" + values;
+  }
+
+  @Override
   public void collect(Visitor collector) {
     final Stats stats = values.collect(collector);
     if (stats != null) {

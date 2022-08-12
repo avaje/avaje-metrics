@@ -34,7 +34,7 @@ final class DTimer implements Timer {
 
   @Override
   public String toString() {
-    return name;
+    return name + ":" + successCounter + ((errorCounter.count() == 0) ? "" : " error:" + errorCounter);
   }
 
   @Override
@@ -54,13 +54,13 @@ final class DTimer implements Timer {
 
   @Override
   public void collect(Visitor collector) {
-    final Stats errStats = errorCounter.collect(collector);
-    if (errStats != null) {
-      collector.visit(errStats);
-    }
     final Stats successStats = successCounter.collect(collector);
     if (successStats != null) {
       collector.visit(successStats);
+    }
+    final Stats errorStats = errorCounter.collect(collector);
+    if (errorStats != null) {
+      collector.visit(errorStats);
     }
   }
 

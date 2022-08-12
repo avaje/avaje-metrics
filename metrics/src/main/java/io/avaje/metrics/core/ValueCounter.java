@@ -30,6 +30,15 @@ final class ValueCounter extends BaseReportName {
     this.bucketRange = bucketRange;
   }
 
+  @Override
+  public String toString() {
+    return "{" +
+      "count=" + count +
+      ", total=" + total +
+      ", max=" + max +
+      '}';
+  }
+
   /**
    * Add a value. Usually the value is Time or Bytes etc.
    */

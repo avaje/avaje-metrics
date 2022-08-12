@@ -26,6 +26,11 @@ final class DCounter extends BaseReportName implements Counter {
     super(name);
   }
 
+  @Override
+  public String toString() {
+    return name + ":" + count;
+  }
+
   /**
    * Clear the collected statistics.
    */

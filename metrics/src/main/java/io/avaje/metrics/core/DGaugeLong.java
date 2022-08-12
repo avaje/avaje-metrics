@@ -33,7 +33,7 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
 
   @Override
   public final String toString() {
-    return name;
+    return name + ":" + supplier.getAsLong();
   }
 
   /**
