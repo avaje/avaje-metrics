@@ -4,20 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>metrics-parent</artifactId>
-    <groupId>io.avaje.metrics</groupId>
+    <artifactId>avaje-metrics-parent</artifactId>
+    <groupId>io.avaje</groupId>
     <version>9.0.2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>metrics-noop</artifactId>
+  <artifactId>avaje-metrics-noop</artifactId>
 
   <properties>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>io.avaje.metrics</groupId>
-      <artifactId>metrics</artifactId>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-metrics</artifactId>
       <version>9.0.2-SNAPSHOT</version>
     </dependency>
 
