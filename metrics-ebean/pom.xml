@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>metrics-parent</artifactId>
-    <groupId>io.avaje.metrics</groupId>
-    <version>9.0.2-SNAPSHOT</version>
+    <artifactId>avaje-metrics-parent</artifactId>
+    <groupId>io.avaje</groupId>
+    <version>9.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>metrics-ebean</artifactId>
+  <artifactId>avaje-metrics-ebean</artifactId>
 
   <properties>
     <surefire.useModulePath>false</surefire.useModulePath>
@@ -22,9 +22,9 @@
     </dependency>
 
     <dependency>
-      <groupId>io.avaje.metrics</groupId>
-      <artifactId>metrics</artifactId>
-      <version>9.0.2-SNAPSHOT</version>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-metrics</artifactId>
+      <version>9.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 

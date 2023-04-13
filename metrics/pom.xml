@@ -1,13 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>io.avaje.metrics</groupId>
-    <artifactId>metrics-parent</artifactId>
-    <version>9.0.2-SNAPSHOT</version>
+    <groupId>io.avaje</groupId>
+    <artifactId>avaje-metrics-parent</artifactId>
+    <version>9.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>metrics</artifactId>
-  <name>metrics</name>
+  <artifactId>avaje-metrics</artifactId>
 
   <properties>
     <logback.version>1.2.11</logback.version>
@@ -25,14 +24,14 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.13.2</version>
+      <version>2.14.2</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.13.2.2</version>
+      <version>2.14.2</version>
       <scope>test</scope>
     </dependency>
 
