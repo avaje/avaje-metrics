@@ -1,14 +1,20 @@
-# avaje-metric-core
+# avaje-metrics
 
 Please read the main documentation at: http://avaje-metrics.github.io
+
+- Provides Timer, Counter, Gauge based metrics
+- Built in standard metrics for JVM and CGroup/K8s
+- Much lighter weight relative to the other metrics libraries we compare ourselves to
+- Intentionally does NOT use Histograms and instead uses lighter weight Timer providing count, total, max, mean
+- Intentionally does NOT provide Exponentially weighted moving averages (as they are too laggy)
 
 ## Maven dependency
 
 ```xml
     <dependency>
-      <groupId>org.avaje.metric</groupId>
-      <artifactId>avaje-metric-core</artifactId>
-      <version>4.4.1</version>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-metrics</artifactId>
+      <version>9.1</version>
     </dependency>
 ```
 
@@ -21,8 +27,8 @@ Micro benchmarks are notoriously difficult but that said the overhead using vers
 
 Request timing would not add much more to execution time per say but relatively speaking can produce a lot of output (that is reported in a background thread) and creates objects so adds some extra GC cost. In production you would expect to limit the number of metrics you collect on and limit the number of request timings you collect.
 
-## Example Metrics output (typically reported every 60 seconds)  
-Below is a sample of the metric log output. The metrics are periodically collected 
+## Example Metrics output (typically reported every 60 seconds)
+Below is a sample of the metric log output. The metrics are periodically collected
 and output to a file or sent to a repository.
 
 ```console
@@ -49,11 +55,11 @@ and output to a file or sent to a repository.
 14:01:00, tm, org.example.myapp.web.api.MetricResource.collecting, count=1, avg=382, max=382, sum=382, dur=10, err.count=0
 ```
 
-## Example Per Request output 
+## Example Per Request output
 
 > Per Request timing is a little bit more expensive to collect and can produce a lot of output. As such it is expected that you only turn it on when needed. For example, for the next 5 invocations of CustomerResource.asBean() collect per request timings.
 
-Per request timing can be set for specific timing metrics - for example, collect per request timing on the next 5 invocations of the CustomerResource.asBean() method. 
+Per request timing can be set for specific timing metrics - for example, collect per request timing on the next 5 invocations of the CustomerResource.asBean() method.
 
 Per request timing output shows the nested calls and where the time went for that single request. The p column shows the percentage of total execution - for example 81% of execution time was taken in Muse.iDoTheRealWorkAroundHere.  Typically in looking at this output you ignore/remove/collapse anything that has percentage of 0.
 
@@ -74,6 +80,6 @@ The columns are: d=depth, p=percentage, ms=milliseconds, us=microseconds, m=metr
    d:5    p:81   ms:500       us:500108                      m:org.example.myapp.service.Muse.iDoTheRealWorkAroundHere
    d:5    p:0    ms:0         us:11                          m:org.example.myapp.service.Muse.notParticularlyResistant
 ```
-CustomerResource.asBean took 612 milliseconds to execute. If you look at Muse.iDoTheRealWorkAroundHere it took 81% of the total execution time (500 milliseconds, 500204 microseconds). 
+CustomerResource.asBean took 612 milliseconds to execute. If you look at Muse.iDoTheRealWorkAroundHere it took 81% of the total execution time (500 milliseconds, 500204 microseconds).
 
 
