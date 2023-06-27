@@ -49,6 +49,13 @@ public class Metrics {
   }
 
   /**
+   * Collect the metrics for writing as JSON (typically to a supplied Appender).
+   */
+  public static MetricRegistry.JsonMetrics collectAsJson() {
+    return defaultRegistry.collectAsJson();
+  }
+
+  /**
    * Add a metric supplier to the default registry.
    */
   public static void addSupplier(MetricSupplier supplier) {
