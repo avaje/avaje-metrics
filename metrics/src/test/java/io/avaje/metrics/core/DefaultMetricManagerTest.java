@@ -13,8 +13,8 @@ class DefaultMetricManagerTest {
 
     DefaultMetricProvider mgr = new DefaultMetricProvider();
 
-    Timer m0 = mgr.timed(Customer.class.getName() + ".doSomething");
-    Timer m0b = mgr.timed("orange.truck.Customer.doSomething");
+    Timer m0 = mgr.timer(Customer.class.getName() + ".doSomething");
+    Timer m0b = mgr.timer("orange.truck.Customer.doSomething");
 
     assertSame(m0, m0b);
   }

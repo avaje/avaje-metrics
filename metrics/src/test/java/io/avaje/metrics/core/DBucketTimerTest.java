@@ -16,7 +16,7 @@ class DBucketTimerTest {
   private final DefaultMetricProvider mgr = new DefaultMetricProvider();
 
   private DBucketTimer create() {
-    return (DBucketTimer) mgr.timed("foo.bar", 100, 200, 300);
+    return (DBucketTimer) mgr.timer("foo.bar", 100, 200, 300);
   }
 
   @Test

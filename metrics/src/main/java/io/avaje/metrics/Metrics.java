@@ -82,14 +82,14 @@ public class Metrics {
    * Return a bucket timer given the name and bucket ranges using the default registry.
    */
   public static Timer timer(String name, int... bucketRanges) {
-    return defaultRegistry.timed(name, bucketRanges);
+    return defaultRegistry.timer(name, bucketRanges);
   }
 
   /**
    * Return a Timer given the name using the default registry.
    */
   public static Timer timer(String name) {
-    return defaultRegistry.timed(name);
+    return defaultRegistry.timer(name);
   }
 
   /**
@@ -131,7 +131,7 @@ public class Metrics {
    * Return the TimerGroup with a based metric name using the default registry.
    */
   public static TimerGroup timerGroup(String baseName) {
-    return defaultRegistry.timedGroup(baseName);
+    return defaultRegistry.timerGroup(baseName);
   }
 
   /**

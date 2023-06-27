@@ -37,8 +37,7 @@ final class DTimerGroup implements TimerGroup {
    */
   @Override
   public Timer.Event start(String name) {
-    Timer timedMetric = timed(name);
-    return timedMetric.startEvent();
+    return timer(name).startEvent();
   }
 
 
@@ -50,26 +49,25 @@ final class DTimerGroup implements TimerGroup {
 
   @Override
   public void addEventDuration(String name, boolean success, long durationNanos) {
-    Timer timedMetric = timed(name);
-    timedMetric.addEventDuration(success, durationNanos);
+    timer(name).addEventDuration(success, durationNanos);
   }
 
   /**
    * Return the TimedMetric for the specific name.
    */
   @Override
-  public Timer timed(String name) {
+  public Timer timer(String name) {
     // try local cache first to try and avoid the name parse
     Timer found = cache.get(name);
     if (found != null) {
       return found;
     }
     // parse name and find/create using MetricManager
-    String metricName = metricNameCache.get(name);
+    final String metricName = metricNameCache.get(name);
     // this is safe in that it is single threaded on construction/put
-    Timer timedMetric = registry.timed(metricName);
-    final Timer existing = cache.putIfAbsent(name, timedMetric);
-    return (existing != null) ? existing : timedMetric;
+    final Timer timer = registry.timer(metricName);
+    final Timer existing = cache.putIfAbsent(name, timer);
+    return (existing != null) ? existing : timer;
   }
 
 }

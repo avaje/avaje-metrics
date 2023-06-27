@@ -13,7 +13,7 @@ class CollectAsJsonTest {
   void collectAsJson() {
 
     long startNanos = System.nanoTime();
-    Timer timer = registry.timed("my.timer");
+    Timer timer = registry.timer("my.timer");
     Counter counter = registry.counter("my.count");
     counter.inc();
     counter.inc();
