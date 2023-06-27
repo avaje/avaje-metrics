@@ -33,7 +33,7 @@ public interface MetricRegistry extends JvmMetrics {
   /**
    * Return the timer using the metric name.
    */
-  Timer timed(String name);
+  Timer timer(String name);
 
   /**
    * Return the bucket timer using the given base metric name and bucketRanges.
@@ -41,12 +41,12 @@ public interface MetricRegistry extends JvmMetrics {
    * @param name         The metric name
    * @param bucketRanges Time in milliseconds which are used to create buckets.
    */
-  Timer timed(String name, int... bucketRanges);
+  Timer timer(String name, int... bucketRanges);
 
   /**
    * Return the TimerGroup using the given base metric name.
    */
-  TimerGroup timedGroup(String baseName);
+  TimerGroup timerGroup(String baseName);
 
   /**
    * Register a metric that was created externally with the registry.

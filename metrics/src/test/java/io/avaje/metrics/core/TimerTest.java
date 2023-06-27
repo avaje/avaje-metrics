@@ -15,7 +15,7 @@ class TimerTest {
   void add() {
 
     MetricRegistry registry = Metrics.createRegistry();
-    Timer metric = registry.timed("org.test.mytimed");
+    Timer metric = registry.timer("org.test.mytimed");
 
     boolean useContext = false;//metric.isRequestTiming();
     long start = System.nanoTime();

@@ -20,7 +20,7 @@ public interface TimerGroup {
   /**
    * Return the Timer for the specific name.
    */
-  Timer timed(String name);
+  Timer timer(String name);
 
   /**
    * Add an event based on a startNanos (determined by {@link System#nanoTime()}).

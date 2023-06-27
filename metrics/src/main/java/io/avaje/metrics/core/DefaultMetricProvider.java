@@ -163,17 +163,17 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
-  public TimerGroup timedGroup(String baseName) {
+  public TimerGroup timerGroup(String baseName) {
     return new DTimerGroup(baseName, this);
   }
 
   @Override
-  public Timer timed(String name) {
+  public Timer timer(String name) {
     return (Timer) metric(name, timerFactory);
   }
 
   @Override
-  public Timer timed(String name, int... bucketRanges) {
+  public Timer timer(String name, int... bucketRanges) {
     return (Timer) metric(name, bucketTimerFactory, bucketRanges);
   }
 
