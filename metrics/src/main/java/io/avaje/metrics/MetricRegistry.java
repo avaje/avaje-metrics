@@ -68,4 +68,31 @@ public interface MetricRegistry extends JvmMetrics {
    */
   List<Metric.Statistics> collectMetrics();
 
+  /**
+   * Collect the metrics for writing as JSON (typically to a supplied Appender).
+   */
+  JsonMetrics collectAsJson();
+
+  /**
+   * Write the collected metrics in JSON form.
+   */
+  interface JsonMetrics {
+
+    /**
+     * Write the metrics in JSON form to the given appendable.
+     * <p>
+     * Note that this doesn't add JSON array start and end so
+     * those need to be added as needed.
+     * </p>
+     *
+     * @param appendable The buffer to write the metrics to
+     */
+    void write(Appendable appendable);
+
+    /**
+     * Collect and return the metrics as JSON array content.
+     */
+    String asJson();
+  }
+
 }

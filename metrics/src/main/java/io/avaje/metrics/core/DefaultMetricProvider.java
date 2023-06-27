@@ -236,12 +236,40 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     }
   }
 
+  @Override
+  public JsonMetrics collectAsJson() {
+    return new DJson(this);
+  }
+
   private void collectAppMetrics(DStatsCollector collector) {
     for (Metric metric : metricsCache.values()) {
       metric.collect(collector);
     }
     for (MetricSupplier supplier : suppliers) {
       collector.addAll(supplier.collectMetrics());
+    }
+  }
+
+  private static class DJson implements JsonMetrics {
+
+    private final DefaultMetricProvider provider;
+
+    DJson(DefaultMetricProvider provider) {
+      this.provider = provider;
+    }
+
+    @Override
+    public void write(Appendable appendable) {
+      JsonWriter.writeTo(appendable, provider.collectMetrics());
+    }
+
+    @Override
+    public String asJson() {
+      final StringBuilder buffer = new StringBuilder(1000);
+      buffer.append("[");
+      write(buffer);
+      buffer.append("]");
+      return buffer.toString();
     }
   }
 }
