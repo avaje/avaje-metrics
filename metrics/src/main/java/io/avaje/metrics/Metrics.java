@@ -16,6 +16,10 @@ import java.util.function.LongSupplier;
  */
 public class Metrics {
 
+  private Metrics() {
+    // hide constructor
+  }
+
   private static final SpiMetricProvider defaultRegistry = initialiseProvider();
 
   /**
