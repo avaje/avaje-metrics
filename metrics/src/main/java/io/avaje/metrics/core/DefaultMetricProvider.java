@@ -86,6 +86,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public MetricRegistry namingUnderscore() {
+    this.namingConvention = UnderscoreNaming.INSTANCE;
+    return this;
+  }
+
+  @Override
   public JvmMetrics withReportChangesOnly() {
     reportChangesOnly = true;
     return this;

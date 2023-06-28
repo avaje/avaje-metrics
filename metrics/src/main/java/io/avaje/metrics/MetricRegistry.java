@@ -64,6 +64,13 @@ public interface MetricRegistry extends JvmMetrics {
   MetricRegistry naming(Function<String, String> namingConvention);
 
   /**
+   * Use the underscore naming convention for reporting metrics.
+   * <p>
+   * This converts period to underscore.
+   */
+  MetricRegistry namingUnderscore();
+
+  /**
    * Collect all the metrics.
    */
   List<Metric.Statistics> collectMetrics();
