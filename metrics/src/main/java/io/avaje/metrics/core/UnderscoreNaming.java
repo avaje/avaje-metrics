@@ -7,15 +7,6 @@ import java.util.function.Function;
  */
 final class UnderscoreNaming implements Function<String, String> {
 
-  /**
-   * Return the
-   */
-  public static final Function<String, String> INSTANCE = new UnderscoreNaming();
-
-  private UnderscoreNaming() {
-    // hide constructor
-  }
-
   @Override
   public String apply(String name) {
     return name.replace('.', '_');

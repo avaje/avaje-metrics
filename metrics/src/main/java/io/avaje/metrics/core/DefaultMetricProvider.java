@@ -87,7 +87,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public MetricRegistry namingUnderscore() {
-    this.namingConvention = UnderscoreNaming.INSTANCE;
+    this.namingConvention = new UnderscoreNaming();
     return this;
   }
 
