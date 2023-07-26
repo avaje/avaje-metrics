@@ -11,7 +11,6 @@ import java.lang.annotation.Target;
  * Note that timed execution can be automatically added to JAX-RS endpoints and
  * Spring beans and this annotation can be used to exclude specific beans as
  * desired.
- * </p>
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

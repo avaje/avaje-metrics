@@ -4,6 +4,8 @@ import io.avaje.metrics.*;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricProvider;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -271,8 +273,8 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
     @Override
     public String asJson() {
-      final StringBuilder buffer = new StringBuilder(1000);
-      buffer.append("[");
+      final var buffer = new StringBuilder(1000);
+      buffer.append("[\n");
       write(buffer);
       buffer.append("]");
       return buffer.toString();

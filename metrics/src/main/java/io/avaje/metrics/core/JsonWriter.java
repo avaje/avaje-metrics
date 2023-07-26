@@ -34,9 +34,8 @@ final class JsonWriter implements Metric.Visitor {
         } else {
           buffer.append(" ,");
         }
-        Metric.Statistics metric = metrics.get(i);
-        metric.visit(this);
-        buffer.append("\n");
+        metrics.get(i).visit(this);
+        buffer.append('\n');
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Error writing JSON", e);
@@ -48,14 +47,14 @@ final class JsonWriter implements Metric.Visitor {
   }
 
   private void writeMetricStart(String name) throws IOException {
-    buffer.append("{");
+    buffer.append('{');
     writeKey("name");
     writeValue(name);
-    buffer.append(",");
+    buffer.append(',');
   }
 
   private void writeMetricEnd() throws IOException {
-    buffer.append("}");
+    buffer.append('}');
   }
 
   @Override
@@ -141,11 +140,11 @@ final class JsonWriter implements Metric.Visitor {
   }
 
   private void writeKey(String key) throws IOException {
-    buffer.append("\"").append(key).append("\":");
+    buffer.append('"').append(key).append('"').append(':');
   }
 
   private void writeValue(String val) throws IOException {
-    buffer.append("\"").append(val).append("\"");
+    buffer.append('"').append(val).append('"');
   }
 
   private void writeNumberValue(String val) throws IOException {

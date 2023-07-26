@@ -6,7 +6,7 @@
   <parent>
     <artifactId>avaje-metrics-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.2-RC1</version>
+    <version>9.2-RC2</version>
   </parent>
 
   <artifactId>avaje-metrics-noop</artifactId>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.2-RC1</version>
+      <version>9.2-RC2</version>
     </dependency>
 
   </dependencies>
