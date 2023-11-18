@@ -95,6 +95,21 @@ public interface GraphiteReporter {
     Builder excludeDefaultRegistry();
 
     /**
+     * Set a threshold where timed metrics with total time less than the
+     * threshold are not reported.
+     * <p>
+     * This can use used to when metrics are applied fairly globally (for
+     * example on all Spring components or all avaje-inject components)
+     * and hence can include methods that are not that interesting for
+     * collecting timing on.
+     * <p>
+     * Setting this to 1000 (which is 1 millisecond) when reporting every 1 minute
+     * means that methods with total execution time less than 1ms in a one-minute period
+     * will not be reported.
+     */
+    Builder timedThresholdMicros(int timedThresholdMicros);
+
+    /**
      * Include Ebean Database metrics in the reporting.
      * <p>
      * This can be used multiple times for each database that we want to

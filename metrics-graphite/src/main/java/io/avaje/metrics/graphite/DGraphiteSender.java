@@ -38,14 +38,16 @@ final class DGraphiteSender implements GraphiteSender {
   private final InetSocketAddress address;
   private final SocketFactory socketFactory;
   private final String prefix;
+  private final long timedThreshold;
   private Socket socket;
   private Writer writer;
 
-  DGraphiteSender(InetSocketAddress address, SocketFactory socketFactory, int batchSize, String prefix) {
+  DGraphiteSender(InetSocketAddress address, SocketFactory socketFactory, int batchSize, String prefix, long timedThreshold) {
     this.address = address;
     this.socketFactory = socketFactory;
     this.batchSize = batchSize;
     this.prefix = prefix;
+    this.timedThreshold = timedThreshold;
   }
 
   @Override
@@ -80,11 +82,13 @@ final class DGraphiteSender implements GraphiteSender {
 
   private class MetricsVisitor implements Metric.Visitor {
 
-    final long epochSecs = System.currentTimeMillis() / 1000;
+    private final long epochSecs = System.currentTimeMillis() / 1000;
 
     @Override
     public void visit(Timer.Stats timed) {
-      sendValues(timed);
+      if (timedThreshold == 0 || timedThreshold < timed.total()) {
+        sendValues(timed);
+      }
     }
 
     @Override
@@ -162,7 +166,7 @@ final class DGraphiteSender implements GraphiteSender {
    * 3. Clear out the list of metrics
    */
   private void writeMetrics() throws IOException {
-    if (metrics.size() > 0) {
+    if (!metrics.isEmpty()) {
       try {
         byte[] payload = pickleMetrics(metrics);
         byte[] header = ByteBuffer.allocate(4).putInt(payload.length).array();
