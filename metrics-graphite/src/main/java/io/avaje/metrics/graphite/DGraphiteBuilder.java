@@ -17,6 +17,7 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
   private String prefix;
   private String hostname;
   private int port;
+  private long timedThresholdMicros;
   private SocketFactory socketFactory = SSLSocketFactory.getDefault();
 
   private final List<GraphiteSender.Reporter> reporters = new ArrayList<>();
@@ -57,7 +58,14 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
     this.excludeDefaultRegistry = true;
     return this;
   }
-    @Override
+
+  @Override
+  public DGraphiteBuilder timedThresholdMicros(int timedThresholdMicros) {
+    this.timedThresholdMicros = timedThresholdMicros;
+    return this;
+  }
+
+  @Override
   public DGraphiteBuilder database(Database database) {
     reporters.add(DatabaseReporter.reporter(database));
     return this;
@@ -84,11 +92,11 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
       throw new IllegalStateException("Unknown host " + address.getHostName());
     }
 
-    return new DGraphiteSender(address, socketFactory, batchSize, prefix);
+    return new DGraphiteSender(address, socketFactory, batchSize, prefix, timedThresholdMicros);
   }
 
   public GraphiteReporter build() {
-    if (!excludeDefaultRegistry){
+    if (!excludeDefaultRegistry) {
       reporters.add(new DRegistryReporter(Metrics.registry()));
     }
     return new DGraphiteReporter(buildSender(), reporters);
