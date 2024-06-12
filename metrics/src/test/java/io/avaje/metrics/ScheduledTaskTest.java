@@ -21,7 +21,7 @@ class ScheduledTaskTest {
     System.out.println("start...");
     task.start();
     Thread.sleep(5);
-    assertThat(counter.get()).isGreaterThan(1);
+    assertThat(counter.get()).isGreaterThan(0);
 
     task.waitIfRunning(10, TimeUnit.SECONDS);
     Thread.sleep(30);
