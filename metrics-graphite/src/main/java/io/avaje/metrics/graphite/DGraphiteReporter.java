@@ -1,16 +1,15 @@
 package io.avaje.metrics.graphite;
 
-import io.avaje.applog.AppLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
 
-import static java.lang.System.Logger.Level.DEBUG;
-import static java.lang.System.Logger.Level.ERROR;
 
 final class DGraphiteReporter implements GraphiteReporter {
 
-  private static final System.Logger log = AppLog.getLogger(GraphiteReporter.class);
+  private static final Logger log = LoggerFactory.getLogger(GraphiteReporter.class);
 
   private final GraphiteSender sender;
   private final List<GraphiteSender.Reporter> reporters;
@@ -30,14 +29,14 @@ final class DGraphiteReporter implements GraphiteReporter {
       }
       sender.flush();
     } catch (IOException e) {
-      log.log(ERROR, "Error reporting metrics", e);
+      log.error("Error reporting metrics", e);
     } finally {
       try {
         sender.close();
       } catch (Throwable e) {
-        log.log(ERROR, "Error closing graphite sender", e);
+        log.error("Error closing graphite sender", e);
       }
-      log.log(DEBUG, "metrics reported in {0}ms", System.currentTimeMillis() - start);
+      log.debug("metrics reported in {}ms", System.currentTimeMillis() - start);
     }
   }
 }

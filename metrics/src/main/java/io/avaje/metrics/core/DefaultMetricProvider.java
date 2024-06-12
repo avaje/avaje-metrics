@@ -1,15 +1,11 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
+import io.avaje.metrics.Timer;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricProvider;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
@@ -51,9 +47,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   static SpiMetricBuilder initBuilder() {
     if (isDisableCollection()) {
-      return ServiceLoader.load(SpiMetricBuilder.class)
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Missing metrics-noop dependency"));
+      Iterator<SpiMetricBuilder> iterator = ServiceLoader.load(SpiMetricBuilder.class)
+        .iterator();
+      if (iterator.hasNext()) {
+        return iterator.next();
+      }
+      throw new IllegalStateException("Missing metrics-noop dependency");
     }
     return new DSpiMetricBuilder();
   }
@@ -273,7 +272,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
     @Override
     public String asJson() {
-      final var buffer = new StringBuilder(1000);
+      final StringBuilder buffer = new StringBuilder(1000);
       buffer.append("[\n");
       write(buffer);
       buffer.append("]");

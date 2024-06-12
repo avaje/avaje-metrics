@@ -3,7 +3,6 @@ package io.avaje.metrics.graphite;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.Metrics;
-import io.ebean.Database;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -62,12 +61,6 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
   @Override
   public DGraphiteBuilder timedThresholdMicros(int timedThresholdMicros) {
     this.timedThresholdMicros = timedThresholdMicros;
-    return this;
-  }
-
-  @Override
-  public DGraphiteBuilder database(Database database) {
-    reporters.add(DatabaseReporter.reporter(database));
     return this;
   }
 

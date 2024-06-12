@@ -1,10 +1,9 @@
 package io.avaje.metrics.core;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.lang.System.Logger.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.function.Predicate;
 
 final class FileLines {
 
-  private static final System.Logger log = System.getLogger("io.avaje.metrics");
+  private static final Logger log = LoggerFactory.getLogger("io.avaje.metrics");
 
   private final File file;
 
@@ -44,7 +43,7 @@ final class FileLines {
         } while (readMore);
       }
     } catch (IOException e) {
-      log.log(Level.WARNING, "Error reading metrics file " + file, e);
+      log.warn("Error reading metrics file " + file, e);
     }
   }
 
@@ -60,7 +59,7 @@ final class FileLines {
       }
 
     } catch (IOException e) {
-      log.log(Level.WARNING, "Error reading metrics file " + file, e);
+      log.warn("Error reading metrics file " + file, e);
       return Collections.emptyList();
     }
   }
@@ -71,7 +70,7 @@ final class FileLines {
         return lineReader.readLine();
       }
     } catch (IOException e) {
-      log.log(Level.WARNING, "Error reading metrics file " + file, e);
+      log.warn("Error reading metrics file " + file, e);
     }
     return null;
   }

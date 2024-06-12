@@ -16,22 +16,15 @@
   <dependencies>
 
     <dependency>
-      <groupId>io.avaje</groupId>
-      <artifactId>avaje-applog</artifactId>
-      <version>1.0</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.36</version>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.2-RC2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>io.ebean</groupId>
-      <artifactId>ebean-api</artifactId>
-      <version>13.19.0</version>
-      <optional>true</optional>
+      <version>9.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>

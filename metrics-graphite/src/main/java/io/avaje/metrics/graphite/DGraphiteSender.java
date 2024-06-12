@@ -74,7 +74,7 @@ final class DGraphiteSender implements GraphiteSender {
 
   @Override
   public void send(List<Metric.Statistics> metrics) {
-    var visitor = new MetricsVisitor();
+    MetricsVisitor visitor = new MetricsVisitor();
     for (Metric.Statistics metric : metrics) {
       metric.visit(visitor);
     }

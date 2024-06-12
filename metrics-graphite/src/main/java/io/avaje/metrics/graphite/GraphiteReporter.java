@@ -2,7 +2,6 @@ package io.avaje.metrics.graphite;
 
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricSupplier;
-import io.ebean.Database;
 
 import javax.net.SocketFactory;
 
@@ -108,14 +107,6 @@ public interface GraphiteReporter {
      * will not be reported.
      */
     Builder timedThresholdMicros(int timedThresholdMicros);
-
-    /**
-     * Include Ebean Database metrics in the reporting.
-     * <p>
-     * This can be used multiple times for each database that we want to
-     * report metrics from.
-     */
-    Builder database(Database database);
 
     /**
      * Include the metric registry.

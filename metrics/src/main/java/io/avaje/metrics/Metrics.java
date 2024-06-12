@@ -2,6 +2,7 @@ package io.avaje.metrics;
 
 import io.avaje.metrics.spi.SpiMetricProvider;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.DoubleSupplier;
@@ -26,9 +27,13 @@ public class Metrics {
    * Finds and returns the implementation of PluginMetricManager using the ServiceLoader.
    */
   private static SpiMetricProvider initialiseProvider() {
-    return ServiceLoader
+    Iterator<SpiMetricProvider> iterator = ServiceLoader
       .load(SpiMetricProvider.class)
-      .findFirst().orElseThrow(() -> new IllegalStateException("io.avaje.metrics:metrics is not in classpath?"));
+      .iterator();
+    if (iterator.hasNext()) {
+      return iterator.next();
+    }
+    throw new IllegalStateException("io.avaje.metrics:metrics is not in classpath?");
   }
 
   /**
