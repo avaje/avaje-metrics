@@ -8,6 +8,7 @@ module io.avaje.metrics {
   exports io.avaje.metrics.spi;
   exports io.avaje.metrics.annotation;
 
+  requires transitive io.avaje.applog;
   requires static java.management;
 
   uses io.avaje.metrics.spi.SpiMetricBuilder;
