@@ -3,10 +3,7 @@ package io.avaje.metrics;
 import io.avaje.applog.AppLog;
 
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.Logger.Level.ERROR;
@@ -94,6 +91,22 @@ final class DScheduledTask implements ScheduledTask {
       log.log(ERROR, "Error stopping task", e);
     } finally {
       activeLock.unlock();
+    }
+  }
+
+  private static final class DaemonThreadFactory implements ThreadFactory {
+
+    private final String name;
+
+    DaemonThreadFactory(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(r, name);
+      t.setDaemon(true);
+      return t;
     }
   }
 }
