@@ -4,7 +4,7 @@
   <parent>
     <artifactId>avaje-metrics-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.3-SNAPSHOT</version>
+    <version>9.3-RC1</version>
   </parent>
 
   <artifactId>avaje-metrics-graphite</artifactId>
