@@ -1,16 +1,15 @@
 package io.avaje.metrics;
 
-import io.avaje.applog.AppLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.System.Logger.Level.ERROR;
-
 final class DScheduledTask implements ScheduledTask {
 
-  private static final System.Logger log = AppLog.getLogger(DScheduledTask.class);
+  private static final Logger log = LoggerFactory.getLogger(DScheduledTask.class);
 
   static final class DBuilder implements Builder {
     private int initial = 60;
@@ -79,7 +78,7 @@ final class DScheduledTask implements ScheduledTask {
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      log.log(ERROR, "interrupted while waiting for task to complete", e);
+      log.error("interrupted while waiting for task to complete", e);
     }
   }
 
@@ -88,7 +87,7 @@ final class DScheduledTask implements ScheduledTask {
     try {
       task.run();
     } catch (Throwable e) {
-      log.log(ERROR, "Error stopping task", e);
+      log.error("Error stopping task", e);
     } finally {
       activeLock.unlock();
     }
