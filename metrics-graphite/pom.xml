@@ -8,6 +8,7 @@
   </parent>
 
   <artifactId>avaje-metrics-graphite</artifactId>
+  <version>9.4-RC2</version>
 
   <properties>
     <surefire.useModulePath>false</surefire.useModulePath>
