@@ -5,8 +5,7 @@ import io.avaje.applog.AppLog;
 import java.io.IOException;
 import java.util.List;
 
-import static java.lang.System.Logger.Level.DEBUG;
-import static java.lang.System.Logger.Level.ERROR;
+import static java.lang.System.Logger.Level.*;
 
 final class DGraphiteReporter implements GraphiteReporter {
 
@@ -30,7 +29,7 @@ final class DGraphiteReporter implements GraphiteReporter {
       }
       sender.flush();
     } catch (IOException e) {
-      log.log(ERROR, "Error reporting metrics", e);
+      log.log(WARNING, "Error reporting metrics", e);
     } finally {
       try {
         sender.close();

@@ -1,5 +1,6 @@
 package io.avaje.metrics.graphite;
 
+import io.avaje.applog.AppLog;
 import io.avaje.metrics.*;
 
 import javax.net.SocketFactory;
@@ -11,12 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static java.lang.System.Logger.Level.INFO;
+import static java.lang.System.Logger.Level.WARNING;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * A client to a Carbon server that sends all metrics after they have been pickled in configurable sized batches
  */
 final class DGraphiteSender implements GraphiteSender {
+
+  private static final System.Logger log = AppLog.getLogger(GraphiteReporter.class);
 
   /**
    * Minimally necessary pickle opcodes.
@@ -40,7 +45,6 @@ final class DGraphiteSender implements GraphiteSender {
   private final String prefix;
   private final long timedThreshold;
   private Socket socket;
-  private Writer writer;
 
   DGraphiteSender(InetSocketAddress address, SocketFactory socketFactory, int batchSize, String prefix, long timedThreshold) {
     this.address = address;
@@ -56,7 +60,6 @@ final class DGraphiteSender implements GraphiteSender {
       throw new IllegalStateException("Already connected");
     }
     this.socket = socketFactory.createSocket(address.getAddress(), address.getPort());
-    this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8));
   }
 
   @Override
@@ -138,25 +141,27 @@ final class DGraphiteSender implements GraphiteSender {
   @Override
   public void flush() throws IOException {
     writeMetrics();
-    if (writer != null) {
-      writer.flush();
-    }
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     try {
       flush();
-      if (writer != null) {
-        writer.close();
-      }
-    } catch (IOException ex) {
-      if (socket != null) {
-        socket.close();
-      }
+    } catch (IOException e) {
+      log.log(INFO, "Exception flushing metrics {0}", e);
     } finally {
-      this.socket = null;
-      this.writer = null;
+      closeSocket();
+    }
+  }
+
+  private void closeSocket() {
+    if (socket != null) {
+      try {
+        socket.close();
+      } catch (IOException e) {
+        log.log(INFO, "Exception trying to close socket {0}", e);
+      }
+      socket = null;
     }
   }
 
@@ -168,19 +173,33 @@ final class DGraphiteSender implements GraphiteSender {
   private void writeMetrics() throws IOException {
     if (!metrics.isEmpty()) {
       try {
-        byte[] payload = pickleMetrics(metrics);
-        byte[] header = ByteBuffer.allocate(4).putInt(payload.length).array();
-
-        OutputStream outputStream = socket.getOutputStream();
-        outputStream.write(header);
-        outputStream.write(payload);
-        outputStream.flush();
+        final byte[] payload = pickleMetrics(metrics);
+        final byte[] header = ByteBuffer.allocate(4).putInt(payload.length).array();
+        send(header, payload);
       } finally {
         // if there was an error, we might miss some data. for now, drop those on the floor and
         // try to keep going.
         metrics.clear();
       }
     }
+  }
+
+  private void send(byte[] header, byte[] payload) throws IOException {
+    try {
+      sendPayload(header, payload);
+    } catch (IOException e) {
+      log.log(WARNING, "Retry sending metrics due to {0}", e);
+      closeSocket();
+      this.socket = socketFactory.createSocket(address.getAddress(), address.getPort());
+      sendPayload(header, payload);
+    }
+  }
+
+  private void sendPayload(byte[] header, byte[] payload) throws IOException {
+    OutputStream outputStream = socket.getOutputStream();
+    outputStream.write(header);
+    outputStream.write(payload);
+    outputStream.flush();
   }
 
   /**
@@ -247,10 +266,11 @@ final class DGraphiteSender implements GraphiteSender {
     return WHITESPACE.matcher(string.trim()).replaceAll(DASH);
   }
 
-  static class MetricTuple {
-    long timestamp;
-    String value;
-    String[] names;
+  static final class MetricTuple {
+
+    final long timestamp;
+    final String value;
+    final String[] names;
 
     MetricTuple(long timestamp, String value, String... names) {
       this.timestamp = timestamp;
