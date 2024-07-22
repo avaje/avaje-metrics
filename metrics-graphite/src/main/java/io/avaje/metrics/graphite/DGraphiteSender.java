@@ -148,7 +148,7 @@ final class DGraphiteSender implements GraphiteSender {
     try {
       flush();
     } catch (IOException e) {
-      log.log(INFO, "Exception flushing metrics {0}", e);
+      log.log(INFO, "Exception flushing metrics", e);
     } finally {
       closeSocket();
     }
@@ -159,17 +159,12 @@ final class DGraphiteSender implements GraphiteSender {
       try {
         socket.close();
       } catch (IOException e) {
-        log.log(INFO, "Exception trying to close socket {0}", e);
+        log.log(INFO, "Exception trying to close socket", e);
       }
       socket = null;
     }
   }
 
-  /**
-   * 1. Run the pickler script to package all the pending metrics into a single message
-   * 2. Send the message to graphite
-   * 3. Clear out the list of metrics
-   */
   private void writeMetrics() throws IOException {
     if (!metrics.isEmpty()) {
       try {
@@ -177,8 +172,7 @@ final class DGraphiteSender implements GraphiteSender {
         final byte[] header = ByteBuffer.allocate(4).putInt(payload.length).array();
         send(header, payload);
       } finally {
-        // if there was an error, we might miss some data. for now, drop those on the floor and
-        // try to keep going.
+        // if there was an error we might drop some metrics
         metrics.clear();
       }
     }
@@ -188,7 +182,8 @@ final class DGraphiteSender implements GraphiteSender {
     try {
       sendPayload(header, payload);
     } catch (IOException e) {
-      log.log(WARNING, "Retry sending metrics due to {0}", e);
+      // perform a single retry with a new socket connection
+      log.log(WARNING, "Retry sending metrics due to " + e);
       closeSocket();
       this.socket = socketFactory.createSocket(address.getAddress(), address.getPort());
       sendPayload(header, payload);
