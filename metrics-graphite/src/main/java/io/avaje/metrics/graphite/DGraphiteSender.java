@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.INFO;
-import static java.lang.System.Logger.Level.WARNING;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -183,7 +182,7 @@ final class DGraphiteSender implements GraphiteSender {
       sendPayload(header, payload);
     } catch (IOException e) {
       // perform a single retry with a new socket connection
-      log.log(WARNING, "Retry sending metrics due to " + e);
+      log.log(INFO, "Retry sending metrics due to " + e);
       closeSocket();
       this.socket = socketFactory.createSocket(address.getAddress(), address.getPort());
       sendPayload(header, payload);
