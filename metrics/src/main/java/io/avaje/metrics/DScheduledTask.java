@@ -65,6 +65,9 @@ final class DScheduledTask implements ScheduledTask {
 
   @Override
   public boolean cancel(boolean mayInterruptIfRunning) {
+    if (backgroundTask == null) {
+      return false;
+    }
     return this.backgroundTask.cancel(mayInterruptIfRunning);
   }
 

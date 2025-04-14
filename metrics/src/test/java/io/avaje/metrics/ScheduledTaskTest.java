@@ -10,6 +10,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ScheduledTaskTest {
 
   @Test
+  void stopWithoutStart() {
+    ScheduledTask task = ScheduledTask.builder()
+      .schedule(1, 1, TimeUnit.MILLISECONDS)
+      .task(ScheduledTaskTest::hello)
+      .build();
+
+    task.cancel(true);
+  }
+
+  @Test
+  void waitWithoutStart() {
+    ScheduledTask task = ScheduledTask.builder()
+      .schedule(1, 1, TimeUnit.MILLISECONDS)
+      .task(ScheduledTaskTest::hello)
+      .build();
+
+    task.waitIfRunning(10, TimeUnit.SECONDS);
+  }
+
+  @Test
   void runIt() throws InterruptedException {
 
     ScheduledTask task = ScheduledTask.builder()

@@ -25,6 +25,7 @@ public interface ScheduledTask {
 
   /**
    * Cancel the scheduled task.
+   * @return true if the task was cancelled otherwise false
    */
   boolean cancel(boolean mayInterruptIfRunning);
 
