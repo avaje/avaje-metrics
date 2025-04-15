@@ -40,7 +40,7 @@ final class JvmGarbageCollection {
 
   private static final class Count implements LongSupplier {
 
-    final GarbageCollectorMXBean gcMXBean;
+    private final GarbageCollectorMXBean gcMXBean;
 
     Count(GarbageCollectorMXBean gcMXBean) {
       this.gcMXBean = gcMXBean;
@@ -54,7 +54,7 @@ final class JvmGarbageCollection {
 
   private static final class Time implements LongSupplier {
 
-    final GarbageCollectorMXBean gcMXBean;
+    private final GarbageCollectorMXBean gcMXBean;
 
     Time(GarbageCollectorMXBean gcMXBean) {
       this.gcMXBean = gcMXBean;
@@ -68,7 +68,7 @@ final class JvmGarbageCollection {
 
   private static final class TotalTime implements LongSupplier {
 
-    final GarbageCollectorMXBean[] gcMXBeans;
+    private final GarbageCollectorMXBean[] gcMXBeans;
 
     TotalTime(GarbageCollectorMXBean[] gcMXBeans) {
       this.gcMXBeans = gcMXBeans;

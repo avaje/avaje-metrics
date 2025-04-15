@@ -15,7 +15,7 @@ class JvmMemoryMetricGroupTest {
   void testCreateHeapGroup() {
 
     DefaultMetricProvider registry = new DefaultMetricProvider();
-    JvmMemory.createHeapGroup(registry, true);
+    JvmMemory.createHeapGroup(registry, true, true);
 
     List<Metric> gaugeMetrics = new ArrayList<>(registry.metrics());
 
@@ -32,7 +32,7 @@ class JvmMemoryMetricGroupTest {
   void testCreateNonHeapGroup() {
 
     DefaultMetricProvider registry = new DefaultMetricProvider();
-    JvmMemory.createNonHeapGroup(registry, true);
+    JvmMemory.createNonHeapGroup(registry, true, true);
     List<Metric> gaugeMetrics = new ArrayList<>(registry.metrics());
 
     assertThat(gaugeMetrics.size()).isGreaterThan(1);

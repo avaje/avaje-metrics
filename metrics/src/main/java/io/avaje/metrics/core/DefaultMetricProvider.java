@@ -129,7 +129,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    JvmCGroupCpu.createGauges(this, reportChangesOnly);
+    JvmCGroupCpu.createGauges(this, reportChangesOnly, withDetails);
     JvmCGroupMemory.createGauges(this, reportChangesOnly);
     return this;
   }
@@ -158,8 +158,8 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerJvmMemoryMetrics() {
-    JvmMemory.createHeapGroup(this, reportChangesOnly);
-    JvmMemory.createNonHeapGroup(this, reportChangesOnly);
+    JvmMemory.createHeapGroup(this, reportChangesOnly, withDetails);
+    JvmMemory.createNonHeapGroup(this, reportChangesOnly, withDetails);
     return this;
   }
 

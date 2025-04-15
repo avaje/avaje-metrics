@@ -11,18 +11,18 @@ import static java.math.BigDecimal.valueOf;
 
 final class JvmCGroupCpu {
 
-  static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
-    new JvmCGroupCpu().create(registry, reportChangesOnly);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+    new JvmCGroupCpu().create(registry, reportChangesOnly, withDetails);
   }
 
-  void create(MetricRegistry registry, boolean reportChangesOnly) {
+  void create(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
      FileLines cpu = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpuacct.usage");
     if (cpu.exists()) {
       createCGroupCpuUsage(registry, cpu);
     }
     FileLines cpuStat = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.stat");
     if (cpuStat.exists()) {
-      createCGroupCpuThrottle(registry, cpuStat, reportChangesOnly);
+      createCGroupCpuThrottle(registry, cpuStat, reportChangesOnly, withDetails);
     }
     FileLines cpuShares = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.shares");
     if (cpuStat.exists()) {
@@ -72,12 +72,14 @@ final class JvmCGroupCpu {
     registry.gauge("jvm.cgroup.cpu.usageMicros", GaugeLong.incrementing(new CpuUsageMicros(cpu)));
   }
 
-  private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly) {
-    CpuStatsSource source = new CpuStatsSource(cpuStat);
+  private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly, boolean withDetails) {
+    final var source = new CpuStatsSource(cpuStat);
     registry.register(gauge("jvm.cgroup.cpu.throttleMicros", source::getThrottleMicros, reportChangesOnly));
-    registry.register(gauge("jvm.cgroup.cpu.numPeriod", source::getNumPeriod, reportChangesOnly));
-    registry.register(gauge("jvm.cgroup.cpu.numThrottle", source::getNumThrottle, reportChangesOnly));
-    registry.register(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
+    if (withDetails) {
+      registry.register(gauge("jvm.cgroup.cpu.numPeriod", source::getNumPeriod, reportChangesOnly));
+      registry.register(gauge("jvm.cgroup.cpu.numThrottle", source::getNumThrottle, reportChangesOnly));
+      registry.register(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
+    }
   }
 
   private GaugeLong gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {
