@@ -12,6 +12,6 @@ module io.avaje.metrics {
   requires static java.management;
 
   uses io.avaje.metrics.spi.SpiMetricBuilder;
-  uses SpiMetricProvider;
-  provides SpiMetricProvider with DefaultMetricProvider;
+  uses io.avaje.metrics.spi.SpiMetricProvider;
+  provides io.avaje.metrics.spi.SpiMetricProvider with DefaultMetricProvider;
 }
