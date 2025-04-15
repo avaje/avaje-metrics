@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  */
 final class NestedContext {
 
-  private static final System.Logger log = System.getLogger("io.avaje.metrics");
+  private static final System.Logger log = AppLog.getLogger("io.avaje.metrics");
 
   private static final long thresholdNanos = 1000 * getThresholdMicros();
 
