@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.*;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.DecimalFormat;
@@ -114,7 +115,7 @@ final class JsonWriter implements Metric.Visitor {
 
   private void writeSummary(Meter.Stats valueStats) throws IOException {
     // valueStats == null when BucketTimedMetric and the bucket is empty
-    long count = (valueStats == null) ? 0 : valueStats.count();
+    long count = valueStats.count();
     writeKeyNumber("count", count);
     if (count != 0) {
       buffer.append(",");

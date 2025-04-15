@@ -4,6 +4,7 @@ import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.MetricRegistry;
 
 import java.math.RoundingMode;
+import java.util.Optional;
 import java.util.function.LongSupplier;
 
 import static java.math.BigDecimal.valueOf;
@@ -30,18 +31,18 @@ final class JvmCGroupCpu {
     FileLines cpuQuota = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_quota_us");
     FileLines period = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_period_us");
     if (cpuQuota.exists() && period.exists()) {
-      registry.register(createCGroupCpuLimit(cpuQuota, period));
+      createCGroupCpuLimit(cpuQuota, period).ifPresent(registry::register);
     }
   }
 
-  GaugeLong createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
+  Optional<GaugeLong> createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
     final long cpuQuotaVal = cpuQuota.single();
     long quotaPeriod = period.single();
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return DGaugeLong.once("jvm.cgroup.cpu.limit", new FixedGauge(limit));
+      return Optional.of(DGaugeLong.once("jvm.cgroup.cpu.limit", new FixedGauge(limit)));
     }
-    return null;
+    return Optional.empty();
   }
 
   GaugeLong createCGroupCpuRequests(FileLines cpuShares) {

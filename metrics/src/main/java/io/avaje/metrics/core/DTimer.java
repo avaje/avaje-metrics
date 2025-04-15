@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
 final class DTimer implements Timer {
 
   private final String name;
-  private final String bucketRange;
+  private final @Nullable String bucketRange;
   private final ValueCounter successCounter;
   private final ValueCounter errorCounter;
 
@@ -38,7 +39,7 @@ final class DTimer implements Timer {
   }
 
   @Override
-  public String bucketRange() {
+  public @Nullable String bucketRange() {
     return bucketRange;
   }
 

@@ -1,11 +1,12 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
+import org.jspecify.annotations.Nullable;
 
 abstract class BaseReportName {
 
   final String name;
-  String reportName;
+  @Nullable String reportName;
 
   BaseReportName(String name) {
     this.name = name;

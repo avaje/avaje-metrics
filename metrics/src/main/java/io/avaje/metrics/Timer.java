@@ -1,5 +1,7 @@
 package io.avaje.metrics;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.function.Supplier;
 
 /**
@@ -122,7 +124,7 @@ public interface Timer extends Metric {
   /**
    * Return the bucket range or empty string if not a bucket.
    */
-  String bucketRange();
+  @Nullable String bucketRange();
 
   /**
    * Statistics collected by Timer.
@@ -132,7 +134,7 @@ public interface Timer extends Metric {
     /**
      * Return the bucket range for these statistics.
      */
-    default String bucketRange() {
+    default @Nullable String bucketRange() {
       return null;
     }
   }

@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -27,7 +28,7 @@ final class DBucketTimer implements Timer {
   }
 
   @Override
-  public String bucketRange() {
+  public @Nullable String bucketRange() {
     return null;
   }
 
