@@ -53,21 +53,21 @@ final class JvmMemory {
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  static void createHeapGroup(MetricRegistry registry, boolean reportChangesOnly) {
+  static void createHeapGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    createGroup(registry, "jvm.memory.heap", source, reportChangesOnly);
+    createGroup(registry, "jvm.memory.heap", source, reportChangesOnly, withDetails);
   }
 
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  static void createNonHeapGroup(MetricRegistry registry, boolean reportChangesOnly) {
+  static void createNonHeapGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    createGroup(registry, "jvm.memory.nonheap", source, reportChangesOnly);
+    createGroup(registry, "jvm.memory.nonheap", source, reportChangesOnly, withDetails);
   }
 
-  private static void createGroup(MetricRegistry registry, String baseName, MemoryUsageSource source, boolean reportChangesOnly) {
-    new MemUsageGauages(source, baseName).createMetric(registry, reportChangesOnly);
+  private static void createGroup(MetricRegistry registry, String baseName, MemoryUsageSource source, boolean reportChangesOnly, boolean withDetails) {
+    new MemUsageGauages(source, baseName).createMetric(registry, reportChangesOnly, withDetails);
   }
 
   static final class MemUsageGauages {
@@ -79,8 +79,10 @@ final class JvmMemory {
       this.baseName = baseName;
     }
 
-    void createMetric(MetricRegistry registry, boolean reportChangesOnly) {
-      registry.register(DGaugeLong.once(name("init"), new Init(source)));
+    void createMetric(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+      if (withDetails) {
+        registry.register(DGaugeLong.once(name("init"), new Init(source)));
+      }
       registry.register(DGaugeLong.of(name("used"), new Used(source), reportChangesOnly));
       registry.register(DGaugeLong.of(name("committed"), new Committed(source), reportChangesOnly));
       // JRE 8 is not reporting max for non-heap memory
@@ -88,7 +90,9 @@ final class JvmMemory {
       if (hasMax) {
         // also collect Max and Percentage
         registry.register(DGaugeLong.once(name("max"), new Max(source)));
-        registry.register(DGaugeLong.of(name("pct"), new Pct(source), reportChangesOnly));
+        if (withDetails) {
+          registry.register(DGaugeLong.of(name("pct"), new Pct(source), reportChangesOnly));
+        }
       }
     }
 
@@ -97,15 +101,15 @@ final class JvmMemory {
     }
 
     private abstract static class Base {
-      MemoryUsageSource source;
+      final MemoryUsageSource source;
 
-      Base(MemoryUsageSource source) {
+      private Base(MemoryUsageSource source) {
         this.source = source;
       }
     }
 
     private static final class Init extends Base implements LongSupplier {
-      Init(MemoryUsageSource source) {
+      private Init(MemoryUsageSource source) {
         super(source);
       }
 
@@ -116,7 +120,7 @@ final class JvmMemory {
     }
 
     private static final class Used extends Base implements LongSupplier {
-      Used(MemoryUsageSource source) {
+      private Used(MemoryUsageSource source) {
         super(source);
       }
 
@@ -127,7 +131,7 @@ final class JvmMemory {
     }
 
     private static final class Committed extends Base implements LongSupplier {
-      Committed(MemoryUsageSource source) {
+      private Committed(MemoryUsageSource source) {
         super(source);
       }
 
@@ -138,7 +142,7 @@ final class JvmMemory {
     }
 
     private static class Max extends Base implements LongSupplier {
-      Max(MemoryUsageSource source) {
+      private Max(MemoryUsageSource source) {
         super(source);
       }
 
@@ -149,7 +153,7 @@ final class JvmMemory {
     }
 
     private static class Pct extends Base implements LongSupplier {
-      Pct(MemoryUsageSource source) {
+      private Pct(MemoryUsageSource source) {
         super(source);
       }
 
