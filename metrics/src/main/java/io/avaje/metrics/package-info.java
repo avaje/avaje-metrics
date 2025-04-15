@@ -11,4 +11,7 @@
  *
  * @see io.avaje.metrics.Metrics
  */
+@NullMarked
 package io.avaje.metrics;
+
+import org.jspecify.annotations.NullMarked;

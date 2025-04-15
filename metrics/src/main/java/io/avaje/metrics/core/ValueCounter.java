@@ -3,6 +3,7 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.stats.TimerStats;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.LongAdder;
  */
 final class ValueCounter extends BaseReportName {
 
-  private final String bucketRange;
+  private final @Nullable String bucketRange;
   private final LongAdder count = new LongAdder();
   private final LongAdder total = new LongAdder();
   private final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
@@ -48,7 +49,7 @@ final class ValueCounter extends BaseReportName {
     max.accumulate(value);
   }
 
-  Timer.Stats collect(Metric.Visitor collector) {
+  Timer.@Nullable Stats collect(Metric.Visitor collector) {
     final long count = this.count.sumThenReset();
     if (count == 0) {
       return null;

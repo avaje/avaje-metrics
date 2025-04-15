@@ -1,5 +1,8 @@
 package io.avaje.metrics.core;
 
+import io.avaje.applog.AppLog;
+import org.jspecify.annotations.Nullable;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,7 +15,7 @@ import java.util.function.Predicate;
 
 final class FileLines {
 
-  private static final System.Logger log = System.getLogger("io.avaje.metrics");
+  private static final System.Logger log = AppLog.getLogger("io.avaje.metrics");
 
   private final File file;
 
@@ -65,7 +68,7 @@ final class FileLines {
     }
   }
 
-  private String readLine() {
+  private @Nullable String readLine() {
     try {
       try (LineNumberReader lineReader = new LineNumberReader(new FileReader(file))) {
         return lineReader.readLine();

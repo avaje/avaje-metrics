@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.MetricRegistry;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.management.ManagementFactory;
 
@@ -11,7 +12,7 @@ final class JvmProcessMemory {
 
   private static final long TO_MEGABYTES = 1024L;
 
-  private final String pid;
+  private final @Nullable String pid;
 
   /**
    * Return the list of OS process memory metrics.
@@ -30,7 +31,7 @@ final class JvmProcessMemory {
   /**
    * Return the PID (when running on linux).
    */
-  private String linuxPid() {
+  private @Nullable String linuxPid() {
     String os = System.getProperty("os.name").toLowerCase();
     if (os.contains("linux")) {
       String[] parts = ManagementFactory.getRuntimeMXBean().getName().split("@");
