@@ -65,7 +65,7 @@ final class JvmCGroupMemory {
   }
 
   GaugeLong usage(MemSource source, boolean reportChangesOnly) {
-    return DGaugeLong.of("jvm.cgroup.memory.usageMb", source::usageMb, reportChangesOnly);
+    return DGaugeLong.of("jvm.cgroup.memory.usage", source::usageMb, reportChangesOnly);
   }
 
   GaugeLong pctUsage(MemSource source, boolean reportChangesOnly) {
