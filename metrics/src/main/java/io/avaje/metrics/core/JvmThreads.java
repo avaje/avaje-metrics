@@ -17,11 +17,11 @@ final class JvmThreads {
 
     private final ThreadMXBean threadMXBean;
 
-    ThreadGauges(ThreadMXBean threadMXBean) {
+    private ThreadGauges(ThreadMXBean threadMXBean) {
       this.threadMXBean = threadMXBean;
     }
 
-    void createMetrics(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+    private void createMetrics(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
       registry.register(DGaugeLong.of("jvm.threads.current", new Count(threadMXBean), reportChangesOnly));
       if (withDetails) {
         registry.register(DGaugeLong.of("jvm.threads.peak", new Peak(threadMXBean), reportChangesOnly));
@@ -29,10 +29,10 @@ final class JvmThreads {
       }
     }
 
-    static final class Count implements LongSupplier {
+    private static final class Count implements LongSupplier {
       private final ThreadMXBean threadMXBean;
 
-      Count(ThreadMXBean threadMXBean) {
+      private Count(ThreadMXBean threadMXBean) {
         this.threadMXBean = threadMXBean;
       }
 
@@ -42,10 +42,10 @@ final class JvmThreads {
       }
     }
 
-    static final class Peak implements LongSupplier {
+    private static final class Peak implements LongSupplier {
       private final ThreadMXBean threadMXBean;
 
-      Peak(ThreadMXBean threadMXBean) {
+      private Peak(ThreadMXBean threadMXBean) {
         this.threadMXBean = threadMXBean;
       }
 
@@ -58,10 +58,10 @@ final class JvmThreads {
       }
     }
 
-    static final class Daemon implements LongSupplier {
+    private static final class Daemon implements LongSupplier {
       private final ThreadMXBean threadMXBean;
 
-      Daemon(ThreadMXBean threadMXBean) {
+      private Daemon(ThreadMXBean threadMXBean) {
         this.threadMXBean = threadMXBean;
       }
 

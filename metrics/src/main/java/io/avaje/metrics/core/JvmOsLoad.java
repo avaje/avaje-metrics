@@ -24,7 +24,7 @@ final class JvmOsLoad {
 
     private final OperatingSystemMXBean osMXbean;
 
-    OsLoadGauge(OperatingSystemMXBean osMXbean) {
+    private OsLoadGauge(OperatingSystemMXBean osMXbean) {
       this.osMXbean = osMXbean;
     }
 

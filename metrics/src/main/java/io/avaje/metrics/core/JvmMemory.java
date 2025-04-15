@@ -28,6 +28,7 @@ final class JvmMemory {
       this.memoryMXBean = memoryMXBean;
     }
 
+    @Override
     public MemoryUsage usage() {
       return memoryMXBean.getHeapMemoryUsage();
     }
@@ -43,6 +44,7 @@ final class JvmMemory {
       this.memoryMXBean = memoryMXBean;
     }
 
+    @Override
     public MemoryUsage usage() {
       return memoryMXBean.getNonHeapMemoryUsage();
     }
