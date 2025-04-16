@@ -20,7 +20,6 @@ final class DCounter extends BaseReportName implements Counter {
    * <p>
    * The rateUnit should be chosen to 'scale' the statistics in a reasonable
    * manor - typically events per hour, minute or second.
-   * </p>
    */
   DCounter(String name) {
     super(name);

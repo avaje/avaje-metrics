@@ -4,24 +4,25 @@ import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.MetricRegistry;
 
 import java.math.RoundingMode;
+import java.util.Optional;
 import java.util.function.LongSupplier;
 
 import static java.math.BigDecimal.valueOf;
 
 final class JvmCGroupCpu {
 
-  static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
-    new JvmCGroupCpu().create(registry, reportChangesOnly);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+    new JvmCGroupCpu().create(registry, reportChangesOnly, withDetails);
   }
 
-  void create(MetricRegistry registry, boolean reportChangesOnly) {
+  void create(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
      FileLines cpu = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpuacct.usage");
     if (cpu.exists()) {
       createCGroupCpuUsage(registry, cpu);
     }
     FileLines cpuStat = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.stat");
     if (cpuStat.exists()) {
-      createCGroupCpuThrottle(registry, cpuStat, reportChangesOnly);
+      createCGroupCpuThrottle(registry, cpuStat, reportChangesOnly, withDetails);
     }
     FileLines cpuShares = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.shares");
     if (cpuStat.exists()) {
@@ -30,18 +31,18 @@ final class JvmCGroupCpu {
     FileLines cpuQuota = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_quota_us");
     FileLines period = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_period_us");
     if (cpuQuota.exists() && period.exists()) {
-      registry.register(createCGroupCpuLimit(cpuQuota, period));
+      createCGroupCpuLimit(cpuQuota, period).ifPresent(registry::register);
     }
   }
 
-  GaugeLong createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
+  Optional<GaugeLong> createCGroupCpuLimit(FileLines cpuQuota, FileLines period) {
     final long cpuQuotaVal = cpuQuota.single();
     long quotaPeriod = period.single();
     if (cpuQuotaVal > 0 && quotaPeriod > 0) {
       final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return DGaugeLong.once("jvm.cgroup.cpu.limit", new FixedGauge(limit));
+      return Optional.of(DGaugeLong.once("jvm.cgroup.cpu.limit", new FixedGauge(limit)));
     }
-    return null;
+    return Optional.empty();
   }
 
   GaugeLong createCGroupCpuRequests(FileLines cpuShares) {
@@ -71,12 +72,14 @@ final class JvmCGroupCpu {
     registry.gauge("jvm.cgroup.cpu.usageMicros", GaugeLong.incrementing(new CpuUsageMicros(cpu)));
   }
 
-  private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly) {
-    CpuStatsSource source = new CpuStatsSource(cpuStat);
+  private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly, boolean withDetails) {
+    final var source = new CpuStatsSource(cpuStat);
     registry.register(gauge("jvm.cgroup.cpu.throttleMicros", source::getThrottleMicros, reportChangesOnly));
-    registry.register(gauge("jvm.cgroup.cpu.numPeriod", source::getNumPeriod, reportChangesOnly));
-    registry.register(gauge("jvm.cgroup.cpu.numThrottle", source::getNumThrottle, reportChangesOnly));
-    registry.register(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
+    if (withDetails) {
+      registry.register(gauge("jvm.cgroup.cpu.numPeriod", source::getNumPeriod, reportChangesOnly));
+      registry.register(gauge("jvm.cgroup.cpu.numThrottle", source::getNumThrottle, reportChangesOnly));
+      registry.register(gauge("jvm.cgroup.cpu.pctThrottle", source::getPctThrottle, reportChangesOnly));
+    }
   }
 
   private GaugeLong gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {

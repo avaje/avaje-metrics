@@ -4,8 +4,6 @@ import io.avaje.metrics.*;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricProvider;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -131,7 +129,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    JvmCGroupCpu.createGauges(this, reportChangesOnly);
+    JvmCGroupCpu.createGauges(this, reportChangesOnly, withDetails);
     JvmCGroupMemory.createGauges(this, reportChangesOnly);
     return this;
   }
@@ -160,8 +158,8 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerJvmMemoryMetrics() {
-    JvmMemory.createHeapGroup(this, reportChangesOnly);
-    JvmMemory.createNonHeapGroup(this, reportChangesOnly);
+    JvmMemory.createHeapGroup(this, reportChangesOnly, withDetails);
+    JvmMemory.createNonHeapGroup(this, reportChangesOnly, withDetails);
     return this;
   }
 

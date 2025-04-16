@@ -25,7 +25,7 @@ final class DTimerEvent implements Timer.Event {
 
   @Override
   public String toString() {
-    return metric.toString() + " durationMillis:" + duration();
+    return metric + " durationMillis:" + duration();
   }
 
   /**
