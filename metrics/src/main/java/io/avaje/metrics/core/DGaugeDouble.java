@@ -12,19 +12,24 @@ final class DGaugeDouble extends BaseReportName implements GaugeDouble {
 
   private final DoubleSupplier gauge;
 
-  DGaugeDouble(String name, DoubleSupplier gauge) {
-    super(name);
+  DGaugeDouble(ID id, DoubleSupplier gauge) {
+    super(id);
     this.gauge = gauge;
   }
 
   @Override
+  public ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   @Override
   public String toString() {
-    return name + ":" + value();
+    return id + ":" + value();
   }
 
   /**
@@ -39,8 +44,8 @@ final class DGaugeDouble extends BaseReportName implements GaugeDouble {
   public void collect(Visitor collector) {
     final double value = gauge.getAsDouble();
     if (Double.compare(value, 0.0d) != 0) {
-      final String name = reportName != null ? reportName : reportName(collector);
-      collector.visit(new GaugeDoubleStats(name, value));
+      final ID reportId = reportId(collector);
+      collector.visit(new GaugeDoubleStats(reportId, value));
     }
   }
 

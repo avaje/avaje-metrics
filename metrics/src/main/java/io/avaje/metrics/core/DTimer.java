@@ -14,28 +14,28 @@ import java.util.function.Supplier;
  */
 final class DTimer implements Timer {
 
-  private final String name;
+  private final ID id;
   private final @Nullable String bucketRange;
   private final ValueCounter successCounter;
   private final ValueCounter errorCounter;
 
-  DTimer(String name) {
-    this.name = name;
+  DTimer(ID id) {
+    this.id = id;
     this.bucketRange = null;
-    this.successCounter = new ValueCounter(name);
-    this.errorCounter = new ValueCounter(name + ".error");
+    this.successCounter = new ValueCounter(id);
+    this.errorCounter = new ValueCounter(id.suffix(".error"));
   }
 
-  DTimer(String name, String bucketRange) {
-    this.name = name;
+  DTimer(ID id, String bucketRange) {
+    this.id = id;
     this.bucketRange = bucketRange;
-    this.successCounter = new ValueCounter(name, bucketRange);
-    this.errorCounter = new ValueCounter(name + ".error");
+    this.successCounter = new ValueCounter(id, bucketRange);
+    this.errorCounter = new ValueCounter(id.suffix(".error"));
   }
 
   @Override
   public String toString() {
-    return name + ":" + successCounter + ((errorCounter.count() == 0) ? "" : " error:" + errorCounter);
+    return id + ":" + successCounter + ((errorCounter.count() == 0) ? "" : " error:" + errorCounter);
   }
 
   @Override
@@ -65,8 +65,13 @@ final class DTimer implements Timer {
     }
   }
 
+  @Override
+  public ID id() {
+    return id;
+  }
+
   public String name() {
-    return name;
+    return id.name();
   }
 
   @Override

@@ -8,14 +8,14 @@ import io.avaje.metrics.Metric;
  */
 public final class CounterStats implements Counter.Stats {
 
-  final String name;
+  final Metric.ID id;
   final long count;
 
   /**
    * Construct for Counter which doesn't collect time or high watermark.
    */
-  public CounterStats(String name, long count) {
-    this.name = name;
+  public CounterStats(Metric.ID id, long count) {
+    this.id = id;
     this.count = count;
   }
 
@@ -30,8 +30,13 @@ public final class CounterStats implements Counter.Stats {
   }
 
   @Override
+  public Metric.ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   /**

@@ -18,7 +18,7 @@ import java.util.function.LongSupplier;
  */
 public final class DefaultMetricProvider implements SpiMetricProvider {
 
-  private final ConcurrentHashMap<String, Metric> metricsCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Metric.ID, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimerFactory;
   private final SpiMetricBuilder.Factory<Timer> timerFactory;
   private final SpiMetricBuilder.Factory<Counter> counterFactory;
@@ -175,62 +175,93 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public Timer timer(String name) {
-    return (Timer) metric(name, timerFactory);
+    return metric(Metric.ID.of(name), timerFactory);
+  }
+
+  @Override
+  public Timer timer(String name, Tags tags) {
+    return metric(Metric.ID.of(name, tags), timerFactory);
   }
 
   @Override
   public Timer timer(String name, int... bucketRanges) {
-    return (Timer) metric(name, bucketTimerFactory, bucketRanges);
+    return metric(Metric.ID.of(name), bucketTimerFactory, bucketRanges);
+  }
+
+  @Override
+  public Timer timer(String name, Tags tags, int... bucketRanges) {
+    return metric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
   }
 
   @Override
   public Counter counter(String name) {
-    return (Counter) metric(name, counterFactory);
+    return metric(Metric.ID.of(name), counterFactory);
+  }
+
+  @Override
+  public Counter counter(String name, Tags tags) {
+    return metric(Metric.ID.of(name, tags), counterFactory);
   }
 
   @Override
   public Meter meter(String name) {
-    return (Meter) metric(name, meterFactory);
+    return metric(Metric.ID.of(name), meterFactory);
+  }
+
+  @Override
+  public Meter meter(String name, Tags tags) {
+    return metric(Metric.ID.of(name, tags), meterFactory);
   }
 
   @Override
   public GaugeDouble gauge(String name, DoubleSupplier supplier) {
-    return put(name, new DGaugeDouble(name, supplier));
+    return put(new DGaugeDouble(Metric.ID.of(name), supplier));
+  }
+
+  @Override
+  public GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier) {
+    return put(new DGaugeDouble(Metric.ID.of(name, tags), supplier));
   }
 
   @Override
   public GaugeLong gauge(String name, LongSupplier gauge) {
-    return put(name, DGaugeLong.of(name, gauge));
+    return put(DGaugeLong.of(Metric.ID.of(name), gauge));
   }
 
-  private <T extends Metric> T put(String name, T metric) {
-    metricsCache.put(name, metric);
+  @Override
+  public GaugeLong gauge(String name, Tags tags, LongSupplier gauge) {
+    return put(DGaugeLong.of(Metric.ID.of(name, tags), gauge));
+  }
+
+  private <T extends Metric> T put(T metric) {
+    metricsCache.put(metric.id(), metric);
     return metric;
   }
 
-  private Metric metric(String name, SpiMetricBuilder.Factory<?> factory) {
-    return metric(name, factory, null);
+  private <T extends Metric> T metric(Metric.ID id, SpiMetricBuilder.Factory<?> factory) {
+    return metric(id, factory, null);
   }
 
-  private Metric metric(String name, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+  @SuppressWarnings("unchecked")
+  private <T extends Metric> T metric(Metric.ID id, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
     // try lock free get first
-    Metric metric = metricsCache.get(name);
+    Metric metric = metricsCache.get(id);
     if (metric == null) {
       synchronized (monitor) {
         // use synchronized block
-        metric = metricsCache.get(name);
+        metric = metricsCache.get(id);
         if (metric == null) {
-          metric = factory.createMetric(name, bucketRanges);
-          metricsCache.put(name, metric);
+          metric = factory.createMetric(id, bucketRanges);
+          metricsCache.put(id, metric);
         }
       }
     }
-    return metric;
+    return (T) metric;
   }
 
   @Override
   public void register(Metric metric) {
-    metricsCache.put(metric.name(), metric);
+    metricsCache.put(metric.id(), metric);
   }
 
   @Override

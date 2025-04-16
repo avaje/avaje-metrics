@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.Metric;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,7 +9,7 @@ class CounterTest {
 
   @Test
   void test() {
-    DCounter counter = new DCounter(null);
+    DCounter counter = new DCounter(Metric.ID.of("foo"));
     assertEquals(0, counter.count());
 
     counter.inc();

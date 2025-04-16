@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class TimerStats implements Timer.Stats {
 
-  final String name;
+  final Metric.ID id;
   final @Nullable String bucketRange;
   final long count;
   final long total;
@@ -18,15 +18,15 @@ public final class TimerStats implements Timer.Stats {
   /**
    * Create with no bucketRange.
    */
-  public TimerStats(String name, long count, long total, long max) {
-    this(name, null, count, total, max);
+  public TimerStats(Metric.ID id, long count, long total, long max) {
+    this(id, null, count, total, max);
   }
 
   /**
    * Create with all parameters including bucketRange.
    */
-  public TimerStats(String name, @Nullable  String bucketRange, long count, long total, long max) {
-    this.name = name;
+  public TimerStats(Metric.ID id, @Nullable String bucketRange, long count, long total, long max) {
+    this.id = id;
     this.bucketRange = bucketRange;
     this.count = count;
     this.total = total;
@@ -51,8 +51,13 @@ public final class TimerStats implements Timer.Stats {
   }
 
   @Override
+  public Metric.ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   /**

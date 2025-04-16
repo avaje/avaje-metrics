@@ -44,7 +44,7 @@ final class JsonWriter implements Metric.Visitor {
   }
 
   private void writeMetricStart(Metric.Statistics metric) throws IOException {
-    writeMetricStart(metric.name());
+    writeMetricStart(metric.id().name());
   }
 
   private void writeMetricStart(String name) throws IOException {
@@ -54,7 +54,21 @@ final class JsonWriter implements Metric.Visitor {
     buffer.append(',');
   }
 
-  private void writeMetricEnd() throws IOException {
+  private void writeMetricEnd(Metric.Statistics metric) throws IOException {
+    Tags tags = metric.id().tags();
+    if (!tags.isEmpty()) {
+      buffer.append(',');
+      writeKey("tags");
+      buffer.append('[');
+      String[] tagVals = tags.array();
+      for (int i = 0; i < tagVals.length; i++) {
+        if (i > 0) {
+          buffer.append(',');
+        }
+        writeValue(tagVals[i]);
+      }
+      buffer.append(']');
+    }
     buffer.append('}');
   }
 
@@ -63,7 +77,7 @@ final class JsonWriter implements Metric.Visitor {
     try {
       writeMetricStart(metric.name());
       writeSummary(metric);
-      writeMetricEnd();
+      writeMetricEnd(metric);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -74,7 +88,7 @@ final class JsonWriter implements Metric.Visitor {
     try {
       writeMetricStart(metric);
       writeSummary(metric);
-      writeMetricEnd();
+      writeMetricEnd(metric);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -85,7 +99,7 @@ final class JsonWriter implements Metric.Visitor {
     try {
       writeMetricStart(metric);
       writeKeyNumber("value", metric.count());
-      writeMetricEnd();
+      writeMetricEnd(metric);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -96,7 +110,7 @@ final class JsonWriter implements Metric.Visitor {
     try {
       writeMetricStart(metric);
       writeKeyNumber("value", format(metric.value()));
-      writeMetricEnd();
+      writeMetricEnd(metric);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -107,7 +121,7 @@ final class JsonWriter implements Metric.Visitor {
     try {
       writeMetricStart(metric);
       writeKeyNumber("value", metric.value());
-      writeMetricEnd();
+      writeMetricEnd(metric);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

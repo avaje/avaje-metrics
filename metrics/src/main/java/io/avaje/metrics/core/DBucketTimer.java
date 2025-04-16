@@ -10,13 +10,13 @@ import java.util.function.Supplier;
  */
 final class DBucketTimer implements Timer {
 
-  private final String metricName;
+  private final ID id;
   final int[] bucketRanges;
   final Timer[] buckets;
   private final int lastBucketIndex;
 
-  DBucketTimer(String metricName, int[] bucketRanges, Timer[] buckets) {
-    this.metricName = metricName;
+  DBucketTimer(ID id, int[] bucketRanges, Timer[] buckets) {
+    this.id = id;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
     this.lastBucketIndex = bucketRanges.length;
@@ -24,7 +24,7 @@ final class DBucketTimer implements Timer {
 
   @Override
   public String toString() {
-    return metricName;
+    return id.toString();
   }
 
   @Override
@@ -102,8 +102,13 @@ final class DBucketTimer implements Timer {
   }
 
   @Override
+  public ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return metricName;
+    return id.name();
   }
 
   @Override

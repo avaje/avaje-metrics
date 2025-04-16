@@ -5,16 +5,21 @@ import org.jspecify.annotations.Nullable;
 
 abstract class BaseReportName {
 
-  final String name;
-  @Nullable String reportName;
+  final Metric.ID id;
+  volatile Metric.@Nullable ID reportId;
 
-  BaseReportName(String name) {
-    this.name = name;
+  BaseReportName(Metric.ID id) {
+    this.id = id;
   }
 
-  final String reportName(Metric.Visitor collector) {
-    final String tmp = collector.namingConvention().apply(name);
-    this.reportName = tmp;
+  final Metric.ID reportId(Metric.Visitor collector) {
+    final var id = reportId;
+    return id != null ? id : useNamingConvention(collector);
+  }
+
+  final Metric.ID useNamingConvention(Metric.Visitor collector) {
+    final Metric.ID tmp = id.withName(collector.namingConvention().apply(id.name()));
+    this.reportId = tmp;
     return tmp;
   }
 

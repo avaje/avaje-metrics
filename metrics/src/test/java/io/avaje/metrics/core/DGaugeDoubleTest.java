@@ -2,6 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.NamingMatch;
+import io.avaje.metrics.Tags;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -21,7 +22,8 @@ class DGaugeDoubleTest {
   @Test
   void notSkip_when_unchanged() {
     MyGauge myGauge = new MyGauge();
-    DGaugeDouble metric = new DGaugeDouble(DGaugeLongTest.MyGauge.class.getName() + ".test", myGauge);
+    Metric.ID id = Metric.ID.of(MyGauge.class.getName() + ".test");
+    DGaugeDouble metric = new DGaugeDouble(id, myGauge);
 
     assertEquals(0.0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -51,15 +53,18 @@ class DGaugeDoubleTest {
   @Test
   void test() {
 
+    Metric.ID id = Metric.ID.of(MyGauge.class.getName() + ".test", Tags.of("k", "v"));
     MyGauge myGauge = new MyGauge();
-    DGaugeDouble metric = new DGaugeDouble(MyGauge.class.getName() + ".test", myGauge);
+    DGaugeDouble metric = new DGaugeDouble(id, myGauge);
 
     assertEquals(0d, metric.value());
     assertThat(collect(metric)).isEmpty();
 
     myGauge.value = 100d;
     assertEquals(100d, metric.value());
-    assertThat(collect(metric)).hasSize(1);
+    List<Metric.Statistics> collect = collect(metric);
+    assertThat(collect).hasSize(1);
+    assertThat(collect.get(0).id()).isEqualTo(id);
   }
 
   static class MyGauge implements DoubleSupplier {

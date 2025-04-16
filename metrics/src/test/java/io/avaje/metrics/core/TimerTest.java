@@ -16,6 +16,10 @@ class TimerTest {
 
     MetricRegistry registry = Metrics.createRegistry();
     Timer metric = registry.timer("org.test.mytimed");
+    Timer metric2 = registry.timer("org.test.mytimed", Tags.of("a", "b"));
+    Timer metric3 = registry.timer("myBucket", Tags.of("a", "b"), 400, 900);
+    assertThat(metric2).isNotSameAs(metric);
+    assertThat(metric3).isNotSameAs(metric);
 
     boolean useContext = false;//metric.isRequestTiming();
     long start = System.nanoTime();

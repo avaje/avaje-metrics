@@ -38,4 +38,43 @@ class CounterMetricTest {
     metric.collect(collector);
     return collector.list();
   }
+
+  @Test
+  void tags() {
+    MetricRegistry registry = Metrics.registry();
+    Counter counter0 = registry.counter("one", Tags.of("k", "v"));
+    Counter counter1 = registry.counter("one", Tags.of("k", "x"));
+    Counter counter2 = registry.counter("one");
+
+    assertThat(counter0).isNotSameAs(counter1);
+    assertThat(counter0).isNotSameAs(counter2);
+
+    counter0.inc();
+    counter1.inc();
+    counter1.inc();
+    counter2.inc();
+    counter2.inc();
+    counter2.inc();
+
+    List<Metric.Statistics> s0 = collect(counter0);
+    assertThat(s0).hasSize(1);
+    assertThat(s0.get(0).id().tags()).isEqualTo(Tags.of("k", "v"));
+    assertThat(counter0.count()).isEqualTo(0);
+    assertThat(counter1.count()).isEqualTo(2);
+    assertThat(counter2.count()).isEqualTo(3);
+
+    List<Metric.Statistics> s1 = collect(counter1);
+    assertThat(s1).hasSize(1);
+    assertThat(s1.get(0).id().tags()).isEqualTo(Tags.of("k", "x"));
+    assertThat(counter0.count()).isEqualTo(0);
+    assertThat(counter1.count()).isEqualTo(0);
+    assertThat(counter2.count()).isEqualTo(3);
+
+    List<Metric.Statistics> s2 = collect(counter2);
+    assertThat(s2).hasSize(1);
+    assertThat(s2.get(0).id().tags()).isEqualTo(Tags.of());
+    assertThat(counter0.count()).isEqualTo(0);
+    assertThat(counter1.count()).isEqualTo(0);
+    assertThat(counter2.count()).isEqualTo(0);
+  }
 }

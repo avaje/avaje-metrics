@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricRegistry;
 
 import java.math.RoundingMode;
@@ -83,7 +84,7 @@ final class JvmCGroupCpu {
   }
 
   private GaugeLong gauge(String name, LongSupplier gauge, boolean reportChangesOnly) {
-    return DGaugeLong.of(name, gauge, reportChangesOnly);
+    return DGaugeLong.of(Metric.ID.of(name), gauge, reportChangesOnly);
   }
 
   static final class CpuUsageMicros implements LongSupplier {

@@ -15,6 +15,11 @@ import java.util.function.Function;
 public interface Metric {
 
   /**
+   * Return the Id of the metric.
+   */
+  ID id();
+
+  /**
    * Return the name of the metric.
    */
   String name();
@@ -28,11 +33,56 @@ public interface Metric {
   /**
    * Reset the statistics resetting any internal counters etc.
    * <p>
-   * Typically the MetricManager takes care of resetting the statistic/counters for the metrics when
-   * it periodically collects and reports all the metrics and you are not expected to use this method.
-   * </p>
+   * Typically, the MetricRegistry takes care of resetting the statistic/counters for the metrics when
+   * it periodically collects and reports all the metrics, and you are not expected to use this method.
    */
   void reset();
+
+  /**
+   * Identifier of a Metric based on both the name and tags.
+   */
+  interface ID {
+
+    /**
+     * Create an Id given a name only.
+     */
+    static ID of(String name) {
+      return new MId(name, Tags.EMPTY);
+    }
+
+    /**
+     * Create an Id given name and tags.
+     */
+    static ID of(String name, Tags tags) {
+      return new MId(name, tags);
+    }
+
+    /**
+     * Return the metric name.
+     */
+    String name();
+
+    /**
+     * Return the tags.
+     */
+    Tags tags();
+
+    /**
+     * Return an Id appending the suffix to the name.
+     */
+    ID suffix(String suffix);
+
+    /**
+     * Return an Id with the given name..
+     */
+    ID withName(String otherName);
+
+    /**
+     * Return an Id with the given name..
+     */
+    ID withTags(Tags tags);
+
+  }
 
   /**
    * Common for statistics of all metrics.
@@ -40,7 +90,12 @@ public interface Metric {
   interface Statistics {
 
     /**
-     * Return the associated metric name.
+     * Return the metric id.
+     */
+    ID id();
+
+    /**
+     * Return the metric name.
      */
     String name();
 

@@ -21,13 +21,13 @@ final class DCounter extends BaseReportName implements Counter {
    * The rateUnit should be chosen to 'scale' the statistics in a reasonable
    * manor - typically events per hour, minute or second.
    */
-  DCounter(String name) {
-    super(name);
+  DCounter(ID id) {
+    super(id);
   }
 
   @Override
   public String toString() {
-    return name + ":" + count;
+    return id + ":" + count;
   }
 
   /**
@@ -42,8 +42,8 @@ final class DCounter extends BaseReportName implements Counter {
   public void collect(Visitor collector) {
     final long sum = count.sumThenReset();
     if (sum != 0) {
-      final String name = reportName != null ? reportName : reportName(collector);
-      collector.visit(new CounterStats(name, sum));
+      final ID reportId = reportId(collector);
+      collector.visit(new CounterStats(reportId, sum));
     }
   }
 
@@ -52,12 +52,14 @@ final class DCounter extends BaseReportName implements Counter {
     return count.sum();
   }
 
-  /**
-   * Return the name of the metric.
-   */
+  @Override
+  public ID id() {
+    return id;
+  }
+
   @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   /**

@@ -5,17 +5,17 @@ import io.avaje.metrics.Metric;
 
 public final class GaugeLongStats implements GaugeLong.Stats {
 
-  private final String name;
+  private final Metric.ID id;
   private final long value;
 
-  public GaugeLongStats(String name, long value) {
-    this.name = name;
+  public GaugeLongStats(Metric.ID id, long value) {
+    this.id = id;
     this.value = value;
   }
 
   @Override
   public String toString() {
-    return name;
+    return id.toString();
   }
 
   @Override
@@ -24,8 +24,13 @@ public final class GaugeLongStats implements GaugeLong.Stats {
   }
 
   @Override
+  public Metric.ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   @Override
