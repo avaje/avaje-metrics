@@ -1,6 +1,9 @@
 package io.avaje.metrics.spi;
 
-import io.avaje.metrics.*;
+import io.avaje.metrics.Counter;
+import io.avaje.metrics.Meter;
+import io.avaje.metrics.Metric;
+import io.avaje.metrics.Timer;
 
 public interface SpiMetricBuilder {
 
@@ -17,6 +20,6 @@ public interface SpiMetricBuilder {
     /**
      * Create the metric.
      */
-    T createMetric(String name, int[] bucketRanges);
+    T createMetric(Metric.ID id, int[] bucketRanges);
   }
 }

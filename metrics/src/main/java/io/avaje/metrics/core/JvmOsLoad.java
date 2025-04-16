@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
+import io.avaje.metrics.Metric;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -13,7 +14,7 @@ final class JvmOsLoad {
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
   static GaugeLong osLoadAverage() {
-    return DGaugeLong.of("jvm.os.loadAverage", new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()));
+    return DGaugeLong.of(Metric.ID.of("jvm.os.loadAverage"), new OsLoadGauge(ManagementFactory.getOperatingSystemMXBean()));
   }
 
   static long toLoad(double loadAverage) {

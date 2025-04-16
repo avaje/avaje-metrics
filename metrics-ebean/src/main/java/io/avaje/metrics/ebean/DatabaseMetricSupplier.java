@@ -36,13 +36,13 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
       log.log(Level.DEBUG, dbMetrics.asJson().withHash(false).withNewLine(false).json());
     }
     for (MetaTimedMetric timedMetric : dbMetrics.timedMetrics()) {
-      metrics.add(new TimerStats(timedMetric.name(), timedMetric.count(), timedMetric.total(), timedMetric.max()));
+      metrics.add(new TimerStats(Metric.ID.of(timedMetric.name()), timedMetric.count(), timedMetric.total(), timedMetric.max()));
     }
     for (MetaQueryMetric metric : dbMetrics.queryMetrics()) {
-      metrics.add(new TimerStats(metric.name(), metric.count(), metric.total(), metric.max()));
+      metrics.add(new TimerStats(Metric.ID.of(metric.name()), metric.count(), metric.total(), metric.max()));
     }
     for (MetaCountMetric metric : dbMetrics.countMetrics()) {
-      metrics.add(new CounterStats(metric.name(), metric.count()));
+      metrics.add(new CounterStats(Metric.ID.of(metric.name()), metric.count()));
     }
     return metrics;
   }

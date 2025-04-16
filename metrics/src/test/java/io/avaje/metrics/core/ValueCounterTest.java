@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.Metric;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +9,7 @@ class ValueCounterTest {
 
   @Test
   void testGetStatisticsWithNoReset() {
-    ValueCounter counter = new ValueCounter("junk");
+    ValueCounter counter = new ValueCounter(Metric.ID.of("junk"));
     assertEquals(Long.MIN_VALUE, counter.max());
 
     counter.add(100);
@@ -26,7 +27,7 @@ class ValueCounterTest {
 
   @Test
   void test() {
-    ValueCounter counter = new ValueCounter("junk");
+    ValueCounter counter = new ValueCounter(Metric.ID.of("junk"));
 
     assertEquals(0, counter.count());
     assertEquals(0, counter.total());

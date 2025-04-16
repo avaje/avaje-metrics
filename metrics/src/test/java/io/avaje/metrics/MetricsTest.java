@@ -17,7 +17,7 @@ class MetricsTest {
     Metrics.collectMetrics();
 
     Metrics.addSupplier(() -> suppliedMetrics);
-    suppliedMetrics.add(new GaugeLongStats("supplied0", 42));
+    suppliedMetrics.add(new GaugeLongStats(Metric.ID.of("supplied0"), 42));
 
     List<Metric.Statistics> result = Metrics.collectMetrics();
     assertThat(result).hasSize(1);

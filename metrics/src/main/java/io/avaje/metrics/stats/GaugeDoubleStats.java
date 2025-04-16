@@ -5,17 +5,17 @@ import io.avaje.metrics.Metric;
 
 public final class GaugeDoubleStats implements GaugeDouble.Stats {
 
-  private final String name;
+  private final Metric.ID id;
   private final double value;
 
-  public GaugeDoubleStats(String name, double value) {
-    this.name = name;
+  public GaugeDoubleStats(Metric.ID id, double value) {
+    this.id = id;
     this.value = value;
   }
 
   @Override
   public String toString() {
-    return name;
+    return id.toString();
   }
 
   @Override
@@ -24,8 +24,13 @@ public final class GaugeDoubleStats implements GaugeDouble.Stats {
   }
 
   @Override
+  public Metric.ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   @Override

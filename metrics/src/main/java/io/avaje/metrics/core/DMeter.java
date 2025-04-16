@@ -10,20 +10,20 @@ import io.avaje.metrics.Meter;
  */
 final class DMeter implements Metric, Meter {
 
-  private final String name;
+  private final ID id;
   private final ValueCounter values;
 
   /**
    * Create with a name.
    */
-  DMeter(String name) {
-    this.name = name;
-    this.values = new ValueCounter(name);
+  DMeter(ID id) {
+    this.id = id;
+    this.values = new ValueCounter(id);
   }
 
   @Override
   public String toString() {
-    return name + ":" + values;
+    return id + ":" + values;
   }
 
   @Override
@@ -40,8 +40,13 @@ final class DMeter implements Metric, Meter {
   }
 
   @Override
+  public ID id() {
+    return id;
+  }
+
+  @Override
   public String name() {
-    return name;
+    return id.name();
   }
 
   @Override

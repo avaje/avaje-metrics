@@ -16,9 +16,19 @@ public interface MetricRegistry extends JvmMetrics {
   Counter counter(String name);
 
   /**
+   * Return the Counter with the given name and tags.
+   */
+  Counter counter(String name, Tags tags);
+
+  /**
    * Return the Meter using the metric name.
    */
   Meter meter(String name);
+
+  /**
+   * Return the Meter using the metric name and tags.
+   */
+  Meter meter(String name, Tags tags);
 
   /**
    * Create and register a gauge using the supplied double values.
@@ -26,14 +36,29 @@ public interface MetricRegistry extends JvmMetrics {
   GaugeDouble gauge(String name, DoubleSupplier supplier);
 
   /**
+   * Create and register a gauge using the supplied double values.
+   */
+  GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier);
+
+  /**
    * Create and register a gauge using the supplied long values.
    */
   GaugeLong gauge(String name, LongSupplier supplier);
 
   /**
+   * Create and register a gauge using the supplied long values.
+   */
+  GaugeLong gauge(String name, Tags tags, LongSupplier supplier);
+
+  /**
    * Return the timer using the metric name.
    */
   Timer timer(String name);
+
+  /**
+   * Return the timer using the metric name and tags.
+   */
+  Timer timer(String name, Tags tags);
 
   /**
    * Return the bucket timer using the given base metric name and bucketRanges.
@@ -42,6 +67,15 @@ public interface MetricRegistry extends JvmMetrics {
    * @param bucketRanges Time in milliseconds which are used to create buckets.
    */
   Timer timer(String name, int... bucketRanges);
+
+  /**
+   * Return the bucket timer using the given base metric name, tags and bucketRanges.
+   *
+   * @param name         The metric name
+   * @param tags         The metric tags
+   * @param bucketRanges Time in milliseconds which are used to create buckets.
+   */
+  Timer timer(String name, Tags tags, int... bucketRanges);
 
   /**
    * Return the TimerGroup using the given base metric name.
