@@ -9,7 +9,7 @@
     <version>9.5</version>
   </parent>
 
-  <artifactId>metrics-statsd</artifactId>
+  <artifactId>avaje-metrics-statsd</artifactId>
 
   <dependencies>
     <dependency>
