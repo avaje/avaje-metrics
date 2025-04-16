@@ -35,6 +35,15 @@ class MetricIDTest {
   }
 
   @Test
+  void testToString() {
+    var one = Metric.ID.of("one", Tags.of("a", "b"));
+    assertThat(one.toString()).isEqualTo("one tags:[a, b]");
+
+    assertThat(Metric.ID.of("one").toString()).isEqualTo("one");
+    assertThat(Metric.ID.of("one", Tags.of()).toString()).isEqualTo("one");
+  }
+
+  @Test
   void withName_sameName_expectSame() {
     var one = Metric.ID.of("one", Tags.of("a", "b"));
     Metric.ID expectSame = one.withName("one");

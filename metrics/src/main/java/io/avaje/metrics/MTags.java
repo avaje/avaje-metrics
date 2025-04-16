@@ -38,4 +38,9 @@ final class MTags implements Tags {
   public int hashCode() {
     return Arrays.hashCode(keyValuePairs);
   }
+
+  @Override
+  public String toString() {
+    return keyValuePairs.length == 0 ? "" : "tags:" + Arrays.toString(keyValuePairs);
+  }
 }

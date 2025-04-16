@@ -14,10 +14,12 @@ final class MId implements Metric.ID {
     this.tags = tags;
   }
 
+  @Override
   public String name() {
     return name;
   }
 
+  @Override
   public Tags tags() {
     return tags;
   }
@@ -54,5 +56,10 @@ final class MId implements Metric.ID {
   @Override
   public int hashCode() {
     return Objects.hash(name, tags);
+  }
+
+  @Override
+  public String toString() {
+    return tags.isEmpty() ? name : name + ' ' + tags;
   }
 }
