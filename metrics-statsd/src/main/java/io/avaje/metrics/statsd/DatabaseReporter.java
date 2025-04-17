@@ -41,7 +41,7 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
       this.epochSecs = System.currentTimeMillis() / 1000;
       DataSource dataSource = database.dataSource();
       if (dataSource instanceof DataSourcePool) {
-        DataSourcePool pool = (DataSourcePool) database;
+        DataSourcePool pool = (DataSourcePool) dataSource;
         reporter.gaugeWithTimestamp("pool.size", pool.size(), epochSecs, "db", dbName, "type", "main");
       }
       DataSource readDatasource = database.readOnlyDataSource();
