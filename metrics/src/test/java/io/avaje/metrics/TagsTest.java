@@ -14,18 +14,28 @@ class TagsTest {
 
   @Test
   void of() {
-    Tags tag = Tags.of("env", "dev");
-    assertThat(tag).isEqualTo(Tags.of("env", "dev"));
-    assertThat(tag.array()).isEqualTo(new String[]{"env","dev"});
+    Tags tag = Tags.of("env:dev", "service:foo");
+    assertThat(tag).isEqualTo(Tags.of("env:dev", "service:foo"));
+    assertThat(tag.array()).isEqualTo(new String[]{"env:dev","service:foo"});
 
-    assertThat(tag).isNotEqualTo(Tags.of("env", "test"));
-    assertThat(tag).isNotEqualTo(Tags.of("enx", "dev"));
+    assertThat(tag).isNotEqualTo(Tags.of("env:test", "service:foo"));
+    assertThat(tag).isNotEqualTo(Tags.of("enx:dev", "service:foo"));
   }
 
   @Test
   void testToString() {
     assertThat(Tags.EMPTY.toString()).isEqualTo("");
-    assertThat(Tags.of("env", "dev").toString()).isEqualTo("tags:[env, dev]");
+    assertThat(Tags.of("e:d", "d:v").toString()).isEqualTo("tags:[e:d, d:v]");
     assertThat(Tags.of("a", "b", "x", "y").toString()).isEqualTo("tags:[a, b, x, y]");
+  }
+
+  @Test
+  void append_when_empty() {
+    assertThat(Tags.of().append("x:y")).isEqualTo(new String[]{"x:y"});
+  }
+
+  @Test
+  void append() {
+    assertThat(Tags.of("a:1", "b:2").append("x:y")).isEqualTo(new String[]{"a:1", "b:2", "x:y"});
   }
 }

@@ -10,6 +10,8 @@ import io.ebean.meta.ServerMetrics;
 
 import javax.sql.DataSource;
 
+import static io.avaje.metrics.statsd.Trim.qry;
+
 final class DatabaseReporter implements StatsdReporter.Reporter {
 
   private final Database database;
@@ -32,27 +34,23 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
     private final StatsDClient reporter;
     private final ServerMetrics dbMetrics;
     private final long epochSecs;
-    private final String dbName;
+    private final String dbTag;
 
     private DReport(Database database, StatsDClient reporter) {
       this.reporter = reporter;
-      this.dbName = database.name();
+      this.dbTag = "db:" + database.name();
       this.dbMetrics = database.metaInfo().collectMetrics();
       this.epochSecs = System.currentTimeMillis() / 1000;
       DataSource dataSource = database.dataSource();
       if (dataSource instanceof DataSourcePool) {
         DataSourcePool pool = (DataSourcePool) dataSource;
-        reporter.gaugeWithTimestamp("pool.size", pool.size(), epochSecs, "db", dbName, "type", "main");
+        reporter.gaugeWithTimestamp("db.pool.size", pool.size(), epochSecs, dbTag, "type:main");
       }
       DataSource readDatasource = database.readOnlyDataSource();
       if (readDatasource instanceof DataSourcePool && readDatasource != dataSource) {
         DataSourcePool readOnlyPool = (DataSourcePool) readDatasource;
-        reporter.gaugeWithTimestamp("pool.size", readOnlyPool.size(), epochSecs,"db", dbName, "type", "readonly");
+        reporter.gaugeWithTimestamp("db.pool.size", readOnlyPool.size(), epochSecs,dbTag, "type:readonly");
       }
-    }
-
-    private String nm(String name, String suffix) {
-      return name + suffix;
     }
 
     private void report() {
@@ -68,26 +66,27 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
     }
 
     private void reportCountMetric(MetaCountMetric countMetric) {
-      reporter.count(nm(countMetric.name(), ".count"), countMetric.count(), "db", dbName);
+      reporter.count(nm("db.count.", countMetric.name()), countMetric.count(), dbTag);
     }
 
     private void reportTimedMetric(MetaTimedMetric metric) {
       final String name = metric.name();
-      if (name.startsWith("txn")) {
-        reportMetric(metric, "txn", "name", name, "db", dbName);
+      if (name.startsWith("txn.")) {
+        reportMetric(metric, "db.txn", dbTag, "name:" + qry(name));
       } else {
-        reportMetric(metric, name, "db", dbName);
+        reportMetric(metric, nm("db.timed.", name), dbTag);
       }
     }
 
     private void reportQueryMetric(MetaQueryMetric metric) {
-      final String name = metric.name();
+      final var name = metric.name();
+      final var queryTag = "name:" + qry(name);
       if (name.startsWith("orm")) {
-        reportMetric(metric, "db.query", "query", name, "db", dbName, "type", "orm");
+        reportMetric(metric, "db.query", dbTag, queryTag, "type:orm");
       } else if (name.startsWith("sql")) {
-        reportMetric(metric, "db.query", "query", name, "db", dbName, "type", "orm");
+        reportMetric(metric, "db.query", dbTag, queryTag, "type:sql");
       } else {
-        reportMetric(metric, "db.query", "query", name, "db", dbName, "type", "other");
+        reportMetric(metric, "db.query", dbTag, queryTag, "type:other");
       }
     }
 
@@ -96,6 +95,10 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
       reporter.gaugeWithTimestamp(nm(name, ".max"), metric.max(), epochSecs, tags);
       reporter.gaugeWithTimestamp(nm(name, ".mean"), metric.mean(), epochSecs, tags);
       reporter.gaugeWithTimestamp(nm(name, ".total"), metric.total(), epochSecs, tags);
+    }
+
+    private String nm(String name, String suffix) {
+      return name + suffix;
     }
   }
 

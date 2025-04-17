@@ -100,6 +100,11 @@ public interface Metric {
     String name();
 
     /**
+     * Return the associated tags as an array.
+     */
+    String[] tags();
+
+    /**
      * Visit the reporter for the given metric type.
      */
     void visit(Visitor reporter);

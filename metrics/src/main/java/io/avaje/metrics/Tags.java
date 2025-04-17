@@ -1,18 +1,55 @@
 package io.avaje.metrics;
 
+/**
+ * Tags that can be associated to metrics.
+ *
+ * <pre>{@code
+ *
+ *   Tags.of("env:dev", "service:foo-service");
+ *
+ * }</pre>
+ */
 public interface Tags {
 
-  Tags EMPTY = MTags.EMPTY;
+    /**
+     * Empty Tags.
+     */
+    Tags EMPTY = MTags.EMPTY;
 
-  static Tags of() {
-    return EMPTY;
-  }
+    /**
+     * Return empty Tags.
+     */
+    static Tags of() {
+        return EMPTY;
+    }
 
-  static Tags of(String... keyValuePairs) {
-    return new MTags(keyValuePairs);
-  }
+    /**
+     * Create given the raw tags in key:value format.
+     * <pre>{@code
+     *
+     *   Tags.of("env:dev", "service:foo-service");
+     *
+     * }</pre>
+     */
+    static Tags of(String... rawTags) {
+        return new MTags(rawTags);
+    }
 
-  String[] array();
+    /**
+     * Return true if the tags is empty.
+     */
+    boolean isEmpty();
 
-  boolean isEmpty();
+    /**
+     * Return the tags as an array.
+     */
+    String[] array();
+
+    /**
+     * Merge and return as an array.
+     *
+     * @param moreTags Additional tags that we want to merge.
+     * @return The merged set of tags.
+     */
+    String[] append(String... moreTags);
 }

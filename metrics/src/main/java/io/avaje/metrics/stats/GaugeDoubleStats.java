@@ -34,6 +34,11 @@ public final class GaugeDoubleStats implements GaugeDouble.Stats {
   }
 
   @Override
+  public String[] tags() {
+    return id.tags().array();
+  }
+
+  @Override
   public double value() {
     return value;
   }

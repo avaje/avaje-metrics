@@ -34,6 +34,11 @@ public final class GaugeLongStats implements GaugeLong.Stats {
   }
 
   @Override
+  public String[] tags() {
+    return id.tags().array();
+  }
+
+  @Override
   public long value() {
     return value;
   }
