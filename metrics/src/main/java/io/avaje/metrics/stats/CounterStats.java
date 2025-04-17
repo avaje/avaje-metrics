@@ -39,6 +39,11 @@ public final class CounterStats implements Counter.Stats {
     return id.name();
   }
 
+  @Override
+  public String[] tags() {
+    return id.tags().array();
+  }
+
   /**
    * Return the count of values collected.
    */

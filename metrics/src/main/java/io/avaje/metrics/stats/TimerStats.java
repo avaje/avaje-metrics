@@ -60,6 +60,11 @@ public final class TimerStats implements Timer.Stats {
     return id.name();
   }
 
+  @Override
+  public String[] tags() {
+    return id.tags().array();
+  }
+
   /**
    * Return the count of values collected.
    */

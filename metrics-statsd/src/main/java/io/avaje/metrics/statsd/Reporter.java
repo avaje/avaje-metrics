@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.avaje.metrics.statsd.Trim.trim;
+
 @NullMarked
 final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
 
@@ -70,34 +72,36 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
     @Override
     public void visit(Timer.Stats timed) {
       if (timedThreshold == 0 || timedThreshold < timed.total()) {
-        if (timed.name().startsWith("web.api")) {
-          sendValues(timed, "web.api", "name", timed.name());
+        if (timed.name().startsWith("web.api.")) {
+          String nameTag = "name:" + trim(timed.name(), 8);
+          sendValues(timed, "web.api", timed.id().tags().append(nameTag));
         } else if (timed.name().startsWith("app.")) {
-          sendValues(timed, "app.method", "name", timed.name());
+          String nameTag = "name:" + trim(timed.name(),4);
+          sendValues(timed, "app.component", timed.id().tags().append(nameTag));
         } else {
-          sendValues(timed, timed.name());
+          sendValues(timed, timed.name(), timed.tags());
         }
       }
     }
 
     @Override
     public void visit(Meter.Stats stats) {
-      sendValues(stats, stats.name());
+      sendValues(stats, stats.name(), stats.tags());
     }
 
     @Override
     public void visit(Counter.Stats counter) {
-      client.countWithTimestamp(counter.name(), counter.count(), epochSecs);
+      client.countWithTimestamp(counter.name(), counter.count(), epochSecs, counter.tags());
     }
 
     @Override
     public void visit(GaugeDouble.Stats gauge) {
-      client.gaugeWithTimestamp(gauge.name(), gauge.value(), epochSecs);
+      client.gaugeWithTimestamp(gauge.name(), gauge.value(), epochSecs, gauge.tags());
     }
 
     @Override
     public void visit(GaugeLong.Stats gauge) {
-      client.gaugeWithTimestamp(gauge.name(), gauge.value(), epochSecs);
+      client.gaugeWithTimestamp(gauge.name(), gauge.value(), epochSecs, gauge.tags());
     }
   }
 }
