@@ -27,15 +27,14 @@ class JvmCGroupCpuMetricGroupTest {
   }
 
   @Test
-  void cpuUsageMicros() {
-
+  void cpuUsageMillis_firstReadingIsZero() {
     FileLines source = new FileLines("src/test/resources/cgroup/cpuacct.usage");
     assertTrue(source.exists());
 
-    final JvmCGroupCpu.CpuUsageMicros usageMicros = new JvmCGroupCpu.CpuUsageMicros(source);
+    final JvmCGroupCpu.CpuUsage usageMicros = new JvmCGroupCpu.CpuUsage(source);
 
     final long value = usageMicros.getAsLong();
-    assertThat(value).isEqualTo(55035664L);
+    assertThat(value).isEqualTo(0L);
   }
 
   @Test
