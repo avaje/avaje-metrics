@@ -70,7 +70,7 @@ final class JvmCGroupCpu {
   }
 
   private void createCGroupCpuUsage(MetricRegistry registry, FileLines cpu) {
-    registry.gauge("jvm.cgroup.cpu.usageMicros", GaugeLong.incrementing(new CpuUsageMicros(cpu)));
+    registry.gauge("jvm.cgroup.cpu.usage", new CpuUsage(cpu));
   }
 
   private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly, boolean withDetails) {
@@ -87,17 +87,32 @@ final class JvmCGroupCpu {
     return DGaugeLong.of(Metric.ID.of(name), gauge, reportChangesOnly);
   }
 
-  static final class CpuUsageMicros implements LongSupplier {
+  /** CPU Usage in Millicores */
+  static final class CpuUsage implements LongSupplier {
 
     private final FileLines source;
 
-    CpuUsageMicros(FileLines source) {
+    private long prevUsageNanos;
+    private long prevTimeMillis;
+
+    CpuUsage(FileLines source) {
       this.source = source;
     }
 
     @Override
     public long getAsLong() {
-      return source.singleMicros();
+      final long newTimeMillis = System.currentTimeMillis();
+      final long newUsageNanos = source.single();
+      if (prevUsageNanos == 0) {
+        prevUsageNanos = newUsageNanos;
+        prevTimeMillis = newTimeMillis;
+        return 0;
+      }
+      final long deltaTimeMicros = (newTimeMillis - prevTimeMillis) * 1000;
+      final long millicores = (newUsageNanos - prevUsageNanos) / deltaTimeMicros;
+      this.prevTimeMillis = newTimeMillis;
+      this.prevUsageNanos = newUsageNanos;
+      return millicores;
     }
   }
 
