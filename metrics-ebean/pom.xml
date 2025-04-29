@@ -4,7 +4,7 @@
   <parent>
     <artifactId>avaje-metrics-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.6-RC3</version>
+    <version>9.6-RC4</version>
   </parent>
 
   <artifactId>avaje-metrics-ebean</artifactId>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.6-RC3</version>
+      <version>9.6-RC4</version>
       <scope>provided</scope>
     </dependency>
 
