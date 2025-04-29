@@ -3,6 +3,7 @@ package io.avaje.metrics.statsd;
 import com.timgroup.statsd.StatsDClient;
 import io.ebean.Database;
 import io.ebean.datasource.DataSourcePool;
+import io.ebean.datasource.PoolStatus;
 import io.ebean.meta.MetaCountMetric;
 import io.ebean.meta.MetaQueryMetric;
 import io.ebean.meta.MetaTimedMetric;
@@ -15,18 +16,20 @@ import static io.avaje.metrics.statsd.Trim.qry;
 final class DatabaseReporter implements StatsdReporter.Reporter {
 
   private final Database database;
+  private final boolean verbose;
 
-  private DatabaseReporter(Database database) {
+  private DatabaseReporter(Database database, boolean verbose) {
     this.database = database;
+    this.verbose = verbose;
   }
 
-  static StatsdReporter.Reporter reporter(Database database) {
-    return new DatabaseReporter(database);
+  static StatsdReporter.Reporter reporter(Database database, boolean verbose) {
+    return new DatabaseReporter(database, verbose);
   }
 
   @Override
   public void report(StatsDClient sender) {
-    new DReport(database, sender).report();
+    new DReport(database, sender, verbose).report();
   }
 
   private static final class DReport {
@@ -36,7 +39,7 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
     private final long epochSecs;
     private final String dbTag;
 
-    private DReport(Database database, StatsDClient reporter) {
+    private DReport(Database database, StatsDClient reporter, boolean verbose) {
       this.reporter = reporter;
       this.dbTag = "db:" + database.name();
       this.dbMetrics = database.metaInfo().collectMetrics();
@@ -44,12 +47,40 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
       DataSource dataSource = database.dataSource();
       if (dataSource instanceof DataSourcePool) {
         DataSourcePool pool = (DataSourcePool) dataSource;
-        reporter.gaugeWithTimestamp("db.pool.size", pool.size(), epochSecs, dbTag, "type:main");
+        poolMetrics(verbose, pool, "type:main");
       }
       DataSource readDatasource = database.readOnlyDataSource();
       if (readDatasource instanceof DataSourcePool && readDatasource != dataSource) {
         DataSourcePool readOnlyPool = (DataSourcePool) readDatasource;
-        reporter.gaugeWithTimestamp("db.pool.size", readOnlyPool.size(), epochSecs,dbTag, "type:readonly");
+        poolMetrics(verbose, readOnlyPool, "type:readonly");
+      }
+    }
+
+    private void poolMetrics(boolean verbose, DataSourcePool pool, String tag) {
+      if (verbose) {
+        poolMetrics(pool, tag);
+      } else {
+        reporter.gaugeWithTimestamp("db.pool.size", pool.size(), epochSecs, dbTag, tag);
+      }
+    }
+
+    private void poolMetrics(DataSourcePool pool, String tag) {
+      PoolStatus status = pool.status(true);
+      int size = status.busy() + status.free();
+      reporter.gaugeWithTimestamp("db.pool.size", size, epochSecs, dbTag, tag);
+
+      long meanAcquireMicros = status.meanAcquireNanos() / 1000;
+      reporter.gaugeWithTimestamp("db.pool.meanAcquireMicros", meanAcquireMicros, epochSecs, dbTag, tag);
+
+      reporter.gaugeWithTimestamp("db.pool.usageCount", status.hitCount(), epochSecs, dbTag, tag);
+      reporter.gaugeWithTimestamp("db.pool.acquireMicros", status.totalAcquireMicros(), epochSecs, dbTag, tag);
+      int waitCount = status.waitCount();
+      if (waitCount > 0) {
+        reporter.gaugeWithTimestamp("db.pool.waitCount", waitCount, epochSecs, dbTag, tag);
+      }
+      long waitMicros = status.totalWaitMicros();
+      if (waitMicros > 0) {
+        reporter.gaugeWithTimestamp("db.pool.waitMicros", waitMicros, epochSecs, dbTag, tag);
       }
     }
 
@@ -82,11 +113,11 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
       final var name = metric.name();
       final var queryTag = "name:" + qry(name);
       if (name.startsWith("orm")) {
-        reportMetric(metric, "db.query", dbTag, queryTag, "type:orm");
+        reportMetric(metric, "db.query", dbTag, "type:orm", queryTag);
       } else if (name.startsWith("sql")) {
-        reportMetric(metric, "db.query", dbTag, queryTag, "type:sql");
+        reportMetric(metric, "db.query", dbTag, "type:sql", queryTag);
       } else {
-        reportMetric(metric, "db.query", dbTag, queryTag, "type:other");
+        reportMetric(metric, "db.query", dbTag, "type:other", queryTag);
       }
     }
 

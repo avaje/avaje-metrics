@@ -70,7 +70,13 @@ final class StatsdBuilder implements StatsdReporter.Builder {
 
   @Override
   public StatsdReporter.Builder database(Database database) {
-    reporters.add(DatabaseReporter.reporter(database));
+    reporters.add(DatabaseReporter.reporter(database, false));
+    return this;
+  }
+
+  @Override
+  public StatsdReporter.Builder databaseVerbose(Database database) {
+    reporters.add(DatabaseReporter.reporter(database, true));
     return this;
   }
 

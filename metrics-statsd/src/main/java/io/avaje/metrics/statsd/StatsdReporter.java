@@ -97,6 +97,11 @@ public interface StatsdReporter extends AutoCloseable {
     Builder database(Database database);
 
     /**
+     * Add a database to report on with verbose metrics.
+     */
+    Builder databaseVerbose(Database database);
+
+    /**
      * Add an additional custom reporter.
      */
     Builder reporter(Reporter reporter);
