@@ -28,7 +28,7 @@ class MetricIDTest {
 
   @Test
   void suffix() {
-    var one = Metric.ID.of("one", Tags.of("a", "b"));
+    var one = Metric.ID.of("one", Tags.of("a:b"));
     Metric.ID suffix = one.suffix(".error");
     assertThat(suffix.name()).isEqualTo("one.error");
     assertThat(suffix.tags()).isEqualTo(one.tags());

@@ -7,33 +7,30 @@ final class MTags implements Tags {
 
     static Tags EMPTY = new MTags(new String[]{});
 
-    private final String[] keyValuePairs;
+    private final String[] rawTags;
 
-    MTags(String[] keyValuePairs) {
-        if (keyValuePairs.length % 2 != 0) {
-            throw new IllegalArgumentException("Incorrect length, must be pairs of key values");
-        }
-        this.keyValuePairs = keyValuePairs;
+    MTags(String[] rawTags) {
+        this.rawTags = rawTags;
     }
 
     @Override
     public boolean isEmpty() {
-        return keyValuePairs.length == 0;
+        return rawTags.length == 0;
     }
 
     @Override
     public String[] array() {
-        return keyValuePairs;
+        return rawTags;
     }
 
     @Override
     public String[] append(String... moreTags) {
-        if (keyValuePairs.length == 0) {
+        if (rawTags.length == 0) {
             return moreTags;
         }
-        String[] merged = new String[keyValuePairs.length + moreTags.length];
-        System.arraycopy(keyValuePairs, 0, merged, 0, keyValuePairs.length);
-        System.arraycopy(moreTags, 0, merged, keyValuePairs.length, moreTags.length);
+        String[] merged = new String[rawTags.length + moreTags.length];
+        System.arraycopy(rawTags, 0, merged, 0, rawTags.length);
+        System.arraycopy(moreTags, 0, merged, rawTags.length, moreTags.length);
         return merged;
     }
 
@@ -42,16 +39,16 @@ final class MTags implements Tags {
         if (this == object) return true;
         if (!(object instanceof MTags)) return false;
         MTags dTags = (MTags) object;
-        return Objects.deepEquals(keyValuePairs, dTags.keyValuePairs);
+        return Objects.deepEquals(rawTags, dTags.rawTags);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(keyValuePairs);
+        return Arrays.hashCode(rawTags);
     }
 
     @Override
     public String toString() {
-        return keyValuePairs.length == 0 ? "" : "tags:" + Arrays.toString(keyValuePairs);
+        return rawTags.length == 0 ? "" : "tags:" + Arrays.toString(rawTags);
     }
 }
