@@ -73,11 +73,11 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
     public void visit(Timer.Stats timed) {
       if (timedThreshold == 0 || timedThreshold < timed.total()) {
         if (timed.name().startsWith("web.api.")) {
-          String nameTag = "name:" + trim(timed.name(), 8);
-          sendValues(timed, "web.api", timed.id().tags().append(nameTag));
+          String labelTag = "label:" + trim(timed.name(), 8);
+          sendValues(timed, "web.api", timed.id().tags().append(labelTag));
         } else if (timed.name().startsWith("app.")) {
-          String nameTag = "name:" + trim(timed.name(),4);
-          sendValues(timed, "app.component", timed.id().tags().append(nameTag));
+          String labelTag = "label:" + trim(timed.name(),4);
+          sendValues(timed, "app.component", timed.id().tags().append(labelTag));
         } else {
           sendValues(timed, timed.name(), timed.tags());
         }

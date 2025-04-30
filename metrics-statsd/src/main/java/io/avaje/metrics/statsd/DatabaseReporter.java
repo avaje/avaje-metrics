@@ -60,27 +60,27 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
       if (verbose) {
         poolMetrics(pool, tag);
       } else {
-        reporter.gaugeWithTimestamp("db.pool.size", pool.size(), epochSecs, dbTag, tag);
+        reporter.gaugeWithTimestamp("datasource.pool.size", pool.size(), epochSecs, dbTag, tag);
       }
     }
 
     private void poolMetrics(DataSourcePool pool, String tag) {
       PoolStatus status = pool.status(true);
       int size = status.busy() + status.free();
-      reporter.gaugeWithTimestamp("db.pool.size", size, epochSecs, dbTag, tag);
+      reporter.gaugeWithTimestamp("datasource.pool.size", size, epochSecs, dbTag, tag);
 
       long meanAcquireMicros = status.meanAcquireNanos() / 1000;
-      reporter.gaugeWithTimestamp("db.pool.meanAcquireMicros", meanAcquireMicros, epochSecs, dbTag, tag);
+      reporter.gaugeWithTimestamp("datasource.pool.meanAcquireMicros", meanAcquireMicros, epochSecs, dbTag, tag);
 
-      reporter.gaugeWithTimestamp("db.pool.usageCount", status.hitCount(), epochSecs, dbTag, tag);
-      reporter.gaugeWithTimestamp("db.pool.acquireMicros", status.totalAcquireMicros(), epochSecs, dbTag, tag);
+      reporter.gaugeWithTimestamp("datasource.pool.usageCount", status.hitCount(), epochSecs, dbTag, tag);
+      reporter.gaugeWithTimestamp("datasource.pool.acquireMicros", status.totalAcquireMicros(), epochSecs, dbTag, tag);
       int waitCount = status.waitCount();
       if (waitCount > 0) {
-        reporter.gaugeWithTimestamp("db.pool.waitCount", waitCount, epochSecs, dbTag, tag);
+        reporter.gaugeWithTimestamp("datasource.pool.waitCount", waitCount, epochSecs, dbTag, tag);
       }
       long waitMicros = status.totalWaitMicros();
       if (waitMicros > 0) {
-        reporter.gaugeWithTimestamp("db.pool.waitMicros", waitMicros, epochSecs, dbTag, tag);
+        reporter.gaugeWithTimestamp("datasource.pool.waitMicros", waitMicros, epochSecs, dbTag, tag);
       }
     }
 
@@ -97,27 +97,27 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
     }
 
     private void reportCountMetric(MetaCountMetric countMetric) {
-      reporter.count(nm("db.count.", countMetric.name()), countMetric.count(), dbTag);
+      reporter.count(nm("ebean.count.", countMetric.name()), countMetric.count(), dbTag);
     }
 
     private void reportTimedMetric(MetaTimedMetric metric) {
       final String name = metric.name();
       if (name.startsWith("txn.")) {
-        reportMetric(metric, "db.txn", dbTag, "name:" + qry(name));
+        reportMetric(metric, "ebean.txn", dbTag, "label:" + qry(name));
       } else {
-        reportMetric(metric, nm("db.timed.", name), dbTag);
+        reportMetric(metric, nm("ebean.timed.", name), dbTag);
       }
     }
 
     private void reportQueryMetric(MetaQueryMetric metric) {
       final var name = metric.name();
-      final var queryTag = "name:" + qry(name);
+      final var queryTag = "label:" + qry(name);
       if (name.startsWith("orm")) {
-        reportMetric(metric, "db.query", dbTag, "type:orm", queryTag);
+        reportMetric(metric, "ebean.query", dbTag, "type:orm", queryTag);
       } else if (name.startsWith("sql")) {
-        reportMetric(metric, "db.query", dbTag, "type:sql", queryTag);
+        reportMetric(metric, "ebean.query", dbTag, "type:sql", queryTag);
       } else {
-        reportMetric(metric, "db.query", dbTag, "type:other", queryTag);
+        reportMetric(metric, "ebean.query", dbTag, "type:other", queryTag);
       }
     }
 
