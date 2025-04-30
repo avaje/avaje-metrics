@@ -9,7 +9,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-metrics-parent</artifactId>
-  <version>9.6-RC4</version>
+  <version>9.6-RC5</version>
   <packaging>pom</packaging>
 
   <url>https://avaje-metrics.github.io</url>
