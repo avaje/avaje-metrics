@@ -24,40 +24,20 @@ final class JvmGCPause {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.metrics");
 
-  static void createMeters(MetricRegistry registry, boolean withDetails) {
+  static void createMeters(MetricRegistry registry) {
     if (!extensionsPresent() || !hasNotifications()) {
       return;
     }
-    final var jcPause = new JvmGCPause();
-    jcPause.createMeters(registry);
-  }
 
-  // private final List<Runnable> cleanup = new ArrayList<>();
-
-  void createMeters(MetricRegistry registry) {
-    final var listener = new GcListener(registry);
+    final var listener = new Listener(registry);
     final var filter = new Filter();
     for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-      if (!(gcBean instanceof NotificationEmitter)) {
-        continue;
+      if (gcBean instanceof NotificationEmitter) {
+        final var emitter = (NotificationEmitter) gcBean;
+        emitter.addNotificationListener(listener, filter, null);
       }
-      final var emitter = (NotificationEmitter) gcBean;
-      emitter.addNotificationListener(listener, filter, null);
-
-//      cleanup.add(() -> {
-//        try {
-//          notificationEmitter.removeNotificationListener(listener);
-//        } catch (ListenerNotFoundException ignore) {
-//          // ignore
-//        }
-//      });
     }
   }
-//
-//  @Override
-//  public void close() {
-//    // cleanup.forEach(Runnable::run);
-//  }
 
   static final class Filter implements NotificationFilter {
     @Override
@@ -66,12 +46,14 @@ final class JvmGCPause {
     }
   }
 
-  static final class GcListener implements NotificationListener {
+  static final class Listener implements NotificationListener {
 
-    private final MetricRegistry registry;
+    private final Meter concurrent;
+    private final Meter pause;
 
-    GcListener(MetricRegistry registry) {
-      this.registry = registry;
+    Listener(MetricRegistry registry) {
+      this.concurrent = registry.meter("jvm.gc.concurrent");
+      this.pause = registry.meter("jvm.gc.pause");
     }
 
     @Override
@@ -83,14 +65,10 @@ final class JvmGCPause {
       String gcCause = notificationInfo.getGcCause();
       long duration = notificationInfo.getGcInfo().getDuration();
 
-      //Tags tags = Tags.of("gc:" + gcName, "action:" + gcAction, "cause:" + gcCause);
       if (isConcurrentPhase(gcCause, gcName)) {
-        Meter meter = registry.meter("jvm.gc.concurrent");//, tags);
-        meter.addEvent(duration);
-
+        concurrent.addEvent(duration);
       } else {
-        Meter meter = registry.meter("jvm.gc.pause");//, tags);
-        meter.addEvent(duration);
+        pause.addEvent(duration);
       }
     }
   }
