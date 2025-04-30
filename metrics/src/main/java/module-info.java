@@ -10,6 +10,7 @@ module io.avaje.metrics {
   requires transitive io.avaje.applog;
   requires transitive org.jspecify;
   requires static java.management;
+  requires static jdk.management;
 
   uses io.avaje.metrics.spi.SpiMetricBuilder;
   uses io.avaje.metrics.spi.SpiMetricProvider;

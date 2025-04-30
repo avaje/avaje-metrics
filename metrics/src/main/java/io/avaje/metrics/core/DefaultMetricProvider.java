@@ -153,6 +153,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   @Override
   public JvmMetrics registerJvmGCMetrics() {
     JvmGarbageCollection.createGauges(this, withDetails);
+    JvmGCPause.createMeters(this, withDetails);
     return this;
   }
 
