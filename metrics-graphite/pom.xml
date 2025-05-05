@@ -4,11 +4,11 @@
   <parent>
     <artifactId>avaje-metrics-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.6-RC6</version>
+    <version>9.6</version>
   </parent>
 
   <artifactId>avaje-metrics-graphite</artifactId>
-  <version>9.6-RC6</version>
+  <version>9.6</version>
 
   <properties>
     <surefire.useModulePath>false</surefire.useModulePath>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.6-RC6</version>
+      <version>9.6</version>
     </dependency>
 
     <dependency>
