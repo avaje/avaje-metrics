@@ -25,6 +25,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   private final SpiMetricBuilder.Factory<Meter> meterFactory;
   private final List<MetricSupplier> suppliers = new ArrayList<>();
   private final Object monitor = new Object();
+  private Tags globalTags;
   private boolean withDetails;
   private boolean reportChangesOnly;
   private Function<String, String> namingConvention = NamingMatch.INSTANCE;
@@ -35,6 +36,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     this.timerFactory = builder.timer();
     this.meterFactory = builder.meter();
     this.counterFactory = builder.counter();
+    this.globalTags = initGlobalTags();
   }
 
   DefaultMetricProvider(DefaultMetricProvider parent) {
@@ -45,6 +47,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     this.namingConvention = parent.namingConvention;
     this.withDetails = parent.withDetails;
     this.reportChangesOnly = parent.reportChangesOnly;
+    this.globalTags = initGlobalTags();
   }
 
   static SpiMetricBuilder initBuilder() {
@@ -54,6 +57,15 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         .orElseThrow(() -> new IllegalStateException("Missing metrics-noop dependency"));
     }
     return new DSpiMetricBuilder();
+  }
+
+  private static Tags initGlobalTags() {
+    String hostname = System.getenv("HOSTNAME");
+    if (hostname == null || hostname.trim().isEmpty()) {
+      return Tags.EMPTY;
+    } else {
+      return Tags.of("pod:" + hostname.trim());
+    }
   }
 
   /**
@@ -92,6 +104,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public JvmMetrics withGlobalTags(Tags globalTags) {
+    this.globalTags = globalTags;
+    return this;
+  }
+
+  @Override
   public JvmMetrics withReportChangesOnly() {
     reportChangesOnly = true;
     return this;
@@ -123,14 +141,14 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerProcessMemoryMetrics() {
-    JvmProcessMemory.createGauges(this, reportChangesOnly);
+    JvmProcessMemory.createGauges(this, reportChangesOnly, globalTags);
     return this;
   }
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    JvmCGroupCpu.createGauges(this, reportChangesOnly, withDetails);
-    JvmCGroupMemory.createGauges(this, reportChangesOnly);
+    JvmCGroupCpu.createGauges(this, reportChangesOnly, withDetails, globalTags);
+    JvmCGroupMemory.createGauges(this, reportChangesOnly, globalTags);
     return this;
   }
 
@@ -152,15 +170,15 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerJvmGCMetrics() {
-    JvmGarbageCollection.createGauges(this, withDetails);
+    JvmGarbageCollection.createGauges(this, withDetails, globalTags);
     JvmGCPause.createMeters(this);
     return this;
   }
 
   @Override
   public JvmMetrics registerJvmMemoryMetrics() {
-    JvmMemory.createHeapGroup(this, reportChangesOnly, withDetails);
-    JvmMemory.createNonHeapGroup(this, reportChangesOnly, withDetails);
+    JvmMemory.createHeapGroup(this, reportChangesOnly, withDetails, globalTags);
+    JvmMemory.createNonHeapGroup(this, reportChangesOnly, withDetails, globalTags);
     return this;
   }
 

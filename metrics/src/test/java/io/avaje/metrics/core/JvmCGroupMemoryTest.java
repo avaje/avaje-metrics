@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.GaugeLong;
+import io.avaje.metrics.Tags;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,13 +31,13 @@ class JvmCGroupMemoryTest {
     assertThat(source.usageMb()).isEqualTo(227);
     assertThat(source.pctUsage()).isEqualTo(22);
 
-    final GaugeLong memoryLimit = me.limit(source, true);
+    final GaugeLong memoryLimit = me.limit(source, true, Tags.EMPTY);
     assertThat(memoryLimit.value()).isEqualTo(1025);
 
-    final GaugeLong memoryUsage = me.usage(source, true);
+    final GaugeLong memoryUsage = me.usage(source, true, Tags.EMPTY);
     assertThat(memoryUsage.value()).isEqualTo(227);
 
-    final GaugeLong pctUsage = me.pctUsage(source, true);
+    final GaugeLong pctUsage = me.pctUsage(source, true, Tags.EMPTY);
     assertThat(pctUsage.value()).isEqualTo(22);
   }
 

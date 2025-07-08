@@ -26,10 +26,18 @@ public interface JvmMetrics {
   JvmMetrics withReportChangesOnly();
 
   /**
+   * Set global tags to use with the JVM metrics.
+   * <p>
+   * By default, this will check the HOSTNAME environment variable and
+   * when set, will use this value with a "pod" tag.
+   */
+  JvmMetrics withGlobalTags(Tags globalTags);
+
+  /**
    * Set to report the metrics irrespective of whether the metric has changed.
    * <p>
    * For metrics that generally don't change like max memory or don't change as
-   * frequently these metrics will be reported every time.
+   * frequently, these metrics will be reported every time.
    * </p>
    */
   JvmMetrics withReportAlways();

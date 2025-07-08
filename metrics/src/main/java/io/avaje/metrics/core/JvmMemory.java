@@ -1,6 +1,8 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.Tags;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -53,30 +55,32 @@ final class JvmMemory {
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
-  static void createHeapGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+  static void createHeapGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {
     HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    createGroup(registry, "jvm.memory.heap", source, reportChangesOnly, withDetails);
+    createGroup(registry, "jvm.memory.heap", source, reportChangesOnly, withDetails, globalTags);
   }
 
   /**
    * Create the NonHeap Memory based GaugeDoubleMetricGroup.
    */
-  static void createNonHeapGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
+  static void createNonHeapGroup(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {
     NonHeapMemoryUsageSource source = new NonHeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
-    createGroup(registry, "jvm.memory.nonheap", source, reportChangesOnly, withDetails);
+    createGroup(registry, "jvm.memory.nonheap", source, reportChangesOnly, withDetails, globalTags);
   }
 
-  private static void createGroup(MetricRegistry registry, String baseName, MemoryUsageSource source, boolean reportChangesOnly, boolean withDetails) {
-    new MemUsageGauages(source, baseName).createMetric(registry, reportChangesOnly, withDetails);
+  private static void createGroup(MetricRegistry registry, String baseName, MemoryUsageSource source, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {
+    new MemUsageGauages(source, baseName, globalTags).createMetric(registry, reportChangesOnly, withDetails);
   }
 
   static final class MemUsageGauages {
     private final MemoryUsageSource source;
     private final String baseName;
+    private final Tags globalTags;
 
-    private MemUsageGauages(MemoryUsageSource source, String baseName) {
+    private MemUsageGauages(MemoryUsageSource source, String baseName, Tags globalTags) {
       this.source = source;
       this.baseName = baseName;
+      this.globalTags = globalTags;
     }
 
     void createMetric(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
@@ -96,8 +100,8 @@ final class JvmMemory {
       }
     }
 
-    private String name(String name) {
-      return baseName + "." + name;
+    private Metric.ID name(String name) {
+      return Metric.ID.of(baseName + "." + name, globalTags);
     }
 
     private abstract static class Base {
