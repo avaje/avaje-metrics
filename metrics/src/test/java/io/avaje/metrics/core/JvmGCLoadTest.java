@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.Tags;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -12,8 +13,8 @@ class JvmGCLoadTest {
   @Test
   void test() throws InterruptedException {
     DefaultMetricProvider registry = new DefaultMetricProvider();
-    new JvmGCPause().createMeters(registry);
-    JvmGarbageCollection.createGauges(registry, false);
+    JvmGCPause.createMeters(registry);
+    JvmGarbageCollection.createGauges(registry, false, Tags.EMPTY);
     for (int i = 0; i < 3; i++) {
       doSomething(registry);
     }

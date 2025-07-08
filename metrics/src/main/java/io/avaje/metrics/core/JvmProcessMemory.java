@@ -1,6 +1,8 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.Tags;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.management.ManagementFactory;
@@ -17,8 +19,8 @@ final class JvmProcessMemory {
   /**
    * Return the list of OS process memory metrics.
    */
-  static void createGauges(MetricRegistry registry, boolean reportChangesOnly) {
-    new JvmProcessMemory().metrics(registry, reportChangesOnly);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
+    new JvmProcessMemory().metrics(registry, reportChangesOnly, globalTags);
   }
 
   /**
@@ -45,15 +47,15 @@ final class JvmProcessMemory {
   /**
    * Return the metrics for VmRSS and VmHWM.
    */
-  public void metrics(MetricRegistry registry, boolean reportChangesOnly) {
+  public void metrics(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
     if (pid == null) {
       return;
     }
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
       Source source = new Source(procStatus);
-      registry.register(DGaugeLong.of("jvm.memory.process.vmrss", source::rss, reportChangesOnly));
-      registry.register(DGaugeLong.of("jvm.memory.process.vmhwm", source::hwm, reportChangesOnly));
+      registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmrss", globalTags), source::rss, reportChangesOnly));
+      registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmhwm", globalTags), source::hwm, reportChangesOnly));
     }
   }
 

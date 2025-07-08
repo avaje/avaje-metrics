@@ -1,6 +1,7 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Metric;
+import io.avaje.metrics.Tags;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ class JvmMemoryMetricGroupTest {
   void testCreateHeapGroup() {
 
     DefaultMetricProvider registry = new DefaultMetricProvider();
-    JvmMemory.createHeapGroup(registry, true, true);
+    JvmMemory.createHeapGroup(registry, true, true, Tags.EMPTY);
 
     List<Metric> gaugeMetrics = new ArrayList<>(registry.metrics());
 
@@ -32,7 +33,7 @@ class JvmMemoryMetricGroupTest {
   void testCreateNonHeapGroup() {
 
     DefaultMetricProvider registry = new DefaultMetricProvider();
-    JvmMemory.createNonHeapGroup(registry, true, true);
+    JvmMemory.createNonHeapGroup(registry, true, true, Tags.EMPTY);
     List<Metric> gaugeMetrics = new ArrayList<>(registry.metrics());
 
     assertThat(gaugeMetrics.size()).isGreaterThan(1);

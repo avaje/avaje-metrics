@@ -19,8 +19,8 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
     return changesOnly ? new ChangesOnly(id, supplier) : new All(id, supplier);
   }
 
-  static DGaugeLong once(String name, LongSupplier supplier) {
-    return new Once(name, supplier);
+  static DGaugeLong once(ID id, LongSupplier supplier) {
+    return new Once(id, supplier);
   }
 
   protected final LongSupplier supplier;
@@ -92,8 +92,8 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
 
   static final class Once extends DGaugeLong {
 
-    Once(String name, LongSupplier supplier) {
-      super(ID.of(name), supplier);
+    Once(ID id, LongSupplier supplier) {
+      super(id, supplier);
     }
 
     @Override
