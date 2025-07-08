@@ -6,16 +6,17 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-metrics-parent</artifactId>
-    <version>9.6</version>
+    <version>9.7-RC2</version>
   </parent>
 
   <artifactId>avaje-metrics-statsd</artifactId>
+  <name>avaje-metrics-statsd</name>
 
   <dependencies>
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.6</version>
+      <version>9.7-RC2</version>
     </dependency>
 
     <dependency>

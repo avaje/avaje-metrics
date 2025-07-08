@@ -3,10 +3,11 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-metrics-parent</artifactId>
-    <version>9.6</version>
+    <version>9.7-RC2</version>
   </parent>
 
   <artifactId>avaje-metrics</artifactId>
+  <name>avaje-metrics</name>
 
   <properties>
     <logback.version>1.2.11</logback.version>
