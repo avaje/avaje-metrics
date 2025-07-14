@@ -23,6 +23,12 @@
       <groupId>com.datadoghq</groupId>
       <artifactId>java-dogstatsd-client</artifactId>
       <version>4.4.4</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.jnr</groupId>
+          <artifactId>jnr-unixsocket</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
