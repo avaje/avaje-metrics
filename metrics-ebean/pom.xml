@@ -4,7 +4,7 @@
   <parent>
     <artifactId>avaje-metrics-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.7-RC2</version>
+    <version>9.7-RC3</version>
   </parent>
 
   <artifactId>avaje-metrics-ebean</artifactId>
@@ -19,13 +19,13 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-applog</artifactId>
-      <version>1.0</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.7-RC2</version>
+      <version>9.7-RC3</version>
       <scope>provided</scope>
     </dependency>
 
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>junit</artifactId>
-      <version>1.5</version>
+      <version>1.6</version>
       <scope>test</scope>
     </dependency>
 
