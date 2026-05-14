@@ -135,6 +135,16 @@ OtelReporter reporter = OtelReporter.builder()
 reporter.start();
 ```
 
+## Timed spans
+
+This module also provides the optional span bridge used by traced timers.
+When you use `Metrics.tracedTimer(...)` or enhancement with `@Timed(span = Timed.SpanMode.ON)`,
+timer events create OpenTelemetry spans via `GlobalOpenTelemetry`.
+
+This is especially convenient when running with the OTEL Java agent because the global
+OpenTelemetry instance is already installed. Error spans are marked with error status, and
+`Timer.Event.endWithError(Throwable)` records the exception on the span.
+
 ## Example: avaje-inject
 
 When using [avaje-inject](https://avaje.io/inject/), configure the reporter via a `@Factory` class.

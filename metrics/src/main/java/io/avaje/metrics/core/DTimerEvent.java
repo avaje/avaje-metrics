@@ -1,6 +1,8 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
+import io.avaje.metrics.spi.SpiSpan;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A Timed Event typically used to time a SOAP operation or a SQL execution etc.
@@ -13,13 +15,15 @@ import io.avaje.metrics.Timer;
 final class DTimerEvent implements Timer.Event {
 
   private final DTimer metric;
+  private final @Nullable SpiSpan span;
   private final long startNanos;
 
   /**
    * Create a TimedMetricEvent.
    */
-  DTimerEvent(DTimer metric) {
+  DTimerEvent(DTimer metric, @Nullable SpiSpan span) {
     this.metric = metric;
+    this.span = span;
     this.startNanos = DTimer.tickNanos();
   }
 
@@ -33,7 +37,20 @@ final class DTimerEvent implements Timer.Event {
    */
   @Override
   public void end(boolean withSuccess) {
+    end(withSuccess, null);
+  }
+
+  private void end(boolean withSuccess, @Nullable Throwable error) {
     metric.addEventDuration(withSuccess, duration());
+    if (span != null) {
+      if (withSuccess) {
+        span.end();
+      } else if (error != null) {
+        span.endWithError(error);
+      } else {
+        span.endWithError();
+      }
+    }
   }
 
   /**
@@ -52,6 +69,11 @@ final class DTimerEvent implements Timer.Event {
   @Override
   public void endWithError() {
     end(false);
+  }
+
+  @Override
+  public void endWithError(Throwable error) {
+    end(false, error);
   }
 
   /**

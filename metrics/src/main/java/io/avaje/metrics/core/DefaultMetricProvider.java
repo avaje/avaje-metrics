@@ -3,6 +3,8 @@ package io.avaje.metrics.core;
 import io.avaje.metrics.*;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricProvider;
+import io.avaje.metrics.spi.SpiTimedSpanFactory;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +23,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   private final ConcurrentHashMap<Metric.ID, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimerFactory;
   private final SpiMetricBuilder.Factory<Timer> timerFactory;
+  private final @Nullable SpiTimedSpanFactory timedSpanFactory;
   private final SpiMetricBuilder.Factory<Counter> counterFactory;
   private final SpiMetricBuilder.Factory<Meter> meterFactory;
   private final List<MetricSupplier> suppliers = new ArrayList<>();
@@ -34,6 +37,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     SpiMetricBuilder builder = initBuilder();
     this.bucketTimerFactory = builder.bucket();
     this.timerFactory = builder.timer();
+    this.timedSpanFactory = initTimedSpanFactory();
     this.meterFactory = builder.meter();
     this.counterFactory = builder.counter();
     this.globalTags = initGlobalTags();
@@ -42,6 +46,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   DefaultMetricProvider(DefaultMetricProvider parent) {
     this.bucketTimerFactory = parent.bucketTimerFactory;
     this.timerFactory = parent.timerFactory;
+    this.timedSpanFactory = parent.timedSpanFactory;
     this.meterFactory = parent.meterFactory;
     this.counterFactory = parent.counterFactory;
     this.namingConvention = parent.namingConvention;
@@ -57,6 +62,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         .orElseThrow(() -> new IllegalStateException("Missing metrics-noop dependency"));
     }
     return new DSpiMetricBuilder();
+  }
+
+  static @Nullable SpiTimedSpanFactory initTimedSpanFactory() {
+    return ServiceLoader.load(SpiTimedSpanFactory.class)
+      .findFirst()
+      .orElse(null);
   }
 
   private static Tags initGlobalTags() {
@@ -198,8 +209,18 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public Timer tracedTimer(String name) {
+    return tracedMetric(Metric.ID.of(name), timerFactory, null);
+  }
+
+  @Override
   public Timer timer(String name, Tags tags) {
     return metric(Metric.ID.of(name, tags), timerFactory);
+  }
+
+  @Override
+  public Timer tracedTimer(String name, Tags tags) {
+    return tracedMetric(Metric.ID.of(name, tags), timerFactory, null);
   }
 
   @Override
@@ -208,8 +229,18 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public Timer tracedTimer(String name, int... bucketRanges) {
+    return tracedMetric(Metric.ID.of(name), bucketTimerFactory, bucketRanges);
+  }
+
+  @Override
   public Timer timer(String name, Tags tags, int... bucketRanges) {
     return metric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
+  }
+
+  @Override
+  public Timer tracedTimer(String name, Tags tags, int... bucketRanges) {
+    return tracedMetric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
   }
 
   @Override
@@ -276,6 +307,23 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
       }
     }
     return (T) metric;
+  }
+
+  private Timer tracedMetric(Metric.ID id, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+    Metric metric = metricsCache.get(id);
+    if (metric == null) {
+      synchronized (monitor) {
+        metric = metricsCache.get(id);
+        if (metric == null) {
+          metric = factory.createMetric(id, bucketRanges);
+          if (metric instanceof TraceableTimer) {
+            metric = ((TraceableTimer) metric).withTracing(timedSpanFactory);
+          }
+          metricsCache.put(id, metric);
+        }
+      }
+    }
+    return (Timer)metric;
   }
 
   @Override

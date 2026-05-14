@@ -14,5 +14,6 @@ module io.avaje.metrics {
 
   uses io.avaje.metrics.spi.SpiMetricBuilder;
   uses io.avaje.metrics.spi.SpiMetricProvider;
+  uses io.avaje.metrics.spi.SpiTimedSpanFactory;
   provides io.avaje.metrics.spi.SpiMetricProvider with DefaultMetricProvider;
 }

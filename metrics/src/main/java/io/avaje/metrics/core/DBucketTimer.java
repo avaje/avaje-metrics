@@ -1,6 +1,9 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
+import io.avaje.metrics.spi.SpiSpan;
+import io.avaje.metrics.spi.SpiTimedSpanFactory.Prepared;
+import io.avaje.metrics.spi.SpiTimedSpanFactory;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -8,18 +11,24 @@ import java.util.function.Supplier;
 /**
  * Default implementation of BucketTimedMetric.
  */
-final class DBucketTimer implements Timer {
+final class DBucketTimer implements Timer, TraceableTimer {
 
   private final ID id;
   final int[] bucketRanges;
   final Timer[] buckets;
   private final int lastBucketIndex;
+  private final @Nullable Prepared preparedSpan;
 
   DBucketTimer(ID id, int[] bucketRanges, Timer[] buckets) {
+    this(id, bucketRanges, buckets, null);
+  }
+
+  private DBucketTimer(ID id, int[] bucketRanges, Timer[] buckets, @Nullable Prepared preparedSpan) {
     this.id = id;
     this.bucketRanges = bucketRanges;
     this.buckets = buckets;
     this.lastBucketIndex = bucketRanges.length;
+    this.preparedSpan = preparedSpan;
   }
 
   @Override
@@ -34,32 +43,55 @@ final class DBucketTimer implements Timer {
 
   @Override
   public void time(Runnable event) {
-    long start = System.nanoTime();
-    try {
-      event.run();
-      add(start);
-    } catch (RuntimeException e) {
-      addErr(start);
-      throw e;
+    if (preparedSpan != null) {
+      Timer.Event timedEvent = startEvent();
+      try {
+        event.run();
+        timedEvent.end();
+      } catch (RuntimeException | Error e) {
+        timedEvent.endWithError(e);
+        throw e;
+      }
+    } else {
+      long start = System.nanoTime();
+      try {
+        event.run();
+        add(start);
+      } catch (RuntimeException | Error e) {
+        addErr(start);
+        throw e;
+      }
     }
   }
 
   @Override
   public <T> T time(Supplier<T> event) {
-    long start = System.nanoTime();
-    try {
-      final T result = event.get();
-      add(start);
-      return result;
-    } catch (Exception e) {
-      addErr(start);
-      throw e;
+    if (preparedSpan != null) {
+      Timer.Event timedEvent = startEvent();
+      try {
+        final T result = event.get();
+        timedEvent.end();
+        return result;
+      } catch (RuntimeException | Error e) {
+        timedEvent.endWithError(e);
+        throw e;
+      }
+    } else {
+      long start = System.nanoTime();
+      try {
+        final T result = event.get();
+        add(start);
+        return result;
+      } catch (RuntimeException | Error e) {
+        addErr(start);
+        throw e;
+      }
     }
   }
 
   @Override
   public Timer.Event startEvent() {
-    return new Event(this);
+    return new Event(this, startSpan());
   }
 
   /**
@@ -125,13 +157,31 @@ final class DBucketTimer implements Timer {
     }
   }
 
+  @Override
+  public Timer withTracing(@Nullable SpiTimedSpanFactory timedSpanFactory) {
+    if (this.preparedSpan != null || timedSpanFactory == null) {
+      return this;
+    }
+    var prepared = timedSpanFactory.prepare(id, null);
+    if (prepared == null) {
+      return this;
+    }
+    return new DBucketTimer(id, bucketRanges, buckets, prepared);
+  }
+
+  private @Nullable SpiSpan startSpan() {
+    return preparedSpan == null ? null : preparedSpan.start();
+  }
+
   protected static final class Event implements Timer.Event {
 
     private final DBucketTimer metric;
+    private final @Nullable SpiSpan span;
     private final long startNanos;
 
-    Event(DBucketTimer metric) {
+    Event(DBucketTimer metric, @Nullable SpiSpan span) {
       this.metric = metric;
+      this.span = span;
       this.startNanos = System.nanoTime();
     }
 
@@ -145,7 +195,20 @@ final class DBucketTimer implements Timer {
      */
     @Override
     public void end(boolean withSuccess) {
+      end(withSuccess, null);
+    }
+
+    private void end(boolean withSuccess, @Nullable Throwable error) {
       metric.addEventDuration(withSuccess, duration());
+      if (span != null) {
+        if (withSuccess) {
+          span.end();
+        } else if (error != null) {
+          span.endWithError(error);
+        } else {
+          span.endWithError();
+        }
+      }
     }
 
     /**
@@ -164,6 +227,11 @@ final class DBucketTimer implements Timer {
     @Override
     public void endWithError() {
       end(false);
+    }
+
+    @Override
+    public void endWithError(Throwable error) {
+      end(false, error);
     }
 
     /**

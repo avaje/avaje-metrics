@@ -61,6 +61,10 @@ import java.util.function.Supplier;
  *
  * </code>
  * </pre>
+ *
+ * <p>
+ * Timers obtained via {@link Metrics#tracedTimer(String)} create spans when used with
+ * {@link #startEvent()} or {@link #time(Runnable)} / {@link #time(Supplier)}.
  */
 public interface Timer extends Metric {
 
@@ -78,8 +82,8 @@ public interface Timer extends Metric {
    * Start an event.
    * <p>
    * At the completion of the event one of {@link Event#end()},
-   * {@link Event#endWithError()} or {@link Event#end(boolean)} is called to record the
-   * event duration and success or otherwise.
+   * {@link Event#endWithError()}, {@link Event#endWithError(Throwable)} or
+   * {@link Event#end(boolean)} is called to record the event duration and success or otherwise.
    * <p>
    * This is an alternative to using {@link #addEventSince(boolean, long)} or
    * {@link #addEventDuration(boolean, long)}. Note that this startEvent() method has slightly
@@ -177,6 +181,14 @@ public interface Timer extends Metric {
      * This timed event ended with an error or fault execution.
      */
     void endWithError();
+
+    /**
+     * This timed event ended with an error or fault execution and the underlying span should record
+     * the Throwable when span support is enabled.
+     */
+    default void endWithError(Throwable error) {
+      endWithError();
+    }
 
     /**
      * End specifying whether the event was successful or in error.

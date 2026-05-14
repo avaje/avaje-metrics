@@ -56,9 +56,22 @@ public interface MetricRegistry extends JvmMetrics {
   Timer timer(String name);
 
   /**
+   * Return a traced timer using the metric name.
+   * <p>
+   * Traced timers create spans when used via {@link Timer#startEvent()} or
+   * {@link Timer#time(Runnable)} / {@link Timer#time(java.util.function.Supplier)}.
+   */
+  Timer tracedTimer(String name);
+
+  /**
    * Return the timer using the metric name and tags.
    */
   Timer timer(String name, Tags tags);
+
+  /**
+   * Return a traced timer using the metric name and tags.
+   */
+  Timer tracedTimer(String name, Tags tags);
 
   /**
    * Return the bucket timer using the given base metric name and bucketRanges.
@@ -69,6 +82,14 @@ public interface MetricRegistry extends JvmMetrics {
   Timer timer(String name, int... bucketRanges);
 
   /**
+   * Return the traced bucket timer using the given base metric name and bucketRanges.
+   *
+   * @param name         The metric name
+   * @param bucketRanges Time in milliseconds which are used to create buckets.
+   */
+  Timer tracedTimer(String name, int... bucketRanges);
+
+  /**
    * Return the bucket timer using the given base metric name, tags and bucketRanges.
    *
    * @param name         The metric name
@@ -76,6 +97,15 @@ public interface MetricRegistry extends JvmMetrics {
    * @param bucketRanges Time in milliseconds which are used to create buckets.
    */
   Timer timer(String name, Tags tags, int... bucketRanges);
+
+  /**
+   * Return the traced bucket timer using the given base metric name, tags and bucketRanges.
+   *
+   * @param name         The metric name
+   * @param tags         The metric tags
+   * @param bucketRanges Time in milliseconds which are used to create buckets.
+   */
+  Timer tracedTimer(String name, Tags tags, int... bucketRanges);
 
   /**
    * Return the TimerGroup using the given base metric name.

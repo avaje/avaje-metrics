@@ -90,6 +90,20 @@ public class Metrics {
   }
 
   /**
+   * Return a traced bucket timer given the name and bucket ranges using the default registry.
+   */
+  public static Timer tracedTimer(Class<?> cls, String name, int... bucketRanges) {
+    return tracedTimer(name(cls, name), bucketRanges);
+  }
+
+  /**
+   * Return a traced bucket timer given the name and bucket ranges using the default registry.
+   */
+  public static Timer tracedTimer(String name, int... bucketRanges) {
+    return defaultRegistry.tracedTimer(name, bucketRanges);
+  }
+
+  /**
    * Return a Timer given the name using the default registry.
    */
   public static Timer timer(String name) {
@@ -97,10 +111,24 @@ public class Metrics {
   }
 
   /**
+   * Return a traced timer given the name using the default registry.
+   */
+  public static Timer tracedTimer(String name) {
+    return defaultRegistry.tracedTimer(name);
+  }
+
+  /**
    * Return a Timer using the class, name to derive the MetricName using the default registry.
    */
   public static Timer timer(Class<?> cls, String eventName) {
     return timer(name(cls, eventName));
+  }
+
+  /**
+   * Return a traced timer using the class and name to derive the MetricName using the default registry.
+   */
+  public static Timer tracedTimer(Class<?> cls, String eventName) {
+    return tracedTimer(name(cls, eventName));
   }
 
   /**
