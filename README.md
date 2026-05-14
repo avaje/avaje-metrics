@@ -101,6 +101,11 @@ or "All non-private methods of Avaje Inject Beans"
 Timers can be added by putting `@Timed` on a class. Then enhancement will add timers to
 all non-private methods on that class. We use `@NotTimed` to not have a method timed.
 
+To also create spans for enhanced methods use `@Timed(span = Timed.SpanMode.ON)`.
+Method-level `span = Timed.SpanMode.OFF` overrides a traced class-level default.
+The enhancement agent also supports `timedSpans` modes of `default-off`, `default-on`,
+and `disabled`. If unset, timed spans default to off.
+
 
 #### Using Timer programmatically
 
@@ -108,6 +113,12 @@ Obtain a Timer from the `MetricRegistry` or via `Metrics.timer(...)` which uses 
 
 ```java
 Timer metric = Metrics.timer("test.runnable");
+```
+
+To create spans as well as timed metrics, obtain a traced timer:
+
+```java
+Timer tracedMetric = Metrics.tracedTimer("test.runnable");
 ```
 
 #### Time Runnable
@@ -141,3 +152,6 @@ Event event = timer.startEvent();
 event.end();
 ```
 
+Traced timers use this event lifecycle to create and end spans.
+Use `event.endWithError(Throwable)` when you want the traced span to record the Throwable as
+well as mark the span as an error.

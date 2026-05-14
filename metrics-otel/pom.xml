@@ -4,12 +4,11 @@
   <parent>
     <artifactId>avaje-metrics-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.7-RC2</version>
+    <version>9.8</version>
   </parent>
 
   <artifactId>avaje-metrics-otel</artifactId>
   <name>avaje-metrics-otel</name>
-  <version>9.7-RC2</version>
 
   <properties>
     <surefire.useModulePath>false</surefire.useModulePath>
@@ -26,7 +25,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-metrics</artifactId>
-      <version>9.7-RC2</version>
+      <version>9.8</version>
     </dependency>
 
     <dependency>
@@ -39,7 +38,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>junit</artifactId>
-      <version>1.5</version>
+      <version>1.8</version>
       <scope>test</scope>
     </dependency>
 

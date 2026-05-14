@@ -18,6 +18,24 @@ import java.lang.annotation.Target;
 public @interface Timed {
 
   /**
+   * Controls whether timed enhancement should also create spans.
+   */
+  enum SpanMode {
+    /**
+     * Use the surrounding default.
+     */
+    DEFAULT,
+    /**
+     * Create spans for timed methods.
+     */
+    ON,
+    /**
+     * Do not create spans for timed methods.
+     */
+    OFF
+  }
+
+  /**
    * Set the prefix for metric names. Typically used at class level to define a common prefix.
    * <p>
    * By default <em>app</em> is the prefix used for timed metrics with <em>web.api</em> is the
@@ -58,4 +76,11 @@ public @interface Timed {
    * Defining buckets means a bucket timer will be used instead of a standard timer.
    */
   int[] buckets() default {};
+
+  /**
+   * Specify whether timed enhancement should also create spans.
+   * <p>
+   * {@link SpanMode#DEFAULT} inherits the class-level or agent-level setting.
+   */
+  SpanMode span() default SpanMode.DEFAULT;
 }
