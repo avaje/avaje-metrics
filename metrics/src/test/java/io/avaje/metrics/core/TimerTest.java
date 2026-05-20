@@ -21,7 +21,7 @@ class TimerTest {
     assertThat(metric2).isNotSameAs(metric);
     assertThat(metric3).isNotSameAs(metric);
 
-    boolean useContext = false;//metric.isRequestTiming();
+    boolean useContext = false;
     long start = System.nanoTime();
 
     assertEquals("org.test.mytimed", metric.name());
