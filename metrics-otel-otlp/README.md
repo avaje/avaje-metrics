@@ -24,8 +24,7 @@ Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured wit
 OpenTelemetry openTelemetry =
     OtlpOpenTelemetry.builder()
         .endpoint("http://otel-collector:4317")
-        .serviceName("central-notifications")
-        .timedThresholdMicros(1_000)
+        .serviceName("my-service")
         .meterInterval(Duration.ofSeconds(60))
         .traceInterval(Duration.ofSeconds(10))
         .buildAndRegisterGlobal();
