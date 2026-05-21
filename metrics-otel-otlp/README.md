@@ -13,7 +13,7 @@ Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured wit
 <dependency>
   <groupId>io.avaje</groupId>
   <artifactId>avaje-metrics-otel-otlp</artifactId>
-  <version>9.9-RC4</version>
+  <version>9.9-RC5</version>
 </dependency>
 ```
 
@@ -82,5 +82,5 @@ OpenTelemetrySdk sdk =
 - `includeTrace(false)` or `includeMeter(false)` can be used for metrics-only or traces-only setup.
 - If you want more control over SDK setup, wire OpenTelemetry manually and use
   `avaje-metrics-otel-producer` directly.
-- If you also want traced timers via `Metrics.tracedTimer(...)`, add `avaje-metrics-otel`
+- If you also want traced timers via `Metrics.tracedTimer(...)`, add `avaje-metrics-otel-trace`
   separately.
