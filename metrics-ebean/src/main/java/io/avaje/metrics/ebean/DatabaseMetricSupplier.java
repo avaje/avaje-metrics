@@ -1,15 +1,13 @@
 package io.avaje.metrics.ebean;
 
 import io.avaje.applog.AppLog;
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.stats.CounterStats;
 import io.avaje.metrics.stats.TimerStats;
 import io.ebean.Database;
-import io.ebean.meta.MetaCountMetric;
-import io.ebean.meta.MetaQueryMetric;
-import io.ebean.meta.MetaTimedMetric;
-import io.ebean.meta.ServerMetrics;
+import io.ebean.meta.*;
 
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
@@ -30,8 +28,17 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
 
   @Override
   public List<Metric.Statistics> collectMetrics() {
+    return collectMetrics(CollectionMode.DELTA);
+  }
+
+  @Override
+  public List<Metric.Statistics> collectMetrics(CollectionMode mode) {
+    boolean reset = mode == CollectionMode.DELTA;
+
+    var dbMetrics = new BasicMetricVisitor(database.name(), MetricNamingMatch.INSTANCE, reset, true, true, true);
+    database.metaInfo().visitMetrics(dbMetrics);
+
     List<Metric.Statistics> metrics = new ArrayList<>();
-    ServerMetrics dbMetrics = database.metaInfo().collectMetrics();
     if (log.isLoggable(Level.DEBUG)) {
       log.log(Level.DEBUG, dbMetrics.asJson().withHash(false).withNewLine(false).json());
     }

@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.NamingMatch;
 import io.avaje.metrics.Timer;
@@ -69,8 +70,46 @@ class DBucketTimerTest {
     assertThat(collect(buckets[2])).isEmpty();
   }
 
+  @Test
+  void collectTimer_cumulative() {
+    DBucketTimer bucketTimedMetric = create();
+
+    long fiftyMillisAsNanos = TimeUnit.MILLISECONDS.toNanos(50);
+    bucketTimedMetric.addEventDuration(true, fiftyMillisAsNanos);
+
+    Timer bucket = bucketTimedMetric.buckets[0];
+    Timer.Stats stats = collectTimer(bucket, CollectionMode.CUMULATIVE);
+    assertEquals(1, stats.count());
+    assertEquals(50_000, stats.total());
+    assertEquals(50_000, stats.max());
+
+    Timer.Stats stats2 = collectTimer(bucket, CollectionMode.CUMULATIVE);
+    assertEquals(1, stats2.count());
+    assertEquals(50_000, stats2.total());
+    assertEquals(0, stats2.max());
+
+    long fortyMillisAsNanos = TimeUnit.MILLISECONDS.toNanos(40);
+    bucketTimedMetric.addEventDuration(true, fortyMillisAsNanos);
+    Timer.Stats stats3 = collectTimer(bucket, CollectionMode.CUMULATIVE);
+    assertEquals(2, stats3.count());
+    assertEquals(90_000, stats3.total());
+    assertEquals(40_000, stats3.max());
+
+    Timer.Stats delta = collectTimer(bucket);
+    assertEquals(2, delta.count());
+    assertEquals(90_000, delta.total());
+    assertEquals(0, delta.max());
+    assertThat(collect(bucket)).isEmpty();
+  }
+
   private Timer.Stats collectTimer(Timer timer) {
     DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
+    timer.collect(collector);
+    return (Timer.Stats) collector.list().get(0);
+  }
+
+  private Timer.Stats collectTimer(Timer timer, CollectionMode mode) {
+    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE, mode);
     timer.collect(collector);
     return (Timer.Stats) collector.list().get(0);
   }

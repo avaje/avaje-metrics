@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OtelMetricProducerTest {
 
   @Test
-  void counter_deltaAcrossCollections() {
+  void counter_cumulativeAcrossCollections() {
     var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
     var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
@@ -42,17 +42,25 @@ class OtelMetricProducerTest {
     epochNanosSource.advanceSeconds(10);
     var second = onlyMetric(producer.produce(Resource.empty()));
 
+    epochNanosSource.advanceSeconds(10);
+    var third = onlyMetric(producer.produce(Resource.empty()));
+
     assertThat(first.getName()).isEqualTo("app.requests");
-    assertThat(first.getLongSumData().getAggregationTemporality()).isEqualTo(AggregationTemporality.DELTA);
+    assertThat(first.getLongSumData().getAggregationTemporality()).isEqualTo(AggregationTemporality.CUMULATIVE);
     assertThat(first.getLongSumData().isMonotonic()).isTrue();
     assertThat(onlyLongPoint(first).getStartEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     assertThat(onlyLongPoint(first).getEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:10Z")));
     assertThat(onlyLongPoint(first).getValue()).isEqualTo(5);
 
     assertThat(second.getName()).isEqualTo("app.requests");
-    assertThat(onlyLongPoint(second).getStartEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:10Z")));
+    assertThat(onlyLongPoint(second).getStartEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     assertThat(onlyLongPoint(second).getEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:20Z")));
-    assertThat(onlyLongPoint(second).getValue()).isEqualTo(3);
+    assertThat(onlyLongPoint(second).getValue()).isEqualTo(8);
+
+    assertThat(third.getName()).isEqualTo("app.requests");
+    assertThat(onlyLongPoint(third).getStartEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
+    assertThat(onlyLongPoint(third).getEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:30Z")));
+    assertThat(onlyLongPoint(third).getValue()).isEqualTo(8);
   }
 
   @Test
@@ -73,7 +81,7 @@ class OtelMetricProducerTest {
   }
 
   @Test
-  void timer_metricsIncludeSuccessAndErrorSeries() {
+  void timer_metricsAreCumulativeAndMaxResets() {
     var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
     var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
@@ -83,9 +91,9 @@ class OtelMetricProducerTest {
     timer.addEventDuration(false, 2_000_000L);
     epochNanosSource.advanceSeconds(5);
 
-    Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
+    Map<String, MetricData> first = byName(producer.produce(Resource.empty()));
 
-    assertThat(metrics).containsKeys(
+    assertThat(first).containsKeys(
       "app.service.method.count",
       "app.service.method.total",
       "app.service.method.max",
@@ -93,16 +101,44 @@ class OtelMetricProducerTest {
       "app.service.method.error.total",
       "app.service.method.error.max");
 
-    assertThat(onlyLongSumPoint(metrics.get("app.service.method.count")).getValue()).isEqualTo(1);
-    assertThat(onlyLongSumPoint(metrics.get("app.service.method.total")).getValue()).isEqualTo(5_000L);
-    assertThat(onlyLongGaugePoint(metrics.get("app.service.method.max")).getValue()).isEqualTo(5_000L);
-    assertThat(onlyLongSumPoint(metrics.get("app.service.method.error.count")).getValue()).isEqualTo(1);
-    assertThat(onlyLongSumPoint(metrics.get("app.service.method.error.total")).getValue()).isEqualTo(2_000L);
-    assertThat(onlyLongGaugePoint(metrics.get("app.service.method.error.max")).getValue()).isEqualTo(2_000L);
+    assertThat(first.get("app.service.method.count").getLongSumData().getAggregationTemporality())
+      .isEqualTo(AggregationTemporality.CUMULATIVE);
+    assertThat(onlyLongSumPoint(first.get("app.service.method.count")).getStartEpochNanos())
+      .isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
+    assertThat(onlyLongSumPoint(first.get("app.service.method.count")).getEpochNanos())
+      .isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:05Z")));
+    assertThat(onlyLongSumPoint(first.get("app.service.method.count")).getValue()).isEqualTo(1);
+    assertThat(onlyLongSumPoint(first.get("app.service.method.total")).getValue()).isEqualTo(5_000L);
+    assertThat(onlyLongGaugePoint(first.get("app.service.method.max")).getValue()).isEqualTo(5_000L);
+    assertThat(onlyLongSumPoint(first.get("app.service.method.error.count")).getValue()).isEqualTo(1);
+    assertThat(onlyLongSumPoint(first.get("app.service.method.error.total")).getValue()).isEqualTo(2_000L);
+    assertThat(onlyLongGaugePoint(first.get("app.service.method.error.max")).getValue()).isEqualTo(2_000L);
+
+    epochNanosSource.advanceSeconds(5);
+    Map<String, MetricData> second = byName(producer.produce(Resource.empty()));
+
+    assertThat(onlyLongSumPoint(second.get("app.service.method.count")).getValue()).isEqualTo(1);
+    assertThat(onlyLongSumPoint(second.get("app.service.method.total")).getValue()).isEqualTo(5_000L);
+    assertThat(onlyLongGaugePoint(second.get("app.service.method.max")).getValue()).isEqualTo(0L);
+    assertThat(onlyLongSumPoint(second.get("app.service.method.error.count")).getValue()).isEqualTo(1);
+    assertThat(onlyLongSumPoint(second.get("app.service.method.error.total")).getValue()).isEqualTo(2_000L);
+    assertThat(onlyLongGaugePoint(second.get("app.service.method.error.max")).getValue()).isEqualTo(0L);
+
+    timer.addEventDuration(true, 3_000_000L);
+    timer.addEventDuration(false, 7_000_000L);
+    epochNanosSource.advanceSeconds(5);
+    Map<String, MetricData> third = byName(producer.produce(Resource.empty()));
+
+    assertThat(onlyLongSumPoint(third.get("app.service.method.count")).getValue()).isEqualTo(2);
+    assertThat(onlyLongSumPoint(third.get("app.service.method.total")).getValue()).isEqualTo(8_000L);
+    assertThat(onlyLongGaugePoint(third.get("app.service.method.max")).getValue()).isEqualTo(3_000L);
+    assertThat(onlyLongSumPoint(third.get("app.service.method.error.count")).getValue()).isEqualTo(2);
+    assertThat(onlyLongSumPoint(third.get("app.service.method.error.total")).getValue()).isEqualTo(9_000L);
+    assertThat(onlyLongGaugePoint(third.get("app.service.method.error.max")).getValue()).isEqualTo(7_000L);
   }
 
   @Test
-  void timedThreshold_skipsSmallTimers() {
+  void timedThreshold_appliesToCumulativeTotal() {
     var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
     var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 10_000, epochNanosSource);
@@ -112,6 +148,15 @@ class OtelMetricProducerTest {
     epochNanosSource.advanceSeconds(5);
 
     assertThat(producer.produce(Resource.empty())).isEmpty();
+
+    timer.addEventDuration(true, 9_000_000L);
+    epochNanosSource.advanceSeconds(5);
+
+    Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
+
+    assertThat(onlyLongSumPoint(metrics.get("app.fast.method.count")).getValue()).isEqualTo(2);
+    assertThat(onlyLongSumPoint(metrics.get("app.fast.method.total")).getValue()).isEqualTo(10_000L);
+    assertThat(onlyLongGaugePoint(metrics.get("app.fast.method.max")).getValue()).isEqualTo(9_000L);
   }
 
   @Test
@@ -129,6 +174,8 @@ class OtelMetricProducerTest {
 
     Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
 
+    assertThat(metrics.get("app.bytes.sent.count").getLongSumData().getAggregationTemporality())
+      .isEqualTo(AggregationTemporality.CUMULATIVE);
     assertThat(onlyLongSumPoint(metrics.get("app.bytes.sent.count")).getValue()).isEqualTo(2);
     assertThat(onlyLongSumPoint(metrics.get("app.bytes.sent.total")).getValue()).isEqualTo(3072L);
     assertThat(onlyLongGaugePoint(metrics.get("app.bytes.sent.max")).getValue()).isEqualTo(2048L);
@@ -155,6 +202,7 @@ class OtelMetricProducerTest {
       MetricData metric = onlyMetric(reader.collectAllMetrics());
 
       assertThat(metric.getName()).isEqualTo("app.checkout");
+      assertThat(metric.getLongSumData().getAggregationTemporality()).isEqualTo(AggregationTemporality.CUMULATIVE);
       assertThat(metric.getInstrumentationScopeInfo().getName()).isEqualTo("custom.scope");
       assertThat(metric.getResource().getAttribute(AttributeKey.stringKey("service.name"))).isEqualTo("catalog");
       assertThat(onlyLongPoint(metric).getValue()).isEqualTo(4);

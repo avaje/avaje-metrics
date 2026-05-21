@@ -10,7 +10,7 @@ class ValueCounterTest {
   @Test
   void testGetStatisticsWithNoReset() {
     ValueCounter counter = new ValueCounter(Metric.ID.of("junk"));
-    assertEquals(Long.MIN_VALUE, counter.max());
+    assertEquals(0, counter.max());
 
     counter.add(100);
 
@@ -31,7 +31,7 @@ class ValueCounterTest {
 
     assertEquals(0, counter.count());
     assertEquals(0, counter.total());
-    assertEquals(Long.MIN_VALUE, counter.max());
+    assertEquals(0, counter.max());
 
     counter.add(100);
     assertEquals(1, counter.count());
@@ -56,6 +56,6 @@ class ValueCounterTest {
     counter.reset();
     assertEquals(0, counter.count());
     assertEquals(0, counter.total());
-    assertEquals(Long.MIN_VALUE, counter.max());
+    assertEquals(0, counter.max());
   }
 }

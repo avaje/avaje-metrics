@@ -4,6 +4,7 @@ import io.avaje.metrics.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -156,6 +157,59 @@ class TimerTest {
     assertThat(stat0.total()).isGreaterThan(0);
     assertThat(stat0.mean()).isGreaterThan(0);
     assertThat(stat0.max()).isGreaterThan(0);
+  }
+
+  @Test
+  void collectMetrics_cumulative() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer metric = registry.timer("test.timer.cumulative");
+
+    metric.addEventDuration(true, TimeUnit.MILLISECONDS.toNanos(5));
+    metric.addEventDuration(false, TimeUnit.MILLISECONDS.toNanos(2));
+
+    List<Metric.Statistics> stats = registry.collectMetrics(CollectionMode.CUMULATIVE);
+    assertThat(stats).hasSize(2);
+
+    Timer.Stats success = (Timer.Stats) stats.get(0);
+    Timer.Stats error = (Timer.Stats) stats.get(1);
+    assertEquals("test.timer.cumulative", success.name());
+    assertEquals(1, success.count());
+    assertEquals(5_000, success.total());
+    assertEquals(5_000, success.max());
+    assertEquals("test.timer.cumulative.error", error.name());
+    assertEquals(1, error.count());
+    assertEquals(2_000, error.total());
+    assertEquals(2_000, error.max());
+
+    List<Metric.Statistics> stats2 = registry.collectMetrics(CollectionMode.CUMULATIVE);
+    assertThat(stats2).hasSize(2);
+    assertEquals(1, ((Timer.Stats) stats2.get(0)).count());
+    assertEquals(5_000, ((Timer.Stats) stats2.get(0)).total());
+    assertEquals(0, ((Timer.Stats) stats2.get(0)).max());
+    assertEquals(1, ((Timer.Stats) stats2.get(1)).count());
+    assertEquals(2_000, ((Timer.Stats) stats2.get(1)).total());
+    assertEquals(0, ((Timer.Stats) stats2.get(1)).max());
+
+    metric.addEventDuration(true, TimeUnit.MILLISECONDS.toNanos(3));
+    metric.addEventDuration(false, TimeUnit.MILLISECONDS.toNanos(7));
+    List<Metric.Statistics> stats3 = registry.collectMetrics(CollectionMode.CUMULATIVE);
+    assertThat(stats3).hasSize(2);
+    assertEquals(2, ((Timer.Stats) stats3.get(0)).count());
+    assertEquals(8_000, ((Timer.Stats) stats3.get(0)).total());
+    assertEquals(3_000, ((Timer.Stats) stats3.get(0)).max());
+    assertEquals(2, ((Timer.Stats) stats3.get(1)).count());
+    assertEquals(9_000, ((Timer.Stats) stats3.get(1)).total());
+    assertEquals(7_000, ((Timer.Stats) stats3.get(1)).max());
+
+    List<Metric.Statistics> stats4 = registry.collectMetrics();
+    assertThat(stats4).hasSize(2);
+    assertEquals(2, ((Timer.Stats) stats4.get(0)).count());
+    assertEquals(8_000, ((Timer.Stats) stats4.get(0)).total());
+    assertEquals(0, ((Timer.Stats) stats4.get(0)).max());
+    assertEquals(2, ((Timer.Stats) stats4.get(1)).count());
+    assertEquals(9_000, ((Timer.Stats) stats4.get(1)).total());
+    assertEquals(0, ((Timer.Stats) stats4.get(1)).max());
+    assertThat(registry.collectMetrics()).isEmpty();
   }
 
 //

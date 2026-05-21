@@ -333,8 +333,13 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public List<Metric.Statistics> collectMetrics() {
+    return collectMetrics(CollectionMode.DELTA);
+  }
+
+  @Override
+  public List<Metric.Statistics> collectMetrics(CollectionMode mode) {
     synchronized (monitor) {
-      final DStatsCollector collector = new DStatsCollector(namingConvention);
+      final DStatsCollector collector = new DStatsCollector(namingConvention, mode);
       collectAppMetrics(collector);
       return collector.list();
     }
@@ -342,7 +347,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JsonMetrics collectAsJson() {
-    return new DJson(this);
+    return collectAsJson(CollectionMode.DELTA);
+  }
+
+  @Override
+  public JsonMetrics collectAsJson(CollectionMode mode) {
+    return new DJson(this, mode);
   }
 
   private void collectAppMetrics(DStatsCollector collector) {
@@ -350,21 +360,23 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
       metric.collect(collector);
     }
     for (MetricSupplier supplier : suppliers) {
-      collector.addAll(supplier.collectMetrics());
+      collector.addAll(supplier.collectMetrics(collector.collectionMode()));
     }
   }
 
   private static class DJson implements JsonMetrics {
 
     private final DefaultMetricProvider provider;
+    private final CollectionMode mode;
 
-    DJson(DefaultMetricProvider provider) {
+    DJson(DefaultMetricProvider provider, CollectionMode mode) {
       this.provider = provider;
+      this.mode = mode;
     }
 
     @Override
     public void write(Appendable appendable) {
-      JsonWriter.writeTo(appendable, provider.collectMetrics());
+      JsonWriter.writeTo(appendable, provider.collectMetrics(mode));
     }
 
     @Override

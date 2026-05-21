@@ -11,4 +11,12 @@ public interface MetricSupplier {
    * Return extra metrics that should be included in metrics reporting.
    */
   List<Metric.Statistics> collectMetrics();
+
+  /**
+   * Return extra metrics that should be included in metrics reporting for the
+   * given collection mode.
+   */
+  default List<Metric.Statistics> collectMetrics(CollectionMode mode) {
+    return collectMetrics();
+  }
 }

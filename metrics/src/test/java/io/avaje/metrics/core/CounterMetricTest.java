@@ -33,12 +33,6 @@ class CounterMetricTest {
     assertEquals(0, counterMetric.count());
   }
 
-  private List<Metric.Statistics> collect(Metric metric) {
-    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
-    metric.collect(collector);
-    return collector.list();
-  }
-
   @Test
   void tags() {
     MetricRegistry registry = Metrics.registry();
@@ -76,5 +70,39 @@ class CounterMetricTest {
     assertThat(counter0.count()).isEqualTo(0);
     assertThat(counter1.count()).isEqualTo(0);
     assertThat(counter2.count()).isEqualTo(0);
+  }
+
+  @Test
+  void collectCumulative() {
+    DCounter counterMetric = new DCounter(Metric.ID.of("org.test.mycountermetric.cumulative"));
+    counterMetric.inc();
+    counterMetric.inc();
+
+    List<Metric.Statistics> stats = collect(counterMetric, CollectionMode.CUMULATIVE);
+    assertThat(stats).hasSize(1);
+    assertThat(((Counter.Stats) stats.get(0)).count()).isEqualTo(2);
+    assertThat(counterMetric.count()).isEqualTo(2);
+
+    List<Metric.Statistics> stats2 = collect(counterMetric, CollectionMode.CUMULATIVE);
+    assertThat(stats2).hasSize(1);
+    assertThat(((Counter.Stats) stats2.get(0)).count()).isEqualTo(2);
+    assertThat(counterMetric.count()).isEqualTo(2);
+
+    List<Metric.Statistics> stats3 = collect(counterMetric);
+    assertThat(stats3).hasSize(1);
+    assertThat(((Counter.Stats) stats3.get(0)).count()).isEqualTo(2);
+    assertThat(counterMetric.count()).isEqualTo(0);
+  }
+
+  private List<Metric.Statistics> collect(Metric metric) {
+    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE);
+    metric.collect(collector);
+    return collector.list();
+  }
+
+  private List<Metric.Statistics> collect(Metric metric, CollectionMode mode) {
+    DStatsCollector collector = new DStatsCollector(NamingMatch.INSTANCE, mode);
+    metric.collect(collector);
+    return collector.list();
   }
 }

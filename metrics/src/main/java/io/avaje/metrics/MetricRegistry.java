@@ -135,14 +135,26 @@ public interface MetricRegistry extends JvmMetrics {
   MetricRegistry namingUnderscore();
 
   /**
-   * Collect all the metrics.
+   * Collect all the metrics using {@link CollectionMode#DELTA}.
    */
   List<Metric.Statistics> collectMetrics();
 
   /**
-   * Collect the metrics for writing as JSON (typically to a supplied Appender).
+   * Collect all the metrics using the given collection mode.
+   */
+  List<Metric.Statistics> collectMetrics(CollectionMode mode);
+
+  /**
+   * Collect the metrics for writing as JSON using {@link CollectionMode#DELTA}
+   * (typically to a supplied Appender).
    */
   JsonMetrics collectAsJson();
+
+  /**
+   * Collect the metrics for writing as JSON using the given collection mode
+   * (typically to a supplied Appender).
+   */
+  JsonMetrics collectAsJson(CollectionMode mode);
 
   /**
    * Write the collected metrics in JSON form.
