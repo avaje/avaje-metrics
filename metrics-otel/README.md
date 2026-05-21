@@ -7,6 +7,9 @@ The module collects avaje metrics on a configurable schedule and pushes them to 
 `OpenTelemetry` or `MeterProvider` instance. The OTEL SDK and its configured exporters
 (OTLP, Prometheus, logging, etc.) handle shipping the data to your backend.
 
+If you want OpenTelemetry collection time to define the interval instead of a separate avaje
+schedule, use `avaje-metrics-otel-producer` instead.
+
 ## Maven dependency
 
 ```xml
