@@ -137,8 +137,12 @@ path. Although counters and totals are cumulative, `name.max` resets on collecti
 can consume the max window before another reads it.
 
 Supplier-backed metrics only behave cumulatively when the supplier implements
-`MetricSupplier.collectMetrics(CollectionMode)`. Some supplier-based integrations, such as
-`avaje-metrics-ebean`, still need a follow-up update for cumulative collection semantics.
+`MetricSupplier.collectMetrics(CollectionMode)`.
+
+`avaje-metrics-ebean` now supports both delta and cumulative collection modes. Its cumulative timed
+and query `max` values rely on the corresponding Ebean runtime fix that resets `max` on each
+collection; without that runtime change, cumulative `count` and `total` still work but `max`
+behaves like a lifetime high-water mark.
 
 Do not use `avaje-metrics-otel` and `avaje-metrics-otel-producer` for the same registry/export
 path at the same time, or you will emit duplicate telemetry.
