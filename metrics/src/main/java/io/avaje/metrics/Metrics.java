@@ -111,10 +111,24 @@ public class Metrics {
   }
 
   /**
+   * Return a Timer given the name using the default registry.
+   */
+  public static Timer timer(String name, String... tags) {
+    return defaultRegistry.timer(name, Tags.of(tags));
+  }
+
+  /**
    * Return a traced timer given the name using the default registry.
    */
   public static Timer tracedTimer(String name) {
     return defaultRegistry.tracedTimer(name);
+  }
+
+  /**
+   * Return a traced timer given the name using the default registry.
+   */
+  public static Timer tracedTimer(String name, String... tags) {
+    return defaultRegistry.tracedTimer(name, Tags.of(tags));
   }
 
   /**

@@ -123,6 +123,29 @@ class OtelTimedSpanFactoryTest {
   }
 
   @Test
+  void tracedTimer_labelTagUsesMethodLabelForSpanName() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer timer = registry.tracedTimer("web.api", Tags.of("label:CustomerResource.staticGeneral", "env:prod"));
+
+    var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
+    try (Scope ignored = parent.makeCurrent()) {
+      timer.time(() -> "ok");
+    } finally {
+      parent.end();
+    }
+
+    List<SpanData> spans = exporter.getFinishedSpanItems();
+    assertThat(spans).hasSize(2);
+    SpanData span = spans.stream()
+      .filter(it -> it.getName().equals("CustomerResource.staticGeneral"))
+      .findFirst()
+      .orElseThrow();
+    assertThat(span.getAttributes().get(AttributeKey.stringKey("avaje.metrics.name"))).isEqualTo("web.api");
+    assertThat(span.getAttributes().get(AttributeKey.stringKey("label"))).isEqualTo("CustomerResource.staticGeneral");
+    assertThat(span.getAttributes().get(AttributeKey.stringKey("env"))).isEqualTo("prod");
+  }
+
+  @Test
   void tracedTimer_withoutGlobalTelemetry_isNoop() {
     MetricRegistry registry = Metrics.createRegistry();
     GlobalOpenTelemetry.resetForTest();

@@ -37,7 +37,7 @@ class MetricIDTest {
   @Test
   void testToString() {
     var one = Metric.ID.of("one", Tags.of("a", "b"));
-    assertThat(one.toString()).isEqualTo("one tags:[a, b]");
+    assertThat(one.toString()).isEqualTo("one [a, b]");
 
     assertThat(Metric.ID.of("one").toString()).isEqualTo("one");
     assertThat(Metric.ID.of("one", Tags.of()).toString()).isEqualTo("one");

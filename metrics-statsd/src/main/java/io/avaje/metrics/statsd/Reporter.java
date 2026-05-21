@@ -72,7 +72,9 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
     @Override
     public void visit(Timer.Stats timed) {
       if (timedThreshold == 0 || timedThreshold < timed.total()) {
-        if (timed.name().startsWith("web.api.")) {
+        if (hasLabelTag(timed.tags())) {
+          sendValues(timed, timed.name(), timed.tags());
+        } else if (timed.name().startsWith("web.api.")) {
           String labelTag = "label:" + trim(timed.name(), 8);
           sendValues(timed, "web.api", timed.id().tags().append(labelTag));
         } else if (timed.name().startsWith("app.")) {
@@ -82,6 +84,15 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
           sendValues(timed, timed.name(), timed.tags());
         }
       }
+    }
+
+    private boolean hasLabelTag(String[] tags) {
+      for (String tag : tags) {
+        if (tag.startsWith("label:")) {
+          return true;
+        }
+      }
+      return false;
     }
 
     @Override

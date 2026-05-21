@@ -19,7 +19,17 @@ public final class OtelTimedSpanFactory implements SpiTimedSpanFactory {
 
   @Override
   public @Nullable Prepared prepare(Metric.ID id, @Nullable String bucketRange) {
-    return new PreparedSpan(id.name(), attributes(id, bucketRange));
+    return new PreparedSpan(spanName(id), attributes(id, bucketRange));
+  }
+
+  private String spanName(Metric.ID id) {
+    for (String tag : id.tags().array()) {
+      int colon = tag.indexOf(':');
+      if (colon > 0 && "label".equals(tag.substring(0, colon))) {
+        return tag.substring(colon + 1);
+      }
+    }
+    return id.name();
   }
 
   private Attributes attributes(Metric.ID id, @Nullable String bucketRange) {

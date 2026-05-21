@@ -25,8 +25,10 @@ class TagsTest {
   @Test
   void testToString() {
     assertThat(Tags.EMPTY.toString()).isEqualTo("");
-    assertThat(Tags.of("e:d", "d:v").toString()).isEqualTo("tags:[e:d, d:v]");
-    assertThat(Tags.of("a", "b", "x", "y").toString()).isEqualTo("tags:[a, b, x, y]");
+    assertThat(Tags.EMPTY.cacheKey()).isEqualTo("");
+    assertThat(Tags.of("e:d", "d:v").cacheKey()).isEqualTo("[e:d, d:v]");
+    assertThat(Tags.of("e:d", "d:v").toString()).isEqualTo("[e:d, d:v]");
+    assertThat(Tags.of("a", "b", "x", "y").toString()).isEqualTo("[a, b, x, y]");
   }
 
   @Test

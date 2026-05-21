@@ -78,6 +78,21 @@ class OtelReporterTest {
   }
 
   @Test
+  void counter_withNullTagEntry_skipped() {
+    Counter counter = registry.counter("app.login.count", Tags.of(null, "env:prod"));
+    counter.inc(10);
+
+    reporter.report();
+
+    Map<String, MetricData> metrics = collectByName();
+    assertThat(metrics).containsKey("app.login.count");
+    MetricData data = metrics.get("app.login.count");
+    LongPointData point = data.getLongSumData().getPoints().iterator().next();
+    assertThat(point.getAttributes().get(io.opentelemetry.api.common.AttributeKey.stringKey("env"))).isEqualTo("prod");
+    assertThat(point.getAttributes().size()).isEqualTo(1);
+  }
+
+  @Test
   void counter_zeroNotReported() {
     registry.counter("app.noop.count");
     // no increments

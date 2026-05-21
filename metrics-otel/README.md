@@ -144,6 +144,8 @@ timer events create OpenTelemetry spans via `GlobalOpenTelemetry`.
 This is especially convenient when running with the OTEL Java agent because the global
 OpenTelemetry instance is already installed. Error spans are marked with error status, and
 `Timer.Event.endWithError(Throwable)` records the exception on the span.
+When a traced timer includes a `label:...` tag, that label is used as the span name while the
+aggregated metric name remains available via the `avaje.metrics.name` attribute.
 
 ## Example: avaje-inject
 
