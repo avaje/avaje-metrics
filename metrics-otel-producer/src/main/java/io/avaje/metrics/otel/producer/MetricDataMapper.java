@@ -5,8 +5,10 @@ import io.avaje.metrics.GaugeDouble;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Meter;
 import io.avaje.metrics.Metric;
+import io.avaje.metrics.Tags;
 import io.avaje.metrics.Timer;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
@@ -32,6 +34,7 @@ final class MetricDataMapper {
   private final InstrumentationScopeInfo scopeInfo;
   private final long timedThresholdMicros;
   private final ConcurrentHashMap<String, Attributes> attributeCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, DerivedMetricNames> derivedNameCache = new ConcurrentHashMap<>();
 
   MetricDataMapper(InstrumentationScopeInfo scopeInfo, long timedThresholdMicros) {
     this.scopeInfo = scopeInfo;
@@ -93,29 +96,29 @@ final class MetricDataMapper {
       if (stats.count() == 0) {
         return;
       }
-      metrics.add(longSumMetric(stats.name(), COUNT_UNIT, stats.count(), true, attributes(stats)));
+      metrics.add(longSumMetric(stats.name(), COUNT_UNIT, stats.count(), true, attributes(stats.id())));
     }
 
     @Override
     public void visit(GaugeDouble.Stats stats) {
-      metrics.add(doubleGaugeMetric(stats.name(), DEFAULT_UNIT, stats.value(), attributes(stats)));
+      metrics.add(doubleGaugeMetric(stats.name(), DEFAULT_UNIT, stats.value(), attributes(stats.id())));
     }
 
     @Override
     public void visit(GaugeLong.Stats stats) {
-      metrics.add(longGaugeMetric(stats.name(), DEFAULT_UNIT, stats.value(), attributes(stats)));
+      metrics.add(longGaugeMetric(stats.name(), DEFAULT_UNIT, stats.value(), attributes(stats.id())));
     }
 
     private List<MetricData> metrics() {
-      return List.copyOf(metrics);
+      return metrics;
     }
 
     private void recordMeterStats(Meter.Stats stats, String unit) {
-      var name = stats.name();
-      var attributes = attributes(stats);
-      metrics.add(longSumMetric(name + ".count", COUNT_UNIT, stats.count(), true, attributes));
-      metrics.add(longSumMetric(name + ".total", unit, stats.total(), true, attributes));
-      metrics.add(longGaugeMetric(name + ".max", unit, stats.max(), attributes));
+      var names = derivedMetricNames(stats.name());
+      var attributes = attributes(stats.id());
+      metrics.add(longSumMetric(names.count(), COUNT_UNIT, stats.count(), true, attributes));
+      metrics.add(longSumMetric(names.total(), unit, stats.total(), true, attributes));
+      metrics.add(longGaugeMetric(names.max(), unit, stats.max(), attributes));
     }
 
     private MetricData longSumMetric(String name, String unit, long value, boolean monotonic, Attributes attributes) {
@@ -152,9 +155,59 @@ final class MetricDataMapper {
         GaugeData.createDoubleGaugeData(
           List.of(DoublePointData.create(startEpochNanos, epochNanos, attributes, value, List.of()))));
     }
+  }
 
-    private Attributes attributes(Metric.Statistics stats) {
-      return OtelAttributes.of(stats.id().tags(), attributeCache);
+  private Attributes attributes(Metric.ID id) {
+    return attributes(id.tags());
+  }
+
+  private Attributes attributes(Tags tags) {
+    var cacheKey = tags.cacheKey();
+    if (cacheKey.isEmpty()) {
+      return Attributes.empty();
+    }
+    return attributeCache.computeIfAbsent(cacheKey, key -> buildAttributes(tags));
+  }
+
+  private Attributes buildAttributes(Tags tags) {
+    AttributesBuilder builder = Attributes.builder();
+    for (String tag : tags.array()) {
+      if (tag != null) {
+        int colon = tag.indexOf(':');
+        if (colon > 0) {
+          builder.put(tag.substring(0, colon), tag.substring(colon + 1));
+        }
+      }
+    }
+    return builder.build();
+  }
+
+  private DerivedMetricNames derivedMetricNames(String name) {
+    return derivedNameCache.computeIfAbsent(name, DerivedMetricNames::new);
+  }
+
+  private static final class DerivedMetricNames {
+
+    private final String count;
+    private final String total;
+    private final String max;
+
+    private DerivedMetricNames(String baseName) {
+      this.count = baseName + ".count";
+      this.total = baseName + ".total";
+      this.max = baseName + ".max";
+    }
+
+    private String count() {
+      return count;
+    }
+
+    private String total() {
+      return total;
+    }
+
+    private String max() {
+      return max;
     }
   }
 }

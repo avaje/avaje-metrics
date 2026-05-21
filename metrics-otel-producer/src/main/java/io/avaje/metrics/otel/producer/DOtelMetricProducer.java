@@ -5,8 +5,8 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
 
-import java.time.Clock;
 import java.util.Collection;
+import java.util.function.LongSupplier;
 
 import static java.util.Objects.requireNonNull;
 
@@ -14,33 +14,28 @@ final class DOtelMetricProducer implements OtelMetricProducer {
 
   private final MetricRegistry registry;
   private final MetricDataMapper mapper;
-  private final Clock clock;
+  private final LongSupplier epochNanosSource;
   private long lastCollectionEpochNanos;
 
   DOtelMetricProducer(
     MetricRegistry registry,
     InstrumentationScopeInfo scopeInfo,
     long timedThresholdMicros,
-    Clock clock) {
+    LongSupplier epochNanosSource) {
 
     this.registry = requireNonNull(registry, "registry");
     this.mapper = new MetricDataMapper(requireNonNull(scopeInfo, "scopeInfo"), timedThresholdMicros);
-    this.clock = requireNonNull(clock, "clock");
-    this.lastCollectionEpochNanos = epochNanos(clock);
+    this.epochNanosSource = requireNonNull(epochNanosSource, "epochNanosSource");
+    this.lastCollectionEpochNanos = epochNanosSource.getAsLong();
   }
 
   @Override
   public synchronized Collection<MetricData> produce(Resource resource) {
     requireNonNull(resource, "resource");
     var startEpochNanos = lastCollectionEpochNanos;
-    var epochNanos = epochNanos(clock);
+    var epochNanos = epochNanosSource.getAsLong();
     var statistics = registry.collectMetrics();
     lastCollectionEpochNanos = epochNanos;
     return mapper.map(resource, startEpochNanos, epochNanos, statistics);
-  }
-
-  private static long epochNanos(Clock clock) {
-    var instant = clock.instant();
-    return instant.getEpochSecond() * 1_000_000_000L + instant.getNano();
   }
 }

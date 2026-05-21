@@ -4,8 +4,6 @@ import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 
-import java.time.Clock;
-
 import static java.util.Objects.requireNonNull;
 
 final class DOtelMetricProducerBuilder implements OtelMetricProducer.Builder {
@@ -38,6 +36,14 @@ final class DOtelMetricProducerBuilder implements OtelMetricProducer.Builder {
   public OtelMetricProducer build() {
     var effectiveRegistry = registry != null ? registry : Metrics.registry();
     var scopeInfo = InstrumentationScopeInfo.create(scopeName);
-    return new DOtelMetricProducer(effectiveRegistry, scopeInfo, timedThresholdMicros, Clock.systemUTC());
+    return new DOtelMetricProducer(
+      effectiveRegistry,
+      scopeInfo,
+      timedThresholdMicros,
+      DOtelMetricProducerBuilder::systemEpochNanos);
+  }
+
+  private static long systemEpochNanos() {
+    return System.currentTimeMillis() * 1_000_000L;
   }
 }

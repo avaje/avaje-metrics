@@ -17,12 +17,10 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import org.junit.jupiter.api.Test;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,17 +29,17 @@ class OtelMetricProducerTest {
 
   @Test
   void counter_deltaAcrossCollections() {
-    var clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
-    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, clock);
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
     var counter = registry.counter("app.requests");
 
     counter.inc(5);
-    clock.advanceSeconds(10);
+    epochNanosSource.advanceSeconds(10);
     var first = onlyMetric(producer.produce(Resource.empty()));
 
     counter.inc(3);
-    clock.advanceSeconds(10);
+    epochNanosSource.advanceSeconds(10);
     var second = onlyMetric(producer.produce(Resource.empty()));
 
     assertThat(first.getName()).isEqualTo("app.requests");
@@ -59,13 +57,13 @@ class OtelMetricProducerTest {
 
   @Test
   void counter_tagsConvertedAndNullEntriesSkipped() {
-    var clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
-    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, clock);
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
     Counter counter = registry.counter("app.login.count", Tags.of(null, "env:prod", "region:us-east"));
 
     counter.inc(10);
-    clock.advanceSeconds(5);
+    epochNanosSource.advanceSeconds(5);
     MetricData metric = onlyMetric(producer.produce(Resource.empty()));
     LongPointData point = onlyLongPoint(metric);
 
@@ -76,14 +74,14 @@ class OtelMetricProducerTest {
 
   @Test
   void timer_metricsIncludeSuccessAndErrorSeries() {
-    var clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
-    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, clock);
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
     Timer timer = registry.timer("app.service.method");
 
     timer.addEventDuration(true, 5_000_000L);
     timer.addEventDuration(false, 2_000_000L);
-    clock.advanceSeconds(5);
+    epochNanosSource.advanceSeconds(5);
 
     Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
 
@@ -105,29 +103,29 @@ class OtelMetricProducerTest {
 
   @Test
   void timedThreshold_skipsSmallTimers() {
-    var clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
-    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 10_000, clock);
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 10_000, epochNanosSource);
     Timer timer = registry.timer("app.fast.method");
 
     timer.addEventDuration(true, 1_000_000L);
-    clock.advanceSeconds(5);
+    epochNanosSource.advanceSeconds(5);
 
     assertThat(producer.produce(Resource.empty())).isEmpty();
   }
 
   @Test
   void meterAndGauges_areMapped() {
-    var clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
-    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, clock);
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
 
     Meter meter = registry.meter("app.bytes.sent");
     meter.addEvent(1024);
     meter.addEvent(2048);
     registry.gauge("jvm.threads.active", () -> 42L);
     registry.gauge("jvm.memory.pct", () -> 0.75);
-    clock.advanceSeconds(5);
+    epochNanosSource.advanceSeconds(5);
 
     Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
 
@@ -191,31 +189,21 @@ class OtelMetricProducerTest {
     return instant.getEpochSecond() * 1_000_000_000L + instant.getNano();
   }
 
-  private static final class MutableClock extends Clock {
+  private static final class MutableEpochNanosSource implements LongSupplier {
 
-    private Instant instant;
+    private long epochNanos;
 
-    private MutableClock(Instant instant) {
-      this.instant = instant;
+    private MutableEpochNanosSource(long epochNanos) {
+      this.epochNanos = epochNanos;
     }
 
     @Override
-    public ZoneId getZone() {
-      return ZoneOffset.UTC;
-    }
-
-    @Override
-    public Clock withZone(ZoneId zone) {
-      return this;
-    }
-
-    @Override
-    public Instant instant() {
-      return instant;
+    public long getAsLong() {
+      return epochNanos;
     }
 
     private void advanceSeconds(long seconds) {
-      instant = instant.plusSeconds(seconds);
+      epochNanos += seconds * 1_000_000_000L;
     }
   }
 }
