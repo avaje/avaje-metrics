@@ -22,13 +22,59 @@ setups rather than API-only setups.
 
 ## Basic usage
 
+The `MetricProducer` is registered with an OpenTelemetry SDK `SdkMeterProvider`. The
+`registerMetricReader(...)` call is where you choose how metrics are actually collected/exported.
+Common reader choices are:
+
+- `PeriodicMetricReader` for OTLP push/export
+- Prometheus reader/server types for Prometheus scraping
+
+Any normal OpenTelemetry metrics created from the same `SdkMeterProvider` are collected alongside
+the avaje metrics exposed by `OtelMetricProducer`.
+
+### Example: OTLP push
+
 ```java
+MetricReader reader =
+    PeriodicMetricReader.builder(
+            OtlpGrpcMetricExporter.builder()
+                .setEndpoint("http://otel-collector:4317")
+                .build())
+        .setInterval(Duration.ofSeconds(60))
+        .build();
+
 SdkMeterProvider meterProvider = SdkMeterProvider.builder()
     .registerMetricReader(reader)
     .registerMetricProducer(
         OtelMetricProducer.builder()
             .registry(Metrics.registry())
             .timedThresholdMicros(1_000)
+            .build())
+    .build();
+
+OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+    .setMeterProvider(meterProvider)
+    .build();
+
+// Normal OpenTelemetry meters are collected too
+Meter meter = openTelemetry.getMeter("my.app");
+LongCounter counter = meter.counterBuilder("my.app.requests").build();
+counter.add(1);
+```
+
+### Example: Prometheus
+
+```java
+PrometheusHttpServer prometheus = PrometheusHttpServer.builder()
+    .setHost("0.0.0.0")
+    .setPort(9464)
+    .build();
+
+SdkMeterProvider meterProvider = SdkMeterProvider.builder()
+    .registerMetricReader(prometheus)
+    .registerMetricProducer(
+        OtelMetricProducer.builder()
+            .registry(Metrics.registry())
             .build())
     .build();
 ```
@@ -77,6 +123,9 @@ OpenTelemetry SDK reader/exporter, for example:
 
 Use `avaje-metrics-otel` when you want the lighter API-only scheduled reporter and do not need a
 `MetricProducer`.
+
+If you want a convenience module that builds an OTLP-backed `OpenTelemetrySdk` and registers
+`OtelMetricProducer` for you, use `avaje-metrics-otel-otlp`.
 
 ## Important limitation
 
