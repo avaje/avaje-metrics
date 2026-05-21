@@ -8,9 +8,11 @@ final class MTags implements Tags {
     static Tags EMPTY = new MTags(new String[]{});
 
     private final String[] rawTags;
+    private final String raw;
 
     MTags(String[] rawTags) {
-        this.rawTags = rawTags;
+        this.rawTags = Objects.requireNonNull(rawTags);
+        this.raw = rawTags.length == 0 ? "" : Arrays.toString(rawTags);
     }
 
     @Override
@@ -21,6 +23,11 @@ final class MTags implements Tags {
     @Override
     public String[] array() {
         return rawTags;
+    }
+
+    @Override
+    public String cacheKey() {
+        return raw;
     }
 
     @Override
@@ -49,6 +56,6 @@ final class MTags implements Tags {
 
     @Override
     public String toString() {
-        return rawTags.length == 0 ? "" : "tags:" + Arrays.toString(rawTags);
+        return raw;
     }
 }

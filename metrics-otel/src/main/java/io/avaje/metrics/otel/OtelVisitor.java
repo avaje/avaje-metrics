@@ -2,6 +2,7 @@ package io.avaje.metrics.otel;
 
 import io.avaje.metrics.*;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleGauge;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongGauge;
@@ -38,6 +39,7 @@ final class OtelVisitor implements Metric.Visitor {
   private final ConcurrentHashMap<String, LongGauge> meterMaxCache = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, LongGauge> gaugeLongCache = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, DoubleGauge> gaugeDoubleCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Attributes> attributeCache = new ConcurrentHashMap<>();
 
   OtelVisitor(io.opentelemetry.api.metrics.Meter otelMeter, long timedThresholdMicros) {
     this.otelMeter = otelMeter;
@@ -49,7 +51,7 @@ final class OtelVisitor implements Metric.Visitor {
     if (stats.count() == 0) {
       return;
     }
-    Attributes attrs = OtelAttributes.of(stats.tags());
+    Attributes attrs = attributes(stats.id().tags());
     getOrCreate(counterCache, stats.name(), name ->
         otelMeter.counterBuilder(name)
             .setUnit("{event}")
@@ -78,7 +80,7 @@ final class OtelVisitor implements Metric.Visitor {
 
   @Override
   public void visit(GaugeDouble.Stats stats) {
-    Attributes attrs = OtelAttributes.of(stats.tags());
+    Attributes attrs = attributes(stats.id().tags());
     getOrCreate(gaugeDoubleCache, stats.name(), name ->
         otelMeter.gaugeBuilder(name)
             .setUnit("1")
@@ -88,7 +90,7 @@ final class OtelVisitor implements Metric.Visitor {
 
   @Override
   public void visit(GaugeLong.Stats stats) {
-    Attributes attrs = OtelAttributes.of(stats.tags());
+    Attributes attrs = attributes(stats.id().tags());
     getOrCreate(gaugeLongCache, stats.name(), name ->
         otelMeter.gaugeBuilder(name)
             .ofLongs()
@@ -98,7 +100,7 @@ final class OtelVisitor implements Metric.Visitor {
   }
 
   private void recordMeterStats(Meter.Stats stats, String unit) {
-    Attributes attrs = OtelAttributes.of(stats.tags());
+    Attributes attrs = attributes(stats.id().tags());
     String name = stats.name();
 
     getOrCreate(meterCountCache, name, n ->
@@ -123,5 +125,26 @@ final class OtelVisitor implements Metric.Visitor {
 
   private <T> T getOrCreate(ConcurrentHashMap<String, T> cache, String name, Function<String, T> factory) {
     return cache.computeIfAbsent(name, factory);
+  }
+
+  private Attributes attributes(Tags tags) {
+    String cacheKey = tags.cacheKey();
+    if (cacheKey.isEmpty()) {
+      return Attributes.empty();
+    }
+    return attributeCache.computeIfAbsent(cacheKey, key -> buildAttributes(tags));
+  }
+
+  static Attributes buildAttributes(Tags tags) {
+    AttributesBuilder builder = Attributes.builder();
+    for (String tag : tags.array()) {
+      if (tag != null) {
+        int colon = tag.indexOf(':');
+        if (colon > 0) {
+          builder.put(tag.substring(0, colon), tag.substring(colon + 1));
+        }
+      }
+    }
+    return builder.build();
   }
 }

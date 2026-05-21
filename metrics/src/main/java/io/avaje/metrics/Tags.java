@@ -46,6 +46,11 @@ public interface Tags {
     String[] array();
 
     /**
+     * Return an ordered string representation suitable as a cache key.
+     */
+    String cacheKey();
+
+    /**
      * Merge and return as an array.
      *
      * @param moreTags Additional tags that we want to merge.
