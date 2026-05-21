@@ -4,6 +4,7 @@ module io.avaje.metrics.otel.otlp {
 
   requires io.avaje.metrics;
   requires io.avaje.metrics.otel.producer;
+  requires io.avaje.metrics.otel.trace;
   requires io.opentelemetry.api;
   requires io.opentelemetry.context;
   requires io.opentelemetry.exporter.otlp;

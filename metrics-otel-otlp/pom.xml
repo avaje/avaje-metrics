@@ -30,6 +30,12 @@
     </dependency>
 
     <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-metrics-otel-trace</artifactId>
+      <version>9.9-RC5</version>
+    </dependency>
+
+    <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-api</artifactId>
       <version>${otel.version}</version>

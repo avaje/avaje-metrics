@@ -1,7 +1,10 @@
 package io.avaje.metrics.otel.otlp;
 
+import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
+import io.avaje.metrics.Timer;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -16,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import io.opentelemetry.context.Scope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -150,6 +155,40 @@ class OtlpOpenTelemetryTest {
       flush(openTelemetry.getSdkMeterProvider().forceFlush());
 
       assertThat(byName(metricExporter.exportedMetrics())).containsKey("app.requests");
+    }
+  }
+
+  @Test
+  void buildAndRegisterGlobal_enablesTracedTimersByDefault() {
+    GlobalOpenTelemetry.resetForTest();
+    var metricReader = InMemoryMetricReader.create();
+    var spanExporter = InMemorySpanExporter.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = OtlpOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .registry(registry)
+      .metricReader(metricReader)
+      .spanExporter(spanExporter)
+      .buildAndRegisterGlobal()) {
+
+      MetricRegistry tracedRegistry = Metrics.createRegistry();
+      Timer timer = tracedRegistry.tracedTimer("app.service.method");
+
+      var parent = openTelemetry.getTracer("manual").spanBuilder("parent").startSpan();
+      try (Scope ignored = parent.makeCurrent()) {
+        timer.time(() -> "ok");
+      } finally {
+        parent.end();
+      }
+
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems())
+        .extracting(it -> it.getName())
+        .contains("parent", "app.service.method");
+    } finally {
+      GlobalOpenTelemetry.resetForTest();
     }
   }
 
