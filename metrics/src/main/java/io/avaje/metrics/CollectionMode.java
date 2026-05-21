@@ -11,7 +11,9 @@ public enum CollectionMode {
   DELTA,
 
   /**
-   * Collect process-lifetime values without resetting the underlying counters.
+   * Collect process-lifetime count and total values without resetting them.
+   *
+   * <p>Windowed high-water values such as {@code max} may still reset on each collection.
    */
   CUMULATIVE
 }

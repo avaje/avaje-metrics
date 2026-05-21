@@ -20,7 +20,7 @@ final class ValueCounter extends BaseReportName {
   private final @Nullable String bucketRange;
   private final LongAdder count = new LongAdder();
   private final LongAdder total = new LongAdder();
-  private final LongAccumulator max = new LongAccumulator(Math::max, Long.MIN_VALUE);
+  private final LongAccumulator max = new LongAccumulator(Math::max, 0);
 
   ValueCounter(Metric.ID id) {
     super(id);
@@ -56,8 +56,8 @@ final class ValueCounter extends BaseReportName {
     if (count == 0) {
       return null;
     } else {
-      final long maxVal = cumulative ? max.get() : max.getThenReset();
       final long totalVal = cumulative ? total.sum() : total.sumThenReset();
+      final long maxVal = max.getThenReset();
       final Metric.ID reportId = reportId(collector);
       return new TimerStats(reportId, bucketRange, count, totalVal, maxVal);
     }

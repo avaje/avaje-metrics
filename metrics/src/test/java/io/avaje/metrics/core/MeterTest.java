@@ -49,11 +49,20 @@ class MeterTest {
     Meter.Stats statistics2 = (Meter.Stats) collect(metric, CollectionMode.CUMULATIVE).get(0);
     assertEquals(3, statistics2.count());
     assertEquals(4500, statistics2.total());
-    assertEquals(2000, statistics2.max());
+    assertEquals(0, statistics2.max());
     assertEquals(1500, statistics2.mean());
 
+    metric.addEvent(750);
+    Meter.Stats statistics3 = (Meter.Stats) collect(metric, CollectionMode.CUMULATIVE).get(0);
+    assertEquals(4, statistics3.count());
+    assertEquals(5250, statistics3.total());
+    assertEquals(750, statistics3.max());
+    assertEquals(1312, statistics3.mean());
+
     Meter.Stats delta = (Meter.Stats) collect(metric).get(0);
-    assertEquals(3, delta.count());
+    assertEquals(4, delta.count());
+    assertEquals(5250, delta.total());
+    assertEquals(0, delta.max());
     assertEquals(0, metric.count());
     assertThat(collect(metric)).isEmpty();
   }
