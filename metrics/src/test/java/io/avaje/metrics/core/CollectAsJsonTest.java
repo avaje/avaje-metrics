@@ -56,4 +56,22 @@ class CollectAsJsonTest {
     assertThat(asJson).contains("{\"name\":\"my.gauge1\",\"value\":200}");
     assertThat(asJson).contains("{\"name\":\"my.gauge1\",\"value\":400,\"tags\":[\"a\",\"b\"]}");
   }
+
+  @Test
+  void collectAsJsonCumulative() {
+
+    Counter counter = registry.counter("my.cumulative.count");
+    counter.inc();
+    counter.inc();
+
+    String first = registry.collectAsJson(CollectionMode.CUMULATIVE).asJson();
+    assertThat(first).contains("{\"name\":\"my.cumulative.count\",\"value\":2}");
+
+    String second = registry.collectAsJson(CollectionMode.CUMULATIVE).asJson();
+    assertThat(second).contains("{\"name\":\"my.cumulative.count\",\"value\":2}");
+
+    String delta = registry.collectAsJson().asJson();
+    assertThat(delta).contains("{\"name\":\"my.cumulative.count\",\"value\":2}");
+    assertThat(registry.collectAsJson().asJson()).doesNotContain("{\"name\":\"my.cumulative.count\"");
+  }
 }

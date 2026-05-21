@@ -25,8 +25,12 @@ public interface Metric {
   String name();
 
   /**
-   * Typically this is only called by the MetricManager and tells the metric to collect its underlying statistics for
-   * reporting purposes and in addition resetting and internal counters it has.
+   * Typically this is only called by the MetricManager and tells the metric to collect its underlying
+   * statistics for reporting purposes.
+   * <p>
+   * The {@link Visitor#collectionMode()} determines whether the collect operation also resets any
+   * internal counters.
+   * </p>
    */
   void collect(Visitor collector);
 
@@ -121,6 +125,13 @@ public interface Metric {
      */
     default Function<String, String> namingConvention() {
       return NamingMatch.INSTANCE;
+    }
+
+    /**
+     * Return the collection mode to use when gathering metric statistics.
+     */
+    default CollectionMode collectionMode() {
+      return CollectionMode.DELTA;
     }
 
     /**

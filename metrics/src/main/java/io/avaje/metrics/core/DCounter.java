@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.stats.CounterStats;
 
@@ -40,7 +41,9 @@ final class DCounter extends BaseReportName implements Counter {
 
   @Override
   public void collect(Visitor collector) {
-    final long sum = count.sumThenReset();
+    final long sum = (collector.collectionMode() == CollectionMode.CUMULATIVE)
+      ? count.sum()
+      : count.sumThenReset();
     if (sum != 0) {
       final ID reportId = reportId(collector);
       collector.visit(new CounterStats(reportId, sum));

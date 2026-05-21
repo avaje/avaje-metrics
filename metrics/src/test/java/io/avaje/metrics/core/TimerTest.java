@@ -158,6 +158,37 @@ class TimerTest {
     assertThat(stat0.max()).isGreaterThan(0);
   }
 
+  @Test
+  void collectMetrics_cumulative() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer metric = registry.timer("test.timer.cumulative");
+
+    long start = System.nanoTime();
+    metric.add(start);
+    metric.addErr(start);
+
+    List<Metric.Statistics> stats = registry.collectMetrics(CollectionMode.CUMULATIVE);
+    assertThat(stats).hasSize(2);
+
+    Timer.Stats success = (Timer.Stats) stats.get(0);
+    Timer.Stats error = (Timer.Stats) stats.get(1);
+    assertEquals("test.timer.cumulative", success.name());
+    assertEquals(1, success.count());
+    assertEquals("test.timer.cumulative.error", error.name());
+    assertEquals(1, error.count());
+
+    List<Metric.Statistics> stats2 = registry.collectMetrics(CollectionMode.CUMULATIVE);
+    assertThat(stats2).hasSize(2);
+    assertEquals(1, ((Timer.Stats) stats2.get(0)).count());
+    assertEquals(1, ((Timer.Stats) stats2.get(1)).count());
+
+    List<Metric.Statistics> stats3 = registry.collectMetrics();
+    assertThat(stats3).hasSize(2);
+    assertEquals(1, ((Timer.Stats) stats3.get(0)).count());
+    assertEquals(1, ((Timer.Stats) stats3.get(1)).count());
+    assertThat(registry.collectMetrics()).isEmpty();
+  }
+
 //
 //  @Test
 //  public void addEventSince() {

@@ -10,10 +10,16 @@ import java.util.function.Function;
 final class DStatsCollector implements Metric.Visitor {
 
   private final List<Metric.Statistics> list = new ArrayList<>();
-  private final  Function<String, String> namingConvention;
+  private final Function<String, String> namingConvention;
+  private final CollectionMode collectionMode;
 
   public DStatsCollector(Function<String, String> namingConvention) {
+    this(namingConvention, CollectionMode.DELTA);
+  }
+
+  public DStatsCollector(Function<String, String> namingConvention, CollectionMode collectionMode) {
     this.namingConvention = namingConvention;
+    this.collectionMode = collectionMode;
   }
 
   List<Metric.Statistics> list() {
@@ -23,6 +29,11 @@ final class DStatsCollector implements Metric.Visitor {
   @Override
   public Function<String, String> namingConvention() {
     return namingConvention;
+  }
+
+  @Override
+  public CollectionMode collectionMode() {
+    return collectionMode;
   }
 
   @Override

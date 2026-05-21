@@ -1,5 +1,6 @@
 package io.avaje.metrics.core;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.stats.TimerStats;
@@ -50,12 +51,13 @@ final class ValueCounter extends BaseReportName {
   }
 
   Timer.@Nullable Stats collect(Metric.Visitor collector) {
-    final long count = this.count.sumThenReset();
+    final boolean cumulative = collector.collectionMode() == CollectionMode.CUMULATIVE;
+    final long count = cumulative ? this.count.sum() : this.count.sumThenReset();
     if (count == 0) {
       return null;
     } else {
-      final long maxVal = max.getThenReset();
-      final long totalVal = total.sumThenReset();
+      final long maxVal = cumulative ? max.get() : max.getThenReset();
+      final long totalVal = cumulative ? total.sum() : total.sumThenReset();
       final Metric.ID reportId = reportId(collector);
       return new TimerStats(reportId, bucketRange, count, totalVal, maxVal);
     }

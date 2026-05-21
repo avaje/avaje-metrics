@@ -46,17 +46,34 @@ public class Metrics {
   }
 
   /**
-   * Collect all the metrics from the default registry.
+   * Collect all the metrics from the default registry using
+   * {@link CollectionMode#DELTA}.
    */
   public static List<Metric.Statistics> collectMetrics() {
-    return defaultRegistry.collectMetrics();
+    return collectMetrics(CollectionMode.DELTA);
   }
 
   /**
-   * Collect the metrics for writing as JSON (typically to a supplied Appender).
+   * Collect all the metrics from the default registry using the given mode.
+   */
+  public static List<Metric.Statistics> collectMetrics(CollectionMode mode) {
+    return defaultRegistry.collectMetrics(mode);
+  }
+
+  /**
+   * Collect the metrics for writing as JSON using
+   * {@link CollectionMode#DELTA} (typically to a supplied Appender).
    */
   public static MetricRegistry.JsonMetrics collectAsJson() {
-    return defaultRegistry.collectAsJson();
+    return collectAsJson(CollectionMode.DELTA);
+  }
+
+  /**
+   * Collect the metrics for writing as JSON using the given mode
+   * (typically to a supplied Appender).
+   */
+  public static MetricRegistry.JsonMetrics collectAsJson(CollectionMode mode) {
+    return defaultRegistry.collectAsJson(mode);
   }
 
   /**
