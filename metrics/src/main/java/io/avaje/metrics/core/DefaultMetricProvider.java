@@ -151,8 +151,16 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public JvmMetrics registerJvmCoreMetrics() {
+    JvmMemory.createHeapUsed(this, reportChangesOnly, globalTags);
+    JvmProcessMemory.createGauges(this, reportChangesOnly, false, globalTags);
+    JvmThreads.createThreadMetricGroup(this, reportChangesOnly, false);
+    return this;
+  }
+
+  @Override
   public JvmMetrics registerProcessMemoryMetrics() {
-    JvmProcessMemory.createGauges(this, reportChangesOnly, globalTags);
+    JvmProcessMemory.createGauges(this, reportChangesOnly, true, globalTags);
     return this;
   }
 

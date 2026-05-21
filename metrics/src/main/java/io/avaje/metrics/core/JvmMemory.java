@@ -52,6 +52,11 @@ final class JvmMemory {
     }
   }
 
+  static void createHeapUsed(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
+    HeapMemoryUsageSource source = new HeapMemoryUsageSource(ManagementFactory.getMemoryMXBean());
+    new MemUsageGauages(source, "jvm.memory.heap", globalTags).createHeapUsed(registry, reportChangesOnly);
+  }
+
   /**
    * Create the Heap Memory based GaugeMetricGroup.
    */
@@ -81,6 +86,10 @@ final class JvmMemory {
       this.source = source;
       this.baseName = baseName;
       this.globalTags = globalTags;
+    }
+
+    void createHeapUsed(MetricRegistry registry, boolean reportChangesOnly) {
+      registry.register(DGaugeLong.of(name("used"), new Used(source), reportChangesOnly));
     }
 
     void createMetric(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {

@@ -48,6 +48,18 @@ public interface JvmMetrics {
   JvmMetrics registerJvmMetrics();
 
   /**
+   * Register a smaller core set of JVM metrics intended for lower-cardinality / lower-cost export.
+   *
+   * <h4>Base metrics</h4>
+   * <ul>
+   *   <li>jvm.memory.heap.used</li>
+   *   <li>jvm.memory.process.vmrss</li>
+   *   <li>jvm.threads.current</li>
+   * </ul>
+   */
+  JvmMetrics registerJvmCoreMetrics();
+
+  /**
    * Register a metric for OS load.
    *
    * <h4>Base metrics</h4>

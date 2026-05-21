@@ -19,8 +19,8 @@ final class JvmProcessMemory {
   /**
    * Return the list of OS process memory metrics.
    */
-  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
-    new JvmProcessMemory().metrics(registry, reportChangesOnly, globalTags);
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, boolean withHWM, Tags globalTags) {
+    new JvmProcessMemory().metrics(registry, reportChangesOnly, withHWM, globalTags);
   }
 
   /**
@@ -47,7 +47,7 @@ final class JvmProcessMemory {
   /**
    * Return the metrics for VmRSS and VmHWM.
    */
-  public void metrics(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
+  public void metrics(MetricRegistry registry, boolean reportChangesOnly, boolean withHwm, Tags globalTags) {
     if (pid == null) {
       return;
     }
@@ -55,7 +55,9 @@ final class JvmProcessMemory {
     if (procStatus.exists()) {
       Source source = new Source(procStatus);
       registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmrss", globalTags), source::rss, reportChangesOnly));
-      registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmhwm", globalTags), source::hwm, reportChangesOnly));
+      if (withHwm) {
+        registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmhwm", globalTags), source::hwm, reportChangesOnly));
+      }
     }
   }
 
