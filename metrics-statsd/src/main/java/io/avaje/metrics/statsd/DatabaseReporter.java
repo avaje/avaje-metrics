@@ -10,6 +10,7 @@ import io.ebean.meta.MetaTimedMetric;
 import io.ebean.meta.ServerMetrics;
 
 import javax.sql.DataSource;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.avaje.metrics.statsd.Trim.qry;
 
@@ -17,10 +18,17 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
 
   private final Database database;
   private final boolean verbose;
+  private final String dbTag;
+  private final ConcurrentHashMap<String, String> countMetricNames = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, MetricNames> timedMetricNames = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, String> queryTags = new ConcurrentHashMap<>();
+  private final MetricNames txnMetricNames = MetricNames.of("ebean.txn");
+  private final MetricNames queryMetricNames = MetricNames.of("ebean.query");
 
   private DatabaseReporter(Database database, boolean verbose) {
     this.database = database;
     this.verbose = verbose;
+    this.dbTag = "db:" + database.name();
   }
 
   static StatsdReporter.Reporter reporter(Database database, boolean verbose) {
@@ -29,19 +37,17 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
 
   @Override
   public void report(StatsDClient sender) {
-    new DReport(database, sender, verbose).report();
+    new DReport(sender).report();
   }
 
-  private static final class DReport {
+  private final class DReport {
 
     private final StatsDClient reporter;
     private final ServerMetrics dbMetrics;
     private final long epochSecs;
-    private final String dbTag;
 
-    private DReport(Database database, StatsDClient reporter, boolean verbose) {
+    private DReport(StatsDClient reporter) {
       this.reporter = reporter;
-      this.dbTag = "db:" + database.name();
       this.dbMetrics = database.metaInfo().collectMetrics();
       this.epochSecs = System.currentTimeMillis() / 1000;
       DataSource dataSource = database.dataSource();
@@ -97,40 +103,47 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
     }
 
     private void reportCountMetric(MetaCountMetric countMetric) {
-      reporter.count(nm("ebean.count.", countMetric.name()), countMetric.count(), dbTag);
+      reporter.count(countMetricName(countMetric.name()), countMetric.count(), dbTag);
     }
 
     private void reportTimedMetric(MetaTimedMetric metric) {
       final String name = metric.name();
       if (name.startsWith("txn.")) {
-        reportMetric(metric, "ebean.txn", dbTag, "label:" + qry(name));
+        reportMetric(metric, txnMetricNames, dbTag, queryTag(name));
       } else {
-        reportMetric(metric, nm("ebean.timed.", name), dbTag);
+        reportMetric(metric, timedMetricNamesFor(name), dbTag);
       }
     }
 
     private void reportQueryMetric(MetaQueryMetric metric) {
       final var name = metric.name();
-      final var queryTag = "label:" + qry(name);
+      final var queryTag = queryTag(name);
       if (name.startsWith("orm")) {
-        reportMetric(metric, "ebean.query", dbTag, "type:orm", queryTag);
+        reportMetric(metric, queryMetricNames, dbTag, "type:orm", queryTag);
       } else if (name.startsWith("sql")) {
-        reportMetric(metric, "ebean.query", dbTag, "type:sql", queryTag);
+        reportMetric(metric, queryMetricNames, dbTag, "type:sql", queryTag);
       } else {
-        reportMetric(metric, "ebean.query", dbTag, "type:other", queryTag);
+        reportMetric(metric, queryMetricNames, dbTag, "type:other", queryTag);
       }
     }
 
-    private void reportMetric(MetaTimedMetric metric, String name, String... tags) {
-      reporter.countWithTimestamp(nm(name, ".count"), metric.count(), epochSecs, tags);
-      reporter.gaugeWithTimestamp(nm(name, ".max"), metric.max(), epochSecs, tags);
-      reporter.gaugeWithTimestamp(nm(name, ".mean"), metric.mean(), epochSecs, tags);
-      reporter.gaugeWithTimestamp(nm(name, ".total"), metric.total(), epochSecs, tags);
-    }
-
-    private String nm(String name, String suffix) {
-      return name + suffix;
+    private void reportMetric(MetaTimedMetric metric, MetricNames names, String... tags) {
+      reporter.countWithTimestamp(names.count(), metric.count(), epochSecs, tags);
+      reporter.gaugeWithTimestamp(names.max(), metric.max(), epochSecs, tags);
+      reporter.gaugeWithTimestamp(names.mean(), metric.mean(), epochSecs, tags);
+      reporter.gaugeWithTimestamp(names.total(), metric.total(), epochSecs, tags);
     }
   }
 
+  private String countMetricName(String name) {
+    return countMetricNames.computeIfAbsent(name, value -> "ebean.count." + value);
+  }
+
+  private MetricNames timedMetricNamesFor(String name) {
+    return timedMetricNames.computeIfAbsent(name, value -> MetricNames.of("ebean.timed." + value));
+  }
+
+  private String queryTag(String name) {
+    return queryTags.computeIfAbsent(name, value -> "label:" + qry(value));
+  }
 }

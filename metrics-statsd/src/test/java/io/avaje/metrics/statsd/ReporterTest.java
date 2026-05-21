@@ -50,6 +50,27 @@ class ReporterTest {
     });
   }
 
+  @Test
+  void visitTimer_withoutLabelTag_reusesDerivedNamesAndTagsAcrossRuns() {
+    var registry = Metrics.createRegistry();
+    var timer = registry.timer("app.SimpleService.doSomething", Tags.of("env:dev"));
+
+    var calls = new ArrayList<MetricCall>();
+    var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
+
+    timer.time(() -> {});
+    reporter.run();
+
+    timer.time(() -> {});
+    reporter.run();
+
+    assertThat(calls).hasSize(8);
+    for (int i = 0; i < 4; i++) {
+      assertThat(calls.get(i).metricName()).isSameAs(calls.get(i + 4).metricName());
+      assertThat(calls.get(i).tags()).isSameAs(calls.get(i + 4).tags());
+    }
+  }
+
   private StatsDClient recordingClient(List<MetricCall> calls) {
     return (StatsDClient) Proxy.newProxyInstance(
       StatsDClient.class.getClassLoader(),

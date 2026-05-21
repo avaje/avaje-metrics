@@ -7,11 +7,18 @@ import org.jspecify.annotations.NullMarked;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.avaje.metrics.statsd.Trim.trim;
 
 @NullMarked
 final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
+
+  private static final String LABEL_PREFIX = "label:";
+  private static final String WEB_API_PREFIX = "web.api.";
+  private static final String WEB_API_NAME = "web.api";
+  private static final String APP_PREFIX = "app.";
+  private static final String APP_COMPONENT_NAME = "app.component";
 
   private final MetricRegistry registry;
   private final StatsDClient client;
@@ -19,6 +26,8 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
   private final List<StatsdReporter.Reporter> reporters;
   private final ScheduledTask scheduledTask;
   private final AtomicBoolean started = new AtomicBoolean(false);
+  private final ConcurrentHashMap<String, MetricNames> metricNames = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Metric.ID, MetricTarget> timerTargets = new ConcurrentHashMap<>();
 
   Reporter(MetricRegistry registry, StatsDClient client, long timedThreshold, int schedule,
            TimeUnit scheduleTimeUnit, List<StatsdReporter.Reporter> reporters) {
@@ -61,39 +70,23 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
 
     private final long epochSecs = System.currentTimeMillis() / 1000;
 
-    private void sendValues(Meter.Stats stats, String name, String... tags) {
+    private void sendValues(Meter.Stats stats, String name, String[] tags) {
       if (stats.count() > 0) {
-        client.countWithTimestamp(name + ".count", stats.count(), epochSecs, tags);
-        client.gaugeWithTimestamp(name + ".total", stats.total(), epochSecs, tags);
-        client.gaugeWithTimestamp(name + ".mean", stats.mean(), epochSecs, tags);
-        client.gaugeWithTimestamp(name + ".max", stats.max(), epochSecs, tags);
+        var names = metricNamesFor(name);
+        client.countWithTimestamp(names.count(), stats.count(), epochSecs, tags);
+        client.gaugeWithTimestamp(names.total(), stats.total(), epochSecs, tags);
+        client.gaugeWithTimestamp(names.mean(), stats.mean(), epochSecs, tags);
+        client.gaugeWithTimestamp(names.max(), stats.max(), epochSecs, tags);
       }
     }
 
     @Override
     public void visit(Timer.Stats timed) {
-      if (timedThreshold == 0 || timedThreshold < timed.total()) {
-        if (hasLabelTag(timed.tags())) {
-          sendValues(timed, timed.name(), timed.tags());
-        } else if (timed.name().startsWith("web.api.")) {
-          String labelTag = "label:" + trim(timed.name(), 8);
-          sendValues(timed, "web.api", timed.id().tags().append(labelTag));
-        } else if (timed.name().startsWith("app.")) {
-          String labelTag = "label:" + trim(timed.name(),4);
-          sendValues(timed, "app.component", timed.id().tags().append(labelTag));
-        } else {
-          sendValues(timed, timed.name(), timed.tags());
-        }
+      if (timedThreshold != 0 && timedThreshold >= timed.total()) {
+        return;
       }
-    }
-
-    private boolean hasLabelTag(String[] tags) {
-      for (String tag : tags) {
-        if (tag.startsWith("label:")) {
-          return true;
-        }
-      }
-      return false;
+      var target = timerTargetFor(timed.id());
+      sendValues(timed, target.name(), target.tags());
     }
 
     @Override
@@ -114,6 +107,58 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
     @Override
     public void visit(GaugeLong.Stats gauge) {
       client.gaugeWithTimestamp(gauge.name(), gauge.value(), epochSecs, gauge.tags());
+    }
+  }
+
+  private MetricNames metricNamesFor(String name) {
+    return metricNames.computeIfAbsent(name, MetricNames::of);
+  }
+
+  private MetricTarget timerTargetFor(Metric.ID id) {
+    return timerTargets.computeIfAbsent(id, this::createTimerTarget);
+  }
+
+  private MetricTarget createTimerTarget(Metric.ID id) {
+    var name = id.name();
+    var tags = id.tags();
+    var rawTags = tags.array();
+    if (hasLabelTag(rawTags)) {
+      return new MetricTarget(name, rawTags);
+    }
+    if (name.startsWith(WEB_API_PREFIX)) {
+      return new MetricTarget(WEB_API_NAME, tags.append(LABEL_PREFIX + trim(name, WEB_API_PREFIX.length())));
+    }
+    if (name.startsWith(APP_PREFIX)) {
+      return new MetricTarget(APP_COMPONENT_NAME, tags.append(LABEL_PREFIX + trim(name, APP_PREFIX.length())));
+    }
+    return new MetricTarget(name, rawTags);
+  }
+
+  private static boolean hasLabelTag(String[] tags) {
+    for (String tag : tags) {
+      if (tag.startsWith(LABEL_PREFIX)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static final class MetricTarget {
+
+    private final String name;
+    private final String[] tags;
+
+    private MetricTarget(String name, String[] tags) {
+      this.name = name;
+      this.tags = tags;
+    }
+
+    private String name() {
+      return name;
+    }
+
+    private String[] tags() {
+      return tags;
     }
   }
 }
