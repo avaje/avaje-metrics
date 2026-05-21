@@ -33,9 +33,10 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
   }
 
   @Override
-  public void start() {
+  public StatsdReporter start() {
     scheduledTask.start();
     started.set(true);
+    return this;
   }
 
   @Override

@@ -27,7 +27,7 @@ public interface StatsdReporter extends AutoCloseable {
   /**
    * Start reporting.
    */
-  void start();
+  StatsdReporter start();
 
   /**
    * Shutdown and stop reporting.
