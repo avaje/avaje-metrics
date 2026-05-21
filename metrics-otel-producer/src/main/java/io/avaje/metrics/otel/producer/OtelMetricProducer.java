@@ -7,7 +7,7 @@ import io.opentelemetry.sdk.metrics.export.MetricProducer;
 /**
  * Exposes avaje metrics to OpenTelemetry readers using the SDK {@link MetricProducer} bridge.
  *
- * <p>Unlike {@code avaje-metrics-otel}, this bridge aligns collection with the OpenTelemetry SDK
+ * <p>Unlike {@code avaje-metrics-otel-reporter}, this bridge aligns collection with the OpenTelemetry SDK
  * reader/exporter interval rather than running on a separate avaje reporting schedule.
  *
  * <p>Register the built producer with {@link SdkMeterProviderBuilder#registerMetricProducer(MetricProducer)}.

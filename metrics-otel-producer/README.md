@@ -3,7 +3,7 @@
 Exposes [avaje-metrics](https://avaje-metrics.github.io) to OpenTelemetry using the SDK-side
 `MetricProducer` bridge.
 
-Unlike `avaje-metrics-otel`, this module does not run its own reporting schedule. Metric collection
+Unlike `avaje-metrics-otel-reporter`, this module does not run its own reporting schedule. Metric collection
 happens when the OpenTelemetry SDK reader/exporter collects.
 
 - counters, `name.count`, and `name.total` are exported as cumulative monotonic sums
@@ -15,7 +15,7 @@ happens when the OpenTelemetry SDK reader/exporter collects.
 <dependency>
   <groupId>io.avaje</groupId>
   <artifactId>avaje-metrics-otel-producer</artifactId>
-  <version>9.9-RC3</version>
+  <version>9.9-RC5</version>
 </dependency>
 ```
 
@@ -124,11 +124,13 @@ OpenTelemetry SDK reader/exporter, for example:
 - you want `name.max` to reflect the current collection window
 - You want to avoid a separate avaje reporting scheduler
 
-Use `avaje-metrics-otel` when you want the lighter API-only scheduled reporter and do not need a
+Use `avaje-metrics-otel-reporter` when you want the lighter scheduled reporter and do not need a
 `MetricProducer`.
 
 If you want a convenience module that builds an OTLP-backed `OpenTelemetrySdk` and registers
 `OtelMetricProducer` for you, use `avaje-metrics-otel-otlp`.
+
+If you also want traced timers via `Metrics.tracedTimer(...)`, add `avaje-metrics-otel-trace`.
 
 ## Important limitation
 
@@ -144,5 +146,5 @@ and query `max` values rely on the corresponding Ebean runtime fix that resets `
 collection; without that runtime change, cumulative `count` and `total` still work but `max`
 behaves like a lifetime high-water mark.
 
-Do not use `avaje-metrics-otel` and `avaje-metrics-otel-producer` for the same registry/export
+Do not use `avaje-metrics-otel-reporter` and `avaje-metrics-otel-producer` for the same registry/export
 path at the same time, or you will emit duplicate telemetry.

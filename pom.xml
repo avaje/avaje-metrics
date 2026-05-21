@@ -10,7 +10,7 @@
   <groupId>io.avaje</groupId>
   <artifactId>avaje-metrics-parent</artifactId>
   <name>avaje-metrics-parent</name>
-  <version>9.9-RC4</version>
+  <version>9.9-RC5</version>
   <packaging>pom</packaging>
 
   <url>https://avaje-metrics.github.io</url>
@@ -23,7 +23,7 @@
 
   <properties>
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
-    <project.build.outputTimestamp>2026-05-21T02:39:35Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-05-21T10:33:22Z</project.build.outputTimestamp>
   </properties>
 
   <modules>
@@ -31,7 +31,8 @@
     <module>metrics-graphite</module>
     <module>metrics-ebean</module>
     <module>metrics-statsd</module>
-    <module>metrics-otel</module>
+    <module>metrics-otel-trace</module>
+    <module>metrics-otel-reporter</module>
     <module>metrics-otel-producer</module>
     <module>metrics-otel-otlp</module>
   </modules>
