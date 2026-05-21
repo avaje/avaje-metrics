@@ -130,7 +130,7 @@ final class MetricDataMapper {
         unit,
         SumData.createLongSumData(
           monotonic,
-          AggregationTemporality.DELTA,
+          AggregationTemporality.CUMULATIVE,
           List.of(LongPointData.create(startEpochNanos, epochNanos, attributes, value))));
     }
 
