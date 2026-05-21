@@ -1,4 +1,4 @@
-package io.avaje.metrics.otel.otlp;
+package io.avaje.metrics.otel;
 
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
@@ -24,7 +24,7 @@ import io.opentelemetry.context.Scope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class OtlpOpenTelemetryTest {
+class MetricsOpenTelemetryTest {
 
   private static final AttributeKey<String> SERVICE_NAME = AttributeKey.stringKey("service.name");
 
@@ -34,7 +34,7 @@ class OtlpOpenTelemetryTest {
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
-    try (var openTelemetry = OtlpOpenTelemetry.builder()
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
       .endpoint("http://collector:4317")
       .serviceName("catalog-service")
       .timedThresholdMicros(1_000)
@@ -70,7 +70,7 @@ class OtlpOpenTelemetryTest {
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
-    try (var openTelemetry = OtlpOpenTelemetry.builder()
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
       .registry(registry)
       .metricReader(metricReader)
       .spanExporter(spanExporter)
@@ -96,7 +96,7 @@ class OtlpOpenTelemetryTest {
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
-    try (var openTelemetry = OtlpOpenTelemetry.builder()
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
       .serviceName("catalog-service")
       .registry(registry)
       .metricReader(metricReader)
@@ -118,7 +118,7 @@ class OtlpOpenTelemetryTest {
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
-    try (var openTelemetry = OtlpOpenTelemetry.builder()
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
       .serviceName("catalog-service")
       .registry(registry)
       .metricReader(metricReader)
@@ -143,7 +143,7 @@ class OtlpOpenTelemetryTest {
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
-    try (var openTelemetry = OtlpOpenTelemetry.builder()
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
       .serviceName("catalog-service")
       .registry(registry)
       .metricExporter(metricExporter)
@@ -165,7 +165,7 @@ class OtlpOpenTelemetryTest {
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
-    try (var openTelemetry = OtlpOpenTelemetry.builder()
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
       .serviceName("catalog-service")
       .registry(registry)
       .metricReader(metricReader)

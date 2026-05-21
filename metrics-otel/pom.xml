@@ -7,8 +7,8 @@
     <version>9.9-RC5</version>
   </parent>
 
-  <artifactId>avaje-metrics-otel-otlp</artifactId>
-  <name>avaje-metrics-otel-otlp</name>
+  <artifactId>avaje-metrics-otel</artifactId>
+  <name>avaje-metrics-otel</name>
 
   <properties>
     <otel.version>1.62.0</otel.version>

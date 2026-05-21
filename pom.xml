@@ -34,7 +34,7 @@
     <module>metrics-otel-trace</module>
     <module>metrics-otel-reporter</module>
     <module>metrics-otel-producer</module>
-    <module>metrics-otel-otlp</module>
+    <module>metrics-otel</module>
   </modules>
 
 </project>

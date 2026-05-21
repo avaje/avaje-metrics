@@ -1,4 +1,4 @@
-package io.avaje.metrics.otel.otlp;
+package io.avaje.metrics.otel;
 
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
@@ -39,9 +39,9 @@ import static java.util.Objects.requireNonNull;
  * <p>If you need more control, you can wire the OpenTelemetry SDK manually and use
  * {@link OtelMetricProducer} directly.
  */
-public final class OtlpOpenTelemetry {
+public final class MetricsOpenTelemetry {
 
-  private OtlpOpenTelemetry() {}
+  private MetricsOpenTelemetry() {}
 
   /**
    * Return a builder for creating an OTLP-backed {@link OpenTelemetrySdk}.

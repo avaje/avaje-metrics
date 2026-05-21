@@ -7,6 +7,7 @@ with `@Timed(span = Timed.SpanMode.ON)` create OpenTelemetry spans via `GlobalOp
 
 This module does **not** export avaje metrics to OpenTelemetry metrics backends. For that use:
 
+- `avaje-metrics-otel` for the OTLP-backed convenience helper path
 - `avaje-metrics-otel-reporter` for the scheduled reporter path
 - `avaje-metrics-otel-producer` for the SDK `MetricProducer` path
 

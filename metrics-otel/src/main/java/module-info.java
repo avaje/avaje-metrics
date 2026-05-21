@@ -1,6 +1,6 @@
-module io.avaje.metrics.otel.otlp {
+module io.avaje.metrics.otel {
 
-  exports io.avaje.metrics.otel.otlp;
+  exports io.avaje.metrics.otel;
 
   requires io.avaje.metrics;
   requires io.avaje.metrics.otel.producer;

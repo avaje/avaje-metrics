@@ -128,7 +128,7 @@ Use `avaje-metrics-otel-reporter` when you want the lighter scheduled reporter a
 `MetricProducer`.
 
 If you want a convenience module that builds an OTLP-backed `OpenTelemetrySdk` and registers
-`OtelMetricProducer` for you, use `avaje-metrics-otel-otlp`.
+`OtelMetricProducer` for you, use `avaje-metrics-otel`.
 
 If you also want traced timers via `Metrics.tracedTimer(...)`, add `avaje-metrics-otel-trace`.
 

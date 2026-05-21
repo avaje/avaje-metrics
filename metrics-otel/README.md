@@ -1,4 +1,4 @@
-# avaje-metrics-otel-otlp
+# avaje-metrics-otel
 
 Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured with:
 
@@ -13,7 +13,7 @@ Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured wit
 ```xml
 <dependency>
   <groupId>io.avaje</groupId>
-  <artifactId>avaje-metrics-otel-otlp</artifactId>
+  <artifactId>avaje-metrics-otel</artifactId>
   <version>9.9-RC5</version>
 </dependency>
 ```
@@ -22,7 +22,7 @@ Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured wit
 
 ```java
 OpenTelemetry openTelemetry =
-    OtlpOpenTelemetry.builder()
+    MetricsOpenTelemetry.builder()
         .endpoint("http://otel-collector:4317")
         .serviceName("my-service")
         .meterInterval(Duration.ofSeconds(60))
@@ -45,7 +45,7 @@ This helper configures:
 
 ```java
 OpenTelemetrySdk sdk =
-    OtlpOpenTelemetry.builder()
+    MetricsOpenTelemetry.builder()
         .endpoint("http://otel-collector:4317")   // default: http://localhost:4317
         .serviceName("my-service")                // default: unknown_service:java
         .includeTrace(true)                       // default: true
@@ -62,7 +62,7 @@ compression, or timeouts:
 
 ```java
 OpenTelemetrySdk sdk =
-    OtlpOpenTelemetry.builder()
+    MetricsOpenTelemetry.builder()
         .endpoint("http://otel-collector:4317")
         .serviceName("my-service")
         .metricExporter(
