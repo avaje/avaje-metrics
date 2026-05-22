@@ -28,7 +28,7 @@ final class MetricDataMapper {
 
   private static final String DESCRIPTION = "";
   private static final String COUNT_UNIT = "{event}";
-  private static final String DEFAULT_UNIT = "1";
+  private static final String DEFAULT_UNIT = "";
   private static final String MICROS_UNIT = "us";
 
   private final InstrumentationScopeInfo scopeInfo;

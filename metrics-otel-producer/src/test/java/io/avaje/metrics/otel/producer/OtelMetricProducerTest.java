@@ -46,6 +46,7 @@ class OtelMetricProducerTest {
     var third = onlyMetric(producer.produce(Resource.empty()));
 
     assertThat(first.getName()).isEqualTo("app.requests");
+    assertThat(first.getUnit()).isEqualTo("{event}");
     assertThat(first.getLongSumData().getAggregationTemporality()).isEqualTo(AggregationTemporality.CUMULATIVE);
     assertThat(first.getLongSumData().isMonotonic()).isTrue();
     assertThat(onlyLongPoint(first).getStartEpochNanos()).isEqualTo(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
@@ -101,6 +102,12 @@ class OtelMetricProducerTest {
       "app.service.method.error.total",
       "app.service.method.error.max");
 
+    assertThat(first.get("app.service.method.count").getUnit()).isEqualTo("{event}");
+    assertThat(first.get("app.service.method.total").getUnit()).isEqualTo("us");
+    assertThat(first.get("app.service.method.max").getUnit()).isEqualTo("us");
+    assertThat(first.get("app.service.method.error.count").getUnit()).isEqualTo("{event}");
+    assertThat(first.get("app.service.method.error.total").getUnit()).isEqualTo("us");
+    assertThat(first.get("app.service.method.error.max").getUnit()).isEqualTo("us");
     assertThat(first.get("app.service.method.count").getLongSumData().getAggregationTemporality())
       .isEqualTo(AggregationTemporality.CUMULATIVE);
     assertThat(onlyLongSumPoint(first.get("app.service.method.count")).getStartEpochNanos())
@@ -176,6 +183,11 @@ class OtelMetricProducerTest {
 
     assertThat(metrics.get("app.bytes.sent.count").getLongSumData().getAggregationTemporality())
       .isEqualTo(AggregationTemporality.CUMULATIVE);
+    assertThat(metrics.get("app.bytes.sent.count").getUnit()).isEqualTo("{event}");
+    assertThat(metrics.get("app.bytes.sent.total").getUnit()).isEmpty();
+    assertThat(metrics.get("app.bytes.sent.max").getUnit()).isEmpty();
+    assertThat(metrics.get("jvm.threads.active").getUnit()).isEmpty();
+    assertThat(metrics.get("jvm.memory.pct").getUnit()).isEmpty();
     assertThat(onlyLongSumPoint(metrics.get("app.bytes.sent.count")).getValue()).isEqualTo(2);
     assertThat(onlyLongSumPoint(metrics.get("app.bytes.sent.total")).getValue()).isEqualTo(3072L);
     assertThat(onlyLongGaugePoint(metrics.get("app.bytes.sent.max")).getValue()).isEqualTo(2048L);
@@ -202,6 +214,7 @@ class OtelMetricProducerTest {
       MetricData metric = onlyMetric(reader.collectAllMetrics());
 
       assertThat(metric.getName()).isEqualTo("app.checkout");
+      assertThat(metric.getUnit()).isEqualTo("{event}");
       assertThat(metric.getLongSumData().getAggregationTemporality()).isEqualTo(AggregationTemporality.CUMULATIVE);
       assertThat(metric.getInstrumentationScopeInfo().getName()).isEqualTo("custom.scope");
       assertThat(metric.getResource().getAttribute(AttributeKey.stringKey("service.name"))).isEqualTo("catalog");

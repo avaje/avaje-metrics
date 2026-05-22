@@ -107,12 +107,16 @@ avaje metrics are mapped to OTEL metric data as follows:
 |---|---|---|
 | `Counter` | cumulative `LongSum` | monotonic, unit `{event}` |
 | `Timer` | cumulative `LongSum` (`name.count`), cumulative `LongSum` (`name.total`), `LongGauge` (`name.max`) | count/total are cumulative; `max` resets each collection; values in microseconds (`us`) |
-| `Meter` | cumulative `LongSum` (`name.count`), cumulative `LongSum` (`name.total`), `LongGauge` (`name.max`) | count/total are cumulative; `max` resets each collection |
-| `GaugeLong` | `LongGauge` | current value at collection time |
-| `GaugeDouble` | `DoubleGauge` | current value at collection time |
+| `Meter` | cumulative `LongSum` (`name.count`), cumulative `LongSum` (`name.total`), `LongGauge` (`name.max`) | count/total are cumulative; `max` resets each collection; `name.count` uses `{event}` and `name.total` / `name.max` use an empty OTEL unit |
+| `GaugeLong` | `LongGauge` | current value at collection time; empty OTEL unit |
+| `GaugeDouble` | `DoubleGauge` | current value at collection time; empty OTEL unit |
 
 Timer success and error statistics are exported separately as `name` and `name.error`, matching the
 existing avaje timer reporting behavior.
+
+By default, generic meters and gauges are exported with an empty OTEL unit rather than `1`. This
+avoids downstream Prometheus-compatible backends inferring a ratio-style suffix from a dimensionless
+gauge. Explicit units remain unchanged for counters (`{event}`) and timers (`us`).
 
 ## When to use this module
 

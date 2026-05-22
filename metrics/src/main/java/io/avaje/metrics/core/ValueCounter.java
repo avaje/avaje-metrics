@@ -1,8 +1,10 @@
 package io.avaje.metrics.core;
 
 import io.avaje.metrics.CollectionMode;
+import io.avaje.metrics.Meter;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.Timer;
+import io.avaje.metrics.stats.MeterStats;
 import io.avaje.metrics.stats.TimerStats;
 import org.jspecify.annotations.Nullable;
 
@@ -50,7 +52,17 @@ final class ValueCounter extends BaseReportName {
     max.accumulate(value);
   }
 
-  Timer.@Nullable Stats collect(Metric.Visitor collector) {
+  Meter.@Nullable Stats collect(Metric.Visitor collector) {
+    var snapshot = collectSnapshot(collector);
+    return snapshot == null ? null : new MeterStats(snapshot.reportId(), snapshot.count(), snapshot.total(), snapshot.max());
+  }
+
+  Timer.@Nullable Stats collectTimed(Metric.Visitor collector) {
+    var snapshot = collectSnapshot(collector);
+    return snapshot == null ? null : new TimerStats(snapshot.reportId(), bucketRange, snapshot.count(), snapshot.total(), snapshot.max());
+  }
+
+  private @Nullable Snapshot collectSnapshot(Metric.Visitor collector) {
     final boolean cumulative = collector.collectionMode() == CollectionMode.CUMULATIVE;
     final long count = cumulative ? this.count.sum() : this.count.sumThenReset();
     if (count == 0) {
@@ -59,7 +71,7 @@ final class ValueCounter extends BaseReportName {
       final long totalVal = cumulative ? total.sum() : total.sumThenReset();
       final long maxVal = max.getThenReset();
       final Metric.ID reportId = reportId(collector);
-      return new TimerStats(reportId, bucketRange, count, totalVal, maxVal);
+      return new Snapshot(reportId, count, totalVal, maxVal);
     }
   }
 
@@ -97,6 +109,37 @@ final class ValueCounter extends BaseReportName {
     long count = count();
     long total = total();
     return (count < 1) ? 0L : Math.round((double) (total / count));
+  }
+
+  private static final class Snapshot {
+
+    private final Metric.ID reportId;
+    private final long count;
+    private final long total;
+    private final long max;
+
+    private Snapshot(Metric.ID reportId, long count, long total, long max) {
+      this.reportId = reportId;
+      this.count = count;
+      this.total = total;
+      this.max = max;
+    }
+
+    private Metric.ID reportId() {
+      return reportId;
+    }
+
+    private long count() {
+      return count;
+    }
+
+    private long total() {
+      return total;
+    }
+
+    private long max() {
+      return max;
+    }
   }
 
 }

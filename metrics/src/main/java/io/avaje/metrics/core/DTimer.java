@@ -62,11 +62,11 @@ final class DTimer implements Timer, TraceableTimer {
 
   @Override
   public void collect(Visitor collector) {
-    final Stats successStats = successCounter.collect(collector);
+    final Stats successStats = successCounter.collectTimed(collector);
     if (successStats != null) {
       collector.visit(successStats);
     }
-    final Stats errorStats = errorCounter.collect(collector);
+    final Stats errorStats = errorCounter.collectTimed(collector);
     if (errorStats != null) {
       collector.visit(errorStats);
     }

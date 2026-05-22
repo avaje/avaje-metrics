@@ -1,33 +1,23 @@
 package io.avaje.metrics.stats;
 
+import io.avaje.metrics.Meter;
 import io.avaje.metrics.Metric;
-import io.avaje.metrics.Timer;
-import org.jspecify.annotations.Nullable;
 
 /**
- * Snapshot of the current statistics for a Timer.
+ * Snapshot of the current statistics for a Meter.
  */
-public final class TimerStats implements Timer.Stats {
+public final class MeterStats implements Meter.Stats {
 
   final Metric.ID id;
-  final @Nullable String bucketRange;
   final long count;
   final long total;
   final long max;
 
   /**
-   * Create with no bucketRange.
+   * Create with all parameters.
    */
-  public TimerStats(Metric.ID id, long count, long total, long max) {
-    this(id, null, count, total, max);
-  }
-
-  /**
-   * Create with all parameters including bucketRange.
-   */
-  public TimerStats(Metric.ID id, @Nullable String bucketRange, long count, long total, long max) {
+  public MeterStats(Metric.ID id, long count, long total, long max) {
     this.id = id;
-    this.bucketRange = bucketRange;
     this.count = count;
     this.total = total;
     // collection is racy so sanitize the max value if it has not been set
@@ -46,11 +36,6 @@ public final class TimerStats implements Timer.Stats {
   }
 
   @Override
-  public @Nullable String bucketRange() {
-    return bucketRange;
-  }
-
-  @Override
   public Metric.ID id() {
     return id;
   }
@@ -65,36 +50,23 @@ public final class TimerStats implements Timer.Stats {
     return id.tags().array();
   }
 
-  /**
-   * Return the count of values collected.
-   */
   @Override
   public long count() {
     return count;
   }
 
-  /**
-   * Return the total of all the values.
-   */
   @Override
   public long total() {
     return total;
   }
 
-  /**
-   * Return the Max value collected.
-   */
   @Override
   public long max() {
     return max;
   }
 
-  /**
-   * Return the mean value rounded up.
-   */
   @Override
   public long mean() {
     return (count < 1) ? 0L : Math.round((double) (total / count));
   }
-
 }
