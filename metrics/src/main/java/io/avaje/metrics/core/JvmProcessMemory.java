@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 final class JvmProcessMemory {
 
   private static final long TO_MEGABYTES = 1024L;
+  private static final String MEMORY_UNIT = "MiBy";
 
   private final @Nullable String pid;
 
@@ -54,9 +55,9 @@ final class JvmProcessMemory {
     FileLines procStatus = new FileLines("/proc/" + pid + "/status");
     if (procStatus.exists()) {
       Source source = new Source(procStatus);
-      registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmrss", globalTags), source::rss, reportChangesOnly));
+      registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmrss", globalTags), MEMORY_UNIT, source::rss, reportChangesOnly));
       if (withHwm) {
-        registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmhwm", globalTags), source::hwm, reportChangesOnly));
+        registry.register(DGaugeLong.of(Metric.ID.of("jvm.memory.process.vmhwm", globalTags), MEMORY_UNIT, source::hwm, reportChangesOnly));
       }
     }
   }

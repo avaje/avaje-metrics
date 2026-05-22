@@ -8,6 +8,8 @@ import io.avaje.metrics.Tags;
 final class JvmCGroupMemory {
 
   private static final long MEG = 1_048_576;
+  private static final String MEMORY_UNIT = "MiBy";
+  private static final String PERCENT_UNIT = "%";
 
   static void createGauges(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
     new JvmCGroupMemory().metrics(registry, reportChangesOnly, globalTags);
@@ -67,15 +69,15 @@ final class JvmCGroupMemory {
   }
 
   GaugeLong usage(MemSource source, boolean reportChangesOnly, Tags globalTags) {
-    return DGaugeLong.of(Metric.ID.of("jvm.cgroup.memory.usage", globalTags), source::usageMb, reportChangesOnly);
+    return DGaugeLong.of(Metric.ID.of("jvm.cgroup.memory.usage", globalTags), MEMORY_UNIT, source::usageMb, reportChangesOnly);
   }
 
   GaugeLong pctUsage(MemSource source, boolean reportChangesOnly, Tags globalTags) {
-    return DGaugeLong.of(Metric.ID.of("jvm.cgroup.memory.pctUsage", globalTags), source::pctUsage, reportChangesOnly);
+    return DGaugeLong.of(Metric.ID.of("jvm.cgroup.memory.pctUsage", globalTags), PERCENT_UNIT, source::pctUsage, reportChangesOnly);
   }
 
   GaugeLong limit(MemSource source, boolean reportChangesOnly, Tags globalTags) {
-    return DGaugeLong.of(Metric.ID.of("jvm.cgroup.memory.limit", globalTags), source::limitMb, reportChangesOnly);
+    return DGaugeLong.of(Metric.ID.of("jvm.cgroup.memory.limit", globalTags), MEMORY_UNIT, source::limitMb, reportChangesOnly);
   }
 
 }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,6 +28,12 @@ class JvmMemoryMetricGroupTest {
       , "jvm.memory.heap.committed"
       , "jvm.memory.heap.max"
       , "jvm.memory.heap.pct");
+    assertThat(gaugeMetrics).filteredOn(metric -> !"jvm.memory.heap.pct".equals(metric.name()))
+      .extracting(Metric::unit)
+      .containsOnly("MiBy");
+    assertThat(gaugeMetrics).filteredOn(metric -> "jvm.memory.heap.pct".equals(metric.name()))
+      .extracting(Metric::unit)
+      .containsOnly("%");
   }
 
   @Test
@@ -42,6 +49,15 @@ class JvmMemoryMetricGroupTest {
       "jvm.memory.nonheap.init"
       , "jvm.memory.nonheap.used"
       , "jvm.memory.nonheap.committed");
+    assertThat(gaugeMetrics).filteredOn(metric -> Set.of(
+        "jvm.memory.nonheap.init",
+        "jvm.memory.nonheap.used",
+        "jvm.memory.nonheap.committed",
+        "jvm.memory.nonheap.max").contains(metric.name()))
+      .extracting(Metric::unit)
+      .containsOnly("MiBy");
+    assertThat(gaugeMetrics).filteredOn(metric -> metric.name().equals("jvm.memory.nonheap.pct"))
+      .allSatisfy(metric -> assertThat(metric.unit()).isEqualTo("%"));
 
   }
 
