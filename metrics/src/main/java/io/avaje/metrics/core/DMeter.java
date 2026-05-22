@@ -1,6 +1,5 @@
 package io.avaje.metrics.core;
 
-import io.avaje.metrics.Metric;
 import io.avaje.metrics.Meter;
 
 /**
@@ -8,16 +7,12 @@ import io.avaje.metrics.Meter;
  * or rows processed or time. Typically, you would use Timer for time based
  * events though.
  */
-final class DMeter implements Metric, Meter {
+final class DMeter extends BaseReportName implements Meter {
 
-  private final ID id;
   private final ValueCounter values;
 
-  /**
-   * Create with a name.
-   */
-  DMeter(ID id) {
-    this.id = id;
+  DMeter(ID id, String unit) {
+    super(id, unit);
     this.values = new ValueCounter(id);
   }
 
@@ -28,7 +23,7 @@ final class DMeter implements Metric, Meter {
 
   @Override
   public void collect(Visitor collector) {
-    final Stats stats = values.collect(collector);
+    final Stats stats = values.collect(collector, unit);
     if (stats != null) {
       collector.visit(stats);
     }
@@ -47,6 +42,11 @@ final class DMeter implements Metric, Meter {
   @Override
   public String name() {
     return id.name();
+  }
+
+  @Override
+  public String unit() {
+    return unit;
   }
 
   @Override

@@ -71,7 +71,7 @@ final class JvmCGroupCpu {
   }
 
   private void createCGroupCpuUsage(MetricRegistry registry, FileLines cpu, Tags globalTags) {
-    registry.gauge("jvm.cgroup.cpu.usage", globalTags, new CpuUsage(cpu));
+    registry.gauge("jvm.cgroup.cpu.usage").tags(globalTags).ofLongs(new CpuUsage(cpu));
   }
 
   private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {

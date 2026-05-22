@@ -35,7 +35,7 @@ class MeterTest {
 
   @Test
   void collectCumulative() {
-    Meter metric = new DMeter(Metric.ID.of("org.test.mycounter.cumulative"));
+    Meter metric = new DMeter(Metric.ID.of("org.test.mycounter.cumulative"), "");
     metric.addEvent(1000);
     metric.addEvent(2000);
     metric.addEvent(1500);

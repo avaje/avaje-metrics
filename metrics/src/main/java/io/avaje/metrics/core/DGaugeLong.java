@@ -8,25 +8,37 @@ import java.util.function.LongSupplier;
 abstract class DGaugeLong extends BaseReportName implements GaugeLong {
 
   static DGaugeLong of(ID id, LongSupplier supplier) {
-    return new All(id, supplier);
+    return of(id, "", supplier);
+  }
+
+  static DGaugeLong of(ID id, String unit, LongSupplier supplier) {
+    return new All(id, unit, supplier);
   }
 
   static DGaugeLong of(String name, LongSupplier supplier, boolean changesOnly) {
-    return of(ID.of(name), supplier, changesOnly);
+    return of(ID.of(name), "", supplier, changesOnly);
   }
 
   static DGaugeLong of(ID id, LongSupplier supplier, boolean changesOnly) {
-    return changesOnly ? new ChangesOnly(id, supplier) : new All(id, supplier);
+    return of(id, "", supplier, changesOnly);
+  }
+
+  static DGaugeLong of(ID id, String unit, LongSupplier supplier, boolean changesOnly) {
+    return changesOnly ? new ChangesOnly(id, unit, supplier) : new All(id, unit, supplier);
   }
 
   static DGaugeLong once(ID id, LongSupplier supplier) {
-    return new Once(id, supplier);
+    return once(id, "", supplier);
+  }
+
+  static DGaugeLong once(ID id, String unit, LongSupplier supplier) {
+    return new Once(id, unit, supplier);
   }
 
   protected final LongSupplier supplier;
 
-  protected DGaugeLong(ID id, LongSupplier supplier) {
-    super(id);
+  protected DGaugeLong(ID id, String unit, LongSupplier supplier) {
+    super(id, unit);
     this.supplier = supplier;
   }
 
@@ -38,6 +50,11 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
   @Override
   public final String name() {
     return id.name();
+  }
+
+  @Override
+  public final String unit() {
+    return unit;
   }
 
   @Override
@@ -60,22 +77,22 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
 
   static final class All extends DGaugeLong {
 
-    All(ID id, LongSupplier supplier) {
-      super(id, supplier);
+    All(ID id, String unit, LongSupplier supplier) {
+      super(id, unit, supplier);
     }
 
     @Override
     public void collect(Visitor collector) {
       final ID reportId = reportId(collector);
-      collector.visit(new GaugeLongStats(reportId, supplier.getAsLong()));
+      collector.visit(new GaugeLongStats(reportId, unit, supplier.getAsLong()));
     }
   }
 
   static final class ChangesOnly extends DGaugeLong {
     private long lastReported;
 
-    ChangesOnly(ID id, LongSupplier supplier) {
-      super(id, supplier);
+    ChangesOnly(ID id, String unit, LongSupplier supplier) {
+      super(id, unit, supplier);
     }
 
     @Override
@@ -85,22 +102,22 @@ abstract class DGaugeLong extends BaseReportName implements GaugeLong {
       if (collect) {
         lastReported = value;
         final ID reportId = reportId(collector);
-        collector.visit(new GaugeLongStats(reportId, value));
+        collector.visit(new GaugeLongStats(reportId, unit, value));
       }
     }
   }
 
   static final class Once extends DGaugeLong {
 
-    Once(ID id, LongSupplier supplier) {
-      super(id, supplier);
+    Once(ID id, String unit, LongSupplier supplier) {
+      super(id, unit, supplier);
     }
 
     @Override
     public void collect(Visitor collector) {
       if (reportId == null) {
         final ID reportId = reportId(collector);
-        collector.visit(new GaugeLongStats(reportId, supplier.getAsLong()));
+        collector.visit(new GaugeLongStats(reportId, unit, supplier.getAsLong()));
       }
     }
   }

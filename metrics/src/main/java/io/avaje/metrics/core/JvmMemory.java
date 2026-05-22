@@ -12,6 +12,8 @@ import java.util.function.LongSupplier;
 final class JvmMemory {
 
   private static final long MEGABYTES = 1024 * 1024L;
+  private static final String MEMORY_UNIT = "MiBy";
+  private static final String PERCENT_UNIT = "%";
 
   /**
    * Helper interface for Heap and NonHeap MemorySource.
@@ -89,22 +91,22 @@ final class JvmMemory {
     }
 
     void createHeapUsed(MetricRegistry registry, boolean reportChangesOnly) {
-      registry.register(DGaugeLong.of(name("used"), new Used(source), reportChangesOnly));
+      registry.register(DGaugeLong.of(name("used"), MEMORY_UNIT, new Used(source), reportChangesOnly));
     }
 
     void createMetric(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails) {
       if (withDetails) {
-        registry.register(DGaugeLong.once(name("init"), new Init(source)));
+        registry.register(DGaugeLong.once(name("init"), MEMORY_UNIT, new Init(source)));
       }
-      registry.register(DGaugeLong.of(name("used"), new Used(source), reportChangesOnly));
-      registry.register(DGaugeLong.of(name("committed"), new Committed(source), reportChangesOnly));
+      registry.register(DGaugeLong.of(name("used"), MEMORY_UNIT, new Used(source), reportChangesOnly));
+      registry.register(DGaugeLong.of(name("committed"), MEMORY_UNIT, new Committed(source), reportChangesOnly));
       // JRE 8 is not reporting max for non-heap memory
       boolean hasMax = (source.usage().getMax() > 0);
       if (hasMax) {
         // also collect Max and Percentage
-        registry.register(DGaugeLong.once(name("max"), new Max(source)));
+        registry.register(DGaugeLong.once(name("max"), MEMORY_UNIT, new Max(source)));
         if (withDetails) {
-          registry.register(DGaugeLong.of(name("pct"), new Pct(source), reportChangesOnly));
+          registry.register(DGaugeLong.of(name("pct"), PERCENT_UNIT, new Pct(source), reportChangesOnly));
         }
       }
     }

@@ -21,8 +21,8 @@ final class JvmGarbageCollection {
       for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
         // modify collector name replacing spaces with hyphens.
         String gcName = gcMXBean.getName().toLowerCase().replace(' ', '_').replace(".", "");
-        registry.gauge(name("count", gcName), globalTags, GaugeLong.incrementing(new Count(gcMXBean)));
-        registry.gauge(name("time", gcName), globalTags, GaugeLong.incrementing(new Time(gcMXBean)));
+        registry.gauge(name("count", gcName)).tags(globalTags).ofLongs(GaugeLong.incrementing(new Count(gcMXBean)));
+        registry.gauge(name("time", gcName)).tags(globalTags).ofLongs(GaugeLong.incrementing(new Time(gcMXBean)));
       }
     }
   }
@@ -32,7 +32,7 @@ final class JvmGarbageCollection {
    */
   private static void createTotalGcTime(MetricRegistry registry, List<GarbageCollectorMXBean> garbageCollectorMXBeans, Tags globalTags) {
     GarbageCollectorMXBean[] gcBeans = garbageCollectorMXBeans.toArray(new GarbageCollectorMXBean[0]);
-    registry.gauge("jvm.gc.time", globalTags, GaugeLong.incrementing(new TotalTime(gcBeans)));
+    registry.gauge("jvm.gc.time").tags(globalTags).ofLongs(GaugeLong.incrementing(new TotalTime(gcBeans)));
   }
 
   private static String name(String prefix, String gcName) {

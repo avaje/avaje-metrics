@@ -17,8 +17,8 @@ class TimerTest {
 
     MetricRegistry registry = Metrics.createRegistry();
     Timer metric = registry.timer("org.test.mytimed");
-    Timer metric2 = registry.timer("org.test.mytimed", Tags.of("a", "b"));
-    Timer metric3 = registry.timer("myBucket", Tags.of("a", "b"), 400, 900);
+    Timer metric2 = registry.timerBuilder("org.test.mytimed").tags(Tags.of("a", "b")).build();
+    Timer metric3 = registry.timerBuilder("myBucket").tags(Tags.of("a", "b")).bucketRanges(400, 900).build();
     assertThat(metric2).isNotSameAs(metric);
     assertThat(metric3).isNotSameAs(metric);
 

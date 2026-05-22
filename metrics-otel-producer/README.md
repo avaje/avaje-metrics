@@ -105,11 +105,11 @@ avaje metrics are mapped to OTEL metric data as follows:
 
 | avaje type | OTEL metric data | Notes |
 |---|---|---|
-| `Counter` | cumulative `LongSum` | monotonic, unit `{event}` |
+| `Counter` | cumulative `LongSum` | monotonic, uses the configured avaje unit (`{event}` by default) |
 | `Timer` | cumulative `LongSum` (`name.count`), cumulative `LongSum` (`name.total`), `LongGauge` (`name.max`) | count/total are cumulative; `max` resets each collection; values in microseconds (`us`) |
-| `Meter` | cumulative `LongSum` (`name.count`), cumulative `LongSum` (`name.total`), `LongGauge` (`name.max`) | count/total are cumulative; `max` resets each collection; `name.count` uses `{event}` and `name.total` / `name.max` use an empty OTEL unit |
-| `GaugeLong` | `LongGauge` | current value at collection time; empty OTEL unit |
-| `GaugeDouble` | `DoubleGauge` | current value at collection time; empty OTEL unit |
+| `Meter` | cumulative `LongSum` (`name.count`), cumulative `LongSum` (`name.total`), `LongGauge` (`name.max`) | count/total are cumulative; `max` resets each collection; `name.count` uses `{event}` and `name.total` / `name.max` use the configured avaje unit (empty by default) |
+| `GaugeLong` | `LongGauge` | current value at collection time; uses the configured avaje unit (empty by default) |
+| `GaugeDouble` | `DoubleGauge` | current value at collection time; uses the configured avaje unit (empty by default) |
 
 Timer success and error statistics are exported separately as `name` and `name.error`, matching the
 existing avaje timer reporting behavior.
@@ -117,6 +117,10 @@ existing avaje timer reporting behavior.
 By default, generic meters and gauges are exported with an empty OTEL unit rather than `1`. This
 avoids downstream Prometheus-compatible backends inferring a ratio-style suffix from a dimensionless
 gauge. Explicit units remain unchanged for counters (`{event}`) and timers (`us`).
+
+If you need explicit units for non-timer metrics, use the unit-aware avaje APIs such as
+`registry.counterBuilder("app.rows").unit("row").build()`, `registry.meterBuilder("app.bytes.sent").unit("By").build()`, or
+`registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(supplier)`.
 
 ## When to use this module
 
@@ -134,7 +138,8 @@ Use `avaje-metrics-otel-reporter` when you want the lighter scheduled reporter a
 If you want a convenience module that builds an OTLP-backed `OpenTelemetrySdk` and registers
 `OtelMetricProducer` for you, use `avaje-metrics-otel`.
 
-If you also want traced timers via `Metrics.tracedTimer(...)`, add `avaje-metrics-otel-trace`.
+If you also want traced timers via `Metrics.timerBuilder(...).buildTraced()`, add
+`avaje-metrics-otel-trace`.
 
 ## Important limitation
 

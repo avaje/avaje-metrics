@@ -7,7 +7,7 @@ import io.avaje.metrics.spi.SpiMetricBuilder;
 final class BucketTimerFactory implements SpiMetricBuilder.Factory<Timer> {
 
   @Override
-  public Timer createMetric(Metric.ID id, int[] bucketRanges) {
+  public Timer createMetric(Metric.ID id, String unitIgnore, int[] bucketRanges) {
     int rangeBottom = 0;
     Timer[] buckets = new Timer[bucketRanges.length + 1];
     for (int i = 0; i < bucketRanges.length; i++) {

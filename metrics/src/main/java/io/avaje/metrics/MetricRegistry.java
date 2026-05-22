@@ -16,9 +16,9 @@ public interface MetricRegistry extends JvmMetrics {
   Counter counter(String name);
 
   /**
-   * Return the Counter with the given name and tags.
+   * Return a builder used to configure and register a counter.
    */
-  Counter counter(String name, Tags tags);
+  CounterBuilder counterBuilder(String name);
 
   /**
    * Return the Meter using the metric name.
@@ -26,9 +26,14 @@ public interface MetricRegistry extends JvmMetrics {
   Meter meter(String name);
 
   /**
-   * Return the Meter using the metric name and tags.
+   * Return a builder used to configure and register a meter.
    */
-  Meter meter(String name, Tags tags);
+  MeterBuilder meterBuilder(String name);
+
+  /**
+   * Return a builder used to configure and register a gauge.
+   */
+  GaugeBuilder gauge(String name);
 
   /**
    * Create and register a gauge using the supplied double values.
@@ -36,19 +41,9 @@ public interface MetricRegistry extends JvmMetrics {
   GaugeDouble gauge(String name, DoubleSupplier supplier);
 
   /**
-   * Create and register a gauge using the supplied double values.
-   */
-  GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier);
-
-  /**
    * Create and register a gauge using the supplied long values.
    */
   GaugeLong gauge(String name, LongSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied long values.
-   */
-  GaugeLong gauge(String name, Tags tags, LongSupplier supplier);
 
   /**
    * Return the timer using the metric name.
@@ -56,56 +51,9 @@ public interface MetricRegistry extends JvmMetrics {
   Timer timer(String name);
 
   /**
-   * Return a traced timer using the metric name.
-   * <p>
-   * Traced timers create spans when used via {@link Timer#startEvent()} or
-   * {@link Timer#time(Runnable)} / {@link Timer#time(java.util.function.Supplier)}.
+   * Return a builder used to configure and register a timer.
    */
-  Timer tracedTimer(String name);
-
-  /**
-   * Return the timer using the metric name and tags.
-   */
-  Timer timer(String name, Tags tags);
-
-  /**
-   * Return a traced timer using the metric name and tags.
-   */
-  Timer tracedTimer(String name, Tags tags);
-
-  /**
-   * Return the bucket timer using the given base metric name and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer timer(String name, int... bucketRanges);
-
-  /**
-   * Return the traced bucket timer using the given base metric name and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer tracedTimer(String name, int... bucketRanges);
-
-  /**
-   * Return the bucket timer using the given base metric name, tags and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param tags         The metric tags
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer timer(String name, Tags tags, int... bucketRanges);
-
-  /**
-   * Return the traced bucket timer using the given base metric name, tags and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param tags         The metric tags
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer tracedTimer(String name, Tags tags, int... bucketRanges);
+  TimerBuilder timerBuilder(String name);
 
   /**
    * Return the TimerGroup using the given base metric name.

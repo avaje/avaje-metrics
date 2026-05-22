@@ -3,19 +3,30 @@ package io.avaje.metrics.stats;
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.Metric;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * Snapshot of the current statistics for a Counter or TimeCounter.
+ * Snapshot of the current statistics for a Counter.
  */
 public final class CounterStats implements Counter.Stats {
 
   final Metric.ID id;
+  final String unit;
   final long count;
 
   /**
    * Construct for Counter which doesn't collect time or high watermark.
    */
   public CounterStats(Metric.ID id, long count) {
+    this(id, "{event}", count);
+  }
+
+  /**
+   * Construct for Counter with an explicit unit.
+   */
+  public CounterStats(Metric.ID id, String unit, long count) {
     this.id = id;
+    this.unit = normalizeUnit(unit);
     this.count = count;
   }
 
@@ -44,11 +55,21 @@ public final class CounterStats implements Counter.Stats {
     return id.tags().array();
   }
 
+  @Override
+  public String unit() {
+    return unit;
+  }
+
   /**
    * Return the count of values collected.
    */
   @Override
   public long count() {
     return count;
+  }
+
+  private static String normalizeUnit(String unit) {
+    var normalized = requireNonNull(unit, "unit");
+    return normalized.isBlank() ? "" : normalized;
   }
 }

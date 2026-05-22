@@ -33,12 +33,15 @@ class JvmCGroupMemoryTest {
 
     final GaugeLong memoryLimit = me.limit(source, true, Tags.EMPTY);
     assertThat(memoryLimit.value()).isEqualTo(1025);
+    assertThat(memoryLimit.unit()).isEqualTo("MiBy");
 
     final GaugeLong memoryUsage = me.usage(source, true, Tags.EMPTY);
     assertThat(memoryUsage.value()).isEqualTo(227);
+    assertThat(memoryUsage.unit()).isEqualTo("MiBy");
 
     final GaugeLong pctUsage = me.pctUsage(source, true, Tags.EMPTY);
     assertThat(pctUsage.value()).isEqualTo(22);
+    assertThat(pctUsage.unit()).isEqualTo("%");
   }
 
 }

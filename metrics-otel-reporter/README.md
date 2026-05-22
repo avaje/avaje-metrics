@@ -9,7 +9,7 @@ The module collects avaje metrics on a configurable schedule and pushes them to 
 
 If you want OpenTelemetry collection time to define the interval instead of a separate avaje
 schedule, use `avaje-metrics-otel-producer` instead. If you also want traced timers via
-`Metrics.tracedTimer(...)`, add `avaje-metrics-otel-trace`.
+`Metrics.timerBuilder(...).buildTraced()`, add `avaje-metrics-otel-trace`.
 
 ## Maven dependency
 
@@ -87,11 +87,11 @@ avaje metrics are mapped to OTEL instruments as follows:
 
 | avaje type | OTEL instruments | Notes |
 |---|---|---|
-| `Counter` | `LongCounter` | delta count per interval; OTEL SDK accumulates to cumulative |
+| `Counter` | `LongCounter` | delta count per interval; OTEL SDK accumulates to cumulative; uses the configured avaje unit (`{event}` by default) |
 | `Timer` | `LongCounter` (`name.count`), `LongCounter` (`name.total`), `LongGauge` (`name.max`) | values in microseconds (`us`) |
-| `Meter` | `LongCounter` (`name.count`), `LongCounter` (`name.total`), `LongGauge` (`name.max`) | values in user-defined units |
-| `GaugeLong` | `LongGauge` | current value, set each interval |
-| `GaugeDouble` | `DoubleGauge` | current value, set each interval |
+| `Meter` | `LongCounter` (`name.count`), `LongCounter` (`name.total`), `LongGauge` (`name.max`) | `name.count` uses `{event}` and `name.total` / `name.max` use the configured avaje unit (empty by default) |
+| `GaugeLong` | `LongGauge` | current value, set each interval, using the configured avaje unit (empty by default) |
+| `GaugeDouble` | `DoubleGauge` | current value, set each interval, using the configured avaje unit (empty by default) |
 
 ### Timer success and error
 
@@ -105,9 +105,28 @@ avaje tags use a `key:value` colon-separated format. These are converted to OTEL
 
 ```java
 // avaje
-Counter counter = registry.counter("app.login", Tags.of("env:prod", "region:us-east-1"));
+Counter counter = registry.counterBuilder("app.login")
+    .tags(Tags.of("env:prod", "region:us-east-1"))
+    .build();
 
 // becomes OTEL attributes: {env="prod", region="us-east-1"}
+```
+
+### Units
+
+For non-timer metrics you can configure units directly on avaje metrics and the reporter will pass
+them through to the OTEL instruments. Examples:
+
+```java
+registry.counterBuilder("app.rows")
+    .unit("row")
+    .build();
+registry.meterBuilder("app.bytes.sent")
+    .unit("By")
+    .build();
+registry.gauge("jvm.memory.used")
+    .unit("MiBy")
+    .ofLongs(memoryGauge);
 ```
 
 ## Reporting manually
@@ -143,8 +162,9 @@ reporter.start();
 
 This reporter module does not include the traced-timer span bridge.
 
-If you also want `Metrics.tracedTimer(...)` or enhancement with `@Timed(span = Timed.SpanMode.ON)`
-to create OpenTelemetry spans, add `avaje-metrics-otel-trace` separately.
+If you also want traced timers via `Metrics.timerBuilder(...).buildTraced()` or enhancement with
+`@Timed(span = Timed.SpanMode.ON)` to create OpenTelemetry spans, add
+`avaje-metrics-otel-trace` separately.
 
 ## Example: avaje-inject
 

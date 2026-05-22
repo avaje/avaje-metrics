@@ -23,7 +23,7 @@ class DGaugeDoubleTest {
   void notSkip_when_unchanged() {
     MyGauge myGauge = new MyGauge();
     Metric.ID id = Metric.ID.of(MyGauge.class.getName() + ".test");
-    DGaugeDouble metric = new DGaugeDouble(id, myGauge);
+    DGaugeDouble metric = new DGaugeDouble(id, "", myGauge);
 
     assertEquals(0.0, metric.value());
     assertThat(collect(metric)).isEmpty();
@@ -55,7 +55,7 @@ class DGaugeDoubleTest {
 
     Metric.ID id = Metric.ID.of(MyGauge.class.getName() + ".test", Tags.of("k", "v"));
     MyGauge myGauge = new MyGauge();
-    DGaugeDouble metric = new DGaugeDouble(id, myGauge);
+    DGaugeDouble metric = new DGaugeDouble(id, "", myGauge);
 
     assertEquals(0d, metric.value());
     assertThat(collect(metric)).isEmpty();

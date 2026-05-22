@@ -93,34 +93,6 @@ public class Metrics {
   }
 
   /**
-   * Return a bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer timer(Class<?> cls, String name, int... bucketRanges) {
-    return timer(name(cls, name), bucketRanges);
-  }
-
-  /**
-   * Return a bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer timer(String name, int... bucketRanges) {
-    return defaultRegistry.timer(name, bucketRanges);
-  }
-
-  /**
-   * Return a traced bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer tracedTimer(Class<?> cls, String name, int... bucketRanges) {
-    return tracedTimer(name(cls, name), bucketRanges);
-  }
-
-  /**
-   * Return a traced bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer tracedTimer(String name, int... bucketRanges) {
-    return defaultRegistry.tracedTimer(name, bucketRanges);
-  }
-
-  /**
    * Return a Timer given the name using the default registry.
    */
   public static Timer timer(String name) {
@@ -128,24 +100,10 @@ public class Metrics {
   }
 
   /**
-   * Return a Timer given the name using the default registry.
+   * Return a builder used to configure and register a timer with the default registry.
    */
-  public static Timer timer(String name, String... tags) {
-    return defaultRegistry.timer(name, Tags.of(tags));
-  }
-
-  /**
-   * Return a traced timer given the name using the default registry.
-   */
-  public static Timer tracedTimer(String name) {
-    return defaultRegistry.tracedTimer(name);
-  }
-
-  /**
-   * Return a traced timer given the name using the default registry.
-   */
-  public static Timer tracedTimer(String name, String... tags) {
-    return defaultRegistry.tracedTimer(name, Tags.of(tags));
+  public static TimerBuilder timerBuilder(String name) {
+    return defaultRegistry.timerBuilder(name);
   }
 
   /**
@@ -156,17 +114,17 @@ public class Metrics {
   }
 
   /**
-   * Return a traced timer using the class and name to derive the MetricName using the default registry.
-   */
-  public static Timer tracedTimer(Class<?> cls, String eventName) {
-    return tracedTimer(name(cls, eventName));
-  }
-
-  /**
    * Return a Counter given the name using the default registry.
    */
   public static Counter counter(String name) {
     return defaultRegistry.counter(name);
+  }
+
+  /**
+   * Return a builder used to configure and register a counter with the default registry.
+   */
+  public static CounterBuilder counterBuilder(String name) {
+    return defaultRegistry.counterBuilder(name);
   }
 
   /**
@@ -181,6 +139,13 @@ public class Metrics {
    */
   public static Meter meter(String name) {
     return defaultRegistry.meter(name);
+  }
+
+  /**
+   * Return a builder used to configure and register a meter with the default registry.
+   */
+  public static MeterBuilder meterBuilder(String name) {
+    return defaultRegistry.meterBuilder(name);
   }
 
   /**
@@ -202,6 +167,13 @@ public class Metrics {
    */
   public static TimerGroup timerGroup(Class<?> cls) {
     return timerGroup(cls.getName());
+  }
+
+  /**
+   * Return a builder used to configure and register a gauge with the default registry.
+   */
+  public static GaugeBuilder gauge(String name) {
+    return defaultRegistry.gauge(name);
   }
 
   /**

@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * Used to collect timed execution statistics.
+ * Used to collect long value statistics for meter and timer metrics.
  * <p>
  * It is intended for high concurrent updates to the statistics and relatively infrequent reads.
  * </p>
@@ -52,9 +52,9 @@ final class ValueCounter extends BaseReportName {
     max.accumulate(value);
   }
 
-  Meter.@Nullable Stats collect(Metric.Visitor collector) {
+  Meter.@Nullable Stats collect(Metric.Visitor collector, String unit) {
     var snapshot = collectSnapshot(collector);
-    return snapshot == null ? null : new MeterStats(snapshot.reportId(), snapshot.count(), snapshot.total(), snapshot.max());
+    return snapshot == null ? null : new MeterStats(snapshot.reportId(), unit, snapshot.count(), snapshot.total(), snapshot.max());
   }
 
   Timer.@Nullable Stats collectTimed(Metric.Visitor collector) {

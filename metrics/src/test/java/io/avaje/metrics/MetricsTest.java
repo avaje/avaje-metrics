@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,11 +18,12 @@ class MetricsTest {
     Metrics.collectMetrics();
 
     Metrics.addSupplier(() -> suppliedMetrics);
-    suppliedMetrics.add(new GaugeLongStats(Metric.ID.of("supplied0"), 42));
+    suppliedMetrics.add(new GaugeLongStats(Metric.ID.of("supplied0"), "MiBy", 42));
 
     List<Metric.Statistics> result = Metrics.collectMetrics(CollectionMode.CUMULATIVE);
     assertThat(result).hasSize(1);
     assertThat(result.get(0).name()).isEqualTo("supplied0");
+    assertThat(result.get(0).unit()).isEqualTo("MiBy");
 
     suppliedMetrics.clear();
 
@@ -38,5 +40,24 @@ class MetricsTest {
       .singleElement()
       .extracting(Metric.Statistics::name)
       .isEqualTo("supplied1");
+  }
+
+  @Test
+  void timerBuilder_usesDefaultRegistry() {
+    Metrics.collectMetrics();
+
+    var timer = Metrics.timerBuilder("app.metrics.builder")
+      .tags(Tags.of("env:test"))
+      .bucketRanges(100, 200)
+      .buildTraced();
+
+    timer.addEventDuration(true, TimeUnit.MILLISECONDS.toNanos(50));
+
+    assertThat(Metrics.collectMetrics(CollectionMode.CUMULATIVE))
+      .filteredOn(it -> it.name().equals("app.metrics.builder"))
+      .singleElement()
+      .extracting(Metric.Statistics::id)
+      .extracting(Metric.ID::tags)
+      .isEqualTo(Tags.of("env:test"));
   }
 }

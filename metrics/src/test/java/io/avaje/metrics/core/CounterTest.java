@@ -9,7 +9,7 @@ class CounterTest {
 
   @Test
   void test() {
-    DCounter counter = new DCounter(Metric.ID.of("foo"));
+    DCounter counter = new DCounter(Metric.ID.of("foo"), "{event}");
     assertEquals(0, counter.count());
 
     counter.inc();

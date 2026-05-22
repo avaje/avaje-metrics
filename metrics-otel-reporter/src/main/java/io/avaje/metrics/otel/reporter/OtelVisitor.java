@@ -18,12 +18,13 @@ import java.util.function.Function;
  * <p>
  * Mapping:
  * <ul>
- *   <li>{@link Counter.Stats} → {@code LongCounter} (add delta count)</li>
+ *   <li>{@link Counter.Stats} → {@code LongCounter} (add delta count, using {@link Counter.Stats#unit()})</li>
  *   <li>{@link Timer.Stats} → three instruments: {@code .count} (LongCounter),
- *       {@code .total} (LongCounter, unit {@code us}), {@code .max} (LongGauge, unit {@code us})</li>
- *   <li>{@link Meter.Stats} → same three instruments as Timer, unit {@code 1}</li>
- *   <li>{@link GaugeLong.Stats} → {@code LongGauge} (set current value)</li>
- *   <li>{@link GaugeDouble.Stats} → {@code DoubleGauge} (set current value)</li>
+ *       {@code .total} (LongCounter, unit {@link Timer.Stats#unit()}), {@code .max} (LongGauge, same unit)</li>
+ *   <li>{@link Meter.Stats} → same three instruments as Timer, using {@link Meter.Stats#unit()} for
+ *       {@code .total} and {@code .max}</li>
+ *   <li>{@link GaugeLong.Stats} → {@code LongGauge} (set current value, using {@link GaugeLong.Stats#unit()})</li>
+ *   <li>{@link GaugeDouble.Stats} → {@code DoubleGauge} (set current value, using {@link GaugeDouble.Stats#unit()})</li>
  * </ul>
  * Timer success and error stats are naturally handled as separate metrics because avaje
  * emits them with different names ({@code name} and {@code name.error}).
@@ -39,6 +40,10 @@ final class OtelVisitor implements Metric.Visitor {
   private final ConcurrentHashMap<String, LongGauge> meterMaxCache = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, LongGauge> gaugeLongCache = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, DoubleGauge> gaugeDoubleCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, String> counterUnitCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, String> meterValueUnitCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, String> gaugeLongUnitCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, String> gaugeDoubleUnitCache = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, Attributes> attributeCache = new ConcurrentHashMap<>();
 
   OtelVisitor(io.opentelemetry.api.metrics.Meter otelMeter, long timedThresholdMicros) {
@@ -52,9 +57,10 @@ final class OtelVisitor implements Metric.Visitor {
       return;
     }
     Attributes attrs = attributes(stats.id().tags());
+    verifyUnit(counterUnitCache, stats.name(), stats.unit());
     getOrCreate(counterCache, stats.name(), name ->
         otelMeter.counterBuilder(name)
-            .setUnit("{event}")
+            .setUnit(stats.unit())
             .build()
     ).add(stats.count(), attrs);
   }
@@ -67,7 +73,7 @@ final class OtelVisitor implements Metric.Visitor {
     if (stats.count() == 0) {
       return;
     }
-    recordMeterStats(stats, "us");
+    recordMeterStats(stats);
   }
 
   @Override
@@ -75,15 +81,16 @@ final class OtelVisitor implements Metric.Visitor {
     if (stats.count() == 0) {
       return;
     }
-    recordMeterStats(stats, "1");
+    recordMeterStats(stats);
   }
 
   @Override
   public void visit(GaugeDouble.Stats stats) {
     Attributes attrs = attributes(stats.id().tags());
+    verifyUnit(gaugeDoubleUnitCache, stats.name(), stats.unit());
     getOrCreate(gaugeDoubleCache, stats.name(), name ->
         otelMeter.gaugeBuilder(name)
-            .setUnit("1")
+            .setUnit(stats.unit())
             .build()
     ).set(stats.value(), attrs);
   }
@@ -91,17 +98,21 @@ final class OtelVisitor implements Metric.Visitor {
   @Override
   public void visit(GaugeLong.Stats stats) {
     Attributes attrs = attributes(stats.id().tags());
+    verifyUnit(gaugeLongUnitCache, stats.name(), stats.unit());
     getOrCreate(gaugeLongCache, stats.name(), name ->
         otelMeter.gaugeBuilder(name)
             .ofLongs()
-            .setUnit("1")
+            .setUnit(stats.unit())
             .build()
     ).set(stats.value(), attrs);
   }
 
-  private void recordMeterStats(Meter.Stats stats, String unit) {
+  private void recordMeterStats(Meter.Stats stats) {
     Attributes attrs = attributes(stats.id().tags());
     String name = stats.name();
+    String unit = stats.unit();
+
+    verifyUnit(meterValueUnitCache, name, unit);
 
     getOrCreate(meterCountCache, name, n ->
         otelMeter.counterBuilder(n + ".count")
@@ -125,6 +136,14 @@ final class OtelVisitor implements Metric.Visitor {
 
   private <T> T getOrCreate(ConcurrentHashMap<String, T> cache, String name, Function<String, T> factory) {
     return cache.computeIfAbsent(name, factory);
+  }
+
+  private void verifyUnit(ConcurrentHashMap<String, String> unitCache, String name, String unit) {
+    var existing = unitCache.putIfAbsent(name, unit);
+    if (existing != null && !existing.equals(unit)) {
+      throw new IllegalStateException(
+        "Metric " + name + " already registered with unit '" + existing + "' not '" + unit + "'");
+    }
   }
 
   private Attributes attributes(Tags tags) {

@@ -2,8 +2,10 @@
 
 Provides the optional OpenTelemetry span bridge used by traced timers.
 
-When this module is on the classpath or module path, `Metrics.tracedTimer(...)` and enhancement
-with `@Timed(span = Timed.SpanMode.ON)` create OpenTelemetry spans via `GlobalOpenTelemetry`.
+When this module is on the classpath or module path,
+`Metrics.timerBuilder(...).buildTraced()`, `MetricRegistry.timerBuilder(...).buildTraced()`,
+and enhancement with `@Timed(span = Timed.SpanMode.ON)` create OpenTelemetry spans via
+`GlobalOpenTelemetry`.
 
 This module does **not** export avaje metrics to OpenTelemetry metrics backends. For that use:
 
@@ -27,9 +29,17 @@ No explicit setup is required in this module beyond having OpenTelemetry configu
 The span factory is discovered via `ServiceLoader`.
 
 ```java
-Timer timer = Metrics.tracedTimer("app.service.method");
+Timer timer = Metrics.timerBuilder("app.service.method")
+  .buildTraced();
 
 timer.time(() -> "ok");
+```
+
+```java
+Timer timer = Metrics.timerBuilder("app.service.method")
+  .tags(Tags.of("env:prod"))
+  .bucketRanges(50, 100, 250)
+  .buildTraced();
 ```
 
 When a traced timer includes a `label:...` tag, that label is used as the span name while the

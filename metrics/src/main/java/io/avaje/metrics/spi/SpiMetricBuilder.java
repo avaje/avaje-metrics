@@ -18,8 +18,8 @@ public interface SpiMetricBuilder {
   interface Factory<T extends Metric> {
 
     /**
-     * Create the metric.
+     * Create the metric with the given unit.
      */
-    T createMetric(Metric.ID id, int[] bucketRanges);
+    T createMetric(Metric.ID id, String unit, int[] bucketRanges);
   }
 }

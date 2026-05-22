@@ -3,12 +3,15 @@ package io.avaje.metrics.stats;
 import io.avaje.metrics.Meter;
 import io.avaje.metrics.Metric;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Snapshot of the current statistics for a Meter.
  */
 public final class MeterStats implements Meter.Stats {
 
   final Metric.ID id;
+  final String unit;
   final long count;
   final long total;
   final long max;
@@ -17,7 +20,15 @@ public final class MeterStats implements Meter.Stats {
    * Create with all parameters.
    */
   public MeterStats(Metric.ID id, long count, long total, long max) {
+    this(id, "", count, total, max);
+  }
+
+  /**
+   * Create with all parameters including unit.
+   */
+  public MeterStats(Metric.ID id, String unit, long count, long total, long max) {
     this.id = id;
+    this.unit = normalizeUnit(unit);
     this.count = count;
     this.total = total;
     // collection is racy so sanitize the max value if it has not been set
@@ -51,6 +62,11 @@ public final class MeterStats implements Meter.Stats {
   }
 
   @Override
+  public String unit() {
+    return unit;
+  }
+
+  @Override
   public long count() {
     return count;
   }
@@ -68,5 +84,10 @@ public final class MeterStats implements Meter.Stats {
   @Override
   public long mean() {
     return (count < 1) ? 0L : Math.round((double) (total / count));
+  }
+
+  private static String normalizeUnit(String unit) {
+    var normalized = requireNonNull(unit, "unit");
+    return normalized.isBlank() ? "" : normalized;
   }
 }

@@ -50,7 +50,9 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_successSpan() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method", Tags.of("env:prod", "region:ap-south"));
+    Timer timer = registry.timerBuilder("app.service.method")
+      .tags(Tags.of("env:prod", "region:ap-south"))
+      .buildTraced();
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
     try (Scope ignored = parent.makeCurrent()) {
@@ -75,7 +77,7 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_errorSpan() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method");
+    Timer timer = registry.timerBuilder("app.service.method").buildTraced();
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
     try (Scope ignored = parent.makeCurrent()) {
@@ -97,7 +99,7 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_errorSpanRecordsThrowable() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method");
+    Timer timer = registry.timerBuilder("app.service.method").buildTraced();
     var error = new IllegalStateException("boom");
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
@@ -125,7 +127,9 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_labelTagUsesMethodLabelForSpanName() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("web.api", Tags.of("label:CustomerResource.staticGeneral", "env:prod"));
+    Timer timer = registry.timerBuilder("web.api")
+      .tags(Tags.of("label:CustomerResource.staticGeneral", "env:prod"))
+      .buildTraced();
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
     try (Scope ignored = parent.makeCurrent()) {
@@ -150,7 +154,7 @@ class OtelTimedSpanFactoryTest {
     MetricRegistry registry = Metrics.createRegistry();
     GlobalOpenTelemetry.resetForTest();
 
-    registry.tracedTimer("app.service.method").time(() -> "ok");
+    registry.timerBuilder("app.service.method").buildTraced().time(() -> "ok");
 
     assertThat(exporter.getFinishedSpanItems()).isEmpty();
   }
@@ -159,7 +163,7 @@ class OtelTimedSpanFactoryTest {
   void tracedTimer_withoutRecordingParent_isNoop() {
     MetricRegistry registry = Metrics.createRegistry();
 
-    registry.tracedTimer("app.service.method").time(() -> "ok");
+    registry.timerBuilder("app.service.method").buildTraced().time(() -> "ok");
 
     assertThat(exporter.getFinishedSpanItems()).isEmpty();
   }

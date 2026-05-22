@@ -25,6 +25,15 @@ public interface Metric {
   String name();
 
   /**
+   * Return the unit associated with the metric.
+   * <p>
+   * Returns an empty string when no explicit unit is configured.
+   */
+  default String unit() {
+    return "";
+  }
+
+  /**
    * Typically this is only called by the MetricManager and tells the metric to collect its underlying
    * statistics for reporting purposes.
    * <p>
@@ -107,6 +116,15 @@ public interface Metric {
      * Return the associated tags as an array.
      */
     String[] tags();
+
+    /**
+     * Return the unit associated with the metric statistics.
+     * <p>
+     * Returns an empty string when no explicit unit is configured.
+     */
+    default String unit() {
+      return "";
+    }
 
     /**
      * Visit the reporter for the given metric type.

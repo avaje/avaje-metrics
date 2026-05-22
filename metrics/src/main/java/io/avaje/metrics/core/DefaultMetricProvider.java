@@ -7,6 +7,7 @@ import io.avaje.metrics.spi.SpiTimedSpanFactory;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -15,10 +16,16 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Default implementation of the SpiMetricProvider.
  */
 public final class DefaultMetricProvider implements SpiMetricProvider {
+
+  private static final String COUNT_UNIT = "{event}";
+  private static final String DEFAULT_UNIT = "";
+  private static final String TIMER_UNIT = "us";
 
   private final ConcurrentHashMap<Metric.ID, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimerFactory;
@@ -213,95 +220,103 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public Timer timer(String name) {
-    return metric(Metric.ID.of(name), timerFactory);
+    return timerBuilder(name).build();
   }
 
   @Override
-  public Timer tracedTimer(String name) {
-    return tracedMetric(Metric.ID.of(name), timerFactory, null);
-  }
-
-  @Override
-  public Timer timer(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), timerFactory);
-  }
-
-  @Override
-  public Timer tracedTimer(String name, Tags tags) {
-    return tracedMetric(Metric.ID.of(name, tags), timerFactory, null);
-  }
-
-  @Override
-  public Timer timer(String name, int... bucketRanges) {
-    return metric(Metric.ID.of(name), bucketTimerFactory, bucketRanges);
-  }
-
-  @Override
-  public Timer tracedTimer(String name, int... bucketRanges) {
-    return tracedMetric(Metric.ID.of(name), bucketTimerFactory, bucketRanges);
-  }
-
-  @Override
-  public Timer timer(String name, Tags tags, int... bucketRanges) {
-    return metric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
-  }
-
-  @Override
-  public Timer tracedTimer(String name, Tags tags, int... bucketRanges) {
-    return tracedMetric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
+  public TimerBuilder timerBuilder(String name) {
+    return new DTimerBuilder(name);
   }
 
   @Override
   public Counter counter(String name) {
-    return metric(Metric.ID.of(name), counterFactory);
+    return counterBuilder(name).build();
   }
 
   @Override
-  public Counter counter(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), counterFactory);
+  public CounterBuilder counterBuilder(String name) {
+    return new DCounterBuilder(name);
   }
 
   @Override
   public Meter meter(String name) {
-    return metric(Metric.ID.of(name), meterFactory);
+    return meterBuilder(name).build();
   }
 
   @Override
-  public Meter meter(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), meterFactory);
+  public MeterBuilder meterBuilder(String name) {
+    return new DMeterBuilder(name);
+  }
+
+  @Override
+  public GaugeBuilder gauge(String name) {
+    return new DGaugeBuilder(name);
   }
 
   @Override
   public GaugeDouble gauge(String name, DoubleSupplier supplier) {
-    return put(new DGaugeDouble(Metric.ID.of(name), supplier));
-  }
-
-  @Override
-  public GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier) {
-    return put(new DGaugeDouble(Metric.ID.of(name, tags), supplier));
+    return gaugeDouble(name, Tags.EMPTY, DEFAULT_UNIT, supplier);
   }
 
   @Override
   public GaugeLong gauge(String name, LongSupplier gauge) {
-    return put(DGaugeLong.of(Metric.ID.of(name), gauge));
+    return gaugeLong(name, Tags.EMPTY, DEFAULT_UNIT, gauge);
   }
 
-  @Override
-  public GaugeLong gauge(String name, Tags tags, LongSupplier gauge) {
-    return put(DGaugeLong.of(Metric.ID.of(name, tags), gauge));
-  }
-
-  private <T extends Metric> T put(T metric) {
-    metricsCache.put(metric.id(), metric);
+  private <T extends Metric> T replace(T metric, Class<T> type) {
+    synchronized (monitor) {
+      var existing = metricsCache.get(metric.id());
+      if (existing != null) {
+        validateMetric(metric.id(), existing, type, metric.unit());
+      }
+      metricsCache.put(metric.id(), metric);
+    }
     return metric;
   }
 
-  private <T extends Metric> T metric(Metric.ID id, SpiMetricBuilder.Factory<?> factory) {
-    return metric(id, factory, null);
+  private GaugeDouble gaugeDouble(String name, Tags tags, String unit, DoubleSupplier supplier) {
+    return replace(
+      new DGaugeDouble(Metric.ID.of(name, tags), unit, requireNonNull(supplier, "supplier")), GaugeDouble.class);
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends Metric> T metric(Metric.ID id, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+  private GaugeLong gaugeLong(String name, Tags tags, String unit, LongSupplier supplier) {
+    return replace(
+      DGaugeLong.of(Metric.ID.of(name, tags), unit, requireNonNull(supplier, "supplier")), GaugeLong.class);
+  }
+
+  private Counter counter(String name, Tags tags, String unit) {
+    return metric(Metric.ID.of(name, tags), unit, counterFactory, Counter.class, null);
+  }
+
+  private Meter meter(String name, Tags tags, String unit) {
+    return metric(Metric.ID.of(name, tags), unit, meterFactory, Meter.class, null);
+  }
+
+  private Timer timer(String name, Tags tags, @Nullable int[] bucketRanges) {
+    return metric(
+      Metric.ID.of(name, tags),
+      TIMER_UNIT,
+      timerFactory(bucketRanges),
+      Timer.class,
+      bucketRanges);
+  }
+
+  private Timer tracedTimer(String name, Tags tags, @Nullable int[] bucketRanges) {
+    return tracedMetric(
+      Metric.ID.of(name, tags),
+      TIMER_UNIT,
+      timerFactory(bucketRanges),
+      bucketRanges);
+  }
+
+  private <T extends Metric> T metric(
+    Metric.ID id,
+    String unit,
+    SpiMetricBuilder.Factory<?> factory,
+    Class<T> type,
+    @Nullable int[] bucketRanges) {
+
+    var normalizedUnit = BaseReportName.normalizeUnit(unit);
     // try lock free get first
     Metric metric = metricsCache.get(id);
     if (metric == null) {
@@ -309,21 +324,22 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         // use synchronized block
         metric = metricsCache.get(id);
         if (metric == null) {
-          metric = factory.createMetric(id, bucketRanges);
+          metric = factory.createMetric(id, normalizedUnit, bucketRanges);
           metricsCache.put(id, metric);
         }
       }
     }
-    return (T) metric;
+    return validateMetric(id, metric, type, normalizedUnit);
   }
 
-  private Timer tracedMetric(Metric.ID id, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+  private Timer tracedMetric(Metric.ID id, String unit, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+    var normalizedUnit = BaseReportName.normalizeUnit(unit);
     Metric metric = metricsCache.get(id);
     if (metric == null) {
       synchronized (monitor) {
         metric = metricsCache.get(id);
         if (metric == null) {
-          metric = factory.createMetric(id, bucketRanges);
+          metric = factory.createMetric(id, normalizedUnit, bucketRanges);
           if (metric instanceof TraceableTimer) {
             metric = ((TraceableTimer) metric).withTracing(timedSpanFactory);
           }
@@ -331,12 +347,166 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         }
       }
     }
-    return (Timer)metric;
+    return validateMetric(id, metric, Timer.class, normalizedUnit);
+  }
+
+  private SpiMetricBuilder.Factory<Timer> timerFactory(@Nullable int[] bucketRanges) {
+    return bucketRanges == null ? timerFactory : bucketTimerFactory;
+  }
+
+  private static @Nullable int[] copyBucketRanges(@Nullable int[] bucketRanges) {
+    return bucketRanges == null || bucketRanges.length == 0 ? null : Arrays.copyOf(bucketRanges, bucketRanges.length);
   }
 
   @Override
   public void register(Metric metric) {
-    metricsCache.put(metric.id(), metric);
+    synchronized (monitor) {
+      var existing = metricsCache.get(metric.id());
+      if (existing != null) {
+        validateUnit(metric.id(), existing, metric.unit());
+      }
+      metricsCache.put(metric.id(), metric);
+    }
+  }
+
+  private static void validateUnit(Metric.ID id, Metric existing, String unit) {
+    var normalizedUnit = BaseReportName.normalizeUnit(unit);
+    if (!existing.unit().equals(normalizedUnit)) {
+      throw new IllegalStateException(
+        "Metric " + id.name() + " already registered with unit '" + existing.unit() + "' not '" + normalizedUnit + "'");
+    }
+  }
+
+  private static <T extends Metric> T validateMetric(Metric.ID id, Metric metric, Class<T> type, String unit) {
+    if (!type.isInstance(metric)) {
+      throw new IllegalStateException(
+        "Metric " + id.name() + " already registered as " + metric.getClass().getSimpleName()
+          + " not " + type.getSimpleName());
+    }
+    validateUnit(id, metric, unit);
+    return type.cast(metric);
+  }
+
+  private final class DGaugeBuilder implements GaugeBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private String unit = DEFAULT_UNIT;
+
+    private DGaugeBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public GaugeBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public GaugeBuilder unit(String unit) {
+      this.unit = BaseReportName.normalizeUnit(unit);
+      return this;
+    }
+
+    @Override
+    public GaugeLong ofLongs(LongSupplier supplier) {
+      return gaugeLong(name, tags, unit, supplier);
+    }
+
+    @Override
+    public GaugeDouble ofDoubles(DoubleSupplier supplier) {
+      return gaugeDouble(name, tags, unit, supplier);
+    }
+  }
+
+  private final class DCounterBuilder implements CounterBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private String unit = COUNT_UNIT;
+
+    private DCounterBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public CounterBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public CounterBuilder unit(String unit) {
+      this.unit = BaseReportName.normalizeUnit(unit);
+      return this;
+    }
+
+    @Override
+    public Counter build() {
+      return counter(name, tags, unit);
+    }
+  }
+
+  private final class DMeterBuilder implements MeterBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private String unit = DEFAULT_UNIT;
+
+    private DMeterBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public MeterBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public MeterBuilder unit(String unit) {
+      this.unit = BaseReportName.normalizeUnit(unit);
+      return this;
+    }
+
+    @Override
+    public Meter build() {
+      return meter(name, tags, unit);
+    }
+  }
+
+  private final class DTimerBuilder implements TimerBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private @Nullable int[] bucketRanges;
+
+    private DTimerBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public TimerBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public TimerBuilder bucketRanges(int... bucketRangesMillis) {
+      this.bucketRanges = copyBucketRanges(requireNonNull(bucketRangesMillis, "bucketRangesMillis"));
+      return this;
+    }
+
+    @Override
+    public Timer build() {
+      return timer(name, tags, bucketRanges);
+    }
+
+    @Override
+    public Timer buildTraced() {
+      return tracedTimer(name, tags, bucketRanges);
+    }
   }
 
   @Override

@@ -15,18 +15,18 @@ class CollectAsJsonTest {
     Tags tags = Tags.of("a", "b");
     long startNanos = System.nanoTime();
     Timer timer = registry.timer("my.timer");
-    Timer timer2 = registry.timer("my.timer", tags);
-    Timer timer3 = registry.timer("myBucket", tags, 400, 900);
+    Timer timer2 = registry.timerBuilder("my.timer").tags(tags).build();
+    Timer timer3 = registry.timerBuilder("myBucket").tags(tags).bucketRanges(400, 900).build();
 
     Counter counter = registry.counter("my.count");
-    Counter counter2 = registry.counter("my.count", tags);
+    Counter counter2 = registry.counterBuilder("my.count").tags(tags).build();
     counter.inc();
     counter.inc();
 
     counter2.inc();
 
     Meter meter = registry.meter("my.meter");
-    Meter meter2 = registry.meter("my.meter", tags);
+    Meter meter2 = registry.meterBuilder("my.meter").tags(tags).build();
     meter.addEvent(42);
     meter.addEvent(44);
     meter.addEvent(46);
@@ -38,8 +38,8 @@ class CollectAsJsonTest {
 
     registry.gauge("my.gauge0", () -> 142D);
     registry.gauge("my.gauge1", () -> 200L);
-    registry.gauge("my.gauge0", tags, () -> 442D);
-    registry.gauge("my.gauge1", tags, () -> 400L);
+    registry.gauge("my.gauge0").tags(tags).ofDoubles(() -> 442D);
+    registry.gauge("my.gauge1").tags(tags).ofLongs(() -> 400L);
 
     timer.add(startNanos);
 

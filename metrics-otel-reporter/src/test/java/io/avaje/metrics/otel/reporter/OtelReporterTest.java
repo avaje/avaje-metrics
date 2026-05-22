@@ -57,6 +57,7 @@ class OtelReporterTest {
     Map<String, MetricData> metrics = collectByName();
     assertThat(metrics).containsKey("app.login.count");
     MetricData data = metrics.get("app.login.count");
+    assertThat(data.getUnit()).isEqualTo("{event}");
     assertThat(data.getLongSumData().getPoints()).hasSize(1);
     LongPointData point = data.getLongSumData().getPoints().iterator().next();
     assertThat(point.getValue()).isEqualTo(8);
@@ -64,7 +65,9 @@ class OtelReporterTest {
 
   @Test
   void counter_withTags() {
-    Counter counter = registry.counter("app.login.count", Tags.of("env:prod", "region:us-east"));
+    Counter counter = registry.counterBuilder("app.login.count")
+      .tags(Tags.of("env:prod", "region:us-east"))
+      .build();
     counter.inc(10);
 
     reporter.report();
@@ -79,7 +82,9 @@ class OtelReporterTest {
 
   @Test
   void counter_withNullTagEntry_skipped() {
-    Counter counter = registry.counter("app.login.count", Tags.of(null, "env:prod"));
+    Counter counter = registry.counterBuilder("app.login.count")
+      .tags(Tags.of(null, "env:prod"))
+      .build();
     counter.inc(10);
 
     reporter.report();
@@ -115,6 +120,8 @@ class OtelReporterTest {
     assertThat(metrics).containsKey("app.service.method.count");
     assertThat(metrics).containsKey("app.service.method.total");
     assertThat(metrics).containsKey("app.service.method.max");
+    assertThat(metrics.get("app.service.method.total").getUnit()).isEqualTo("us");
+    assertThat(metrics.get("app.service.method.max").getUnit()).isEqualTo("us");
 
     LongPointData count = metrics.get("app.service.method.count").getLongSumData().getPoints().iterator().next();
     assertThat(count.getValue()).isEqualTo(2);
@@ -168,6 +175,9 @@ class OtelReporterTest {
     assertThat(metrics).containsKey("app.bytes.sent.count");
     assertThat(metrics).containsKey("app.bytes.sent.total");
     assertThat(metrics).containsKey("app.bytes.sent.max");
+    assertThat(metrics.get("app.bytes.sent.count").getUnit()).isEqualTo("{event}");
+    assertThat(metrics.get("app.bytes.sent.total").getUnit()).isEmpty();
+    assertThat(metrics.get("app.bytes.sent.max").getUnit()).isEmpty();
 
     LongPointData count = metrics.get("app.bytes.sent.count").getLongSumData().getPoints().iterator().next();
     assertThat(count.getValue()).isEqualTo(2);
@@ -184,6 +194,7 @@ class OtelReporterTest {
 
     Map<String, MetricData> metrics = collectByName();
     assertThat(metrics).containsKey("jvm.threads.active");
+    assertThat(metrics.get("jvm.threads.active").getUnit()).isEmpty();
     long value = metrics.get("jvm.threads.active").getLongGaugeData().getPoints().iterator().next().getValue();
     assertThat(value).isEqualTo(42L);
   }
@@ -196,8 +207,28 @@ class OtelReporterTest {
 
     Map<String, MetricData> metrics = collectByName();
     assertThat(metrics).containsKey("jvm.memory.pct");
+    assertThat(metrics.get("jvm.memory.pct").getUnit()).isEmpty();
     double value = metrics.get("jvm.memory.pct").getDoubleGaugeData().getPoints().iterator().next().getValue();
     assertThat(value).isEqualTo(0.75);
+  }
+
+  @Test
+  void configuredUnits() {
+    Counter counter = registry.counterBuilder("app.rows.read").unit("row").build();
+    Meter meter = registry.meterBuilder("app.bytes.sent").unit("By").build();
+    counter.inc(4);
+    meter.addEvent(1024);
+    registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);
+    registry.gauge("app.cpu.utilization").unit("%").ofDoubles(() -> 75.5d);
+
+    reporter.report();
+
+    Map<String, MetricData> metrics = collectByName();
+    assertThat(metrics.get("app.rows.read").getUnit()).isEqualTo("row");
+    assertThat(metrics.get("app.bytes.sent.total").getUnit()).isEqualTo("By");
+    assertThat(metrics.get("app.bytes.sent.max").getUnit()).isEqualTo("By");
+    assertThat(metrics.get("jvm.memory.used").getUnit()).isEqualTo("MiBy");
+    assertThat(metrics.get("app.cpu.utilization").getUnit()).isEqualTo("%");
   }
 
   @Test

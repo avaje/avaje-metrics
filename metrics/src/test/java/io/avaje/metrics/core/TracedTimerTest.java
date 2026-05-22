@@ -16,7 +16,7 @@ class TracedTimerTest {
   @Test
   void tracedTimer_startEvent_success() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method");
+    Timer timer = registry.timerBuilder("app.service.method").buildTraced();
 
     Timer.Event event = timer.startEvent();
     event.end();
@@ -48,7 +48,7 @@ class TracedTimerTest {
   @Test
   void tracedBucketTimer_startEvent_recordsMetrics() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.bucketed", 100, 200);
+    Timer timer = registry.timerBuilder("app.service.bucketed").bucketRanges(100, 200).buildTraced();
 
     Timer.Event event = timer.startEvent();
     event.end();
@@ -86,7 +86,7 @@ class TracedTimerTest {
   @Test
   void tracedBucketTimer_errorRecordsThrowable() {
     TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
-    Timer bucketTimer = new BucketTimerFactory().createMetric(Metric.ID.of("app.service.bucketed"), new int[]{100, 200});
+    Timer bucketTimer = new BucketTimerFactory().createMetric(Metric.ID.of("app.service.bucketed"), "", new int[]{100, 200});
     Timer tracedBucketTimer = ((TraceableTimer) bucketTimer).withTracing(testTimedSpanFactory);
     var error = new IllegalArgumentException("bad");
 

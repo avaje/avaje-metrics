@@ -69,7 +69,9 @@ class OtelMetricProducerTest {
     var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
     var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
-    Counter counter = registry.counter("app.login.count", Tags.of(null, "env:prod", "region:us-east"));
+    Counter counter = registry.counterBuilder("app.login.count")
+      .tags(Tags.of(null, "env:prod", "region:us-east"))
+      .build();
 
     counter.inc(10);
     epochNanosSource.advanceSeconds(5);
@@ -193,6 +195,30 @@ class OtelMetricProducerTest {
     assertThat(onlyLongGaugePoint(metrics.get("app.bytes.sent.max")).getValue()).isEqualTo(2048L);
     assertThat(onlyLongGaugePoint(metrics.get("jvm.threads.active")).getValue()).isEqualTo(42L);
     assertThat(metrics.get("jvm.memory.pct").getDoubleGaugeData().getPoints().iterator().next().getValue()).isEqualTo(0.75);
+  }
+
+  @Test
+  void configuredUnits_areMapped() {
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
+    var registry = Metrics.createRegistry();
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
+
+    var counter = registry.counterBuilder("app.rows.read").unit("row").build();
+    var meter = registry.meterBuilder("app.bytes.sent").unit("By").build();
+    counter.inc(4);
+    meter.addEvent(1024);
+    registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);
+    registry.gauge("app.cpu.utilization").unit("%").ofDoubles(() -> 75.5d);
+    epochNanosSource.advanceSeconds(5);
+
+    Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
+
+    assertThat(metrics.get("app.rows.read").getUnit()).isEqualTo("row");
+    assertThat(metrics.get("app.bytes.sent.count").getUnit()).isEqualTo("{event}");
+    assertThat(metrics.get("app.bytes.sent.total").getUnit()).isEqualTo("By");
+    assertThat(metrics.get("app.bytes.sent.max").getUnit()).isEqualTo("By");
+    assertThat(metrics.get("jvm.memory.used").getUnit()).isEqualTo("MiBy");
+    assertThat(metrics.get("app.cpu.utilization").getUnit()).isEqualTo("%");
   }
 
   @Test
