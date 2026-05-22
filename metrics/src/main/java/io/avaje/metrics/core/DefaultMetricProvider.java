@@ -15,6 +15,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Default implementation of the SpiMetricProvider.
  */
@@ -296,43 +298,18 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public GaugeBuilder gauge(String name) {
+    return new DGaugeBuilder(name);
+  }
+
+  @Override
   public GaugeDouble gauge(String name, DoubleSupplier supplier) {
-    return gauge(name, DEFAULT_UNIT, supplier);
-  }
-
-  @Override
-  public GaugeDouble gauge(String name, String unit, DoubleSupplier supplier) {
-    return replace(new DGaugeDouble(Metric.ID.of(name), unit, supplier), GaugeDouble.class);
-  }
-
-  @Override
-  public GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier) {
-    return gauge(name, tags, DEFAULT_UNIT, supplier);
-  }
-
-  @Override
-  public GaugeDouble gauge(String name, Tags tags, String unit, DoubleSupplier supplier) {
-    return replace(new DGaugeDouble(Metric.ID.of(name, tags), unit, supplier), GaugeDouble.class);
+    return gaugeDouble(name, Tags.EMPTY, DEFAULT_UNIT, supplier);
   }
 
   @Override
   public GaugeLong gauge(String name, LongSupplier gauge) {
-    return gauge(name, DEFAULT_UNIT, gauge);
-  }
-
-  @Override
-  public GaugeLong gauge(String name, String unit, LongSupplier gauge) {
-    return replace(DGaugeLong.of(Metric.ID.of(name), unit, gauge), GaugeLong.class);
-  }
-
-  @Override
-  public GaugeLong gauge(String name, Tags tags, LongSupplier gauge) {
-    return gauge(name, tags, DEFAULT_UNIT, gauge);
-  }
-
-  @Override
-  public GaugeLong gauge(String name, Tags tags, String unit, LongSupplier gauge) {
-    return replace(DGaugeLong.of(Metric.ID.of(name, tags), unit, gauge), GaugeLong.class);
+    return gaugeLong(name, Tags.EMPTY, DEFAULT_UNIT, gauge);
   }
 
   private <T extends Metric> T replace(T metric, Class<T> type) {
@@ -344,6 +321,16 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
       metricsCache.put(metric.id(), metric);
     }
     return metric;
+  }
+
+  private GaugeDouble gaugeDouble(String name, Tags tags, String unit, DoubleSupplier supplier) {
+    return replace(
+      new DGaugeDouble(Metric.ID.of(name, tags), unit, requireNonNull(supplier, "supplier")), GaugeDouble.class);
+  }
+
+  private GaugeLong gaugeLong(String name, Tags tags, String unit, LongSupplier supplier) {
+    return replace(
+      DGaugeLong.of(Metric.ID.of(name, tags), unit, requireNonNull(supplier, "supplier")), GaugeLong.class);
   }
 
   private <T extends Metric> T metric(
@@ -414,6 +401,39 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     }
     validateUnit(id, metric, unit);
     return type.cast(metric);
+  }
+
+  private final class DGaugeBuilder implements GaugeBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private String unit = DEFAULT_UNIT;
+
+    private DGaugeBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public GaugeBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public GaugeBuilder unit(String unit) {
+      this.unit = BaseReportName.normalizeUnit(unit);
+      return this;
+    }
+
+    @Override
+    public GaugeLong ofLongs(LongSupplier supplier) {
+      return gaugeLong(name, tags, unit, supplier);
+    }
+
+    @Override
+    public GaugeDouble ofDoubles(DoubleSupplier supplier) {
+      return gaugeDouble(name, tags, unit, supplier);
+    }
   }
 
   @Override

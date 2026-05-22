@@ -205,8 +205,8 @@ class OtelMetricProducerTest {
     var meter = registry.meter("app.bytes.sent", "By");
     counter.inc(4);
     meter.addEvent(1024);
-    registry.gauge("jvm.memory.used", "MiBy", () -> 42L);
-    registry.gauge("app.cpu.utilization", "%", () -> 75.5d);
+    registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);
+    registry.gauge("app.cpu.utilization").unit("%").ofDoubles(() -> 75.5d);
     epochNanosSource.advanceSeconds(5);
 
     Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));

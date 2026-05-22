@@ -233,6 +233,13 @@ public class Metrics {
   }
 
   /**
+   * Return a builder used to configure and register a gauge with the default registry.
+   */
+  public static GaugeBuilder gauge(String name) {
+    return defaultRegistry.gauge(name);
+  }
+
+  /**
    * Create and register a gauge with the supplied values using the default registry.
    */
   public static GaugeDouble gauge(String name, DoubleSupplier supplier) {
@@ -240,24 +247,10 @@ public class Metrics {
   }
 
   /**
-   * Create and register a gauge with the supplied values and unit using the default registry.
-   */
-  public static GaugeDouble gauge(String name, String unit, DoubleSupplier supplier) {
-    return defaultRegistry.gauge(name, unit, supplier);
-  }
-
-  /**
    * Create and register a gauge with the supplied long values using the default registry.
    */
   public static GaugeLong gauge(String name, LongSupplier supplier) {
     return defaultRegistry.gauge(name, supplier);
-  }
-
-  /**
-   * Create and register a gauge with the supplied long values and unit using the default registry.
-   */
-  public static GaugeLong gauge(String name, String unit, LongSupplier supplier) {
-    return defaultRegistry.gauge(name, unit, supplier);
   }
 
   /**

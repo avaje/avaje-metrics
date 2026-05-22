@@ -118,7 +118,9 @@ them through to the OTEL instruments. Examples:
 ```java
 registry.counter("app.rows", "row");
 registry.meter("app.bytes.sent", "By");
-registry.gauge("jvm.memory.used", "MiBy", memoryGauge);
+registry.gauge("jvm.memory.used")
+    .unit("MiBy")
+    .ofLongs(memoryGauge);
 ```
 
 ## Reporting manually

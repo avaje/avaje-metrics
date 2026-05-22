@@ -120,7 +120,7 @@ gauge. Explicit units remain unchanged for counters (`{event}`) and timers (`us`
 
 If you need explicit units for non-timer metrics, use the unit-aware avaje APIs such as
 `registry.counter("app.rows", "row")`, `registry.meter("app.bytes.sent", "By")`, or
-`registry.gauge("jvm.memory.used", "MiBy", supplier)`.
+`registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(supplier)`.
 
 ## When to use this module
 

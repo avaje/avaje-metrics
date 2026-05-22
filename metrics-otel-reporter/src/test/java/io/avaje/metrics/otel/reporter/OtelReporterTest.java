@@ -214,8 +214,8 @@ class OtelReporterTest {
     Meter meter = registry.meter("app.bytes.sent", "By");
     counter.inc(4);
     meter.addEvent(1024);
-    registry.gauge("jvm.memory.used", "MiBy", () -> 42L);
-    registry.gauge("app.cpu.utilization", "%", () -> 75.5d);
+    registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);
+    registry.gauge("app.cpu.utilization").unit("%").ofDoubles(() -> 75.5d);
 
     reporter.report();
 

@@ -16,8 +16,8 @@ class MetricUnitTest {
     var registry = Metrics.createRegistry();
     var counter = registry.counter("app.rows.read", "row");
     var meter = registry.meter("app.bytes.sent", "By");
-    var gaugeLong = registry.gauge("jvm.memory.used", "MiBy", () -> 42L);
-    var gaugeDouble = registry.gauge("app.cpu.utilization", "%", () -> 75.5d);
+    var gaugeLong = registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);
+    var gaugeDouble = registry.gauge("app.cpu.utilization").unit("%").ofDoubles(() -> 75.5d);
 
     counter.inc(3);
     meter.addEvent(1024);
@@ -74,12 +74,12 @@ class MetricUnitTest {
   void conflictingUnits_areRejected() {
     var registry = Metrics.createRegistry();
     registry.counter("app.counter.conflict", "row");
-    registry.gauge("app.gauge.conflict", "MiBy", () -> 42L);
+    registry.gauge("app.gauge.conflict").unit("MiBy").ofLongs(() -> 42L);
 
     assertThatThrownBy(() -> registry.counter("app.counter.conflict", "request"))
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("app.counter.conflict");
-    assertThatThrownBy(() -> registry.gauge("app.gauge.conflict", "By", () -> 24L))
+    assertThatThrownBy(() -> registry.gauge("app.gauge.conflict").unit("By").ofLongs(() -> 24L))
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("app.gauge.conflict");
   }

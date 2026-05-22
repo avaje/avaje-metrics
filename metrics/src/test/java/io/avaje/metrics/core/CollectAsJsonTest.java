@@ -38,8 +38,8 @@ class CollectAsJsonTest {
 
     registry.gauge("my.gauge0", () -> 142D);
     registry.gauge("my.gauge1", () -> 200L);
-    registry.gauge("my.gauge0", tags, () -> 442D);
-    registry.gauge("my.gauge1", tags, () -> 400L);
+    registry.gauge("my.gauge0").tags(tags).ofDoubles(() -> 442D);
+    registry.gauge("my.gauge1").tags(tags).ofLongs(() -> 400L);
 
     timer.add(startNanos);
 

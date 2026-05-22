@@ -51,44 +51,19 @@ public interface MetricRegistry extends JvmMetrics {
   Meter meter(String name, Tags tags, String unit);
 
   /**
+   * Return a builder used to configure and register a gauge.
+   */
+  GaugeBuilder gauge(String name);
+
+  /**
    * Create and register a gauge using the supplied double values.
    */
   GaugeDouble gauge(String name, DoubleSupplier supplier);
 
   /**
-   * Create and register a gauge using the supplied double values and unit.
-   */
-  GaugeDouble gauge(String name, String unit, DoubleSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied double values.
-   */
-  GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied double values and unit.
-   */
-  GaugeDouble gauge(String name, Tags tags, String unit, DoubleSupplier supplier);
-
-  /**
    * Create and register a gauge using the supplied long values.
    */
   GaugeLong gauge(String name, LongSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied long values and unit.
-   */
-  GaugeLong gauge(String name, String unit, LongSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied long values.
-   */
-  GaugeLong gauge(String name, Tags tags, LongSupplier supplier);
-
-  /**
-   * Create and register a gauge using the supplied long values and unit.
-   */
-  GaugeLong gauge(String name, Tags tags, String unit, LongSupplier supplier);
 
   /**
    * Return the timer using the metric name.
