@@ -7,8 +7,8 @@ import io.avaje.metrics.spi.SpiMetricBuilder;
 final class MeterFactory implements SpiMetricBuilder.Factory<Meter> {
 
   @Override
-  public Meter createMetric(Metric.ID id, int[] bucketRanges) {
-    return new DMeter(id);
+  public Meter createMetric(Metric.ID id, String unit, int[] bucketRanges) {
+    return new DMeter(id, unit);
   }
 
 }

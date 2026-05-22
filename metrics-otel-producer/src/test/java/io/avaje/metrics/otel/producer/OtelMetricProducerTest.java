@@ -196,6 +196,30 @@ class OtelMetricProducerTest {
   }
 
   @Test
+  void configuredUnits_areMapped() {
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
+    var registry = Metrics.createRegistry();
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
+
+    var counter = registry.counter("app.rows.read", "row");
+    var meter = registry.meter("app.bytes.sent", "By");
+    counter.inc(4);
+    meter.addEvent(1024);
+    registry.gauge("jvm.memory.used", "MiBy", () -> 42L);
+    registry.gauge("app.cpu.utilization", "%", () -> 75.5d);
+    epochNanosSource.advanceSeconds(5);
+
+    Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
+
+    assertThat(metrics.get("app.rows.read").getUnit()).isEqualTo("row");
+    assertThat(metrics.get("app.bytes.sent.count").getUnit()).isEqualTo("{event}");
+    assertThat(metrics.get("app.bytes.sent.total").getUnit()).isEqualTo("By");
+    assertThat(metrics.get("app.bytes.sent.max").getUnit()).isEqualTo("By");
+    assertThat(metrics.get("jvm.memory.used").getUnit()).isEqualTo("MiBy");
+    assertThat(metrics.get("app.cpu.utilization").getUnit()).isEqualTo("%");
+  }
+
+  @Test
   void registersWithSdkMeterProvider() {
     MetricRegistry registry = Metrics.createRegistry();
     Counter counter = registry.counter("app.checkout");

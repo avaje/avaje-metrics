@@ -16,14 +16,8 @@ final class DCounter extends BaseReportName implements Counter {
 
   private final LongAdder count = new LongAdder();
 
-  /**
-   * Create the metric with a name and rateUnit.
-   * <p>
-   * The rateUnit should be chosen to 'scale' the statistics in a reasonable
-   * manor - typically events per hour, minute or second.
-   */
-  DCounter(ID id) {
-    super(id);
+  DCounter(ID id, String unit) {
+    super(id, unit);
   }
 
   @Override
@@ -46,7 +40,7 @@ final class DCounter extends BaseReportName implements Counter {
       : count.sumThenReset();
     if (sum != 0) {
       final ID reportId = reportId(collector);
-      collector.visit(new CounterStats(reportId, sum));
+      collector.visit(new CounterStats(reportId, unit, sum));
     }
   }
 
@@ -63,6 +57,11 @@ final class DCounter extends BaseReportName implements Counter {
   @Override
   public String name() {
     return id.name();
+  }
+
+  @Override
+  public String unit() {
+    return unit;
   }
 
   /**

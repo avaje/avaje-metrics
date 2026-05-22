@@ -86,7 +86,7 @@ class TracedTimerTest {
   @Test
   void tracedBucketTimer_errorRecordsThrowable() {
     TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
-    Timer bucketTimer = new BucketTimerFactory().createMetric(Metric.ID.of("app.service.bucketed"), new int[]{100, 200});
+    Timer bucketTimer = new BucketTimerFactory().createMetric(Metric.ID.of("app.service.bucketed"), "", new int[]{100, 200});
     Timer tracedBucketTimer = ((TraceableTimer) bucketTimer).withTracing(testTimedSpanFactory);
     var error = new IllegalArgumentException("bad");
 

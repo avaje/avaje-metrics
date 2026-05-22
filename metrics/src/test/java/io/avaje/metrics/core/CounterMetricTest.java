@@ -74,7 +74,7 @@ class CounterMetricTest {
 
   @Test
   void collectCumulative() {
-    DCounter counterMetric = new DCounter(Metric.ID.of("org.test.mycountermetric.cumulative"));
+    DCounter counterMetric = new DCounter(Metric.ID.of("org.test.mycountermetric.cumulative"), "{event}");
     counterMetric.inc();
     counterMetric.inc();
 

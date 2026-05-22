@@ -16,9 +16,19 @@ public interface MetricRegistry extends JvmMetrics {
   Counter counter(String name);
 
   /**
+   * Return the Counter using the metric name and unit.
+   */
+  Counter counter(String name, String unit);
+
+  /**
    * Return the Counter with the given name and tags.
    */
   Counter counter(String name, Tags tags);
+
+  /**
+   * Return the Counter with the given name, tags and unit.
+   */
+  Counter counter(String name, Tags tags, String unit);
 
   /**
    * Return the Meter using the metric name.
@@ -26,9 +36,19 @@ public interface MetricRegistry extends JvmMetrics {
   Meter meter(String name);
 
   /**
+   * Return the Meter using the metric name and unit.
+   */
+  Meter meter(String name, String unit);
+
+  /**
    * Return the Meter using the metric name and tags.
    */
   Meter meter(String name, Tags tags);
+
+  /**
+   * Return the Meter using the metric name, tags and unit.
+   */
+  Meter meter(String name, Tags tags, String unit);
 
   /**
    * Create and register a gauge using the supplied double values.
@@ -36,9 +56,19 @@ public interface MetricRegistry extends JvmMetrics {
   GaugeDouble gauge(String name, DoubleSupplier supplier);
 
   /**
+   * Create and register a gauge using the supplied double values and unit.
+   */
+  GaugeDouble gauge(String name, String unit, DoubleSupplier supplier);
+
+  /**
    * Create and register a gauge using the supplied double values.
    */
   GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier);
+
+  /**
+   * Create and register a gauge using the supplied double values and unit.
+   */
+  GaugeDouble gauge(String name, Tags tags, String unit, DoubleSupplier supplier);
 
   /**
    * Create and register a gauge using the supplied long values.
@@ -46,9 +76,19 @@ public interface MetricRegistry extends JvmMetrics {
   GaugeLong gauge(String name, LongSupplier supplier);
 
   /**
+   * Create and register a gauge using the supplied long values and unit.
+   */
+  GaugeLong gauge(String name, String unit, LongSupplier supplier);
+
+  /**
    * Create and register a gauge using the supplied long values.
    */
   GaugeLong gauge(String name, Tags tags, LongSupplier supplier);
+
+  /**
+   * Create and register a gauge using the supplied long values and unit.
+   */
+  GaugeLong gauge(String name, Tags tags, String unit, LongSupplier supplier);
 
   /**
    * Return the timer using the metric name.

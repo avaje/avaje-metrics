@@ -13,6 +13,8 @@ import java.util.function.Supplier;
  */
 final class DBucketTimer implements Timer, TraceableTimer {
 
+  private static final String UNIT = "us";
+
   private final ID id;
   final int[] bucketRanges;
   final Timer[] buckets;
@@ -141,6 +143,11 @@ final class DBucketTimer implements Timer, TraceableTimer {
   @Override
   public String name() {
     return id.name();
+  }
+
+  @Override
+  public String unit() {
+    return UNIT;
   }
 
   @Override

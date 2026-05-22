@@ -7,8 +7,8 @@ import io.avaje.metrics.spi.SpiMetricBuilder;
 final class CounterFactory implements SpiMetricBuilder.Factory<Counter> {
 
   @Override
-  public Counter createMetric(Metric.ID id, int[] bucketRanges) {
-    return new DCounter(id);
+  public Counter createMetric(Metric.ID id, String unit, int[] bucketRanges) {
+    return new DCounter(id, unit);
   }
 
 }

@@ -20,6 +20,10 @@ import java.util.function.LongSupplier;
  */
 public final class DefaultMetricProvider implements SpiMetricProvider {
 
+  private static final String COUNT_UNIT = "{event}";
+  private static final String DEFAULT_UNIT = "";
+  private static final String TIMER_UNIT = "us";
+
   private final ConcurrentHashMap<Metric.ID, Metric> metricsCache = new ConcurrentHashMap<>();
   private final SpiMetricBuilder.Factory<Timer> bucketTimerFactory;
   private final SpiMetricBuilder.Factory<Timer> timerFactory;
@@ -213,95 +217,143 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public Timer timer(String name) {
-    return metric(Metric.ID.of(name), timerFactory);
+    return metric(Metric.ID.of(name), TIMER_UNIT, timerFactory, Timer.class, null);
   }
 
   @Override
   public Timer tracedTimer(String name) {
-    return tracedMetric(Metric.ID.of(name), timerFactory, null);
+    return tracedMetric(Metric.ID.of(name), TIMER_UNIT, timerFactory, null);
   }
 
   @Override
   public Timer timer(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), timerFactory);
+    return metric(Metric.ID.of(name, tags), TIMER_UNIT, timerFactory, Timer.class, null);
   }
 
   @Override
   public Timer tracedTimer(String name, Tags tags) {
-    return tracedMetric(Metric.ID.of(name, tags), timerFactory, null);
+    return tracedMetric(Metric.ID.of(name, tags), TIMER_UNIT, timerFactory, null);
   }
 
   @Override
   public Timer timer(String name, int... bucketRanges) {
-    return metric(Metric.ID.of(name), bucketTimerFactory, bucketRanges);
+    return metric(Metric.ID.of(name), TIMER_UNIT, bucketTimerFactory, Timer.class, bucketRanges);
   }
 
   @Override
   public Timer tracedTimer(String name, int... bucketRanges) {
-    return tracedMetric(Metric.ID.of(name), bucketTimerFactory, bucketRanges);
+    return tracedMetric(Metric.ID.of(name), TIMER_UNIT, bucketTimerFactory, bucketRanges);
   }
 
   @Override
   public Timer timer(String name, Tags tags, int... bucketRanges) {
-    return metric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
+    return metric(Metric.ID.of(name, tags), TIMER_UNIT, bucketTimerFactory, Timer.class, bucketRanges);
   }
 
   @Override
   public Timer tracedTimer(String name, Tags tags, int... bucketRanges) {
-    return tracedMetric(Metric.ID.of(name, tags), bucketTimerFactory, bucketRanges);
+    return tracedMetric(Metric.ID.of(name, tags), TIMER_UNIT, bucketTimerFactory, bucketRanges);
   }
 
   @Override
   public Counter counter(String name) {
-    return metric(Metric.ID.of(name), counterFactory);
+    return counter(name, COUNT_UNIT);
+  }
+
+  @Override
+  public Counter counter(String name, String unit) {
+    return metric(Metric.ID.of(name), unit, counterFactory, Counter.class, null);
   }
 
   @Override
   public Counter counter(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), counterFactory);
+    return counter(name, tags, COUNT_UNIT);
+  }
+
+  @Override
+  public Counter counter(String name, Tags tags, String unit) {
+    return metric(Metric.ID.of(name, tags), unit, counterFactory, Counter.class, null);
   }
 
   @Override
   public Meter meter(String name) {
-    return metric(Metric.ID.of(name), meterFactory);
+    return meter(name, DEFAULT_UNIT);
+  }
+
+  @Override
+  public Meter meter(String name, String unit) {
+    return metric(Metric.ID.of(name), unit, meterFactory, Meter.class, null);
   }
 
   @Override
   public Meter meter(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), meterFactory);
+    return meter(name, tags, DEFAULT_UNIT);
+  }
+
+  @Override
+  public Meter meter(String name, Tags tags, String unit) {
+    return metric(Metric.ID.of(name, tags), unit, meterFactory, Meter.class, null);
   }
 
   @Override
   public GaugeDouble gauge(String name, DoubleSupplier supplier) {
-    return put(new DGaugeDouble(Metric.ID.of(name), supplier));
+    return gauge(name, DEFAULT_UNIT, supplier);
+  }
+
+  @Override
+  public GaugeDouble gauge(String name, String unit, DoubleSupplier supplier) {
+    return replace(new DGaugeDouble(Metric.ID.of(name), unit, supplier), GaugeDouble.class);
   }
 
   @Override
   public GaugeDouble gauge(String name, Tags tags, DoubleSupplier supplier) {
-    return put(new DGaugeDouble(Metric.ID.of(name, tags), supplier));
+    return gauge(name, tags, DEFAULT_UNIT, supplier);
+  }
+
+  @Override
+  public GaugeDouble gauge(String name, Tags tags, String unit, DoubleSupplier supplier) {
+    return replace(new DGaugeDouble(Metric.ID.of(name, tags), unit, supplier), GaugeDouble.class);
   }
 
   @Override
   public GaugeLong gauge(String name, LongSupplier gauge) {
-    return put(DGaugeLong.of(Metric.ID.of(name), gauge));
+    return gauge(name, DEFAULT_UNIT, gauge);
+  }
+
+  @Override
+  public GaugeLong gauge(String name, String unit, LongSupplier gauge) {
+    return replace(DGaugeLong.of(Metric.ID.of(name), unit, gauge), GaugeLong.class);
   }
 
   @Override
   public GaugeLong gauge(String name, Tags tags, LongSupplier gauge) {
-    return put(DGaugeLong.of(Metric.ID.of(name, tags), gauge));
+    return gauge(name, tags, DEFAULT_UNIT, gauge);
   }
 
-  private <T extends Metric> T put(T metric) {
-    metricsCache.put(metric.id(), metric);
+  @Override
+  public GaugeLong gauge(String name, Tags tags, String unit, LongSupplier gauge) {
+    return replace(DGaugeLong.of(Metric.ID.of(name, tags), unit, gauge), GaugeLong.class);
+  }
+
+  private <T extends Metric> T replace(T metric, Class<T> type) {
+    synchronized (monitor) {
+      var existing = metricsCache.get(metric.id());
+      if (existing != null) {
+        validateMetric(metric.id(), existing, type, metric.unit());
+      }
+      metricsCache.put(metric.id(), metric);
+    }
     return metric;
   }
 
-  private <T extends Metric> T metric(Metric.ID id, SpiMetricBuilder.Factory<?> factory) {
-    return metric(id, factory, null);
-  }
+  private <T extends Metric> T metric(
+    Metric.ID id,
+    String unit,
+    SpiMetricBuilder.Factory<?> factory,
+    Class<T> type,
+    int[] bucketRanges) {
 
-  @SuppressWarnings("unchecked")
-  private <T extends Metric> T metric(Metric.ID id, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+    var normalizedUnit = BaseReportName.normalizeUnit(unit);
     // try lock free get first
     Metric metric = metricsCache.get(id);
     if (metric == null) {
@@ -309,21 +361,22 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         // use synchronized block
         metric = metricsCache.get(id);
         if (metric == null) {
-          metric = factory.createMetric(id, bucketRanges);
+          metric = factory.createMetric(id, normalizedUnit, bucketRanges);
           metricsCache.put(id, metric);
         }
       }
     }
-    return (T) metric;
+    return validateMetric(id, metric, type, normalizedUnit);
   }
 
-  private Timer tracedMetric(Metric.ID id, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+  private Timer tracedMetric(Metric.ID id, String unit, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+    var normalizedUnit = BaseReportName.normalizeUnit(unit);
     Metric metric = metricsCache.get(id);
     if (metric == null) {
       synchronized (monitor) {
         metric = metricsCache.get(id);
         if (metric == null) {
-          metric = factory.createMetric(id, bucketRanges);
+          metric = factory.createMetric(id, normalizedUnit, bucketRanges);
           if (metric instanceof TraceableTimer) {
             metric = ((TraceableTimer) metric).withTracing(timedSpanFactory);
           }
@@ -331,12 +384,36 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         }
       }
     }
-    return (Timer)metric;
+    return validateMetric(id, metric, Timer.class, normalizedUnit);
   }
 
   @Override
   public void register(Metric metric) {
-    metricsCache.put(metric.id(), metric);
+    synchronized (monitor) {
+      var existing = metricsCache.get(metric.id());
+      if (existing != null) {
+        validateUnit(metric.id(), existing, metric.unit());
+      }
+      metricsCache.put(metric.id(), metric);
+    }
+  }
+
+  private static void validateUnit(Metric.ID id, Metric existing, String unit) {
+    var normalizedUnit = BaseReportName.normalizeUnit(unit);
+    if (!existing.unit().equals(normalizedUnit)) {
+      throw new IllegalStateException(
+        "Metric " + id.name() + " already registered with unit '" + existing.unit() + "' not '" + normalizedUnit + "'");
+    }
+  }
+
+  private static <T extends Metric> T validateMetric(Metric.ID id, Metric metric, Class<T> type, String unit) {
+    if (!type.isInstance(metric)) {
+      throw new IllegalStateException(
+        "Metric " + id.name() + " already registered as " + metric.getClass().getSimpleName()
+          + " not " + type.getSimpleName());
+    }
+    validateUnit(id, metric, unit);
+    return type.cast(metric);
   }
 
   @Override

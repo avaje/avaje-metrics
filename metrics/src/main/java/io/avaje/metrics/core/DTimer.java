@@ -17,6 +17,8 @@ import java.util.function.Supplier;
  */
 final class DTimer implements Timer, TraceableTimer {
 
+  private static final String UNIT = "us";
+
   private final ID id;
   private final @Nullable String bucketRange;
   private final ValueCounter successCounter;
@@ -79,6 +81,11 @@ final class DTimer implements Timer, TraceableTimer {
 
   public String name() {
     return id.name();
+  }
+
+  @Override
+  public String unit() {
+    return UNIT;
   }
 
   @Override

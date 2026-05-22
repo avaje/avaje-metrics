@@ -28,8 +28,6 @@ final class MetricDataMapper {
 
   private static final String DESCRIPTION = "";
   private static final String COUNT_UNIT = "{event}";
-  private static final String DEFAULT_UNIT = "";
-  private static final String MICROS_UNIT = "us";
 
   private final InstrumentationScopeInfo scopeInfo;
   private final long timedThresholdMicros;
@@ -80,7 +78,7 @@ final class MetricDataMapper {
       if (stats.count() == 0) {
         return;
       }
-      recordMeterStats(stats, MICROS_UNIT);
+      recordMeterStats(stats, stats.unit());
     }
 
     @Override
@@ -88,7 +86,7 @@ final class MetricDataMapper {
       if (stats.count() == 0) {
         return;
       }
-      recordMeterStats(stats, DEFAULT_UNIT);
+      recordMeterStats(stats, stats.unit());
     }
 
     @Override
@@ -96,17 +94,17 @@ final class MetricDataMapper {
       if (stats.count() == 0) {
         return;
       }
-      metrics.add(longSumMetric(stats.name(), COUNT_UNIT, stats.count(), true, attributes(stats.id())));
+      metrics.add(longSumMetric(stats.name(), stats.unit(), stats.count(), true, attributes(stats.id())));
     }
 
     @Override
     public void visit(GaugeDouble.Stats stats) {
-      metrics.add(doubleGaugeMetric(stats.name(), DEFAULT_UNIT, stats.value(), attributes(stats.id())));
+      metrics.add(doubleGaugeMetric(stats.name(), stats.unit(), stats.value(), attributes(stats.id())));
     }
 
     @Override
     public void visit(GaugeLong.Stats stats) {
-      metrics.add(longGaugeMetric(stats.name(), DEFAULT_UNIT, stats.value(), attributes(stats.id())));
+      metrics.add(longGaugeMetric(stats.name(), stats.unit(), stats.value(), attributes(stats.id())));
     }
 
     private List<MetricData> metrics() {

@@ -170,10 +170,24 @@ public class Metrics {
   }
 
   /**
+   * Return a Counter given the name and unit using the default registry.
+   */
+  public static Counter counter(String name, String unit) {
+    return defaultRegistry.counter(name, unit);
+  }
+
+  /**
    * Return a Counter using the class and name to derive the name using the default registry.
    */
   public static Counter counter(Class<?> cls, String eventName) {
     return counter(name(cls, eventName));
+  }
+
+  /**
+   * Return a Counter using the class and name to derive the name and unit using the default registry.
+   */
+  public static Counter counter(Class<?> cls, String eventName, String unit) {
+    return counter(name(cls, eventName), unit);
   }
 
   /**
@@ -184,10 +198,24 @@ public class Metrics {
   }
 
   /**
+   * Return a Meter given the name and unit using the default registry.
+   */
+  public static Meter meter(String name, String unit) {
+    return defaultRegistry.meter(name, unit);
+  }
+
+  /**
    * Return a Meter using the class and name using the default registry.
    */
   public static Meter meter(Class<?> cls, String eventName) {
     return meter(name(cls, eventName));
+  }
+
+  /**
+   * Return a Meter using the class, name and unit using the default registry.
+   */
+  public static Meter meter(Class<?> cls, String eventName, String unit) {
+    return meter(name(cls, eventName), unit);
   }
 
   /**
@@ -212,10 +240,24 @@ public class Metrics {
   }
 
   /**
+   * Create and register a gauge with the supplied values and unit using the default registry.
+   */
+  public static GaugeDouble gauge(String name, String unit, DoubleSupplier supplier) {
+    return defaultRegistry.gauge(name, unit, supplier);
+  }
+
+  /**
    * Create and register a gauge with the supplied long values using the default registry.
    */
   public static GaugeLong gauge(String name, LongSupplier supplier) {
     return defaultRegistry.gauge(name, supplier);
+  }
+
+  /**
+   * Create and register a gauge with the supplied long values and unit using the default registry.
+   */
+  public static GaugeLong gauge(String name, String unit, LongSupplier supplier) {
+    return defaultRegistry.gauge(name, unit, supplier);
   }
 
   /**

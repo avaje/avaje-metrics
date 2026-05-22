@@ -87,11 +87,11 @@ avaje metrics are mapped to OTEL instruments as follows:
 
 | avaje type | OTEL instruments | Notes |
 |---|---|---|
-| `Counter` | `LongCounter` | delta count per interval; OTEL SDK accumulates to cumulative |
+| `Counter` | `LongCounter` | delta count per interval; OTEL SDK accumulates to cumulative; uses the configured avaje unit (`{event}` by default) |
 | `Timer` | `LongCounter` (`name.count`), `LongCounter` (`name.total`), `LongGauge` (`name.max`) | values in microseconds (`us`) |
-| `Meter` | `LongCounter` (`name.count`), `LongCounter` (`name.total`), `LongGauge` (`name.max`) | values in user-defined units |
-| `GaugeLong` | `LongGauge` | current value, set each interval |
-| `GaugeDouble` | `DoubleGauge` | current value, set each interval |
+| `Meter` | `LongCounter` (`name.count`), `LongCounter` (`name.total`), `LongGauge` (`name.max`) | `name.count` uses `{event}` and `name.total` / `name.max` use the configured avaje unit (empty by default) |
+| `GaugeLong` | `LongGauge` | current value, set each interval, using the configured avaje unit (empty by default) |
+| `GaugeDouble` | `DoubleGauge` | current value, set each interval, using the configured avaje unit (empty by default) |
 
 ### Timer success and error
 
@@ -108,6 +108,17 @@ avaje tags use a `key:value` colon-separated format. These are converted to OTEL
 Counter counter = registry.counter("app.login", Tags.of("env:prod", "region:us-east-1"));
 
 // becomes OTEL attributes: {env="prod", region="us-east-1"}
+```
+
+### Units
+
+For non-timer metrics you can configure units directly on avaje metrics and the reporter will pass
+them through to the OTEL instruments. Examples:
+
+```java
+registry.counter("app.rows", "row");
+registry.meter("app.bytes.sent", "By");
+registry.gauge("jvm.memory.used", "MiBy", memoryGauge);
 ```
 
 ## Reporting manually

@@ -17,11 +17,12 @@ class MetricsTest {
     Metrics.collectMetrics();
 
     Metrics.addSupplier(() -> suppliedMetrics);
-    suppliedMetrics.add(new GaugeLongStats(Metric.ID.of("supplied0"), 42));
+    suppliedMetrics.add(new GaugeLongStats(Metric.ID.of("supplied0"), "MiBy", 42));
 
     List<Metric.Statistics> result = Metrics.collectMetrics(CollectionMode.CUMULATIVE);
     assertThat(result).hasSize(1);
     assertThat(result.get(0).name()).isEqualTo("supplied0");
+    assertThat(result.get(0).unit()).isEqualTo("MiBy");
 
     suppliedMetrics.clear();
 
