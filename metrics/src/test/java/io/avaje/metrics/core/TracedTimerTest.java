@@ -48,7 +48,7 @@ class TracedTimerTest {
   @Test
   void tracedBucketTimer_startEvent_recordsMetrics() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.bucketed", 100, 200);
+    Timer timer = registry.timerBuilder("app.service.bucketed").bucketRanges(100, 200).buildTraced();
 
     Timer.Event event = timer.startEvent();
     event.end();

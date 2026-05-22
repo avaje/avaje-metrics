@@ -7,6 +7,7 @@ import io.avaje.metrics.spi.SpiTimedSpanFactory;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -219,42 +220,17 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public Timer timer(String name) {
-    return metric(Metric.ID.of(name), TIMER_UNIT, timerFactory, Timer.class, null);
+    return timerBuilder(name).build();
   }
 
   @Override
   public Timer tracedTimer(String name) {
-    return tracedMetric(Metric.ID.of(name), TIMER_UNIT, timerFactory, null);
+    return timerBuilder(name).buildTraced();
   }
 
   @Override
-  public Timer timer(String name, Tags tags) {
-    return metric(Metric.ID.of(name, tags), TIMER_UNIT, timerFactory, Timer.class, null);
-  }
-
-  @Override
-  public Timer tracedTimer(String name, Tags tags) {
-    return tracedMetric(Metric.ID.of(name, tags), TIMER_UNIT, timerFactory, null);
-  }
-
-  @Override
-  public Timer timer(String name, int... bucketRanges) {
-    return metric(Metric.ID.of(name), TIMER_UNIT, bucketTimerFactory, Timer.class, bucketRanges);
-  }
-
-  @Override
-  public Timer tracedTimer(String name, int... bucketRanges) {
-    return tracedMetric(Metric.ID.of(name), TIMER_UNIT, bucketTimerFactory, bucketRanges);
-  }
-
-  @Override
-  public Timer timer(String name, Tags tags, int... bucketRanges) {
-    return metric(Metric.ID.of(name, tags), TIMER_UNIT, bucketTimerFactory, Timer.class, bucketRanges);
-  }
-
-  @Override
-  public Timer tracedTimer(String name, Tags tags, int... bucketRanges) {
-    return tracedMetric(Metric.ID.of(name, tags), TIMER_UNIT, bucketTimerFactory, bucketRanges);
+  public TimerBuilder timerBuilder(String name) {
+    return new DTimerBuilder(name);
   }
 
   @Override
@@ -321,12 +297,29 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     return metric(Metric.ID.of(name, tags), unit, meterFactory, Meter.class, null);
   }
 
+  private Timer timer(String name, Tags tags, @Nullable int[] bucketRanges) {
+    return metric(
+      Metric.ID.of(name, tags),
+      TIMER_UNIT,
+      timerFactory(bucketRanges),
+      Timer.class,
+      bucketRanges);
+  }
+
+  private Timer tracedTimer(String name, Tags tags, @Nullable int[] bucketRanges) {
+    return tracedMetric(
+      Metric.ID.of(name, tags),
+      TIMER_UNIT,
+      timerFactory(bucketRanges),
+      bucketRanges);
+  }
+
   private <T extends Metric> T metric(
     Metric.ID id,
     String unit,
     SpiMetricBuilder.Factory<?> factory,
     Class<T> type,
-    int[] bucketRanges) {
+    @Nullable int[] bucketRanges) {
 
     var normalizedUnit = BaseReportName.normalizeUnit(unit);
     // try lock free get first
@@ -360,6 +353,14 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
       }
     }
     return validateMetric(id, metric, Timer.class, normalizedUnit);
+  }
+
+  private SpiMetricBuilder.Factory<Timer> timerFactory(@Nullable int[] bucketRanges) {
+    return bucketRanges == null ? timerFactory : bucketTimerFactory;
+  }
+
+  private static @Nullable int[] copyBucketRanges(@Nullable int[] bucketRanges) {
+    return bucketRanges == null || bucketRanges.length == 0 ? null : Arrays.copyOf(bucketRanges, bucketRanges.length);
   }
 
   @Override
@@ -477,6 +478,39 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     @Override
     public Meter build() {
       return meter(name, tags, unit);
+    }
+  }
+
+  private final class DTimerBuilder implements TimerBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private @Nullable int[] bucketRanges;
+
+    private DTimerBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public TimerBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public TimerBuilder bucketRanges(int... bucketRangesMillis) {
+      this.bucketRanges = copyBucketRanges(requireNonNull(bucketRangesMillis, "bucketRangesMillis"));
+      return this;
+    }
+
+    @Override
+    public Timer build() {
+      return timer(name, tags, bucketRanges);
+    }
+
+    @Override
+    public Timer buildTraced() {
+      return tracedTimer(name, tags, bucketRanges);
     }
   }
 

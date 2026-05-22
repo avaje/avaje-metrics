@@ -50,7 +50,9 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_successSpan() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method", Tags.of("env:prod", "region:ap-south"));
+    Timer timer = registry.timerBuilder("app.service.method")
+      .tags(Tags.of("env:prod", "region:ap-south"))
+      .buildTraced();
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
     try (Scope ignored = parent.makeCurrent()) {
@@ -125,7 +127,9 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_labelTagUsesMethodLabelForSpanName() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("web.api", Tags.of("label:CustomerResource.staticGeneral", "env:prod"));
+    Timer timer = registry.timerBuilder("web.api")
+      .tags(Tags.of("label:CustomerResource.staticGeneral", "env:prod"))
+      .buildTraced();
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
     try (Scope ignored = parent.makeCurrent()) {

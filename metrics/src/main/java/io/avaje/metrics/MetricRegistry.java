@@ -59,48 +59,9 @@ public interface MetricRegistry extends JvmMetrics {
   Timer tracedTimer(String name);
 
   /**
-   * Return the timer using the metric name and tags.
+   * Return a builder used to configure and register a timer.
    */
-  Timer timer(String name, Tags tags);
-
-  /**
-   * Return a traced timer using the metric name and tags.
-   */
-  Timer tracedTimer(String name, Tags tags);
-
-  /**
-   * Return the bucket timer using the given base metric name and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer timer(String name, int... bucketRanges);
-
-  /**
-   * Return the traced bucket timer using the given base metric name and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer tracedTimer(String name, int... bucketRanges);
-
-  /**
-   * Return the bucket timer using the given base metric name, tags and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param tags         The metric tags
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer timer(String name, Tags tags, int... bucketRanges);
-
-  /**
-   * Return the traced bucket timer using the given base metric name, tags and bucketRanges.
-   *
-   * @param name         The metric name
-   * @param tags         The metric tags
-   * @param bucketRanges Time in milliseconds which are used to create buckets.
-   */
-  Timer tracedTimer(String name, Tags tags, int... bucketRanges);
+  TimerBuilder timerBuilder(String name);
 
   /**
    * Return the TimerGroup using the given base metric name.

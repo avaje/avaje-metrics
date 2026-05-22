@@ -17,7 +17,7 @@ class ReporterTest {
   @Test
   void visitTimer_withExistingLabelTag_keepsMetricNameAndSingleLabel() {
     var registry = Metrics.createRegistry();
-    registry.timer("app.component", Tags.of("env:dev", "label:DefaultTimedResource.defaultMethod")).time(() -> {});
+    registry.timerBuilder("app.component").tags(Tags.of("env:dev", "label:DefaultTimedResource.defaultMethod")).build().time(() -> {});
 
     var calls = new ArrayList<MetricCall>();
     var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
@@ -35,7 +35,7 @@ class ReporterTest {
   @Test
   void visitTimer_withoutLabelTag_derivesAppComponentLabel() {
     var registry = Metrics.createRegistry();
-    registry.timer("app.SimpleService.doSomething", Tags.of("env:dev")).time(() -> {});
+    registry.timerBuilder("app.SimpleService.doSomething").tags(Tags.of("env:dev")).build().time(() -> {});
 
     var calls = new ArrayList<MetricCall>();
     var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
@@ -53,7 +53,7 @@ class ReporterTest {
   @Test
   void visitTimer_withoutLabelTag_reusesDerivedNamesAndTagsAcrossRuns() {
     var registry = Metrics.createRegistry();
-    var timer = registry.timer("app.SimpleService.doSomething", Tags.of("env:dev"));
+    var timer = registry.timerBuilder("app.SimpleService.doSomething").tags(Tags.of("env:dev")).build();
 
     var calls = new ArrayList<MetricCall>();
     var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());

@@ -93,45 +93,10 @@ public class Metrics {
   }
 
   /**
-   * Return a bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer timer(Class<?> cls, String name, int... bucketRanges) {
-    return timer(name(cls, name), bucketRanges);
-  }
-
-  /**
-   * Return a bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer timer(String name, int... bucketRanges) {
-    return defaultRegistry.timer(name, bucketRanges);
-  }
-
-  /**
-   * Return a traced bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer tracedTimer(Class<?> cls, String name, int... bucketRanges) {
-    return tracedTimer(name(cls, name), bucketRanges);
-  }
-
-  /**
-   * Return a traced bucket timer given the name and bucket ranges using the default registry.
-   */
-  public static Timer tracedTimer(String name, int... bucketRanges) {
-    return defaultRegistry.tracedTimer(name, bucketRanges);
-  }
-
-  /**
    * Return a Timer given the name using the default registry.
    */
   public static Timer timer(String name) {
     return defaultRegistry.timer(name);
-  }
-
-  /**
-   * Return a Timer given the name using the default registry.
-   */
-  public static Timer timer(String name, String... tags) {
-    return defaultRegistry.timer(name, Tags.of(tags));
   }
 
   /**
@@ -142,10 +107,10 @@ public class Metrics {
   }
 
   /**
-   * Return a traced timer given the name using the default registry.
+   * Return a builder used to configure and register a timer with the default registry.
    */
-  public static Timer tracedTimer(String name, String... tags) {
-    return defaultRegistry.tracedTimer(name, Tags.of(tags));
+  public static TimerBuilder timerBuilder(String name) {
+    return defaultRegistry.timerBuilder(name);
   }
 
   /**

@@ -15,8 +15,8 @@ class CollectAsJsonTest {
     Tags tags = Tags.of("a", "b");
     long startNanos = System.nanoTime();
     Timer timer = registry.timer("my.timer");
-    Timer timer2 = registry.timer("my.timer", tags);
-    Timer timer3 = registry.timer("myBucket", tags, 400, 900);
+    Timer timer2 = registry.timerBuilder("my.timer").tags(tags).build();
+    Timer timer3 = registry.timerBuilder("myBucket").tags(tags).bucketRanges(400, 900).build();
 
     Counter counter = registry.counter("my.count");
     Counter counter2 = registry.counterBuilder("my.count").tags(tags).build();
