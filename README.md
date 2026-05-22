@@ -115,10 +115,11 @@ Obtain a Timer from the `MetricRegistry` or via `Metrics.timer(...)` which uses 
 Timer metric = Metrics.timer("test.runnable");
 ```
 
-To create spans as well as timed metrics, obtain a traced timer:
+To create spans as well as timed metrics, build a traced timer:
 
 ```java
-Timer tracedMetric = Metrics.tracedTimer("test.runnable");
+Timer tracedMetric = Metrics.timerBuilder("test.runnable")
+  .buildTraced();
 ```
 
 For optional timer configuration such as tags or bucket ranges, use `Metrics.timerBuilder(...)`:

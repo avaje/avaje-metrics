@@ -51,14 +51,6 @@ public interface MetricRegistry extends JvmMetrics {
   Timer timer(String name);
 
   /**
-   * Return a traced timer using the metric name.
-   * <p>
-   * Traced timers create spans when used via {@link Timer#startEvent()} or
-   * {@link Timer#time(Runnable)} / {@link Timer#time(java.util.function.Supplier)}.
-   */
-  Timer tracedTimer(String name);
-
-  /**
    * Return a builder used to configure and register a timer.
    */
   TimerBuilder timerBuilder(String name);

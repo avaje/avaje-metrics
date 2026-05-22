@@ -39,7 +39,8 @@ This helper configures:
 - a `SdkTracerProvider` with:
   - a batch span processor
   - an OTLP gRPC span exporter
-- the traced-timer bridge used by `Metrics.tracedTimer(...)`
+- the traced-timer bridge used by traced timers created via
+  `Metrics.timerBuilder(...).buildTraced()`
 
 ## Builder options
 
@@ -80,8 +81,8 @@ OpenTelemetrySdk sdk =
 
 - Normal OpenTelemetry meters and tracers created from the returned SDK are exported alongside the
   avaje metrics exposed by `OtelMetricProducer`.
-- `Metrics.tracedTimer(...)` works by default because this module brings in
-  `avaje-metrics-otel-trace`.
+- traced timers created via `Metrics.timerBuilder(...).buildTraced()` work by default because this
+  module brings in `avaje-metrics-otel-trace`.
 - `includeTrace(false)` or `includeMeter(false)` can be used for metrics-only or traces-only setup.
 - If you want more control over SDK setup, wire OpenTelemetry manually and use
   `avaje-metrics-otel-producer` directly.

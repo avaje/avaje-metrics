@@ -100,13 +100,6 @@ public class Metrics {
   }
 
   /**
-   * Return a traced timer given the name using the default registry.
-   */
-  public static Timer tracedTimer(String name) {
-    return defaultRegistry.tracedTimer(name);
-  }
-
-  /**
    * Return a builder used to configure and register a timer with the default registry.
    */
   public static TimerBuilder timerBuilder(String name) {
@@ -118,13 +111,6 @@ public class Metrics {
    */
   public static Timer timer(Class<?> cls, String eventName) {
     return timer(name(cls, eventName));
-  }
-
-  /**
-   * Return a traced timer using the class and name to derive the MetricName using the default registry.
-   */
-  public static Timer tracedTimer(Class<?> cls, String eventName) {
-    return tracedTimer(name(cls, eventName));
   }
 
   /**

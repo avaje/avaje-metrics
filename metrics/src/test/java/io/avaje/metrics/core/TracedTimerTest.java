@@ -16,7 +16,7 @@ class TracedTimerTest {
   @Test
   void tracedTimer_startEvent_success() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method");
+    Timer timer = registry.timerBuilder("app.service.method").buildTraced();
 
     Timer.Event event = timer.startEvent();
     event.end();

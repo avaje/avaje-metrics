@@ -77,7 +77,7 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_errorSpan() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method");
+    Timer timer = registry.timerBuilder("app.service.method").buildTraced();
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
     try (Scope ignored = parent.makeCurrent()) {
@@ -99,7 +99,7 @@ class OtelTimedSpanFactoryTest {
   @Test
   void tracedTimer_errorSpanRecordsThrowable() {
     MetricRegistry registry = Metrics.createRegistry();
-    Timer timer = registry.tracedTimer("app.service.method");
+    Timer timer = registry.timerBuilder("app.service.method").buildTraced();
     var error = new IllegalStateException("boom");
 
     var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
@@ -154,7 +154,7 @@ class OtelTimedSpanFactoryTest {
     MetricRegistry registry = Metrics.createRegistry();
     GlobalOpenTelemetry.resetForTest();
 
-    registry.tracedTimer("app.service.method").time(() -> "ok");
+    registry.timerBuilder("app.service.method").buildTraced().time(() -> "ok");
 
     assertThat(exporter.getFinishedSpanItems()).isEmpty();
   }
@@ -163,7 +163,7 @@ class OtelTimedSpanFactoryTest {
   void tracedTimer_withoutRecordingParent_isNoop() {
     MetricRegistry registry = Metrics.createRegistry();
 
-    registry.tracedTimer("app.service.method").time(() -> "ok");
+    registry.timerBuilder("app.service.method").buildTraced().time(() -> "ok");
 
     assertThat(exporter.getFinishedSpanItems()).isEmpty();
   }

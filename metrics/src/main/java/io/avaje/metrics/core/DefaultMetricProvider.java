@@ -224,11 +224,6 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
-  public Timer tracedTimer(String name) {
-    return timerBuilder(name).buildTraced();
-  }
-
-  @Override
   public TimerBuilder timerBuilder(String name) {
     return new DTimerBuilder(name);
   }

@@ -173,7 +173,7 @@ class MetricsOpenTelemetryTest {
       .buildAndRegisterGlobal()) {
 
       MetricRegistry tracedRegistry = Metrics.createRegistry();
-      Timer timer = tracedRegistry.tracedTimer("app.service.method");
+      Timer timer = tracedRegistry.timerBuilder("app.service.method").buildTraced();
 
       var parent = openTelemetry.getTracer("manual").spanBuilder("parent").startSpan();
       try (Scope ignored = parent.makeCurrent()) {
