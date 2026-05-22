@@ -259,42 +259,22 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public Counter counter(String name) {
-    return counter(name, COUNT_UNIT);
+    return counterBuilder(name).build();
   }
 
   @Override
-  public Counter counter(String name, String unit) {
-    return metric(Metric.ID.of(name), unit, counterFactory, Counter.class, null);
-  }
-
-  @Override
-  public Counter counter(String name, Tags tags) {
-    return counter(name, tags, COUNT_UNIT);
-  }
-
-  @Override
-  public Counter counter(String name, Tags tags, String unit) {
-    return metric(Metric.ID.of(name, tags), unit, counterFactory, Counter.class, null);
+  public CounterBuilder counterBuilder(String name) {
+    return new DCounterBuilder(name);
   }
 
   @Override
   public Meter meter(String name) {
-    return meter(name, DEFAULT_UNIT);
+    return meterBuilder(name).build();
   }
 
   @Override
-  public Meter meter(String name, String unit) {
-    return metric(Metric.ID.of(name), unit, meterFactory, Meter.class, null);
-  }
-
-  @Override
-  public Meter meter(String name, Tags tags) {
-    return meter(name, tags, DEFAULT_UNIT);
-  }
-
-  @Override
-  public Meter meter(String name, Tags tags, String unit) {
-    return metric(Metric.ID.of(name, tags), unit, meterFactory, Meter.class, null);
+  public MeterBuilder meterBuilder(String name) {
+    return new DMeterBuilder(name);
   }
 
   @Override
@@ -331,6 +311,14 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   private GaugeLong gaugeLong(String name, Tags tags, String unit, LongSupplier supplier) {
     return replace(
       DGaugeLong.of(Metric.ID.of(name, tags), unit, requireNonNull(supplier, "supplier")), GaugeLong.class);
+  }
+
+  private Counter counter(String name, Tags tags, String unit) {
+    return metric(Metric.ID.of(name, tags), unit, counterFactory, Counter.class, null);
+  }
+
+  private Meter meter(String name, Tags tags, String unit) {
+    return metric(Metric.ID.of(name, tags), unit, meterFactory, Meter.class, null);
   }
 
   private <T extends Metric> T metric(
@@ -433,6 +421,62 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     @Override
     public GaugeDouble ofDoubles(DoubleSupplier supplier) {
       return gaugeDouble(name, tags, unit, supplier);
+    }
+  }
+
+  private final class DCounterBuilder implements CounterBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private String unit = COUNT_UNIT;
+
+    private DCounterBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public CounterBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public CounterBuilder unit(String unit) {
+      this.unit = BaseReportName.normalizeUnit(unit);
+      return this;
+    }
+
+    @Override
+    public Counter build() {
+      return counter(name, tags, unit);
+    }
+  }
+
+  private final class DMeterBuilder implements MeterBuilder {
+
+    private final String name;
+    private Tags tags = Tags.EMPTY;
+    private String unit = DEFAULT_UNIT;
+
+    private DMeterBuilder(String name) {
+      this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    public MeterBuilder tags(Tags tags) {
+      this.tags = requireNonNull(tags, "tags");
+      return this;
+    }
+
+    @Override
+    public MeterBuilder unit(String unit) {
+      this.unit = BaseReportName.normalizeUnit(unit);
+      return this;
+    }
+
+    @Override
+    public Meter build() {
+      return meter(name, tags, unit);
     }
   }
 

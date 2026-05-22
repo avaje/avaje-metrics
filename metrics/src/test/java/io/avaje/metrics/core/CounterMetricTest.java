@@ -36,8 +36,8 @@ class CounterMetricTest {
   @Test
   void tags() {
     MetricRegistry registry = Metrics.registry();
-    Counter counter0 = registry.counter("one", Tags.of("k", "v"));
-    Counter counter1 = registry.counter("one", Tags.of("k", "x"));
+    Counter counter0 = registry.counterBuilder("one").tags(Tags.of("k", "v")).build();
+    Counter counter1 = registry.counterBuilder("one").tags(Tags.of("k", "x")).build();
     Counter counter2 = registry.counter("one");
 
     assertThat(counter0).isNotSameAs(counter1);

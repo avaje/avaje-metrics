@@ -16,19 +16,9 @@ public interface MetricRegistry extends JvmMetrics {
   Counter counter(String name);
 
   /**
-   * Return the Counter using the metric name and unit.
+   * Return a builder used to configure and register a counter.
    */
-  Counter counter(String name, String unit);
-
-  /**
-   * Return the Counter with the given name and tags.
-   */
-  Counter counter(String name, Tags tags);
-
-  /**
-   * Return the Counter with the given name, tags and unit.
-   */
-  Counter counter(String name, Tags tags, String unit);
+  CounterBuilder counterBuilder(String name);
 
   /**
    * Return the Meter using the metric name.
@@ -36,19 +26,9 @@ public interface MetricRegistry extends JvmMetrics {
   Meter meter(String name);
 
   /**
-   * Return the Meter using the metric name and unit.
+   * Return a builder used to configure and register a meter.
    */
-  Meter meter(String name, String unit);
-
-  /**
-   * Return the Meter using the metric name and tags.
-   */
-  Meter meter(String name, Tags tags);
-
-  /**
-   * Return the Meter using the metric name, tags and unit.
-   */
-  Meter meter(String name, Tags tags, String unit);
+  MeterBuilder meterBuilder(String name);
 
   /**
    * Return a builder used to configure and register a gauge.

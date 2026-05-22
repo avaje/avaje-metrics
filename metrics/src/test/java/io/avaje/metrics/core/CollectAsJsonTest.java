@@ -19,14 +19,14 @@ class CollectAsJsonTest {
     Timer timer3 = registry.timer("myBucket", tags, 400, 900);
 
     Counter counter = registry.counter("my.count");
-    Counter counter2 = registry.counter("my.count", tags);
+    Counter counter2 = registry.counterBuilder("my.count").tags(tags).build();
     counter.inc();
     counter.inc();
 
     counter2.inc();
 
     Meter meter = registry.meter("my.meter");
-    Meter meter2 = registry.meter("my.meter", tags);
+    Meter meter2 = registry.meterBuilder("my.meter").tags(tags).build();
     meter.addEvent(42);
     meter.addEvent(44);
     meter.addEvent(46);

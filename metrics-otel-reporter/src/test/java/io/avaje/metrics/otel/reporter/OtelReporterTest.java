@@ -65,7 +65,9 @@ class OtelReporterTest {
 
   @Test
   void counter_withTags() {
-    Counter counter = registry.counter("app.login.count", Tags.of("env:prod", "region:us-east"));
+    Counter counter = registry.counterBuilder("app.login.count")
+      .tags(Tags.of("env:prod", "region:us-east"))
+      .build();
     counter.inc(10);
 
     reporter.report();
@@ -80,7 +82,9 @@ class OtelReporterTest {
 
   @Test
   void counter_withNullTagEntry_skipped() {
-    Counter counter = registry.counter("app.login.count", Tags.of(null, "env:prod"));
+    Counter counter = registry.counterBuilder("app.login.count")
+      .tags(Tags.of(null, "env:prod"))
+      .build();
     counter.inc(10);
 
     reporter.report();
@@ -210,8 +214,8 @@ class OtelReporterTest {
 
   @Test
   void configuredUnits() {
-    Counter counter = registry.counter("app.rows.read", "row");
-    Meter meter = registry.meter("app.bytes.sent", "By");
+    Counter counter = registry.counterBuilder("app.rows.read").unit("row").build();
+    Meter meter = registry.meterBuilder("app.bytes.sent").unit("By").build();
     counter.inc(4);
     meter.addEvent(1024);
     registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);

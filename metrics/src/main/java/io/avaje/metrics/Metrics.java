@@ -170,10 +170,10 @@ public class Metrics {
   }
 
   /**
-   * Return a Counter given the name and unit using the default registry.
+   * Return a builder used to configure and register a counter with the default registry.
    */
-  public static Counter counter(String name, String unit) {
-    return defaultRegistry.counter(name, unit);
+  public static CounterBuilder counterBuilder(String name) {
+    return defaultRegistry.counterBuilder(name);
   }
 
   /**
@@ -184,13 +184,6 @@ public class Metrics {
   }
 
   /**
-   * Return a Counter using the class and name to derive the name and unit using the default registry.
-   */
-  public static Counter counter(Class<?> cls, String eventName, String unit) {
-    return counter(name(cls, eventName), unit);
-  }
-
-  /**
    * Return a Meter given the name using the default registry.
    */
   public static Meter meter(String name) {
@@ -198,10 +191,10 @@ public class Metrics {
   }
 
   /**
-   * Return a Meter given the name and unit using the default registry.
+   * Return a builder used to configure and register a meter with the default registry.
    */
-  public static Meter meter(String name, String unit) {
-    return defaultRegistry.meter(name, unit);
+  public static MeterBuilder meterBuilder(String name) {
+    return defaultRegistry.meterBuilder(name);
   }
 
   /**
@@ -209,13 +202,6 @@ public class Metrics {
    */
   public static Meter meter(Class<?> cls, String eventName) {
     return meter(name(cls, eventName));
-  }
-
-  /**
-   * Return a Meter using the class, name and unit using the default registry.
-   */
-  public static Meter meter(Class<?> cls, String eventName, String unit) {
-    return meter(name(cls, eventName), unit);
   }
 
   /**

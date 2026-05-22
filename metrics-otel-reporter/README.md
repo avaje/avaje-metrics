@@ -105,7 +105,9 @@ avaje tags use a `key:value` colon-separated format. These are converted to OTEL
 
 ```java
 // avaje
-Counter counter = registry.counter("app.login", Tags.of("env:prod", "region:us-east-1"));
+Counter counter = registry.counterBuilder("app.login")
+    .tags(Tags.of("env:prod", "region:us-east-1"))
+    .build();
 
 // becomes OTEL attributes: {env="prod", region="us-east-1"}
 ```
@@ -116,8 +118,12 @@ For non-timer metrics you can configure units directly on avaje metrics and the 
 them through to the OTEL instruments. Examples:
 
 ```java
-registry.counter("app.rows", "row");
-registry.meter("app.bytes.sent", "By");
+registry.counterBuilder("app.rows")
+    .unit("row")
+    .build();
+registry.meterBuilder("app.bytes.sent")
+    .unit("By")
+    .build();
 registry.gauge("jvm.memory.used")
     .unit("MiBy")
     .ofLongs(memoryGauge);

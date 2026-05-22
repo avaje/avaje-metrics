@@ -14,8 +14,8 @@ class MetricUnitTest {
   @Test
   void configuredUnits_arePropagatedToMetricsAndStats() {
     var registry = Metrics.createRegistry();
-    var counter = registry.counter("app.rows.read", "row");
-    var meter = registry.meter("app.bytes.sent", "By");
+    var counter = registry.counterBuilder("app.rows.read").unit("row").build();
+    var meter = registry.meterBuilder("app.bytes.sent").unit("By").build();
     var gaugeLong = registry.gauge("jvm.memory.used").unit("MiBy").ofLongs(() -> 42L);
     var gaugeDouble = registry.gauge("app.cpu.utilization").unit("%").ofDoubles(() -> 75.5d);
 
@@ -61,7 +61,7 @@ class MetricUnitTest {
   @Test
   void blankUnits_normalizeToEmpty() {
     var registry = Metrics.createRegistry();
-    var meter = registry.meter("app.blank.unit", "   ");
+    var meter = registry.meterBuilder("app.blank.unit").unit("   ").build();
 
     meter.addEvent(1);
 
@@ -73,10 +73,10 @@ class MetricUnitTest {
   @Test
   void conflictingUnits_areRejected() {
     var registry = Metrics.createRegistry();
-    registry.counter("app.counter.conflict", "row");
+    registry.counterBuilder("app.counter.conflict").unit("row").build();
     registry.gauge("app.gauge.conflict").unit("MiBy").ofLongs(() -> 42L);
 
-    assertThatThrownBy(() -> registry.counter("app.counter.conflict", "request"))
+    assertThatThrownBy(() -> registry.counterBuilder("app.counter.conflict").unit("request").build())
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("app.counter.conflict");
     assertThatThrownBy(() -> registry.gauge("app.gauge.conflict").unit("By").ofLongs(() -> 24L))
