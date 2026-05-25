@@ -23,7 +23,7 @@ avaje-metrics projects are Java applications or libraries built around:
 - timers, counters, meters, and gauges
 - a default or custom `MetricRegistry`
 - built-in JVM metrics registration
-- optional export or integration modules for OpenTelemetry, StatsD, Graphite, and Ebean
+- optional export or integration modules for OpenTelemetry, Prometheus, StatsD, Graphite, and Ebean
 - Maven as the build tool
 - Java 11+
 

@@ -31,6 +31,10 @@ Common reader choices are:
 - `PeriodicMetricReader` for OTLP push/export
 - Prometheus reader/server types for Prometheus scraping
 
+If you only need a direct Prometheus text endpoint and do not otherwise need the
+OpenTelemetry SDK, use [`avaje-metrics-prometheus`](../metrics-prometheus/README.md)
+instead.
+
 Any normal OpenTelemetry metrics created from the same `SdkMeterProvider` are collected alongside
 the avaje metrics exposed by `OtelMetricProducer`.
 

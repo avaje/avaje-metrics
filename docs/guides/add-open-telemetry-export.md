@@ -45,6 +45,9 @@ Use this when:
 - collection should be driven by the OpenTelemetry reader/exporter
 - you want avaje metrics collected alongside normal OpenTelemetry metrics
 
+For a direct Prometheus text endpoint without OpenTelemetry SDK wiring, use
+[add-prometheus-scrape.md](add-prometheus-scrape.md) instead.
+
 ### Traced timers only: `avaje-metrics-otel-trace`
 
 Use this when:
