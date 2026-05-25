@@ -1,167 +1,73 @@
-# avaje-metric-core
+# avaje-metrics
 
-Please read the main documentation at: http://avaje-metrics.github.io
+Java metrics library for timers, counters, meters, gauges, built-in JVM metrics, and
+export paths such as OpenTelemetry, StatsD, and Graphite.
 
-## Maven dependency
+The repository contains the core `avaje-metrics` module plus optional integration and
+export modules.
+
+## Modules
+
+| Artifact | Purpose | Docs |
+|---|---|---|
+| `avaje-metrics` | Core metrics API, default registry, JVM metrics, `@Timed`, traced timer support hooks | [metrics/README.md](metrics/README.md) |
+| `avaje-metrics-otel` | Convenience OTLP-backed OpenTelemetry setup for metrics + traces | [metrics-otel/README.md](metrics-otel/README.md) |
+| `avaje-metrics-otel-producer` | OpenTelemetry SDK `MetricProducer` bridge | [metrics-otel-producer/README.md](metrics-otel-producer/README.md) |
+| `avaje-metrics-otel-trace` | OpenTelemetry span bridge for traced timers | [metrics-otel-trace/README.md](metrics-otel-trace/README.md) |
+| `avaje-metrics-otel-reporter` | Scheduled OpenTelemetry reporter path | [metrics-otel-reporter/README.md](metrics-otel-reporter/README.md) |
+| `avaje-metrics-statsd` | StatsD / DogStatsD reporter | [metrics-statsd/README.md](metrics-statsd/README.md) |
+| `avaje-metrics-graphite` | Graphite reporter and sender | [metrics-graphite/README.md](metrics-graphite/README.md) |
+| `avaje-metrics-ebean` | Ebean `MetricSupplier` integration | [metrics-ebean/README.md](metrics-ebean/README.md) |
+
+## Documentation & Guides
+
+- [Main website](https://avaje-metrics.github.io)
+- [Docs landing page](docs/README.md)
+- [Guide index](docs/guides/README.md)
+- [Getting started](docs/guides/getting-started.md)
+- [Register JVM metrics](docs/guides/register-jvm-metrics.md)
+- [Add method timing](docs/guides/add-method-timing.md)
+- [Add OpenTelemetry export](docs/guides/add-open-telemetry-export.md)
+
+## Quick start
 
 ```xml
-    <dependency>
-      <groupId>io.avaje</groupId>
-      <artifactId>avaje-metrics</artifactId>
-      <version>9.2</version>
-    </dependency>
-```
-
-
-## License - Apache 2
-Published under Apache Software License 2.0, see LICENSE
-
-## MetricRegistry
-
-A MetricRegistry holds the metrics like timers, gauges etc.
-
-```java
-MetricRegistry registry = Metrics.createRegistry();
-
-// obtain timers, counters, gauges etc
-Timer timer = registry.timer("my.timer");
-Counter counter = registry.counter("my.count");
-```
-
-## Metrics & default registry
-
-There is default MetricRegistry. Creating metrics via `Metrics` creates metrics attached to the default registry.
-
-```java
-// obtain the default MetricRegistry
-MetricRegistry defaultRegistry = Metrics.registry();
+<dependency>
+  <groupId>io.avaje</groupId>
+  <artifactId>avaje-metrics</artifactId>
+  <version>${version}</version>
+</dependency>
 ```
 
 ```java
-// timer registered with the default MetricRegistry
-Timer timer = Metrics.timer("my.timer");
+import io.avaje.metrics.Metrics;
+import io.avaje.metrics.Tags;
+
+var requests = Metrics.counterBuilder("app.http.requests")
+  .unit("{event}")
+  .build();
+
+var timer = Metrics.timerBuilder("app.service.run")
+  .tags(Tags.of("operation:sync"))
+  .build();
+
+Metrics.gauge("app.queue.depth")
+  .ofLongs(queue::size);
+
+Metrics.jvmMetrics()
+  .withReportAlways()
+  .registerJvmCoreMetrics();
+
+requests.inc();
+timer.time(service::run);
 ```
 
-## Counter
+From there, choose an export path:
 
-A Counter holds a single long value that is incremented
+- OpenTelemetry: [docs/guides/add-open-telemetry-export.md](docs/guides/add-open-telemetry-export.md)
+- StatsD: [metrics-statsd/README.md](metrics-statsd/README.md)
+- Graphite: [metrics-graphite/README.md](metrics-graphite/README.md)
 
-```java
-Counter counter = registry.counter("my.count");
+## License
 
-counter.inc();
-counter.inc(42);
-```
-
-## Meter
-
-A Meter is used to represent events that have a value such as bytes sent, bytes received, lines read etc.
-
-```java
-Meter meter = registry.meter("my.meter");
-
-meter.addEvent(42);
-meter.addEvent(44);
-meter.addEvent(46);
-```
-
-## Gauge
-
-Gauges are used to measure something that supplies a value. Creating a Gauge takes either a LongSupplier or a DoubleSupplier.
-
-Gauges are used for JVM Memory metrics and Garbage collection. Although application can obtain values from a Gauge typically
-we register the gauge and the value is obtained when the metrics are reported.
-
-```java
-registry.gauge("my.gauge0", myLongSupplier );
-registry.gauge("my.gauge1", myDoubleSupplier );
-```
-
-There are `incrementing` wrappers that can be applied to the LongSupplier of DoubleSupplier to use for the case
-when the gauge only increments and we wish to report the change.
-
-```java
-// wrap via incrementing()
-GaugeLong myIncrementing = GaugeLong.incrementing(myLongSupplier);
-
-registry.gauge("my.gauge", myIncrementing);
-```
-
-## Timer
-
-A Timer measures the time on an event in microseconds.
-It provides count, total time in micros, mean time in micros, max time in micros.
-
-Timers can be obtained and used via code or via `@Timed` enhancement. We can also
-apply timers on "All non-private methods of Spring Beans"
-or "All non-private methods of Avaje Inject Beans"
-
-#### @Timed
-
-Timers can be added by putting `@Timed` on a class. Then enhancement will add timers to
-all non-private methods on that class. We use `@NotTimed` to not have a method timed.
-
-To also create spans for enhanced methods use `@Timed(span = Timed.SpanMode.ON)`.
-Method-level `span = Timed.SpanMode.OFF` overrides a traced class-level default.
-The enhancement agent also supports `timedSpans` modes of `default-off`, `default-on`,
-and `disabled`. If unset, timed spans default to off.
-
-
-#### Using Timer programmatically
-
-Obtain a Timer from the `MetricRegistry` or via `Metrics.timer(...)` which uses the default registry.
-
-```java
-Timer metric = Metrics.timer("test.runnable");
-```
-
-To create spans as well as timed metrics, build a traced timer:
-
-```java
-Timer tracedMetric = Metrics.timerBuilder("test.runnable")
-  .buildTraced();
-```
-
-For optional timer configuration such as tags or bucket ranges, use `Metrics.timerBuilder(...)`:
-
-```java
-Timer tracedMetric = Metrics.timerBuilder("test.runnable")
-  .tags(Tags.of("env:prod"))
-  .bucketRanges(50, 100, 250)
-  .buildTraced();
-```
-
-#### Time Runnable
-
-The Timer can take a runnable like:
-
-```java
-Timer timer = Metrics.timer("test.runnable");
-
-// using runnable
-timer.time( //* ... runnable */ );
-```
-
-#### Time using start nanos
-```java
-long startNanos = System.nanoTime();
-
-// do something we want to time ...
-timer.add(startNanos);
-```
-This is an efficient way to time events with no extra object allocation.
-
-The time is the difference between startNanos and when that is added to
-the timer.
-
-
-#### Time using startEvent
-```java
-Event event = timer.startEvent();
-// do something we want to time ...
-event.end();
-```
-
-Traced timers use this event lifecycle to create and end spans.
-Use `event.endWithError(Throwable)` when you want the traced span to record the Throwable as
-well as mark the span as an error.
+Published under Apache License 2.0, see [LICENSE](LICENSE).
