@@ -1,7 +1,7 @@
 # avaje-metrics
 
 Java metrics library for timers, counters, meters, gauges, built-in JVM metrics, and
-export paths such as OpenTelemetry, StatsD, and Graphite.
+export paths such as OpenTelemetry, Prometheus, StatsD, and Graphite.
 
 The repository contains the core `avaje-metrics` module plus optional integration and
 export modules.
@@ -15,6 +15,7 @@ export modules.
 | `avaje-metrics-otel-producer` | OpenTelemetry SDK `MetricProducer` bridge | [metrics-otel-producer/README.md](metrics-otel-producer/README.md) |
 | `avaje-metrics-otel-trace` | OpenTelemetry span bridge for traced timers | [metrics-otel-trace/README.md](metrics-otel-trace/README.md) |
 | `avaje-metrics-otel-reporter` | Scheduled OpenTelemetry reporter path | [metrics-otel-reporter/README.md](metrics-otel-reporter/README.md) |
+| `avaje-metrics-prometheus` | Prometheus text exposition scrape exporter | [metrics-prometheus/README.md](metrics-prometheus/README.md) |
 | `avaje-metrics-statsd` | StatsD / DogStatsD reporter | [metrics-statsd/README.md](metrics-statsd/README.md) |
 | `avaje-metrics-graphite` | Graphite reporter and sender | [metrics-graphite/README.md](metrics-graphite/README.md) |
 | `avaje-metrics-ebean` | Ebean `MetricSupplier` integration | [metrics-ebean/README.md](metrics-ebean/README.md) |
@@ -28,6 +29,7 @@ export modules.
 - [Register JVM metrics](docs/guides/register-jvm-metrics.md)
 - [Add method timing](docs/guides/add-method-timing.md)
 - [Add OpenTelemetry export](docs/guides/add-open-telemetry-export.md)
+- [Add Prometheus scraping](docs/guides/add-prometheus-scrape.md)
 
 ## Quick start
 
@@ -65,6 +67,7 @@ timer.time(service::run);
 From there, choose an export path:
 
 - OpenTelemetry: [docs/guides/add-open-telemetry-export.md](docs/guides/add-open-telemetry-export.md)
+- Prometheus: [docs/guides/add-prometheus-scrape.md](docs/guides/add-prometheus-scrape.md)
 - StatsD: [metrics-statsd/README.md](metrics-statsd/README.md)
 - Graphite: [metrics-graphite/README.md](metrics-graphite/README.md)
 

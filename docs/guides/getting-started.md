@@ -23,7 +23,7 @@ avaje-metrics is centered around a `MetricRegistry` and four main metric types:
 | `Gauge` | Read a current value from a supplier | queue depth, memory usage |
 
 Most applications use the default registry via the static `Metrics` helper, then choose
-an export path such as OpenTelemetry, StatsD, or Graphite separately.
+an export path such as OpenTelemetry, Prometheus, StatsD, or Graphite separately.
 
 ---
 
@@ -144,10 +144,11 @@ an exporter module.
 - For built-in JVM metrics, see [register-jvm-metrics.md](register-jvm-metrics.md)
 - For method timing and traced timers, see [add-method-timing.md](add-method-timing.md)
 - For OpenTelemetry export, see [add-open-telemetry-export.md](add-open-telemetry-export.md)
+- For Prometheus scraping, see [add-prometheus-scrape.md](add-prometheus-scrape.md)
 
 ## Notes
 
 - `Metrics.registry()` returns the default shared registry.
 - `Metrics.createRegistry()` creates a separate registry when isolation is needed.
 - Export is a separate concern; `avaje-metrics` collects metrics, while modules such as
-  OpenTelemetry, StatsD, or Graphite handle shipping them elsewhere.
+  OpenTelemetry, Prometheus, StatsD, or Graphite handle shipping them elsewhere.

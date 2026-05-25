@@ -31,6 +31,7 @@
     <module>metrics-graphite</module>
     <module>metrics-ebean</module>
     <module>metrics-statsd</module>
+    <module>metrics-prometheus</module>
     <module>metrics-otel-trace</module>
     <module>metrics-otel-reporter</module>
     <module>metrics-otel-producer</module>
