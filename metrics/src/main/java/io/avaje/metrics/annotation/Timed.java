@@ -72,7 +72,7 @@ public @interface Timed {
    *
    * <pre>{@code
    *
-   * @Timed(tags = {"component:billing", "env:prod"})
+   * @Timed(tags = {"component:billing", "marker:blue"})
    * public class BillingService {
    *
    *   @Timed(tags = "operation:sync")

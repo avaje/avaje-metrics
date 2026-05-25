@@ -131,7 +131,7 @@ class BillingService {
 
   @Timed(tags = "operation:sync")
   void syncInvoices() {
-    // tags: component:billing, env:prod, operation:sync
+    // tags: component:billing, marker:blue, operation:sync
   }
 }
 ```
