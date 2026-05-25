@@ -86,6 +86,18 @@ var timer = Metrics.timerBuilder("app.service.run")
 ```
 
 `@Timed` is the declarative path when enhancement is already enabled in the application.
+Custom tags use the same `key:value` format as `Tags.of(...)`; class-level tags apply to
+each timed method and method-level tags append to them.
+
+```java
+@Timed(tags = "component:billing")
+class BillingService {
+
+  @Timed(tags = "operation:sync")
+  void syncInvoices() {
+  }
+}
+```
 
 ## Next steps
 

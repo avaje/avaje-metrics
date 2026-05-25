@@ -123,6 +123,23 @@ class BillingService {
 }
 ```
 
+Add stable custom tags when the enhanced timer should carry dimensions:
+
+```java
+@Timed(tags = {"component:billing", "marker:blue"})
+class BillingService {
+
+  @Timed(tags = "operation:sync")
+  void syncInvoices() {
+    // tags: component:billing, env:prod, operation:sync
+  }
+}
+```
+
+Tags use the same `key:value` format as `Tags.of(...)`. Class-level tags apply to each
+timed method and method-level tags append to them. These tags are part of the enhanced
+static timer setup, so use stable low-cardinality values rather than request-specific data.
+
 You can also enable spans for enhanced methods:
 
 ```java
@@ -138,6 +155,7 @@ Important behavior:
 - class-level `@Timed` applies timing to public methods by default
 - `@NotTimed` excludes specific methods
 - method-level `@Timed` is useful for overrides or private methods
+- `@Timed(tags = {...})` adds custom timer tags using `key:value` values
 - `@Timed(span = Timed.SpanMode.ON)` requires trace support such as `avaje-metrics-otel-trace`
 
 ---
@@ -159,4 +177,4 @@ name. Success and error timing are tracked separately.
 - Prefer programmatic timers when you want explicit behavior and no enhancement dependency.
 - Prefer `buildTraced()` when you want timing plus spans for the same code path.
 - `@Timed` is the declarative path when the application already uses enhancement.
-- Timers support tags and bucket ranges via `Metrics.timerBuilder(...)`.
+- Timers support tags and bucket ranges via `Metrics.timerBuilder(...)` and `@Timed`.
