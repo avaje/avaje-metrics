@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CounterMetricTest {
@@ -70,6 +71,58 @@ class CounterMetricTest {
     assertThat(counter0.count()).isEqualTo(0);
     assertThat(counter1.count()).isEqualTo(0);
     assertThat(counter2.count()).isEqualTo(0);
+  }
+
+  @Test
+  void withTags() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:counter", "env:test");
+
+    var counter0 = registry.counter("api.fastPath.counter", tags);
+    var counter1 = registry.counter("api.fastPath.counter", tags);
+    var counter2 = registry.counter("api.fastPath.counter", Tags.of("scope:counter", "env:other"));
+
+    assertThat(counter0).isSameAs(counter1);
+    assertThat(counter0).isNotSameAs(counter2);
+    assertThat(counter0.id().tags()).isEqualTo(tags);
+    assertThat(counter2.id().tags()).isEqualTo(Tags.of("scope:counter", "env:other"));
+  }
+
+  @Test
+  void withTags_whenBuilderCreated_expectCachedMetric() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:counter", "source:builder");
+
+    var counter = registry.counterBuilder("api.fastPath.counter.builder")
+      .tags(tags)
+      .unit("row")
+      .build();
+
+    assertThat(registry.counter("api.fastPath.counter.builder", tags)).isSameAs(counter);
+  }
+
+  @Test
+  void withTags_whenDifferentMetricType_expectIllegalStateException() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:counter", "kind:conflict");
+
+    registry.meter("api.fastPath.counter.conflict", tags);
+
+    assertThatThrownBy(() -> registry.counter("api.fastPath.counter.conflict", tags))
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("already registered as")
+      .hasMessageContaining("not Counter");
+  }
+
+  @Test
+  void withTags_whenNullNameOrTags_expectNullPointerException() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:counter", "kind:null");
+
+    assertThatThrownBy(() -> registry.counter(null, tags))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> registry.counter("api.fastPath.counter.nullTags", null))
+      .isInstanceOf(NullPointerException.class);
   }
 
   @Test

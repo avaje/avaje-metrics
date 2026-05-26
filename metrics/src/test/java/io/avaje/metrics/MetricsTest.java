@@ -60,4 +60,20 @@ class MetricsTest {
       .extracting(Metric.ID::tags)
       .isEqualTo(Tags.of("env:test"));
   }
+
+  @Test
+  void metricOverloadsWithTags_useDefaultRegistry() {
+    var tags = Tags.of("scope:facade", "env:test");
+
+    var counter = Metrics.counter("app.metrics.facade.counter", tags);
+    var meter = Metrics.meter("app.metrics.facade.meter", tags);
+    var timer = Metrics.timer("app.metrics.facade.timer", tags);
+
+    assertThat(Metrics.counter("app.metrics.facade.counter", tags)).isSameAs(counter);
+    assertThat(Metrics.meter("app.metrics.facade.meter", tags)).isSameAs(meter);
+    assertThat(Metrics.timer("app.metrics.facade.timer", tags)).isSameAs(timer);
+    assertThat(counter.id().tags()).isEqualTo(tags);
+    assertThat(meter.id().tags()).isEqualTo(tags);
+    assertThat(timer.id().tags()).isEqualTo(tags);
+  }
 }
