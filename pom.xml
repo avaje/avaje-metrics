@@ -10,7 +10,7 @@
   <groupId>io.avaje</groupId>
   <artifactId>avaje-metrics-parent</artifactId>
   <name>avaje-metrics-parent</name>
-  <version>9.9-RC8</version>
+  <version>9.9</version>
   <packaging>pom</packaging>
 
   <url>https://avaje-metrics.github.io</url>
@@ -23,7 +23,7 @@
 
   <properties>
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
-    <project.build.outputTimestamp>2026-05-22T03:58:21Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-05-25T22:30:52Z</project.build.outputTimestamp>
   </properties>
 
   <modules>

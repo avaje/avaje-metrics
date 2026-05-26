@@ -16,6 +16,11 @@ public interface MetricRegistry extends JvmMetrics {
   Counter counter(String name);
 
   /**
+   * Return the Counter using the metric name and tags.
+   */
+  Counter counter(String name, Tags tags);
+
+  /**
    * Return a builder used to configure and register a counter.
    */
   CounterBuilder counterBuilder(String name);
@@ -24,6 +29,11 @@ public interface MetricRegistry extends JvmMetrics {
    * Return the Meter using the metric name.
    */
   Meter meter(String name);
+
+  /**
+   * Return the Meter using the metric name and tags.
+   */
+  Meter meter(String name, Tags tags);
 
   /**
    * Return a builder used to configure and register a meter.
@@ -49,6 +59,11 @@ public interface MetricRegistry extends JvmMetrics {
    * Return the timer using the metric name.
    */
   Timer timer(String name);
+
+  /**
+   * Return the timer using the metric name and tags.
+   */
+  Timer timer(String name, Tags tags);
 
   /**
    * Return a builder used to configure and register a timer.

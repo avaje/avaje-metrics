@@ -224,6 +224,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public Timer timer(String name, Tags tags) {
+    Timer timer = get(name, tags, Timer.class);
+    return timer != null ? timer : timer(name, tags, null);
+  }
+
+  @Override
   public TimerBuilder timerBuilder(String name) {
     return new DTimerBuilder(name);
   }
@@ -234,6 +240,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   @Override
+  public Counter counter(String name, Tags tags) {
+    Counter counter = get(name, tags, Counter.class);
+    return counter != null ? counter : counter(name, tags, COUNT_UNIT);
+  }
+
+  @Override
   public CounterBuilder counterBuilder(String name) {
     return new DCounterBuilder(name);
   }
@@ -241,6 +253,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   @Override
   public Meter meter(String name) {
     return meterBuilder(name).build();
+  }
+
+  @Override
+  public Meter meter(String name, Tags tags) {
+    Meter meter = get(name, tags, Meter.class);
+    return meter != null ? meter : meter(name, tags, DEFAULT_UNIT);
   }
 
   @Override
@@ -375,6 +393,22 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
       throw new IllegalStateException(
         "Metric " + id.name() + " already registered with unit '" + existing.unit() + "' not '" + normalizedUnit + "'");
     }
+  }
+
+  @Nullable
+  private <T extends Metric> T get(String name, Tags tags, Class<T> type) {
+    Metric.ID id = Metric.ID.of(requireNonNull(name), requireNonNull(tags));
+    Metric metric = metricsCache.get(id);
+    return metric != null ? validateType(id, metric, type) : null;
+  }
+
+  private static <T extends Metric> T validateType(Metric.ID id, Metric metric, Class<T> type) {
+    if (!type.isInstance(metric)) {
+      throw new IllegalStateException(
+        "Metric " + id.name() + " already registered as " + metric.getClass().getSimpleName()
+          + " not " + type.getSimpleName());
+    }
+    return type.cast(metric);
   }
 
   private static <T extends Metric> T validateMetric(Metric.ID id, Metric metric, Class<T> type, String unit) {

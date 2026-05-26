@@ -34,6 +34,34 @@ class MeterTest {
   }
 
   @Test
+  void withTags() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:meter", "env:test");
+
+    var meter0 = registry.meter("api.fastPath.meter", tags);
+    var meter1 = registry.meter("api.fastPath.meter", tags);
+    var meter2 = registry.meter("api.fastPath.meter", Tags.of("scope:meter", "env:other"));
+
+    assertThat(meter0).isSameAs(meter1);
+    assertThat(meter0).isNotSameAs(meter2);
+    assertThat(meter0.id().tags()).isEqualTo(tags);
+    assertThat(meter2.id().tags()).isEqualTo(Tags.of("scope:meter", "env:other"));
+  }
+
+  @Test
+  void withTags_whenBuilderCreated_expectCachedMetric() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:meter", "source:builder");
+
+    var meter = registry.meterBuilder("api.fastPath.meter.builder")
+      .tags(tags)
+      .unit("By")
+      .build();
+
+    assertThat(registry.meter("api.fastPath.meter.builder", tags)).isSameAs(meter);
+  }
+
+  @Test
   void collectCumulative() {
     Meter metric = new DMeter(Metric.ID.of("org.test.mycounter.cumulative"), "");
     metric.addEvent(1000);

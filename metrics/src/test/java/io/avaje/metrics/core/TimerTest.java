@@ -66,6 +66,33 @@ class TimerTest {
     assertEquals(2, stat1.count());
   }
 
+  @Test
+  void withTags() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:timer", "env:test");
+
+    var timer0 = registry.timer("api.fastPath.timer", tags);
+    var timer1 = registry.timer("api.fastPath.timer", tags);
+    var timer2 = registry.timer("api.fastPath.timer", Tags.of("scope:timer", "env:other"));
+
+    assertThat(timer0).isSameAs(timer1);
+    assertThat(timer0).isNotSameAs(timer2);
+    assertThat(timer0.id().tags()).isEqualTo(tags);
+    assertThat(timer2.id().tags()).isEqualTo(Tags.of("scope:timer", "env:other"));
+  }
+
+  @Test
+  void withTags_whenBuilderCreated_expectCachedMetric() {
+    var registry = Metrics.createRegistry();
+    var tags = Tags.of("scope:timer", "source:builder");
+
+    var timer = registry.timerBuilder("api.fastPath.timer.builder")
+      .tags(tags)
+      .build();
+
+    assertThat(registry.timer("api.fastPath.timer.builder", tags)).isSameAs(timer);
+  }
+
   private void resetStatistics() {
     Metrics.collectMetrics();
   }

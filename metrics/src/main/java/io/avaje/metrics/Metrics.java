@@ -100,6 +100,13 @@ public class Metrics {
   }
 
   /**
+   * Return a Timer given the name and tags using the default registry.
+   */
+  public static Timer timer(String name, Tags tags) {
+    return defaultRegistry.timer(name, tags);
+  }
+
+  /**
    * Return a builder used to configure and register a timer with the default registry.
    */
   public static TimerBuilder timerBuilder(String name) {
@@ -121,6 +128,13 @@ public class Metrics {
   }
 
   /**
+   * Return a Counter given the name and tags using the default registry.
+   */
+  public static Counter counter(String name, Tags tags) {
+    return defaultRegistry.counter(name, tags);
+  }
+
+  /**
    * Return a builder used to configure and register a counter with the default registry.
    */
   public static CounterBuilder counterBuilder(String name) {
@@ -139,6 +153,13 @@ public class Metrics {
    */
   public static Meter meter(String name) {
     return defaultRegistry.meter(name);
+  }
+
+  /**
+   * Return a Meter given the name and tags using the default registry.
+   */
+  public static Meter meter(String name, Tags tags) {
+    return defaultRegistry.meter(name, tags);
   }
 
   /**
