@@ -44,6 +44,16 @@ reporter.report();
 - `database(...)` — include Ebean database metrics directly
 - `excludeDefaultRegistry()` — report only explicitly added registries/suppliers
 
+## Label tags
+
+Graphite metric paths do not carry tags. When a metric has a `label:<value>` tag,
+the reporter appends the label value to the Graphite metric path. For example,
+`web.api` with `label:MyController.myMethod` is reported as
+`web.api.MyController.myMethod.count`, `web.api.MyController.myMethod.total`,
+and related timer series. The `app.component` base name is reported using the
+legacy `app.<label>` path, such as `app.MyClass.myMethod.count`. Non-label tags
+are ignored by this reporter.
+
 ## Manual sending
 
 If you need low-level manual sending rather than reporter composition, use
