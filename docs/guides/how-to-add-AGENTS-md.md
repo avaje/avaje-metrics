@@ -54,6 +54,7 @@ Key guides (fetch and follow when performing the relevant task):
 - Getting started: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/getting-started.md
 - Register JVM metrics: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/register-jvm-metrics.md
 - Add method timing: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-method-timing.md
+- Configure metrics enhancement: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/configure-metrics-agent.md
 - Add OpenTelemetry export: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-open-telemetry-export.md
 - Add Prometheus scraping: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-prometheus-scrape.md
 - Add StatsD reporting: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-statsd-reporting.md

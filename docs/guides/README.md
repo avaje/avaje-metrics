@@ -39,6 +39,7 @@ Step-by-step guides written as instructions for AI agents and developers working
 |-------|-------------|
 | [Register JVM metrics](register-jvm-metrics.md) | Register the built-in JVM metric sets, choose between core and detailed metrics, and apply global tags |
 | [Add method timing](add-method-timing.md) | Add programmatic timers, traced timers, and `@Timed`-based method timing for service methods and components |
+| [Configure metrics enhancement](configure-metrics-agent.md) | Enable build-time `@Timed` enhancement with `metrics-maven-plugin`, configure `metrics.mf`, and control naming, spans, and component detection |
 
 ## Exporters / observability
 
@@ -73,8 +74,8 @@ Below are copy-paste snippets for the most common AI tooling configurations.
 # AI Agent Instructions
 
 This project uses [avaje-metrics](https://avaje-metrics.github.io). Step-by-step guides
-for common tasks (getting started, JVM metrics, method timing, OpenTelemetry export,
-Prometheus scraping, StatsD reporting, Ebean metrics)
+for common tasks (getting started, JVM metrics, method timing, metrics enhancement configuration,
+OpenTelemetry export, Prometheus scraping, StatsD reporting, Ebean metrics)
 are at:
 
 **https://github.com/avaje/avaje-metrics/tree/HEAD/docs/guides/**
@@ -86,8 +87,8 @@ are at:
 ## AI Agent Instructions
 
 This project uses [avaje-metrics](https://avaje-metrics.github.io). Step-by-step guides
-for common tasks (getting started, JVM metrics, method timing, OpenTelemetry export,
-Prometheus scraping, StatsD reporting, Ebean metrics)
+for common tasks (getting started, JVM metrics, method timing, metrics enhancement configuration,
+OpenTelemetry export, Prometheus scraping, StatsD reporting, Ebean metrics)
 are at:
 
 **https://github.com/avaje/avaje-metrics/tree/HEAD/docs/guides/**
@@ -109,6 +110,7 @@ Key guides (fetch and follow when performing the relevant task):
 - Getting started: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/getting-started.md
 - Register JVM metrics: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/register-jvm-metrics.md
 - Add method timing: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-method-timing.md
+- Configure metrics enhancement: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/configure-metrics-agent.md
 - Add OpenTelemetry export: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-open-telemetry-export.md
 - Add Prometheus scraping: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-prometheus-scrape.md
 - Add StatsD reporting: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-statsd-reporting.md

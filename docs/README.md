@@ -14,6 +14,7 @@ onboarding for all contributors.
 ## Quick links
 
 - Guide index: https://github.com/avaje/avaje-metrics/tree/HEAD/docs/guides/
+- Configure metrics enhancement: https://github.com/avaje/avaje-metrics/blob/HEAD/docs/guides/configure-metrics-agent.md
 - How to add AGENTS.md: https://github.com/avaje/avaje-metrics/blob/HEAD/docs/guides/how-to-add-AGENTS-md.md
 
 ## About avaje-metrics

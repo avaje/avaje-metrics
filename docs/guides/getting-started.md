@@ -22,8 +22,9 @@ avaje-metrics is centered around a `MetricRegistry` and four main metric types:
 | `Meter` | Record value-carrying events | bytes sent, rows processed |
 | `Gauge` | Read a current value from a supplier | queue depth, memory usage |
 
-Most applications use the default registry via the static `Metrics` helper, then choose
-an export path such as OpenTelemetry, Prometheus, StatsD, or Graphite separately.
+Most applications use the default registry via the static `Metrics` helper and enable
+build-time enhancement for `@Timed`, then choose an export path such as OpenTelemetry,
+Prometheus, StatsD, or Graphite separately.
 
 ---
 
@@ -47,7 +48,30 @@ requires io.avaje.metrics;
 
 ---
 
-## Step 2 — Start with the default registry
+## Step 2 — Add build-time enhancement
+
+Most avaje-metrics applications use build-time enhancement for declarative method timing
+with `@Timed`. Add the metrics Maven plugin under `pom.xml` / `build` / `plugins`:
+
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>io.avaje.metrics</groupId>
+      <artifactId>metrics-maven-plugin</artifactId>
+      <version>${avaje-metrics.version}</version>
+      <extensions>true</extensions>
+    </plugin>
+  </plugins>
+</build>
+```
+
+This enhances compiled classes during the Maven build. No runtime `-javaagent` setup is
+needed for the common Maven path.
+
+---
+
+## Step 3 — Start with the default registry
 
 The simplest path is to use the default registry through `Metrics`.
 
@@ -69,7 +93,7 @@ MetricRegistry registry = Metrics.createRegistry();
 
 ---
 
-## Step 3 — Create the first metrics
+## Step 4 — Create the first metrics
 
 ```java
 import io.avaje.metrics.Metrics;
@@ -99,7 +123,7 @@ Metric naming guidance:
 
 ---
 
-## Step 4 — Record values
+## Step 5 — Record values
 
 ```java
 requests.inc();
@@ -125,7 +149,7 @@ try {
 
 ---
 
-## Step 5 — Inspect collected metrics
+## Step 6 — Inspect collected metrics
 
 For a quick sanity check, collect metrics from the default registry:
 
@@ -143,6 +167,7 @@ an exporter module.
 
 - For built-in JVM metrics, see [register-jvm-metrics.md](register-jvm-metrics.md)
 - For method timing and traced timers, see [add-method-timing.md](add-method-timing.md)
+- For build-time enhancement options, see [configure-metrics-agent.md](configure-metrics-agent.md)
 - For OpenTelemetry export, see [add-open-telemetry-export.md](add-open-telemetry-export.md)
 - For Prometheus scraping, see [add-prometheus-scrape.md](add-prometheus-scrape.md)
 
@@ -150,5 +175,6 @@ an exporter module.
 
 - `Metrics.registry()` returns the default shared registry.
 - `Metrics.createRegistry()` creates a separate registry when isolation is needed.
+- `metrics-maven-plugin` enables the common build-time enhancement path for `@Timed`.
 - Export is a separate concern; `avaje-metrics` collects metrics, while modules such as
   OpenTelemetry, Prometheus, StatsD, or Graphite handle shipping them elsewhere.

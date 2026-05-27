@@ -85,7 +85,9 @@ var timer = Metrics.timerBuilder("app.service.run")
   .buildTraced();
 ```
 
-`@Timed` is the declarative path when enhancement is already enabled in the application.
+`@Timed` is the declarative path when build-time enhancement is enabled in the
+application. See [Configure metrics enhancement](../docs/guides/configure-metrics-agent.md)
+for `metrics-maven-plugin` and `metrics.mf` setup.
 Custom tags use the same `key:value` format as `Tags.of(...)`; class-level tags apply to
 each timed method and method-level tags append to them.
 
@@ -105,5 +107,6 @@ class BillingService {
 - [Getting started](../docs/guides/getting-started.md)
 - [Register JVM metrics](../docs/guides/register-jvm-metrics.md)
 - [Add method timing](../docs/guides/add-method-timing.md)
+- [Configure metrics enhancement](../docs/guides/configure-metrics-agent.md)
 - [Add OpenTelemetry export](../docs/guides/add-open-telemetry-export.md)
 - [Add Prometheus scraping](../docs/guides/add-prometheus-scrape.md)

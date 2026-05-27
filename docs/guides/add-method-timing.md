@@ -16,12 +16,12 @@ There are three main timing styles:
 
 | Approach | Best for |
 |---|---|
-| `@Timed` | declarative timing when enhancement is already enabled in the application |
+| `@Timed` | declarative timing via build-time enhancement |
 | `Timer.time(...)` or `Timer.startEvent()` | explicit programmatic timing in code |
 | `Metrics.timerBuilder(...).buildTraced()` | timing plus spans when trace support is present |
 
-If you do **not** already use enhancement, programmatic timers are the safest and most
-explicit path.
+If you do **not** want enhancement, programmatic timers are the safest and most explicit
+path. If you want `@Timed`, configure build-time enhancement first.
 
 ---
 
@@ -103,7 +103,12 @@ global `OpenTelemetry` instance.
 
 ---
 
-## Step 4 — Use `@Timed` when enhancement is already enabled
+## Step 4 — Use `@Timed` with build-time enhancement
+
+Before relying on `@Timed`, enable build-time enhancement with
+`metrics-maven-plugin` and configure it with `metrics.mf`. See
+[configure-metrics-agent.md](configure-metrics-agent.md) for the Maven plugin setup,
+`metrics.mf` options, naming modes, and troubleshooting.
 
 ```java
 import io.avaje.metrics.annotation.NotTimed;
@@ -176,5 +181,5 @@ name. Success and error timing are tracked separately.
 
 - Prefer programmatic timers when you want explicit behavior and no enhancement dependency.
 - Prefer `buildTraced()` when you want timing plus spans for the same code path.
-- `@Timed` is the declarative path when the application already uses enhancement.
+- `@Timed` is the declarative path when the application uses build-time enhancement.
 - Timers support tags and bucket ranges via `Metrics.timerBuilder(...)` and `@Timed`.

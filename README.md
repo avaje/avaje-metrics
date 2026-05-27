@@ -28,6 +28,7 @@ export modules.
 - [Getting started](docs/guides/getting-started.md)
 - [Register JVM metrics](docs/guides/register-jvm-metrics.md)
 - [Add method timing](docs/guides/add-method-timing.md)
+- [Configure metrics enhancement](docs/guides/configure-metrics-agent.md)
 - [Add OpenTelemetry export](docs/guides/add-open-telemetry-export.md)
 - [Add Prometheus scraping](docs/guides/add-prometheus-scrape.md)
 
