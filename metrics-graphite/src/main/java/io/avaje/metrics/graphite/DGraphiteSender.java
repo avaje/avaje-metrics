@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.INFO;
@@ -21,6 +22,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 final class DGraphiteSender implements GraphiteSender {
 
   private static final System.Logger log = AppLog.getLogger(GraphiteReporter.class);
+  private static final String LABEL_PREFIX = "label:";
+  private static final String APP_COMPONENT_NAME = "app.component";
+  private static final String APP_PREFIX = "app.";
 
   /**
    * Minimally necessary pickle opcodes.
@@ -39,6 +43,7 @@ final class DGraphiteSender implements GraphiteSender {
 
   private final int batchSize;
   private final List<MetricTuple> metrics = new ArrayList<>();
+  private final ConcurrentHashMap<Metric.ID, String> graphiteNames = new ConcurrentHashMap<>();
   private final InetSocketAddress address;
   private final SocketFactory socketFactory;
   private final String prefix;
@@ -100,10 +105,11 @@ final class DGraphiteSender implements GraphiteSender {
 
     private void sendValues(Meter.Stats stats) {
       try {
-        send(String.valueOf(stats.count()), epochSecs, stats.name(), ".count");
-        send(String.valueOf(stats.total()), epochSecs, stats.name(), ".total");
-        send(String.valueOf(stats.mean()), epochSecs, stats.name(), ".mean");
-        send(String.valueOf(stats.max()), epochSecs, stats.name(), ".max");
+        var name = graphiteName(stats.id());
+        send(String.valueOf(stats.count()), epochSecs, name, ".count");
+        send(String.valueOf(stats.total()), epochSecs, name, ".total");
+        send(String.valueOf(stats.mean()), epochSecs, name, ".mean");
+        send(String.valueOf(stats.max()), epochSecs, name, ".max");
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -112,7 +118,7 @@ final class DGraphiteSender implements GraphiteSender {
     @Override
     public void visit(Counter.Stats counter) {
       try {
-        send(String.valueOf(counter.count()), epochSecs, counter.name());
+        send(String.valueOf(counter.count()), epochSecs, graphiteName(counter.id()));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -121,7 +127,7 @@ final class DGraphiteSender implements GraphiteSender {
     @Override
     public void visit(GaugeDouble.Stats gauge) {
       try {
-        send(String.valueOf(gauge.value()), epochSecs, gauge.name());
+        send(String.valueOf(gauge.value()), epochSecs, graphiteName(gauge.id()));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -130,11 +136,29 @@ final class DGraphiteSender implements GraphiteSender {
     @Override
     public void visit(GaugeLong.Stats gauge) {
       try {
-        send(String.valueOf(gauge.value()), epochSecs, gauge.name());
+        send(String.valueOf(gauge.value()), epochSecs, graphiteName(gauge.id()));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
     }
+  }
+
+  private String graphiteName(Metric.ID id) {
+    return graphiteNames.computeIfAbsent(id, DGraphiteSender::createGraphiteName);
+  }
+
+  private static String createGraphiteName(Metric.ID id) {
+    var name = id.name();
+    for (String tag : id.tags().array()) {
+      if (tag != null && tag.startsWith(LABEL_PREFIX) && tag.length() > LABEL_PREFIX.length()) {
+        var label = tag.substring(LABEL_PREFIX.length());
+        if (APP_COMPONENT_NAME.equals(name)) {
+          return APP_PREFIX + label;
+        }
+        return name + "." + label;
+      }
+    }
+    return name;
   }
 
   @Override
