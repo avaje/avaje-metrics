@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.INFO;
@@ -42,6 +43,7 @@ final class DGraphiteSender implements GraphiteSender {
 
   private final int batchSize;
   private final List<MetricTuple> metrics = new ArrayList<>();
+  private final ConcurrentHashMap<Metric.ID, String> graphiteNames = new ConcurrentHashMap<>();
   private final InetSocketAddress address;
   private final SocketFactory socketFactory;
   private final String prefix;
@@ -141,7 +143,11 @@ final class DGraphiteSender implements GraphiteSender {
     }
   }
 
-  private static String graphiteName(Metric.ID id) {
+  private String graphiteName(Metric.ID id) {
+    return graphiteNames.computeIfAbsent(id, DGraphiteSender::createGraphiteName);
+  }
+
+  private static String createGraphiteName(Metric.ID id) {
     var name = id.name();
     for (String tag : id.tags().array()) {
       if (tag != null && tag.startsWith(LABEL_PREFIX) && tag.length() > LABEL_PREFIX.length()) {
