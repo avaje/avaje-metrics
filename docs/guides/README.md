@@ -48,6 +48,7 @@ Step-by-step guides written as instructions for AI agents and developers working
 | [Add OpenTelemetry export](add-open-telemetry-export.md) | Choose between `avaje-metrics-otel`, `avaje-metrics-otel-producer`, `avaje-metrics-otel-trace`, and `avaje-metrics-otel-reporter` and wire the right OTEL path |
 | [Add Prometheus scraping](add-prometheus-scrape.md) | Add `avaje-metrics-prometheus` and expose a pull-based Prometheus text endpoint using cumulative collection |
 | [Add StatsD reporting](add-statsd-reporting.md) | Add `avaje-metrics-statsd`, configure `StatsdReporter`, and export avaje-metrics data to StatsD / DogStatsD |
+| [Add Graphite reporting](add-graphite-reporting.md) | Add `avaje-metrics-graphite`, configure `GraphiteReporter`, and export avaje-metrics data to Graphite |
 
 ## Integrations
 
@@ -75,7 +76,7 @@ Below are copy-paste snippets for the most common AI tooling configurations.
 
 This project uses [avaje-metrics](https://avaje-metrics.github.io). Step-by-step guides
 for common tasks (getting started, JVM metrics, method timing, metrics enhancement configuration,
-OpenTelemetry export, Prometheus scraping, StatsD reporting, Ebean metrics)
+OpenTelemetry export, Prometheus scraping, StatsD reporting, Graphite reporting, Ebean metrics)
 are at:
 
 **https://github.com/avaje/avaje-metrics/tree/HEAD/docs/guides/**
@@ -88,7 +89,7 @@ are at:
 
 This project uses [avaje-metrics](https://avaje-metrics.github.io). Step-by-step guides
 for common tasks (getting started, JVM metrics, method timing, metrics enhancement configuration,
-OpenTelemetry export, Prometheus scraping, StatsD reporting, Ebean metrics)
+OpenTelemetry export, Prometheus scraping, StatsD reporting, Graphite reporting, Ebean metrics)
 are at:
 
 **https://github.com/avaje/avaje-metrics/tree/HEAD/docs/guides/**
@@ -114,6 +115,7 @@ Key guides (fetch and follow when performing the relevant task):
 - Add OpenTelemetry export: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-open-telemetry-export.md
 - Add Prometheus scraping: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-prometheus-scrape.md
 - Add StatsD reporting: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-statsd-reporting.md
+- Add Graphite reporting: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-graphite-reporting.md
 - Add Ebean metrics: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-ebean-metrics.md
 ```
 
