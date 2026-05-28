@@ -6,6 +6,8 @@ Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured wit
 - `avaje-metrics-otel-producer` registered as a metric producer
 - `avaje-metrics-otel-trace` on the classpath/module path for traced timers
 - the same `service.name` resource on both tracer and meter providers
+- `service.name` from `otel.service.name` / `OTEL_SERVICE_NAME`
+- resource attributes from `otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`
 - W3C trace-context propagators
 
 ## Maven dependency
@@ -25,6 +27,8 @@ OpenTelemetry openTelemetry =
     MetricsOpenTelemetry.builder()
         .endpoint("http://otel-collector:4317")
         .serviceName("my-service")
+        .deploymentEnvironmentName("production")
+        .resourceAttributes("business.domain=core,business.platform=base")
         .meterInterval(Duration.ofSeconds(60))
         .traceInterval(Duration.ofSeconds(10))
         .buildAndRegisterGlobal();
@@ -52,11 +56,35 @@ OpenTelemetrySdk sdk =
         .includeTrace(true)                       // default: true
         .includeMeter(true)                       // default: true
         .timedThresholdMicros(1_000)              // default: 0
+        .resourceAttribute("business.domain", "core")
+        .resourceAttributes("business.platform=base")
+        .deploymentEnvironmentName("production")
+        .systemNamespace("tracking")
         .meterInterval(Duration.ofSeconds(60))    // default: 60s
         .traceInterval(Duration.ofSeconds(10))    // default: 10s
         .registry(Metrics.registry())             // default: Metrics.registry()
         .build();
 ```
+
+Resource attributes can also be supplied using the standard OpenTelemetry configuration names:
+
+```bash
+java \
+  -Dotel.resource.attributes="business.domain=core,business.platform=base,deployment.environment.name=production" \
+  -jar app.jar
+```
+
+or via an environment variable:
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="business.domain=core,business.platform=base,deployment.environment.name=production"
+```
+
+When both are present, the system property `otel.resource.attributes` wins over the environment
+variable. The service name can also be supplied using `otel.service.name` or `OTEL_SERVICE_NAME`.
+Explicit builder resource attributes override configured resource attributes, `otel.service.name` /
+`OTEL_SERVICE_NAME` override `service.name` from resource attributes, and `serviceName(...)`
+overrides all configured service names.
 
 You can also provide custom exporters when you need OTLP-specific configuration such as headers,
 compression, or timeouts:
@@ -81,6 +109,7 @@ OpenTelemetrySdk sdk =
 
 - Normal OpenTelemetry meters and tracers created from the returned SDK are exported alongside the
   avaje metrics exposed by `OtelMetricProducer`.
+- Resource attributes apply to both metrics and spans.
 - traced timers created via `Metrics.timerBuilder(...).buildTraced()` work by default because this
   module brings in `avaje-metrics-otel-trace`.
 - `includeTrace(false)` or `includeMeter(false)` can be used for metrics-only or traces-only setup.

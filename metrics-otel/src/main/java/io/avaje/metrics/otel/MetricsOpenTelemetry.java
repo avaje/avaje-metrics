@@ -21,6 +21,8 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -58,7 +60,6 @@ public final class MetricsOpenTelemetry {
   public static final class Builder {
 
     private static final String DEFAULT_ENDPOINT = "http://localhost:4317";
-    private static final String DEFAULT_SERVICE_NAME = "unknown_service:java";
     private static final String DEFAULT_SCOPE = "io.avaje.metrics";
     private static final Duration DEFAULT_METER_INTERVAL = Duration.ofSeconds(60);
     private static final Duration DEFAULT_TRACE_INTERVAL = Duration.ofSeconds(10);
@@ -67,11 +68,12 @@ public final class MetricsOpenTelemetry {
     private boolean includeTrace = true;
     private boolean includeMeter = true;
     private String endpoint = DEFAULT_ENDPOINT;
-    private String serviceName = DEFAULT_SERVICE_NAME;
+    private String serviceName;
     private long timedThresholdMicros;
     private Duration meterInterval = DEFAULT_METER_INTERVAL;
     private Duration traceInterval = DEFAULT_TRACE_INTERVAL;
     private MetricRegistry registry;
+    private final Map<String, String> resourceAttributes = new LinkedHashMap<>();
     private ContextPropagators propagators = ContextPropagators.create(W3CTraceContextPropagator.getInstance());
     private MetricExporter metricExporter;
     private MetricReader metricReader;
@@ -93,13 +95,76 @@ public final class MetricsOpenTelemetry {
     /**
      * Set the {@code service.name} resource attribute.
      *
-     * <p>Default is {@code unknown_service:java}.
+     * <p>Defaults to {@code otel.service.name}, then {@code OTEL_SERVICE_NAME}, then the
+     * OpenTelemetry SDK default {@code unknown_service:java}.
      *
      * @param serviceName the service name
      * @return this builder
      */
     public Builder serviceName(String serviceName) {
       this.serviceName = requireNonNull(serviceName);
+      return this;
+    }
+
+    /**
+     * Set an OpenTelemetry resource attribute.
+     *
+     * @param key the resource attribute key
+     * @param value the resource attribute value
+     * @return this builder
+     */
+    public Builder resourceAttribute(String key, String value) {
+      ResourceAttributes.put(resourceAttributes, key, value);
+      return this;
+    }
+
+    /**
+     * Set OpenTelemetry resource attributes.
+     *
+     * @param attributes the resource attributes to add
+     * @return this builder
+     */
+    public Builder resourceAttributes(Map<String, String> attributes) {
+      requireNonNull(attributes, "attributes").forEach(this::resourceAttribute);
+      return this;
+    }
+
+    /**
+     * Set OpenTelemetry resource attributes from a comma-separated {@code key=value} string.
+     *
+     * @param attributes the resource attributes string
+     * @return this builder
+     */
+    public Builder resourceAttributes(String attributes) {
+      resourceAttributes.putAll(ResourceAttributes.parse(attributes));
+      return this;
+    }
+
+    /**
+     * Set the {@code deployment.environment.name} resource attribute.
+     *
+     * @param value the deployment environment name
+     * @return this builder
+     */
+    public Builder deploymentEnvironmentName(String value) {
+      ResourceAttributes.put(
+        resourceAttributes,
+        ResourceAttributes.DEPLOYMENT_ENVIRONMENT_NAME,
+        value);
+      return this;
+    }
+
+    /**
+     * Set the {@code system.namespace} resource attribute.
+     *
+     * @param value the system namespace
+     * @return this builder
+     */
+    public Builder systemNamespace(String value) {
+      ResourceAttributes.put(
+        resourceAttributes,
+        ResourceAttributes.SYSTEM_NAMESPACE,
+        value);
       return this;
     }
 
@@ -257,8 +322,21 @@ public final class MetricsOpenTelemetry {
     }
 
     private Resource resource() {
-      return Resource.getDefault()
-        .merge(Resource.create(Attributes.of(SERVICE_NAME, serviceName)));
+      var attributes = new LinkedHashMap<String, String>();
+      attributes.putAll(ResourceAttributes.configuredAttributes());
+      attributes.putAll(resourceAttributes);
+      var resource = Resource.getDefault();
+      if (!attributes.isEmpty()) {
+        resource = resource.merge(ResourceAttributes.resource(attributes));
+      }
+      var configuredServiceName = ResourceAttributes.configuredServiceName();
+      if (configuredServiceName != null) {
+        resource = resource.merge(Resource.create(Attributes.of(SERVICE_NAME, configuredServiceName)));
+      }
+      if (serviceName != null) {
+        resource = resource.merge(Resource.create(Attributes.of(SERVICE_NAME, serviceName)));
+      }
+      return resource;
     }
 
     private SdkMeterProvider meterProvider(Resource resource) {

@@ -12,6 +12,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -23,10 +24,23 @@ import java.util.stream.Collectors;
 import io.opentelemetry.context.Scope;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MetricsOpenTelemetryTest {
 
   private static final AttributeKey<String> SERVICE_NAME = AttributeKey.stringKey("service.name");
+  private static final AttributeKey<String> BUSINESS_DOMAIN = AttributeKey.stringKey("business.domain");
+  private static final AttributeKey<String> BUSINESS_PLATFORM = AttributeKey.stringKey("business.platform");
+  private static final AttributeKey<String> BUSINESS_SYSTEM = AttributeKey.stringKey("business.system");
+  private static final AttributeKey<String> DEPLOYMENT_ENVIRONMENT_NAME =
+    AttributeKey.stringKey("deployment.environment.name");
+  private static final AttributeKey<String> SYSTEM_NAMESPACE = AttributeKey.stringKey("system.namespace");
+
+  @AfterEach
+  void tearDown() {
+    System.clearProperty(ResourceAttributes.RESOURCE_ATTRIBUTES_PROPERTY);
+    System.clearProperty(ResourceAttributes.SERVICE_NAME_PROPERTY);
+  }
 
   @Test
   void build_collectsProducerAndRegularOtelTelemetry() {
@@ -88,6 +102,180 @@ class MetricsOpenTelemetryTest {
       assertThat(spanExporter.getFinishedSpanItems().get(0).getResource().getAttribute(SERVICE_NAME))
         .isEqualTo("unknown_service:java");
     }
+  }
+
+  @Test
+  void systemPropertyResourceAttributes_applyToMetricAndSpanResources() {
+    System.setProperty(
+      ResourceAttributes.RESOURCE_ATTRIBUTES_PROPERTY,
+      "service.name=property-service,business.domain=fleet,deployment.environment.name=production");
+    var metricReader = InMemoryMetricReader.create();
+    var spanExporter = InMemorySpanExporter.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .registry(registry)
+      .metricReader(metricReader)
+      .spanExporter(spanExporter)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+      openTelemetry.getTracer("manual").spanBuilder("resource-span").startSpan().end();
+
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(SERVICE_NAME)).isEqualTo("property-service");
+      assertThat(metricResource.getAttribute(BUSINESS_DOMAIN)).isEqualTo("fleet");
+      assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
+
+      var spanResource = spanExporter.getFinishedSpanItems().get(0).getResource();
+      assertThat(spanResource.getAttribute(SERVICE_NAME)).isEqualTo("property-service");
+      assertThat(spanResource.getAttribute(BUSINESS_DOMAIN)).isEqualTo("fleet");
+      assertThat(spanResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
+    }
+  }
+
+  @Test
+  void builderResourceAttributes_applyToMetricAndSpanResources() {
+    var metricReader = InMemoryMetricReader.create();
+    var spanExporter = InMemorySpanExporter.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .resourceAttributes(Map.of("business.domain", "fleet"))
+      .resourceAttributes("business.platform=ship")
+      .resourceAttribute("business.system", "vehicle-tracking")
+      .deploymentEnvironmentName("production")
+      .systemNamespace("tracking")
+      .registry(registry)
+      .metricReader(metricReader)
+      .spanExporter(spanExporter)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+      openTelemetry.getTracer("manual").spanBuilder("resource-span").startSpan().end();
+
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(SERVICE_NAME)).isEqualTo("catalog-service");
+      assertThat(metricResource.getAttribute(BUSINESS_DOMAIN)).isEqualTo("fleet");
+      assertThat(metricResource.getAttribute(BUSINESS_PLATFORM)).isEqualTo("ship");
+      assertThat(metricResource.getAttribute(BUSINESS_SYSTEM)).isEqualTo("vehicle-tracking");
+      assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
+      assertThat(metricResource.getAttribute(SYSTEM_NAMESPACE)).isEqualTo("tracking");
+
+      var spanResource = spanExporter.getFinishedSpanItems().get(0).getResource();
+      assertThat(spanResource.getAttribute(SERVICE_NAME)).isEqualTo("catalog-service");
+      assertThat(spanResource.getAttribute(BUSINESS_DOMAIN)).isEqualTo("fleet");
+      assertThat(spanResource.getAttribute(BUSINESS_PLATFORM)).isEqualTo("ship");
+      assertThat(spanResource.getAttribute(BUSINESS_SYSTEM)).isEqualTo("vehicle-tracking");
+      assertThat(spanResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
+      assertThat(spanResource.getAttribute(SYSTEM_NAMESPACE)).isEqualTo("tracking");
+    }
+  }
+
+  @Test
+  void serviceName_overridesResourceAttributeServiceName() {
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .resourceAttribute("service.name", "resource-service")
+      .serviceName("builder-service")
+      .registry(registry)
+      .metricReader(metricReader)
+      .includeTrace(false)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(SERVICE_NAME)).isEqualTo("builder-service");
+    }
+  }
+
+  @Test
+  void configuredServiceName_overridesResourceAttributeServiceName() {
+    System.setProperty(ResourceAttributes.SERVICE_NAME_PROPERTY, "configured-service");
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .resourceAttribute("service.name", "resource-service")
+      .registry(registry)
+      .metricReader(metricReader)
+      .includeTrace(false)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(SERVICE_NAME)).isEqualTo("configured-service");
+    }
+  }
+
+  @Test
+  void serviceName_overridesConfiguredServiceName() {
+    System.setProperty(ResourceAttributes.SERVICE_NAME_PROPERTY, "configured-service");
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .serviceName("builder-service")
+      .registry(registry)
+      .metricReader(metricReader)
+      .includeTrace(false)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(SERVICE_NAME)).isEqualTo("builder-service");
+    }
+  }
+
+  @Test
+  void convenienceResourceAttributes_followNormalCallOrder() {
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .deploymentEnvironmentName("production")
+      .resourceAttribute("deployment.environment.name", "staging")
+      .systemNamespace("tracking")
+      .resourceAttribute("system.namespace", "fleet")
+      .registry(registry)
+      .metricReader(metricReader)
+      .includeTrace(false)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("staging");
+      assertThat(metricResource.getAttribute(SYSTEM_NAMESPACE)).isEqualTo("fleet");
+    }
+  }
+
+  @Test
+  void resourceAttributes_parseAndDecodeValues() {
+    var attributes = ResourceAttributes.parse(
+      "business.domain=fleet%20ops,business.platform=ship+track,broken=keep%2Gvalue,,");
+
+    assertThat(attributes)
+      .containsEntry("business.domain", "fleet ops")
+      .containsEntry("business.platform", "ship+track")
+      .containsEntry("broken", "keep%2Gvalue");
+  }
+
+  @Test
+  void resourceAttributes_malformedEntry_failsClearly() {
+    assertThatThrownBy(() -> MetricsOpenTelemetry.builder().resourceAttributes("business.domain"))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("expected key=value");
   }
 
   @Test

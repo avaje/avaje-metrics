@@ -89,6 +89,8 @@ import java.time.Duration;
 var openTelemetry = MetricsOpenTelemetry.builder()
   .endpoint("http://otel-collector:4317")
   .serviceName("my-service")
+  .deploymentEnvironmentName("production")
+  .resourceAttributes("business.domain=fleet,business.platform=ship")
   .meterInterval(Duration.ofSeconds(60))
   .traceInterval(Duration.ofSeconds(10))
   .buildAndRegisterGlobal();
@@ -98,6 +100,32 @@ This is the best default when the application wants both OTEL metrics export and
 timer support with minimal setup code.
 
 When using this we do **NOT** need Step 3 or Step 4.
+
+### Resource attributes
+
+For Lambda or other non-Kubernetes deployments, add resource attributes with the builder:
+
+```java
+var openTelemetry = MetricsOpenTelemetry.builder()
+  .serviceName("backport")
+  .deploymentEnvironmentName("production")
+  .systemNamespace("tracking")
+  .resourceAttributes("business.domain=fleet,business.subdomain=tracking,business.platform=ship")
+  .buildAndRegisterGlobal();
+```
+
+The convenience module also reads:
+
+- system property `otel.resource.attributes`
+- environment variable `OTEL_RESOURCE_ATTRIBUTES`
+
+using the standard comma-separated `key=value,key2=value2` format. The system property wins over
+the environment variable.
+
+The service name can also be supplied using the standard `otel.service.name` system property or
+`OTEL_SERVICE_NAME` environment variable. Explicit builder attributes override configured resource
+attributes, `otel.service.name` / `OTEL_SERVICE_NAME` override `service.name` from resource
+attributes, and `serviceName(...)` overrides all configured service names.
 
 ---
 
