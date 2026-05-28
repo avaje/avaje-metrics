@@ -117,7 +117,7 @@ nameTrimPackages: com.example
 Tracing default override:
 
 ```text
-timedSpans: default-on
+timedSpans: default-child
 ```
 
 You generally do not need to set `packages`. The built-in filtering skips JDK and
@@ -186,7 +186,7 @@ Avaje HTTP controllers use `web.api` as the default metric base.
 |---|---:|---|
 | `packages` | none | Optional package allow-list. Usually omit this and use the built-in filtering. Values are split on comma, semicolon, or space. Supports `*` and `**` suffixes. |
 | `debugLevel` | `0` | Transform logging verbosity. Use `1` for basic diagnostics and higher values for more detail. |
-| `timedSpans` | `default-off` | Span defaults: `default-off`, `default-on`, or `disabled`. |
+| `timedSpans` | `default-off` | Span defaults: `default-off`, `default-child`, or `disabled`. |
 | `timedMetricNaming` | `full-name` | `full-name` or `label-tag`. |
 | `includeStaticMethods` | `false` | Include static methods when a class is enhanced by default. |
 | `enhanceSingleton` | `true` | Enhance classes annotated with `@Singleton`. |
@@ -259,16 +259,15 @@ method identity as a tag.
 Enhanced methods can create traced timers when trace support is present, such as
 `avaje-metrics-otel-trace`.
 
-`@Timed(span = Timed.SpanMode.ON)` is expected to be most useful in AWS Lambda-style
-applications where method or function boundaries are often the natural span boundary.
-For Kubernetes REST servers, request spans are typically demarcated by an HTTP filter,
-so use enhanced method spans selectively rather than enabling spans broadly for every
-controller method.
+`@Timed(span = Timed.SpanMode.CHILD)` creates child spans under an existing recording
+span, such as a request span created by an HTTP filter. `@Timed(span = Timed.SpanMode.ROOT)`
+creates a root span when there is no current recording span, which is useful for
+top-level AWS Lambda-style handler methods.
 
 Global default:
 
 ```text
-timedSpans: default-on
+timedSpans: default-child
 ```
 
 Disable all enhanced spans:
@@ -280,8 +279,12 @@ timedSpans: disabled
 Override on a class or method:
 
 ```java
-@Timed(span = Timed.SpanMode.ON)
+@Timed(span = Timed.SpanMode.CHILD)
 class BillingService {
+
+  @Timed(span = Timed.SpanMode.ROOT)
+  void lambdaHandler() {
+  }
 
   @Timed(span = Timed.SpanMode.OFF)
   void helper() {

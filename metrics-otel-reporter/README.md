@@ -9,7 +9,8 @@ The module collects avaje metrics on a configurable schedule and pushes them to 
 
 If you want OpenTelemetry collection time to define the interval instead of a separate avaje
 schedule, use `avaje-metrics-otel-producer` instead. If you also want traced timers via
-`Metrics.timerBuilder(...).buildTraced()`, add `avaje-metrics-otel-trace`.
+`Metrics.timerBuilder(...).buildTraced()` or `buildRootTraced()`, add
+`avaje-metrics-otel-trace`.
 
 ## Maven dependency
 
@@ -162,8 +163,9 @@ reporter.start();
 
 This reporter module does not include the traced-timer span bridge.
 
-If you also want traced timers via `Metrics.timerBuilder(...).buildTraced()` or enhancement with
-`@Timed(span = Timed.SpanMode.ON)` to create OpenTelemetry spans, add
+If you also want traced timers via `Metrics.timerBuilder(...).buildTraced()`,
+`buildRootTraced()`, or enhancement with `@Timed(span = Timed.SpanMode.CHILD)` or `ROOT`,
+add
 `avaje-metrics-otel-trace` separately.
 
 ## Example: avaje-inject

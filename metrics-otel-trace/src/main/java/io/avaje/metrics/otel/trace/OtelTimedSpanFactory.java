@@ -19,7 +19,12 @@ public final class OtelTimedSpanFactory implements SpiTimedSpanFactory {
 
   @Override
   public @Nullable Prepared prepare(Metric.ID id, @Nullable String bucketRange) {
-    return new PreparedSpan(spanName(id), attributes(id, bucketRange));
+    return prepare(id, bucketRange, SpanMode.CHILD);
+  }
+
+  @Override
+  public @Nullable Prepared prepare(Metric.ID id, @Nullable String bucketRange, SpanMode spanMode) {
+    return new PreparedSpan(spanName(id), attributes(id, bucketRange), spanMode);
   }
 
   private String spanName(Metric.ID id) {
@@ -55,15 +60,21 @@ public final class OtelTimedSpanFactory implements SpiTimedSpanFactory {
 
     private final String spanName;
     private final Attributes attributes;
+    private final SpanMode spanMode;
 
-    private PreparedSpan(String spanName, Attributes attributes) {
+    private PreparedSpan(String spanName, Attributes attributes, SpanMode spanMode) {
       this.spanName = spanName;
       this.attributes = attributes;
+      this.spanMode = spanMode;
     }
 
     @Override
     public @Nullable OtelSpan start() {
-      if (!Span.current().isRecording()) {
+      var currentSpan = Span.current();
+      if (spanMode == SpanMode.CHILD && !currentSpan.isRecording()) {
+        return null;
+      }
+      if (spanMode == SpanMode.ROOT && !currentSpan.isRecording() && currentSpan.getSpanContext().isValid()) {
         return null;
       }
       var span = GlobalOpenTelemetry.get()
@@ -71,7 +82,7 @@ public final class OtelTimedSpanFactory implements SpiTimedSpanFactory {
         .spanBuilder(spanName)
         .setAllAttributes(attributes)
         .startSpan();
-      return new OtelSpan(span);
+      return spanMode == SpanMode.ROOT ? new OtelSpan(span, span.makeCurrent()) : new OtelSpan(span);
     }
   }
 }

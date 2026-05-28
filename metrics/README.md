@@ -85,6 +85,9 @@ var timer = Metrics.timerBuilder("app.service.run")
   .buildTraced();
 ```
 
+Use `buildRootTraced()` for a top-level boundary that should create a root span when no
+recording span is current.
+
 `@Timed` is the declarative path when build-time enhancement is enabled in the
 application. See [Configure metrics enhancement](../docs/guides/configure-metrics-agent.md)
 for `metrics-maven-plugin` and `metrics.mf` setup.

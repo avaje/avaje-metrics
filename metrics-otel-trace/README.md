@@ -3,9 +3,9 @@
 Provides the optional OpenTelemetry span bridge used by traced timers.
 
 When this module is on the classpath or module path,
-`Metrics.timerBuilder(...).buildTraced()`, `MetricRegistry.timerBuilder(...).buildTraced()`,
-and enhancement with `@Timed(span = Timed.SpanMode.ON)` create OpenTelemetry spans via
-`GlobalOpenTelemetry`.
+`Metrics.timerBuilder(...).buildTraced()`, `Metrics.timerBuilder(...).buildRootTraced()`,
+and enhancement with `@Timed(span = Timed.SpanMode.CHILD)` or
+`@Timed(span = Timed.SpanMode.ROOT)` create OpenTelemetry spans via `GlobalOpenTelemetry`.
 
 This module does **not** export avaje metrics to OpenTelemetry metrics backends. For that use:
 
@@ -41,6 +41,11 @@ Timer timer = Metrics.timerBuilder("app.service.method")
   .bucketRanges(50, 100, 250)
   .buildTraced();
 ```
+
+Use `buildRootTraced()` or `@Timed(span = Timed.SpanMode.ROOT)` on a top-level boundary
+that should start a root span when no recording span is current. Root traced timers use
+the default OpenTelemetry `INTERNAL` span kind and make the span current for the timed
+operation.
 
 When a traced timer includes a `label:...` tag, that label is used as the span name while the
 aggregated metric name remains available via the `avaje.metrics.name` attribute.

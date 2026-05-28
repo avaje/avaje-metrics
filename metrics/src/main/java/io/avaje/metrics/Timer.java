@@ -63,8 +63,8 @@ import java.util.function.Supplier;
  * </pre>
  *
  * <p>
- * Timers built via {@link Metrics#timerBuilder(String)} and {@link TimerBuilder#buildTraced()}
- * create spans when used with {@link #startEvent()} or
+ * Timers built via {@link Metrics#timerBuilder(String)}, {@link TimerBuilder#buildTraced()} or
+ * {@link TimerBuilder#buildRootTraced()} create spans when used with {@link #startEvent()} or
  * {@link #time(Runnable)} / {@link #time(Supplier)}.
  */
 public interface Timer extends Metric {

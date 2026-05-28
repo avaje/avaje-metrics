@@ -2,6 +2,7 @@ package io.avaje.metrics.core;
 
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.spi.SpiTimedSpanFactory;
+import io.avaje.metrics.spi.SpiTimedSpanFactory.SpanMode;
 import org.jspecify.annotations.Nullable;
 
 interface TraceableTimer {
@@ -9,5 +10,5 @@ interface TraceableTimer {
   /**
    * Return this timer with tracing enabled if supported.
    */
-  Timer withTracing(@Nullable SpiTimedSpanFactory timedSpanFactory);
+  Timer withTracing(@Nullable SpiTimedSpanFactory timedSpanFactory, SpanMode spanMode);
 }

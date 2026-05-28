@@ -18,7 +18,8 @@ There are three main timing styles:
 |---|---|
 | `@Timed` | declarative timing via build-time enhancement |
 | `Timer.time(...)` or `Timer.startEvent()` | explicit programmatic timing in code |
-| `Metrics.timerBuilder(...).buildTraced()` | timing plus spans when trace support is present |
+| `Metrics.timerBuilder(...).buildTraced()` | timing plus child spans when trace support is present |
+| `Metrics.timerBuilder(...).buildRootTraced()` | timing plus root-if-needed spans when trace support is present |
 
 If you do **not** want enhancement, programmatic timers are the safest and most explicit
 path. If you want `@Timed`, configure build-time enhancement first.
@@ -88,7 +89,7 @@ Add `avaje-metrics-otel-trace` when the project already has OpenTelemetry config
 </dependency>
 ```
 
-Then build a traced timer:
+Then build a child traced timer:
 
 ```java
 var tracedTimer = Metrics.timerBuilder("app.service.run")
@@ -98,8 +99,18 @@ var tracedTimer = Metrics.timerBuilder("app.service.run")
 tracedTimer.time(service::run);
 ```
 
-`buildTraced()` creates spans when trace support is available and the application has a
-global `OpenTelemetry` instance.
+`buildTraced()` creates child spans when trace support is available, the application has a
+global `OpenTelemetry` instance, and there is a current recording span.
+
+Use `buildRootTraced()` for a top-level boundary that should start a root span when no
+recording span is current:
+
+```java
+var rootTimer = Metrics.timerBuilder("app.lambda.handle")
+  .buildRootTraced();
+
+rootTimer.time(handler::handleRequest);
+```
 
 ---
 
@@ -148,7 +159,7 @@ static timer setup, so use stable low-cardinality values rather than request-spe
 You can also enable spans for enhanced methods:
 
 ```java
-@Timed(span = Timed.SpanMode.ON)
+@Timed(span = Timed.SpanMode.CHILD)
 class BillingService {
   void syncInvoices() {
   }
@@ -161,7 +172,8 @@ Important behavior:
 - `@NotTimed` excludes specific methods
 - method-level `@Timed` is useful for overrides or private methods
 - `@Timed(tags = {...})` adds custom timer tags using `key:value` values
-- `@Timed(span = Timed.SpanMode.ON)` requires trace support such as `avaje-metrics-otel-trace`
+- `@Timed(span = Timed.SpanMode.CHILD)` requires trace support such as `avaje-metrics-otel-trace`
+- `@Timed(span = Timed.SpanMode.ROOT)` starts a root span when no recording span is current
 
 ---
 
@@ -180,6 +192,7 @@ name. Success and error timing are tracked separately.
 ## Notes
 
 - Prefer programmatic timers when you want explicit behavior and no enhancement dependency.
-- Prefer `buildTraced()` when you want timing plus spans for the same code path.
+- Prefer `buildTraced()` when you want timing plus child spans for the same code path.
+- Prefer `buildRootTraced()` or `@Timed(span = Timed.SpanMode.ROOT)` for top-level Lambda-style boundaries.
 - `@Timed` is the declarative path when the application uses build-time enhancement.
 - Timers support tags and bucket ranges via `Metrics.timerBuilder(...)` and `@Timed`.

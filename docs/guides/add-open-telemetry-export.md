@@ -18,7 +18,7 @@ The main decision is **which OpenTelemetry module to use**.
 |---|---|
 | `avaje-metrics-otel` | you want the easiest OTLP-backed setup for avaje metrics and traced timers |
 | `avaje-metrics-otel-producer` | you already own the OpenTelemetry SDK wiring and want collection driven by the SDK reader/exporter |
-| `avaje-metrics-otel-trace` | you only want traced timers / spans and are not exporting avaje metrics via OTEL |
+| `avaje-metrics-otel-trace` | you want traced timers / spans |
 | `avaje-metrics-otel-reporter` | you explicitly want the scheduled reporter path rather than the SDK `MetricProducer` path |
 
 In most new setups, start with **`avaje-metrics-otel`** unless you have a clear reason to
@@ -52,8 +52,7 @@ For a direct Prometheus text endpoint without OpenTelemetry SDK wiring, use
 
 Use this when:
 
-- the goal is spans from `buildTraced()` or `@Timed(span = ON)`
-- avaje metrics are exported some other way, or not exported through OTEL at all
+- the goal is spans from `buildTraced()`, `buildRootTraced()`, or `@Timed(span = Timed.SpanMode.CHILD)` / `ROOT`
 
 ### Scheduled reporter path: `avaje-metrics-otel-reporter`
 
@@ -176,9 +175,10 @@ var openTelemetry = MetricsOpenTelemetry.builder()
   .buildAndRegisterGlobal();
 ```
 
-This controls sampling when Lambda instrumentation or an explicit handler wrapper
-creates an invocation root span. `MetricsOpenTelemetry` does not create that invocation
-span by itself. If there is no current recording span, avaje traced timers are no-op.
+This controls sampling when Lambda instrumentation or `@Timed(span = Timed.SpanMode.ROOT)`
+starts a root span. Use `ROOT` on the top-level handler boundary, then use child traced
+timers inside it. `@Timed(span = Timed.SpanMode.CHILD)` and `buildTraced()` remain no-op
+when there is no current recording span.
 
 ---
 
@@ -235,6 +235,9 @@ var timer = Metrics.timerBuilder("app.service.method")
 
 timer.time(service::run);
 ```
+
+Use `buildRootTraced()` for a top-level boundary that should initiate sampling when no
+recording span is current.
 
 This module does not export avaje metrics to OTEL backends. It only provides the span
 bridge for traced timers.
