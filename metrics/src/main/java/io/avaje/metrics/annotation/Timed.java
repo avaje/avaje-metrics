@@ -29,9 +29,13 @@ public @interface Timed {
      */
     DEFAULT,
     /**
-     * Create spans for timed methods.
+     * Create child spans under an existing recording span.
      */
-    ON,
+    CHILD,
+    /**
+     * Create a root span when no recording span exists.
+     */
+    ROOT,
     /**
      * Do not create spans for timed methods.
      */

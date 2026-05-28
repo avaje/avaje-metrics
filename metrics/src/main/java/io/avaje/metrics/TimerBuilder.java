@@ -30,7 +30,18 @@ public interface TimerBuilder {
   Timer build();
 
   /**
-   * Create and register a traced timer.
+   * Create and register a child traced timer.
+   * <p>
+   * Child traced timers create spans only when there is an existing recording span.
    */
   Timer buildTraced();
+
+  /**
+   * Create and register a root traced timer.
+   * <p>
+   * Root traced timers create a root span when there is no current recording span. If there is a
+   * current recording span, they create a child span. If there is a valid unsampled current span,
+   * they do not create a new root span.
+   */
+  Timer buildRootTraced();
 }

@@ -4,6 +4,7 @@ import io.avaje.metrics.*;
 import io.avaje.metrics.spi.SpiMetricBuilder;
 import io.avaje.metrics.spi.SpiMetricProvider;
 import io.avaje.metrics.spi.SpiTimedSpanFactory;
+import io.avaje.metrics.spi.SpiTimedSpanFactory.SpanMode;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -320,11 +321,20 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
   }
 
   private Timer tracedTimer(String name, Tags tags, @Nullable int[] bucketRanges) {
+    return tracedTimer(name, tags, bucketRanges, SpanMode.CHILD);
+  }
+
+  private Timer rootTracedTimer(String name, Tags tags, @Nullable int[] bucketRanges) {
+    return tracedTimer(name, tags, bucketRanges, SpanMode.ROOT);
+  }
+
+  private Timer tracedTimer(String name, Tags tags, @Nullable int[] bucketRanges, SpanMode spanMode) {
     return tracedMetric(
       Metric.ID.of(name, tags),
       TIMER_UNIT,
       timerFactory(bucketRanges),
-      bucketRanges);
+      bucketRanges,
+      spanMode);
   }
 
   private <T extends Metric> T metric(
@@ -350,7 +360,12 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     return validateMetric(id, metric, type, normalizedUnit);
   }
 
-  private Timer tracedMetric(Metric.ID id, String unit, SpiMetricBuilder.Factory<?> factory, int[] bucketRanges) {
+  private Timer tracedMetric(
+      Metric.ID id,
+      String unit,
+      SpiMetricBuilder.Factory<?> factory,
+      @Nullable int[] bucketRanges,
+      SpanMode spanMode) {
     var normalizedUnit = BaseReportName.normalizeUnit(unit);
     Metric metric = metricsCache.get(id);
     if (metric == null) {
@@ -359,7 +374,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
         if (metric == null) {
           metric = factory.createMetric(id, normalizedUnit, bucketRanges);
           if (metric instanceof TraceableTimer) {
-            metric = ((TraceableTimer) metric).withTracing(timedSpanFactory);
+            metric = ((TraceableTimer) metric).withTracing(timedSpanFactory, spanMode);
           }
           metricsCache.put(id, metric);
         }
@@ -540,6 +555,11 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     @Override
     public Timer buildTraced() {
       return tracedTimer(name, tags, bucketRanges);
+    }
+
+    @Override
+    public Timer buildRootTraced() {
+      return rootTracedTimer(name, tags, bucketRanges);
     }
   }
 

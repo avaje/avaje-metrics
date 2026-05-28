@@ -6,8 +6,11 @@ import io.avaje.metrics.Metrics;
 import io.avaje.metrics.Timer;
 import io.avaje.metrics.spi.SpiSpan;
 import io.avaje.metrics.spi.SpiTimedSpanFactory;
+import io.avaje.metrics.spi.SpiTimedSpanFactory.SpanMode;
 import org.junit.jupiter.api.Test;
 
+import static io.avaje.metrics.spi.SpiTimedSpanFactory.SpanMode.CHILD;
+import static io.avaje.metrics.spi.SpiTimedSpanFactory.SpanMode.ROOT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -30,7 +33,7 @@ class TracedTimerTest {
   void withTracing_returnsImmutableTracedTimer() {
     Timer plainTimer = new DTimer(Metric.ID.of("app.service.method"));
     TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
-    Timer tracedTimer = ((TraceableTimer) plainTimer).withTracing(testTimedSpanFactory);
+    Timer tracedTimer = ((TraceableTimer) plainTimer).withTracing(testTimedSpanFactory, CHILD);
 
     tracedTimer.time(() -> "ok");
     tracedTimer.time(() -> "ok");
@@ -61,7 +64,7 @@ class TracedTimerTest {
   @Test
   void tracedTimer_startEvent_errorRecordsThrowable() {
     TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
-    Timer tracedTimer = ((TraceableTimer) new DTimer(Metric.ID.of("app.service.method"))).withTracing(testTimedSpanFactory);
+    Timer tracedTimer = ((TraceableTimer) new DTimer(Metric.ID.of("app.service.method"))).withTracing(testTimedSpanFactory, CHILD);
     var error = new IllegalStateException("boom");
 
     Timer.Event event = tracedTimer.startEvent();
@@ -73,7 +76,7 @@ class TracedTimerTest {
   @Test
   void tracedTimer_time_errorRecordsThrowable() {
     TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
-    Timer tracedTimer = ((TraceableTimer) new DTimer(Metric.ID.of("app.service.method"))).withTracing(testTimedSpanFactory);
+    Timer tracedTimer = ((TraceableTimer) new DTimer(Metric.ID.of("app.service.method"))).withTracing(testTimedSpanFactory, CHILD);
     var error = new IllegalStateException("boom");
 
     assertThatThrownBy(() -> tracedTimer.time(() -> {
@@ -87,7 +90,7 @@ class TracedTimerTest {
   void tracedBucketTimer_errorRecordsThrowable() {
     TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
     Timer bucketTimer = new BucketTimerFactory().createMetric(Metric.ID.of("app.service.bucketed"), "", new int[]{100, 200});
-    Timer tracedBucketTimer = ((TraceableTimer) bucketTimer).withTracing(testTimedSpanFactory);
+    Timer tracedBucketTimer = ((TraceableTimer) bucketTimer).withTracing(testTimedSpanFactory, CHILD);
     var error = new IllegalArgumentException("bad");
 
     Timer.Event event = tracedBucketTimer.startEvent();
@@ -96,15 +99,32 @@ class TracedTimerTest {
     assertThat(testTimedSpanFactory.lastSpan.error).isSameAs(error);
   }
 
+  @Test
+  void withTracing_passesRootSpanMode() {
+    TestTimedSpanFactory testTimedSpanFactory = new TestTimedSpanFactory();
+    Timer tracedTimer = ((TraceableTimer) new DTimer(Metric.ID.of("app.service.method"))).withTracing(testTimedSpanFactory, ROOT);
+
+    tracedTimer.time(() -> "ok");
+
+    assertThat(testTimedSpanFactory.lastSpanMode).isEqualTo(ROOT);
+  }
+
   private static final class TestTimedSpanFactory implements SpiTimedSpanFactory {
 
     private int prepareCount;
     private int startCount;
     private TestTimedSpan lastSpan;
+    private SpanMode lastSpanMode;
 
     @Override
     public Prepared prepare(Metric.ID id, String bucketRange) {
+      return prepare(id, bucketRange, CHILD);
+    }
+
+    @Override
+    public Prepared prepare(Metric.ID id, String bucketRange, SpanMode spanMode) {
       prepareCount++;
+      lastSpanMode = spanMode;
       return () -> {
         startCount++;
         lastSpan = new TestTimedSpan();

@@ -45,7 +45,7 @@ This helper configures:
   - a batch span processor
   - an OTLP gRPC span exporter
 - the traced-timer bridge used by traced timers created via
-  `Metrics.timerBuilder(...).buildTraced()`
+  `Metrics.timerBuilder(...).buildTraced()` or `buildRootTraced()`
 
 ## Builder options
 
@@ -153,10 +153,11 @@ MetricsOpenTelemetry.builder()
   .buildAndRegisterGlobal();
 ```
 
-This configures the SDK sampler. It does not create the Lambda invocation root span by
-itself. If Lambda instrumentation or a handler wrapper creates a current invocation
-span, avaje traced timers become child spans and follow that sampling decision. If
-there is no current recording span, traced timers are no-op.
+This configures the SDK sampler. Use `@Timed(span = Timed.SpanMode.ROOT)` or
+`buildRootTraced()` on the top-level handler boundary to start a root span when no
+recording span is current. Child traced timers then follow that root sampling decision.
+`@Timed(span = Timed.SpanMode.CHILD)` and `buildTraced()` remain no-op when there is no
+current recording span.
 
 You can also provide custom exporters when you need OTLP-specific configuration such as headers,
 compression, or timeouts:
@@ -182,8 +183,9 @@ OpenTelemetrySdk sdk =
 - Normal OpenTelemetry meters and tracers created from the returned SDK are exported alongside the
   avaje metrics exposed by `OtelMetricProducer`.
 - Resource attributes apply to both metrics and spans.
-- traced timers created via `Metrics.timerBuilder(...).buildTraced()` work by default because this
-  module brings in `avaje-metrics-otel-trace`.
+- traced timers created via `Metrics.timerBuilder(...).buildTraced()` or
+  `buildRootTraced()` work by default because this module brings in
+  `avaje-metrics-otel-trace`.
 - `includeTrace(false)` or `includeMeter(false)` can be used for metrics-only or traces-only setup.
 - If you want more control over SDK setup, wire OpenTelemetry manually and use
   `avaje-metrics-otel-producer` directly.

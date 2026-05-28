@@ -4,6 +4,7 @@ import io.avaje.metrics.Timer;
 import io.avaje.metrics.spi.SpiSpan;
 import io.avaje.metrics.spi.SpiTimedSpanFactory.Prepared;
 import io.avaje.metrics.spi.SpiTimedSpanFactory;
+import io.avaje.metrics.spi.SpiTimedSpanFactory.SpanMode;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.TimeUnit;
@@ -180,11 +181,11 @@ final class DTimer implements Timer, TraceableTimer {
   }
 
   @Override
-  public Timer withTracing(@Nullable SpiTimedSpanFactory timedSpanFactory) {
+  public Timer withTracing(@Nullable SpiTimedSpanFactory timedSpanFactory, SpanMode spanMode) {
     if (this.preparedSpan != null || timedSpanFactory == null) {
       return this;
     }
-    var prepared = timedSpanFactory.prepare(id, bucketRange);
+    var prepared = timedSpanFactory.prepare(id, bucketRange, spanMode);
     if (prepared == null) {
       return this;
     }

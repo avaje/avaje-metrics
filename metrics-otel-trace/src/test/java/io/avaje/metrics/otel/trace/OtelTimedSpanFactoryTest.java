@@ -7,8 +7,13 @@ import io.avaje.metrics.Tags;
 import io.avaje.metrics.Timer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -19,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -166,6 +172,89 @@ class OtelTimedSpanFactoryTest {
     registry.timerBuilder("app.service.method").buildTraced().time(() -> "ok");
 
     assertThat(exporter.getFinishedSpanItems()).isEmpty();
+  }
+
+  @Test
+  void rootTracedTimer_withoutParent_startsRootSpanAndMakesItCurrent() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer timer = registry.timerBuilder("app.lambda.handle").buildRootTraced();
+    var currentWasRecording = new AtomicReference<Boolean>();
+
+    timer.time(() -> {
+      currentWasRecording.set(Span.current().isRecording());
+      return "ok";
+    });
+
+    List<SpanData> spans = exporter.getFinishedSpanItems();
+    assertThat(currentWasRecording).hasValue(true);
+    assertThat(spans).singleElement().satisfies(span -> {
+      assertThat(span.getName()).isEqualTo("app.lambda.handle");
+      assertThat(span.getKind()).isEqualTo(SpanKind.INTERNAL);
+      assertThat(span.getParentSpanContext().isValid()).isFalse();
+    });
+  }
+
+  @Test
+  void rootTracedTimer_withRecordingParent_createsChildSpan() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer timer = registry.timerBuilder("app.lambda.handle").buildRootTraced();
+    var parent = openTelemetry.getTracer("test").spanBuilder("parent").startSpan();
+
+    try (Scope ignored = parent.makeCurrent()) {
+      timer.time(() -> "ok");
+    } finally {
+      parent.end();
+    }
+
+    List<SpanData> spans = exporter.getFinishedSpanItems();
+    assertThat(spans).hasSize(2);
+    SpanData parentSpan = spans.stream()
+      .filter(it -> it.getName().equals("parent"))
+      .findFirst()
+      .orElseThrow();
+    SpanData childSpan = spans.stream()
+      .filter(it -> it.getName().equals("app.lambda.handle"))
+      .findFirst()
+      .orElseThrow();
+    assertThat(childSpan.getParentSpanId()).isEqualTo(parentSpan.getSpanId());
+  }
+
+  @Test
+  void rootTracedTimer_withUnsampledValidParent_doesNotStartNewRoot() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer timer = registry.timerBuilder("app.lambda.handle").buildRootTraced();
+    var unsampledParent = Span.wrap(SpanContext.create(
+      "00000000000000000000000000000001",
+      "0000000000000001",
+      TraceFlags.getDefault(),
+      TraceState.getDefault()));
+
+    try (Scope ignored = unsampledParent.makeCurrent()) {
+      timer.time(() -> "ok");
+    }
+
+    assertThat(exporter.getFinishedSpanItems()).isEmpty();
+  }
+
+  @Test
+  void childTracedTimer_underRootTracedTimer_createsChildSpan() {
+    MetricRegistry registry = Metrics.createRegistry();
+    Timer rootTimer = registry.timerBuilder("app.lambda.handle").buildRootTraced();
+    Timer childTimer = registry.timerBuilder("app.service.method").buildTraced();
+
+    rootTimer.time(() -> childTimer.time(() -> "ok"));
+
+    List<SpanData> spans = exporter.getFinishedSpanItems();
+    assertThat(spans).hasSize(2);
+    SpanData rootSpan = spans.stream()
+      .filter(it -> it.getName().equals("app.lambda.handle"))
+      .findFirst()
+      .orElseThrow();
+    SpanData childSpan = spans.stream()
+      .filter(it -> it.getName().equals("app.service.method"))
+      .findFirst()
+      .orElseThrow();
+    assertThat(childSpan.getParentSpanId()).isEqualTo(rootSpan.getSpanId());
   }
 
   @Test
