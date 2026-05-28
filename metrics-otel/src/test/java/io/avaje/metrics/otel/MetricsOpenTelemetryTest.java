@@ -5,6 +5,10 @@ import io.avaje.metrics.Metrics;
 import io.avaje.metrics.Timer;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -12,6 +16,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +45,8 @@ class MetricsOpenTelemetryTest {
   void tearDown() {
     System.clearProperty(ResourceAttributes.RESOURCE_ATTRIBUTES_PROPERTY);
     System.clearProperty(ResourceAttributes.SERVICE_NAME_PROPERTY);
+    System.clearProperty(TraceSampling.TRACES_SAMPLER_PROPERTY);
+    System.clearProperty(TraceSampling.TRACES_SAMPLER_ARG_PROPERTY);
   }
 
   @Test
@@ -276,6 +283,152 @@ class MetricsOpenTelemetryTest {
     assertThatThrownBy(() -> MetricsOpenTelemetry.builder().resourceAttributes("business.domain"))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessageContaining("expected key=value");
+  }
+
+  @Test
+  void traceSampleRatio_zero_suppressesRootSpans() {
+    var spanExporter = InMemorySpanExporter.create();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .traceSampleRatio(0)
+      .build()) {
+
+      openTelemetry.getTracer("manual").spanBuilder("root").startSpan().end();
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems()).isEmpty();
+    }
+  }
+
+  @Test
+  void traceSampleRatio_one_exportsRootSpans() {
+    var spanExporter = InMemorySpanExporter.create();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .traceSampleRatio(1)
+      .build()) {
+
+      openTelemetry.getTracer("manual").spanBuilder("root").startSpan().end();
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems()).singleElement()
+        .satisfies(span -> assertThat(span.getName()).isEqualTo("root"));
+    }
+  }
+
+  @Test
+  void traceSampleRatio_respectsSampledParent() {
+    var spanExporter = InMemorySpanExporter.create();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .traceSampleRatio(0)
+      .build()) {
+
+      var parent = Span.wrap(SpanContext.createFromRemoteParent(
+        "00000000000000000000000000000001",
+        "0000000000000001",
+        TraceFlags.getSampled(),
+        TraceState.getDefault()));
+      try (Scope ignored = parent.makeCurrent()) {
+        openTelemetry.getTracer("manual").spanBuilder("child").startSpan().end();
+      }
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems()).singleElement()
+        .satisfies(span -> assertThat(span.getName()).isEqualTo("child"));
+    }
+  }
+
+  @Test
+  void samplerOverride_isUsed() {
+    var spanExporter = InMemorySpanExporter.create();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .traceSampleRatio(1)
+      .sampler(Sampler.alwaysOff())
+      .build()) {
+
+      openTelemetry.getTracer("manual").spanBuilder("root").startSpan().end();
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems()).isEmpty();
+    }
+  }
+
+  @Test
+  void configuredSamplerFromSystemProperties_isUsed() {
+    System.setProperty(TraceSampling.TRACES_SAMPLER_PROPERTY, "parentbased_traceidratio");
+    System.setProperty(TraceSampling.TRACES_SAMPLER_ARG_PROPERTY, "0");
+    var spanExporter = InMemorySpanExporter.create();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .build()) {
+
+      openTelemetry.getTracer("manual").spanBuilder("root").startSpan().end();
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems()).isEmpty();
+    }
+  }
+
+  @Test
+  void traceSampleRatio_overridesConfiguredSampler() {
+    System.setProperty(TraceSampling.TRACES_SAMPLER_PROPERTY, "always_off");
+    var spanExporter = InMemorySpanExporter.create();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .traceSampleRatio(1)
+      .build()) {
+
+      openTelemetry.getTracer("manual").spanBuilder("root").startSpan().end();
+      flush(openTelemetry.getSdkTracerProvider().forceFlush());
+
+      assertThat(spanExporter.getFinishedSpanItems()).hasSize(1);
+    }
+  }
+
+  @Test
+  void traceSampleRatio_invalid_failsClearly() {
+    assertThatThrownBy(() -> MetricsOpenTelemetry.builder().traceSampleRatio(1.1))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("between 0.0 and 1.0");
+  }
+
+  @Test
+  void configuredSampler_unsupportedName_failsClearly() {
+    System.setProperty(TraceSampling.TRACES_SAMPLER_PROPERTY, "unsupported");
+
+    assertThatThrownBy(() -> MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(InMemorySpanExporter.create())
+      .build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("Unsupported trace sampler");
+  }
+
+  @Test
+  void configuredSampler_invalidRatio_failsClearly() {
+    System.setProperty(TraceSampling.TRACES_SAMPLER_PROPERTY, "parentbased_traceidratio");
+    System.setProperty(TraceSampling.TRACES_SAMPLER_ARG_PROPERTY, "bad");
+
+    assertThatThrownBy(() -> MetricsOpenTelemetry.builder()
+      .includeMeter(false)
+      .spanExporter(InMemorySpanExporter.create())
+      .build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("Invalid trace sample ratio");
   }
 
   @Test

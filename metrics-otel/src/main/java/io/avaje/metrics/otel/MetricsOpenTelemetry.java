@@ -19,6 +19,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -78,6 +79,8 @@ public final class MetricsOpenTelemetry {
     private MetricExporter metricExporter;
     private MetricReader metricReader;
     private SpanExporter spanExporter;
+    private Sampler sampler;
+    private Double traceSampleRatio;
 
     /**
      * Set the OTLP endpoint used for both metrics and traces.
@@ -260,6 +263,35 @@ public final class MetricsOpenTelemetry {
     }
 
     /**
+     * Set the sampler used by the tracer provider.
+     *
+     * <p>This overrides {@link #traceSampleRatio(double)} and standard OpenTelemetry sampler
+     * configuration.
+     *
+     * @param sampler the sampler to use
+     * @return this builder
+     */
+    public Builder sampler(Sampler sampler) {
+      this.sampler = requireNonNull(sampler);
+      return this;
+    }
+
+    /**
+     * Set the root trace sample ratio from {@code 0.0} to {@code 1.0}.
+     *
+     * <p>The effective sampler is {@code parentBased(traceIdRatioBased(ratio))}, so existing
+     * upstream sampling decisions are respected while new root traces use the configured ratio.
+     *
+     * @param ratio the root trace sample ratio
+     * @return this builder
+     */
+    public Builder traceSampleRatio(double ratio) {
+      TraceSampling.validateRatio(ratio);
+      this.traceSampleRatio = ratio;
+      return this;
+    }
+
+    /**
      * Set the metric exporter used by the periodic metric reader.
      *
      * <p>Defaults to an {@link OtlpGrpcMetricExporter} built from the configured endpoint.
@@ -359,10 +391,24 @@ public final class MetricsOpenTelemetry {
         .setScheduleDelay(traceInterval)
         .build();
 
-      return SdkTracerProvider.builder()
+      var builder = SdkTracerProvider.builder()
         .setResource(resource)
-        .addSpanProcessor(batchProcessor)
-        .build();
+        .addSpanProcessor(batchProcessor);
+      var sampler = effectiveSampler();
+      if (sampler != null) {
+        builder.setSampler(sampler);
+      }
+      return builder.build();
+    }
+
+    private Sampler effectiveSampler() {
+      if (sampler != null) {
+        return sampler;
+      }
+      if (traceSampleRatio != null) {
+        return TraceSampling.parentBasedTraceIdRatio(traceSampleRatio);
+      }
+      return TraceSampling.configuredSampler();
     }
 
     private MetricReader metricReader() {

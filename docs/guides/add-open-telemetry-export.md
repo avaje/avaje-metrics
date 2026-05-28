@@ -91,6 +91,7 @@ var openTelemetry = MetricsOpenTelemetry.builder()
   .serviceName("my-service")
   .deploymentEnvironmentName("production")
   .resourceAttributes("business.domain=fleet,business.platform=ship")
+  .traceSampleRatio(0.05)
   .meterInterval(Duration.ofSeconds(60))
   .traceInterval(Duration.ofSeconds(10))
   .buildAndRegisterGlobal();
@@ -126,6 +127,58 @@ The service name can also be supplied using the standard `otel.service.name` sys
 `OTEL_SERVICE_NAME` environment variable. Explicit builder attributes override configured resource
 attributes, `otel.service.name` / `OTEL_SERVICE_NAME` override `service.name` from resource
 attributes, and `serviceName(...)` overrides all configured service names.
+
+### Trace sampling
+
+Without explicit sampler configuration, the OpenTelemetry SDK default is
+`parentBased(alwaysOn)`. For an avaje-nima service using `NimaOtelFilter`, requests
+without incoming trace headers create root HTTP SERVER spans, so this default samples
+all of those request traces.
+
+For Kubernetes services, configure a parent-based trace-id ratio:
+
+```java
+var openTelemetry = MetricsOpenTelemetry.builder()
+  .endpoint("http://otel-collector:4317")
+  .serviceName("orders")
+  .deploymentEnvironmentName("production")
+  .traceSampleRatio(0.05)
+  .buildAndRegisterGlobal();
+```
+
+This samples new root request traces at 5% while respecting incoming sampled or
+unsampled parent decisions. Traced timers inside sampled requests are exported as
+child spans; traced timers inside unsampled requests are not.
+
+The same configuration can be supplied using standard OpenTelemetry names:
+
+```bash
+OTEL_TRACES_SAMPLER=parentbased_traceidratio
+OTEL_TRACES_SAMPLER_ARG=0.05
+```
+
+or:
+
+```bash
+java \
+  -Dotel.traces.sampler=parentbased_traceidratio \
+  -Dotel.traces.sampler.arg=0.05 \
+  -jar app.jar
+```
+
+For Lambda-style applications, configure the SDK sampler in the same way:
+
+```java
+var openTelemetry = MetricsOpenTelemetry.builder()
+  .serviceName("orders-lambda")
+  .deploymentEnvironmentName("production")
+  .traceSampleRatio(0.10)
+  .buildAndRegisterGlobal();
+```
+
+This controls sampling when Lambda instrumentation or an explicit handler wrapper
+creates an invocation root span. `MetricsOpenTelemetry` does not create that invocation
+span by itself. If there is no current recording span, avaje traced timers are no-op.
 
 ---
 
