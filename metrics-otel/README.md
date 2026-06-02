@@ -179,8 +179,53 @@ recording span is current. Child traced timers then follow that root sampling de
 `@Timed(span = Timed.SpanMode.CHILD)` and `buildTraced()` remain no-op when there is no
 current recording span.
 
+#### waitIfRunning at end of invocation
+
+AWS Lambda freezes the worker between invocations, which can interrupt an in-flight OTLP
+HTTP/gRPC export and cause data loss. Use `enableWaitIfRunning()` to obtain a
+`TelemetryWaiter` that, at the end of an invocation, blocks briefly only if a scheduled
+background export is currently in progress. Background reporting via `PeriodicMetricReader`
+and `BatchSpanProcessor` continues on its normal schedule — this does **not** trigger an
+extra export per invocation.
+
+```java
+import io.avaje.metrics.otel.MetricsOpenTelemetry;
+import io.avaje.metrics.otel.TelemetryWaiter;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
+MetricsOpenTelemetry.Result result = MetricsOpenTelemetry.builder()
+    .protocol(MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF)
+    .endpoint("http://otel-collector:4318")
+    .serviceName("orders-lambda")
+    .exportTimeout(Duration.ofSeconds(30))
+    .connectTimeout(Duration.ofSeconds(10))
+    .enableWaitIfRunning()
+    .timeout(5, TimeUnit.SECONDS)
+    .buildAndRegisterGlobal();
+
+OpenTelemetrySdk sdk = result.sdk();
+TelemetryWaiter waiter = result.waiter();
+
+// In the Lambda handler:
+public void handle(Event event) {
+  try {
+    process(event);
+  } finally {
+    waiter.waitIfRunning();
+  }
+}
+```
+
+`connectTimeout` and `exportTimeout` are passed through to the default OTLP HTTP/gRPC
+exporters. They have no effect when a custom exporter is supplied via
+`metricExporter(...)` or `spanExporter(...)`.
+
+#### Custom exporters
+
 You can also provide custom exporters when you need OTLP-specific configuration such as headers,
-signal-specific endpoints, headers, compression, or timeouts:
+signal-specific endpoints, compression, or timeouts:
 
 ```java
 OpenTelemetrySdk sdk =

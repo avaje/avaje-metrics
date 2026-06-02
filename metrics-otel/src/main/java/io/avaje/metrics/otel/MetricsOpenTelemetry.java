@@ -26,6 +26,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 
@@ -111,6 +112,8 @@ public final class MetricsOpenTelemetry {
     private SpanExporter spanExporter;
     private Sampler sampler;
     private Double traceSampleRatio;
+    private Duration connectTimeout;
+    private Duration exportTimeout;
 
     /**
      * Set the OTLP endpoint used for both metrics and traces.
@@ -367,6 +370,53 @@ public final class MetricsOpenTelemetry {
     }
 
     /**
+     * Set the OTLP exporter connect timeout applied to the default metric and span exporters.
+     *
+     * <p>Has no effect on exporters supplied via {@link #metricExporter(MetricExporter)} or
+     * {@link #spanExporter(SpanExporter)}.
+     *
+     * @param connectTimeout the connect timeout
+     * @return this builder
+     */
+    public Builder connectTimeout(Duration connectTimeout) {
+      this.connectTimeout = requireNonNull(connectTimeout);
+      return this;
+    }
+
+    /**
+     * Set the OTLP exporter request timeout applied to the default metric and span exporters.
+     *
+     * <p>This is the total time allowed for an export request including the response.
+     * Has no effect on exporters supplied via {@link #metricExporter(MetricExporter)} or
+     * {@link #spanExporter(SpanExporter)}.
+     *
+     * @param exportTimeout the export request timeout
+     * @return this builder
+     */
+    public Builder exportTimeout(Duration exportTimeout) {
+      this.exportTimeout = requireNonNull(exportTimeout);
+      return this;
+    }
+
+    /**
+     * Enable the {@code waitIfRunning} pattern for use with AWS Lambda or similar
+     * "freeze-on-exit" runtimes.
+     *
+     * <p>The metric and span exporters are wrapped to track in-flight exports.
+     * Background reporting continues on its normal schedule (no per-invocation flush);
+     * the returned {@link TelemetryWaiter} blocks at the end of an invocation only if a
+     * scheduled background export is currently in progress.
+     *
+     * <p>This is the last call before {@code build()} - the returned {@link WaiterBuilder}
+     * exposes only the build methods.
+     *
+     * @return a builder that produces an SDK paired with a {@link TelemetryWaiter}
+     */
+    public WaiterBuilder enableWaitIfRunning() {
+      return new WaiterBuilder(this);
+    }
+
+    /**
      * Build and return an {@link OpenTelemetrySdk}.
      *
      * @return the built SDK
@@ -492,36 +542,156 @@ public final class MetricsOpenTelemetry {
         .build();
     }
 
-    private MetricExporter metricExporter() {
+    MetricExporter metricExporter() {
       if (metricExporter != null) {
         return metricExporter;
       }
       if (protocol == Protocol.HTTP_PROTOBUF) {
-        return OtlpHttpMetricExporter.builder()
-          .setEndpoint(metricExporterEndpoint())
-          .build();
+        var b = OtlpHttpMetricExporter.builder()
+          .setEndpoint(metricExporterEndpoint());
+        if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+        if (exportTimeout != null) b.setTimeout(exportTimeout);
+        return b.build();
       }
-      return OtlpGrpcMetricExporter.builder()
-        .setEndpoint(metricExporterEndpoint())
-        .build();
+      var b = OtlpGrpcMetricExporter.builder()
+        .setEndpoint(metricExporterEndpoint());
+      if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+      if (exportTimeout != null) b.setTimeout(exportTimeout);
+      return b.build();
     }
 
-    private SpanExporter spanExporter() {
+    SpanExporter spanExporter() {
       if (spanExporter != null) {
         return spanExporter;
       }
       if (protocol == Protocol.HTTP_PROTOBUF) {
-        return OtlpHttpSpanExporter.builder()
-          .setEndpoint(spanExporterEndpoint())
-          .build();
+        var b = OtlpHttpSpanExporter.builder()
+          .setEndpoint(spanExporterEndpoint());
+        if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+        if (exportTimeout != null) b.setTimeout(exportTimeout);
+        return b.build();
       }
-      return OtlpGrpcSpanExporter.builder()
-        .setEndpoint(spanExporterEndpoint())
-        .build();
+      var b = OtlpGrpcSpanExporter.builder()
+        .setEndpoint(spanExporterEndpoint());
+      if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+      if (exportTimeout != null) b.setTimeout(exportTimeout);
+      return b.build();
+    }
+
+    boolean includeMeter() {
+      return includeMeter;
+    }
+
+    boolean includeTrace() {
+      return includeTrace;
+    }
+
+    void setMetricExporterField(MetricExporter exporter) {
+      this.metricExporter = exporter;
+    }
+
+    void setSpanExporterField(SpanExporter exporter) {
+      this.spanExporter = exporter;
     }
 
     private String endpoint() {
       return endpoint != null ? endpoint : protocol.defaultEndpoint();
+    }
+  }
+
+  /**
+   * Result of building an SDK with {@link Builder#enableWaitIfRunning()}, pairing the
+   * {@link OpenTelemetrySdk} with a {@link TelemetryWaiter} that can be used at the end
+   * of a Lambda invocation to wait for any in-flight background export to complete.
+   */
+  public static final class Result {
+
+    private final OpenTelemetrySdk sdk;
+    private final TelemetryWaiter waiter;
+
+    Result(OpenTelemetrySdk sdk, TelemetryWaiter waiter) {
+      this.sdk = sdk;
+      this.waiter = waiter;
+    }
+
+    /** The built OpenTelemetry SDK. */
+    public OpenTelemetrySdk sdk() {
+      return sdk;
+    }
+
+    /** The waiter coordinating in-flight exports. */
+    public TelemetryWaiter waiter() {
+      return waiter;
+    }
+  }
+
+  /**
+   * Builder produced by {@link Builder#enableWaitIfRunning()} that builds an
+   * {@link OpenTelemetrySdk} together with a {@link TelemetryWaiter}.
+   *
+   * <p>The configured (or default) metric and span exporters are wrapped so the
+   * waiter can observe in-flight background exports without triggering an additional
+   * export. Background reporting continues on its normal schedule.
+   */
+  public static final class WaiterBuilder {
+
+    private static final long DEFAULT_TIMEOUT_MILLIS = 5_000L;
+
+    private final Builder builder;
+    private long timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
+
+    WaiterBuilder(Builder builder) {
+      this.builder = builder;
+    }
+
+    /**
+     * Set the default timeout used by {@link TelemetryWaiter#waitIfRunning()}.
+     *
+     * <p>Default is 5 seconds. The timeout applies independently per signal
+     * (metrics, traces).
+     *
+     * @param timeout the wait timeout
+     * @param unit the time unit
+     * @return this builder
+     */
+    public WaiterBuilder timeout(long timeout, TimeUnit unit) {
+      this.timeoutMillis = unit.toMillis(timeout);
+      return this;
+    }
+
+    /**
+     * Build the {@link OpenTelemetrySdk} paired with a {@link TelemetryWaiter}.
+     *
+     * @return the result containing both the SDK and the waiter
+     */
+    public Result build() {
+      var pair = wrap();
+      return new Result(builder.build(), pair);
+    }
+
+    /**
+     * Build the SDK, register it as the global OpenTelemetry instance, and return it
+     * paired with a {@link TelemetryWaiter}.
+     *
+     * @return the result containing both the SDK and the waiter
+     */
+    public Result buildAndRegisterGlobal() {
+      var pair = wrap();
+      return new Result(builder.buildAndRegisterGlobal(), pair);
+    }
+
+    private TelemetryWaiter wrap() {
+      WaitingMetricExporter waitingMetric = null;
+      WaitingSpanExporter waitingSpan = null;
+      if (builder.includeMeter()) {
+        waitingMetric = new WaitingMetricExporter(builder.metricExporter());
+        builder.setMetricExporterField(waitingMetric);
+      }
+      if (builder.includeTrace()) {
+        waitingSpan = new WaitingSpanExporter(builder.spanExporter());
+        builder.setSpanExporterField(waitingSpan);
+      }
+      return new TelemetryWaiter(waitingMetric, waitingSpan, timeoutMillis);
     }
   }
 }

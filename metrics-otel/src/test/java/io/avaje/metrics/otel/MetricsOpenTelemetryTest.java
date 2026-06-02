@@ -573,6 +573,58 @@ class MetricsOpenTelemetryTest {
     }
   }
 
+  @Test
+  void enableWaitIfRunning_buildsResultWithSdkAndWaiter() {
+    var metricExporter = new CapturingMetricExporter();
+    var spanExporter = InMemorySpanExporter.create();
+    var registry = Metrics.createRegistry();
+
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .registry(registry)
+      .metricExporter(metricExporter)
+      .spanExporter(spanExporter)
+      .enableWaitIfRunning()
+      .timeout(2, TimeUnit.SECONDS)
+      .build();
+
+    try (var sdk = result.sdk()) {
+      assertThat(result.waiter()).isNotNull();
+
+      registry.counter("app.requests").inc(3);
+      flush(sdk.getSdkMeterProvider().forceFlush());
+
+      assertThat(byName(metricExporter.exportedMetrics())).containsKey("app.requests");
+
+      // No in-flight export => returns immediately without exception
+      result.waiter().waitIfRunning();
+      result.waiter().waitIfRunning(100, TimeUnit.MILLISECONDS);
+    }
+  }
+
+  @Test
+  void enableWaitIfRunning_includeMeterFalse_waiterStillUsable() {
+    var spanExporter = InMemorySpanExporter.create();
+
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .enableWaitIfRunning()
+      .build();
+
+    try (var sdk = result.sdk()) {
+      assertThat(sdk).isNotNull();
+      result.waiter().waitIfRunning();
+    }
+  }
+
+  @Test
+  void noopWaiter_doesNothing() {
+    TelemetryWaiter.noop().waitIfRunning();
+    TelemetryWaiter.noop().waitIfRunning(50, TimeUnit.MILLISECONDS);
+  }
+
   private static void flush(CompletableResultCode resultCode) {
     resultCode.join(5, TimeUnit.SECONDS);
     assertThat(resultCode.isSuccess()).isTrue();
