@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import io.opentelemetry.context.Scope;
 
+import static io.avaje.metrics.otel.MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -479,13 +480,15 @@ class MetricsOpenTelemetryTest {
   }
 
   @Test
-  void metricExporterOverride_isUsed() {
+  void customExporters_bypassProtocolEndpointConstruction() {
     var metricExporter = new CapturingMetricExporter();
     var spanExporter = InMemorySpanExporter.create();
     var registry = Metrics.createRegistry();
 
     try (var openTelemetry = MetricsOpenTelemetry.builder()
       .serviceName("catalog-service")
+      .protocol(HTTP_PROTOBUF)
+      .endpoint("not a uri")
       .registry(registry)
       .metricExporter(metricExporter)
       .spanExporter(spanExporter)
@@ -497,6 +500,43 @@ class MetricsOpenTelemetryTest {
 
       assertThat(byName(metricExporter.exportedMetrics())).containsKey("app.requests");
     }
+  }
+
+  @Test
+  void defaultProtocol_usesGrpcEndpoint() {
+    var builder = MetricsOpenTelemetry.builder();
+
+    assertThat(builder.metricExporterEndpoint()).isEqualTo("http://localhost:4317");
+    assertThat(builder.spanExporterEndpoint()).isEqualTo("http://localhost:4317");
+  }
+
+  @Test
+  void httpProtocol_usesSignalEndpoints() {
+    var builder = MetricsOpenTelemetry.builder()
+      .protocol(HTTP_PROTOBUF)
+      .endpoint("http://otel-collector:4318");
+
+    assertThat(builder.metricExporterEndpoint()).isEqualTo("http://otel-collector:4318/v1/metrics");
+    assertThat(builder.spanExporterEndpoint()).isEqualTo("http://otel-collector:4318/v1/traces");
+  }
+
+  @Test
+  void httpProtocol_usesHttpDefaultEndpoint() {
+    var builder = MetricsOpenTelemetry.builder()
+      .protocol(HTTP_PROTOBUF);
+
+    assertThat(builder.metricExporterEndpoint()).isEqualTo("http://localhost:4318/v1/metrics");
+    assertThat(builder.spanExporterEndpoint()).isEqualTo("http://localhost:4318/v1/traces");
+  }
+
+  @Test
+  void httpProtocol_allowsTrailingSlashEndpoint() {
+    var builder = MetricsOpenTelemetry.builder()
+      .protocol(HTTP_PROTOBUF)
+      .endpoint("http://otel-collector:4318/");
+
+    assertThat(builder.metricExporterEndpoint()).isEqualTo("http://otel-collector:4318/v1/metrics");
+    assertThat(builder.spanExporterEndpoint()).isEqualTo("http://otel-collector:4318/v1/traces");
   }
 
   @Test

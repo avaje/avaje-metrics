@@ -101,6 +101,53 @@ timer support with minimal setup code.
 
 When using this we do **NOT** need Step 3 or Step 4.
 
+### Choose gRPC or HTTP/protobuf export
+
+By default, `MetricsOpenTelemetry` uses OTLP gRPC and passes `endpoint(...)`
+directly to the metric and span exporters. The default endpoint is
+`http://localhost:4317`.
+
+For OTLP HTTP/protobuf, select `HTTP_PROTOBUF` and provide the HTTP base endpoint:
+
+```java
+var openTelemetry = MetricsOpenTelemetry.builder()
+  .protocol(MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF)
+  .endpoint("http://otel-collector:4318")
+  .serviceName("my-service")
+  .buildAndRegisterGlobal();
+```
+
+In HTTP/protobuf mode, the builder appends `/v1/metrics` for metric export and
+`/v1/traces` for trace export. If the application needs signal-specific endpoints,
+headers, compression, or timeout configuration, keep using explicit
+`metricExporter(...)` and `spanExporter(...)` instances.
+
+### Register global OpenTelemetry once and early
+
+`buildAndRegisterGlobal()` registers the OpenTelemetry SDK with
+`GlobalOpenTelemetry`. Call it in one place only.
+
+If another library reads `GlobalOpenTelemetry` during startup, create this
+OpenTelemetry instance before that library is initialized. For example,
+`ebean-opentelemetry` resolves its tracer while Ebean databases are configured, so
+the OpenTelemetry bean should be created before Ebean `Database` beans.
+
+With Avaje Inject, model this as a real dependency:
+
+```java
+@Bean
+Database database(OpenTelemetry openTelemetry, Configuration config) {
+  return Database.builder()
+    .name("db")
+    .dataSourceBuilder(dataSource(config))
+    .build();
+}
+```
+
+Do not call `buildAndRegisterGlobal()` from multiple factories or helper classes.
+If the application already owns SDK creation, use `avaje-metrics-otel-producer`
+instead of the convenience global-registration path.
+
 ### Resource attributes
 
 For Lambda or other non-Kubernetes deployments, add resource attributes with the builder:

@@ -2,7 +2,7 @@
 
 Convenience module for creating an OTLP-backed `OpenTelemetrySdk` configured with:
 
-- OTLP trace export
+- OTLP trace export, using gRPC by default or HTTP/protobuf when selected
 - `avaje-metrics-otel-producer` registered as a metric producer
 - `avaje-metrics-otel-trace` on the classpath/module path for traced timers
 - the same `service.name` resource on both tracer and meter providers
@@ -39,11 +39,11 @@ This helper configures:
 
 - a `SdkMeterProvider` with:
   - a `PeriodicMetricReader`
-  - an OTLP gRPC metric exporter
+  - an OTLP metric exporter
   - `OtelMetricProducer`
 - a `SdkTracerProvider` with:
   - a batch span processor
-  - an OTLP gRPC span exporter
+  - an OTLP span exporter
 - the traced-timer bridge used by traced timers created via
   `Metrics.timerBuilder(...).buildTraced()` or `buildRootTraced()`
 
@@ -52,6 +52,7 @@ This helper configures:
 ```java
 OpenTelemetrySdk sdk =
     MetricsOpenTelemetry.builder()
+        .protocol(MetricsOpenTelemetry.Protocol.GRPC) // default: GRPC
         .endpoint("http://otel-collector:4317")   // default: http://localhost:4317
         .serviceName("my-service")                // default: unknown_service:java
         .includeTrace(true)                       // default: true
@@ -67,6 +68,25 @@ OpenTelemetrySdk sdk =
         .registry(Metrics.registry())             // default: Metrics.registry()
         .build();
 ```
+
+By default, the builder uses OTLP gRPC and passes `endpoint(...)` directly to the gRPC
+metric and span exporters.
+
+For OTLP HTTP/protobuf, select `HTTP_PROTOBUF` and provide the HTTP base endpoint:
+
+```java
+OpenTelemetrySdk sdk =
+    MetricsOpenTelemetry.builder()
+        .protocol(MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF)
+        .endpoint("http://otel-collector:4318")
+        .serviceName("my-service")
+        .build();
+```
+
+In HTTP/protobuf mode, `endpoint(...)` is the base endpoint. The builder appends
+`/v1/metrics` for metric export and `/v1/traces` for trace export. If you need
+signal-specific endpoints, headers, compression, or timeout configuration, provide
+explicit exporters with `metricExporter(...)` and `spanExporter(...)`.
 
 Resource attributes can also be supplied using the standard OpenTelemetry configuration names:
 
@@ -160,7 +180,7 @@ recording span is current. Child traced timers then follow that root sampling de
 current recording span.
 
 You can also provide custom exporters when you need OTLP-specific configuration such as headers,
-compression, or timeouts:
+signal-specific endpoints, headers, compression, or timeouts:
 
 ```java
 OpenTelemetrySdk sdk =

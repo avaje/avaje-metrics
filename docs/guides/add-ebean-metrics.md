@@ -117,3 +117,7 @@ In those cases, manual supplier registration may not be necessary.
 - This module is most useful when the export path is built around registry collection.
 - For reporter modules with direct `.database(...)` support, use the simpler direct path
   unless you specifically need supplier-level control.
+- `avaje-metrics-ebean` collects database metrics. It is separate from
+  `ebean-opentelemetry`, which creates Ebean transaction spans. When using
+  `ebean-opentelemetry`, register the global OpenTelemetry instance before Ebean
+  `Database` beans are built.
