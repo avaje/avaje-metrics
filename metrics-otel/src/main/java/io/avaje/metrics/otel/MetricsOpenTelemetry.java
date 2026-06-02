@@ -7,6 +7,8 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -56,19 +58,47 @@ public final class MetricsOpenTelemetry {
   }
 
   /**
+   * OTLP exporter protocol used by the default metric and span exporters.
+   */
+  public enum Protocol {
+
+    /**
+     * OTLP gRPC exporter protocol.
+     */
+    GRPC("http://localhost:4317"),
+
+    /**
+     * OTLP HTTP/protobuf exporter protocol.
+     */
+    HTTP_PROTOBUF("http://localhost:4318");
+
+    private final String defaultEndpoint;
+
+    Protocol(String defaultEndpoint) {
+      this.defaultEndpoint = defaultEndpoint;
+    }
+
+    String defaultEndpoint() {
+      return defaultEndpoint;
+    }
+  }
+
+  /**
    * Builder for OTLP-backed {@link OpenTelemetrySdk}.
    */
   public static final class Builder {
 
-    private static final String DEFAULT_ENDPOINT = "http://localhost:4317";
     private static final String DEFAULT_SCOPE = "io.avaje.metrics";
     private static final Duration DEFAULT_METER_INTERVAL = Duration.ofSeconds(60);
     private static final Duration DEFAULT_TRACE_INTERVAL = Duration.ofSeconds(10);
     private static final AttributeKey<String> SERVICE_NAME = AttributeKey.stringKey("service.name");
+    private static final String METRICS_PATH = "/v1/metrics";
+    private static final String TRACES_PATH = "/v1/traces";
 
     private boolean includeTrace = true;
     private boolean includeMeter = true;
-    private String endpoint = DEFAULT_ENDPOINT;
+    private Protocol protocol = Protocol.GRPC;
+    private String endpoint;
     private String serviceName;
     private long timedThresholdMicros;
     private Duration meterInterval = DEFAULT_METER_INTERVAL;
@@ -85,13 +115,32 @@ public final class MetricsOpenTelemetry {
     /**
      * Set the OTLP endpoint used for both metrics and traces.
      *
-     * <p>Default is {@code http://localhost:4317}.
+     * <p>For {@link Protocol#GRPC}, the endpoint is passed directly to the default gRPC exporters.
+     * Default is {@code http://localhost:4317}.
+     *
+     * <p>For {@link Protocol#HTTP_PROTOBUF}, the endpoint is a base endpoint. Default is
+     * {@code http://localhost:4318}; the builder appends {@code /v1/metrics} or
+     * {@code /v1/traces} for the default HTTP exporters.
      *
      * @param endpoint the OTLP endpoint
      * @return this builder
      */
     public Builder endpoint(String endpoint) {
       this.endpoint = requireNonNull(endpoint);
+      return this;
+    }
+
+    /**
+     * Set the OTLP exporter protocol.
+     *
+     * <p>Default is {@link Protocol#GRPC}. For signal-specific exporter configuration, use
+     * {@link #metricExporter(MetricExporter)} and {@link #spanExporter(SpanExporter)}.
+     *
+     * @param protocol the OTLP exporter protocol
+     * @return this builder
+     */
+    public Builder protocol(Protocol protocol) {
+      this.protocol = requireNonNull(protocol);
       return this;
     }
 
@@ -294,7 +343,7 @@ public final class MetricsOpenTelemetry {
     /**
      * Set the metric exporter used by the periodic metric reader.
      *
-     * <p>Defaults to an {@link OtlpGrpcMetricExporter} built from the configured endpoint.
+     * <p>Defaults to a protocol-specific OTLP exporter built from the configured endpoint.
      *
      * @param metricExporter the metric exporter
      * @return this builder
@@ -307,7 +356,7 @@ public final class MetricsOpenTelemetry {
     /**
      * Set the span exporter used by the batch span processor.
      *
-     * <p>Defaults to an {@link OtlpGrpcSpanExporter} built from the configured endpoint.
+     * <p>Defaults to a protocol-specific OTLP exporter built from the configured endpoint.
      *
      * @param spanExporter the span exporter
      * @return this builder
@@ -338,6 +387,28 @@ public final class MetricsOpenTelemetry {
     Builder metricReader(MetricReader metricReader) {
       this.metricReader = requireNonNull(metricReader, "metricReader");
       return this;
+    }
+
+    String metricExporterEndpoint() {
+      if (protocol == Protocol.HTTP_PROTOBUF) {
+        return otlpHttpEndpoint(endpoint(), METRICS_PATH);
+      }
+      return endpoint();
+    }
+
+    String spanExporterEndpoint() {
+      if (protocol == Protocol.HTTP_PROTOBUF) {
+        return otlpHttpEndpoint(endpoint(), TRACES_PATH);
+      }
+      return endpoint();
+    }
+
+    static String otlpHttpEndpoint(String endpoint, String signalPath) {
+      var baseEndpoint = endpoint.trim();
+      while (baseEndpoint.endsWith("/")) {
+        baseEndpoint = baseEndpoint.substring(0, baseEndpoint.length() - 1);
+      }
+      return baseEndpoint + signalPath;
     }
 
     private OpenTelemetrySdkBuilder sdkBuilder() {
@@ -425,8 +496,13 @@ public final class MetricsOpenTelemetry {
       if (metricExporter != null) {
         return metricExporter;
       }
+      if (protocol == Protocol.HTTP_PROTOBUF) {
+        return OtlpHttpMetricExporter.builder()
+          .setEndpoint(metricExporterEndpoint())
+          .build();
+      }
       return OtlpGrpcMetricExporter.builder()
-        .setEndpoint(endpoint)
+        .setEndpoint(metricExporterEndpoint())
         .build();
     }
 
@@ -434,9 +510,18 @@ public final class MetricsOpenTelemetry {
       if (spanExporter != null) {
         return spanExporter;
       }
+      if (protocol == Protocol.HTTP_PROTOBUF) {
+        return OtlpHttpSpanExporter.builder()
+          .setEndpoint(spanExporterEndpoint())
+          .build();
+      }
       return OtlpGrpcSpanExporter.builder()
-        .setEndpoint(endpoint)
+        .setEndpoint(spanExporterEndpoint())
         .build();
+    }
+
+    private String endpoint() {
+      return endpoint != null ? endpoint : protocol.defaultEndpoint();
     }
   }
 }
