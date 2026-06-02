@@ -156,7 +156,7 @@ For Lambda or other non-Kubernetes deployments, add resource attributes with the
 var openTelemetry = MetricsOpenTelemetry.builder()
   .serviceName("backport")
   .deploymentEnvironmentName("production")
-  .systemNamespace("tracking")
+  .serviceNamespace("tracking")
   .resourceAttributes("business.domain=fleet,business.subdomain=tracking,business.platform=ship")
   .buildAndRegisterGlobal();
 ```

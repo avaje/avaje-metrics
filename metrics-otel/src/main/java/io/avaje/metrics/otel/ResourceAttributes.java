@@ -17,7 +17,7 @@ final class ResourceAttributes {
   static final String SERVICE_NAME_PROPERTY = "otel.service.name";
   static final String SERVICE_NAME_ENV = "OTEL_SERVICE_NAME";
   static final String DEPLOYMENT_ENVIRONMENT_NAME = "deployment.environment.name";
-  static final String SYSTEM_NAMESPACE = "system.namespace";
+  static final String SERVICE_NAMESPACE = "service.namespace";
 
   private ResourceAttributes() {
   }

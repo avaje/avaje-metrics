@@ -40,7 +40,7 @@ class MetricsOpenTelemetryTest {
   private static final AttributeKey<String> BUSINESS_SYSTEM = AttributeKey.stringKey("business.system");
   private static final AttributeKey<String> DEPLOYMENT_ENVIRONMENT_NAME =
     AttributeKey.stringKey("deployment.environment.name");
-  private static final AttributeKey<String> SYSTEM_NAMESPACE = AttributeKey.stringKey("system.namespace");
+  private static final AttributeKey<String> SERVICE_NAMESPACE = AttributeKey.stringKey("service.namespace");
 
   @AfterEach
   void tearDown() {
@@ -156,7 +156,7 @@ class MetricsOpenTelemetryTest {
       .resourceAttributes("business.platform=ship")
       .resourceAttribute("business.system", "vehicle-tracking")
       .deploymentEnvironmentName("production")
-      .systemNamespace("tracking")
+      .serviceNamespace("tracking")
       .registry(registry)
       .metricReader(metricReader)
       .spanExporter(spanExporter)
@@ -173,7 +173,7 @@ class MetricsOpenTelemetryTest {
       assertThat(metricResource.getAttribute(BUSINESS_PLATFORM)).isEqualTo("ship");
       assertThat(metricResource.getAttribute(BUSINESS_SYSTEM)).isEqualTo("vehicle-tracking");
       assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
-      assertThat(metricResource.getAttribute(SYSTEM_NAMESPACE)).isEqualTo("tracking");
+      assertThat(metricResource.getAttribute(SERVICE_NAMESPACE)).isEqualTo("tracking");
 
       var spanResource = spanExporter.getFinishedSpanItems().get(0).getResource();
       assertThat(spanResource.getAttribute(SERVICE_NAME)).isEqualTo("catalog-service");
@@ -181,7 +181,7 @@ class MetricsOpenTelemetryTest {
       assertThat(spanResource.getAttribute(BUSINESS_PLATFORM)).isEqualTo("ship");
       assertThat(spanResource.getAttribute(BUSINESS_SYSTEM)).isEqualTo("vehicle-tracking");
       assertThat(spanResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
-      assertThat(spanResource.getAttribute(SYSTEM_NAMESPACE)).isEqualTo("tracking");
+      assertThat(spanResource.getAttribute(SERVICE_NAMESPACE)).isEqualTo("tracking");
     }
   }
 
@@ -253,8 +253,8 @@ class MetricsOpenTelemetryTest {
     try (var openTelemetry = MetricsOpenTelemetry.builder()
       .deploymentEnvironmentName("production")
       .resourceAttribute("deployment.environment.name", "staging")
-      .systemNamespace("tracking")
-      .resourceAttribute("system.namespace", "fleet")
+      .serviceNamespace("tracking")
+      .resourceAttribute("service.namespace", "fleet")
       .registry(registry)
       .metricReader(metricReader)
       .includeTrace(false)
@@ -264,7 +264,7 @@ class MetricsOpenTelemetryTest {
 
       var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
       assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("staging");
-      assertThat(metricResource.getAttribute(SYSTEM_NAMESPACE)).isEqualTo("fleet");
+      assertThat(metricResource.getAttribute(SERVICE_NAMESPACE)).isEqualTo("fleet");
     }
   }
 
