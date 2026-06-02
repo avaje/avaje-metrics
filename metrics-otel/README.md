@@ -61,7 +61,7 @@ OpenTelemetrySdk sdk =
         .resourceAttribute("business.domain", "core")
         .resourceAttributes("business.platform=base")
         .deploymentEnvironmentName("production")
-        .systemNamespace("tracking")
+        .serviceNamespace("tracking")
         .traceSampleRatio(0.05)                  // parentBased(traceIdRatioBased(0.05))
         .meterInterval(Duration.ofSeconds(60))    // default: 60s
         .traceInterval(Duration.ofSeconds(10))    // default: 10s

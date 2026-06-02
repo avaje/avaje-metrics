@@ -207,15 +207,15 @@ public final class MetricsOpenTelemetry {
     }
 
     /**
-     * Set the {@code system.namespace} resource attribute.
+     * Set the {@code service.namespace} resource attribute.
      *
-     * @param value the system namespace
+     * @param value the service namespace
      * @return this builder
      */
-    public Builder systemNamespace(String value) {
+    public Builder serviceNamespace(String value) {
       ResourceAttributes.put(
         resourceAttributes,
-        ResourceAttributes.SYSTEM_NAMESPACE,
+        ResourceAttributes.SERVICE_NAMESPACE,
         value);
       return this;
     }
