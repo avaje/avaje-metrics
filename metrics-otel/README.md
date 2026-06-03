@@ -108,6 +108,14 @@ Explicit builder resource attributes override configured resource attributes, `o
 `OTEL_SERVICE_NAME` override `service.name` from resource attributes, and `serviceName(...)`
 overrides all configured service names.
 
+The endpoint, protocol, intervals, timeouts, and `deployment.environment.name` can also be supplied via
+standard OpenTelemetry SDK environment variables (`OTEL_EXPORTER_OTLP_ENDPOINT`,
+`OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_TIMEOUT`, `OTEL_METRIC_EXPORT_INTERVAL`,
+`OTEL_BSP_SCHEDULE_DELAY`, `OTEL_DEPLOYMENT_ENVIRONMENT_NAME`) and equivalent `otel.*` system
+properties. See
+[Configure OpenTelemetry environment variables](../docs/guides/configure-otel-environment.md)
+for the full reference and precedence rules.
+
 ## Trace sampling
 
 If no sampler is configured, the OpenTelemetry SDK default applies:
@@ -205,7 +213,6 @@ import io.avaje.metrics.otel.MetricsOpenTelemetry;
 import io.avaje.metrics.otel.TelemetryWaiter;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 MetricsOpenTelemetry.Result result = MetricsOpenTelemetry.builder()
     .protocol(MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF)
@@ -214,7 +221,7 @@ MetricsOpenTelemetry.Result result = MetricsOpenTelemetry.builder()
     .exportTimeout(Duration.ofSeconds(5))
     .connectTimeout(Duration.ofSeconds(2))
     .enableWaitIfRunning()
-        .timeout(35, TimeUnit.SECONDS)
+        .timeout(Duration.ofSeconds(35))
         // .flushIfStale(Duration.ofSeconds(60))  // optional, defaults to 2 × meterInterval
         .buildAndRegisterGlobal();
 

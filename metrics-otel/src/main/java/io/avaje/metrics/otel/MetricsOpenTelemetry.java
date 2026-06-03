@@ -99,7 +99,7 @@ public final class MetricsOpenTelemetry {
 
     private boolean includeTrace = true;
     private boolean includeMeter = true;
-    private Protocol protocol = Protocol.GRPC;
+    private Protocol protocol;
     private String endpoint;
     private String serviceName;
     private long timedThresholdMicros;
@@ -137,7 +137,10 @@ public final class MetricsOpenTelemetry {
     /**
      * Set the OTLP exporter protocol.
      *
-     * <p>Default is {@link Protocol#GRPC}. For signal-specific exporter configuration, use
+     * <p>If not set, the protocol is resolved from the {@code OTEL_EXPORTER_OTLP_PROTOCOL}
+     * environment variable / {@code otel.exporter.otlp.protocol} system property
+     * (recognised values: {@code grpc}, {@code http/protobuf}), defaulting to
+     * {@link Protocol#GRPC}. For signal-specific exporter configuration, use
      * {@link #metricExporter(MetricExporter)} and {@link #spanExporter(SpanExporter)}.
      *
      * @param protocol the OTLP exporter protocol
@@ -409,7 +412,7 @@ public final class MetricsOpenTelemetry {
      * scheduled background export is currently in progress.
      *
      * <p>This is the last call before {@code build()} - the returned {@link WaiterBuilder}
-     * exposes only the build methods, {@link WaiterBuilder#timeout(long, TimeUnit)} and
+     * exposes only the build methods, {@link WaiterBuilder#timeout(Duration)} and
      * {@link WaiterBuilder#flushIfStale(Duration)}.
      *
      * <p>Calling this method also flips two defaults to Lambda-friendly values, but only
@@ -447,14 +450,30 @@ public final class MetricsOpenTelemetry {
 
     /**
      * Apply default intervals (Lambda-friendly when {@code waiting}, otherwise standard)
-     * for any interval the caller has not explicitly set.
+     * and timeouts for any value the caller has not explicitly set, falling back through
+     * standard OpenTelemetry SDK environment variables and system properties before applying
+     * built-in defaults.
      */
     void resolveIntervals(boolean waiting) {
+      protocol();
+      if (meterInterval == null) {
+        meterInterval = OtelEnv.metricExportInterval();
+      }
       if (meterInterval == null) {
         meterInterval = waiting ? DEFAULT_METER_INTERVAL_LAMBDA : DEFAULT_METER_INTERVAL;
       }
       if (traceInterval == null) {
+        traceInterval = OtelEnv.bspScheduleDelay();
+      }
+      if (traceInterval == null) {
         traceInterval = DEFAULT_TRACE_INTERVAL;
+      }
+      var otlpTimeout = (connectTimeout == null || exportTimeout == null) ? OtelEnv.otlpTimeout() : null;
+      if (connectTimeout == null && otlpTimeout != null) {
+        connectTimeout = otlpTimeout;
+      }
+      if (exportTimeout == null && otlpTimeout != null) {
+        exportTimeout = otlpTimeout;
       }
     }
 
@@ -464,14 +483,14 @@ public final class MetricsOpenTelemetry {
     }
 
     String metricExporterEndpoint() {
-      if (protocol == Protocol.HTTP_PROTOBUF) {
+      if (protocol() == Protocol.HTTP_PROTOBUF) {
         return otlpHttpEndpoint(endpoint(), METRICS_PATH);
       }
       return endpoint();
     }
 
     String spanExporterEndpoint() {
-      if (protocol == Protocol.HTTP_PROTOBUF) {
+      if (protocol() == Protocol.HTTP_PROTOBUF) {
         return otlpHttpEndpoint(endpoint(), TRACES_PATH);
       }
       return endpoint();
@@ -501,6 +520,10 @@ public final class MetricsOpenTelemetry {
     private Resource resource() {
       var attributes = new LinkedHashMap<String, String>();
       attributes.putAll(ResourceAttributes.configuredAttributes());
+      var configuredDeploymentEnv = OtelEnv.deploymentEnvironmentName();
+      if (configuredDeploymentEnv != null) {
+        attributes.put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT_NAME, configuredDeploymentEnv);
+      }
       attributes.putAll(resourceAttributes);
       var resource = Resource.getDefault();
       if (!attributes.isEmpty()) {
@@ -570,7 +593,7 @@ public final class MetricsOpenTelemetry {
       if (metricExporter != null) {
         return metricExporter;
       }
-      if (protocol == Protocol.HTTP_PROTOBUF) {
+      if (protocol() == Protocol.HTTP_PROTOBUF) {
         var b = OtlpHttpMetricExporter.builder()
           .setEndpoint(metricExporterEndpoint());
         if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
@@ -588,7 +611,7 @@ public final class MetricsOpenTelemetry {
       if (spanExporter != null) {
         return spanExporter;
       }
-      if (protocol == Protocol.HTTP_PROTOBUF) {
+      if (protocol() == Protocol.HTTP_PROTOBUF) {
         var b = OtlpHttpSpanExporter.builder()
           .setEndpoint(spanExporterEndpoint());
         if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
@@ -614,6 +637,26 @@ public final class MetricsOpenTelemetry {
       return meterInterval;
     }
 
+    Protocol protocol() {
+      if (protocol == null) {
+        var configuredProtocol = OtelEnv.otlpProtocol();
+        protocol = configuredProtocol != null ? configuredProtocol : Protocol.GRPC;
+      }
+      return protocol;
+    }
+
+    Duration traceInterval() {
+      return traceInterval;
+    }
+
+    Duration connectTimeout() {
+      return connectTimeout;
+    }
+
+    Duration exportTimeout() {
+      return exportTimeout;
+    }
+
     void setMetricExporterField(MetricExporter exporter) {
       this.metricExporter = exporter;
     }
@@ -623,7 +666,11 @@ public final class MetricsOpenTelemetry {
     }
 
     private String endpoint() {
-      return endpoint != null ? endpoint : protocol.defaultEndpoint();
+      if (endpoint != null) {
+        return endpoint;
+      }
+      var configured = OtelEnv.otlpEndpoint();
+      return configured != null ? configured : protocol().defaultEndpoint();
     }
   }
 
@@ -685,6 +732,20 @@ public final class MetricsOpenTelemetry {
      */
     public WaiterBuilder timeout(long timeout, TimeUnit unit) {
       this.timeoutMillis = unit.toMillis(timeout);
+      return this;
+    }
+
+    /**
+     * Set the default timeout used by {@link TelemetryWaiter#waitIfRunning()}.
+     *
+     * <p>Default is 5 seconds. The timeout applies independently per signal
+     * (metrics, traces) and to any subsequent stale {@code forceFlush()}.
+     *
+     * @param timeout the wait timeout
+     * @return this builder
+     */
+    public WaiterBuilder timeout(Duration timeout) {
+      this.timeoutMillis = requireNonNull(timeout, "timeout").toMillis();
       return this;
     }
 

@@ -56,6 +56,19 @@ class ScheduledTaskTest {
     System.out.println("done");
   }
 
+  @Test
+  void noop_doesNothing() {
+    var task = ScheduledTask.noop();
+    task.start();
+    task.waitIfRunning(1, TimeUnit.SECONDS);
+    assertThat(task.cancel(true)).isFalse();
+  }
+
+  @Test
+  void noop_isSingleton() {
+    assertThat(ScheduledTask.noop()).isSameAs(ScheduledTask.noop());
+  }
+
   private static final AtomicLong counter = new AtomicLong();
 
   private static void hello() {

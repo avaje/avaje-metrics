@@ -174,6 +174,10 @@ The service name can also be supplied using the standard `otel.service.name` sys
 attributes, `otel.service.name` / `OTEL_SERVICE_NAME` override `service.name` from resource
 attributes, and `serviceName(...)` overrides all configured service names.
 
+For the full set of OTel SDK environment variables and system properties read by the
+convenience module (endpoint, timeouts, intervals, deployment environment name) see
+[Configure OpenTelemetry environment variables](configure-otel-environment.md).
+
 ### Trace sampling
 
 Without explicit sampler configuration, the OpenTelemetry SDK default is

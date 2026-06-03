@@ -19,6 +19,17 @@ public interface ScheduledTask {
   }
 
   /**
+   * Return a no-op ScheduledTask whose {@link #start()}, {@link #cancel(boolean)}
+   * and {@link #waitIfRunning(long, TimeUnit)} methods do nothing.
+   * <p>
+   * Useful as a placeholder when a real reporter is not configured but a
+   * {@code ScheduledTask} bean is still required by DI.
+   */
+  static ScheduledTask noop() {
+    return NoopScheduledTask.INSTANCE;
+  }
+
+  /**
    * Start the scheduled task.
    */
   void start();
