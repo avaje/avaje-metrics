@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -571,6 +572,135 @@ class MetricsOpenTelemetryTest {
     } finally {
       GlobalOpenTelemetry.resetForTest();
     }
+  }
+
+  @Test
+  void enableWaitIfRunning_buildsResultWithSdkAndWaiter() {
+    var metricExporter = new CapturingMetricExporter();
+    var spanExporter = InMemorySpanExporter.create();
+    var registry = Metrics.createRegistry();
+
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .registry(registry)
+      .metricExporter(metricExporter)
+      .spanExporter(spanExporter)
+      .enableWaitIfRunning()
+      .timeout(2, TimeUnit.SECONDS)
+      .build();
+
+    try (var sdk = result.sdk()) {
+      assertThat(result.waiter()).isNotNull();
+
+      registry.counter("app.requests").inc(3);
+      flush(sdk.getSdkMeterProvider().forceFlush());
+
+      assertThat(byName(metricExporter.exportedMetrics())).containsKey("app.requests");
+
+      // No in-flight export => returns immediately without exception
+      result.waiter().waitIfRunning();
+      result.waiter().waitIfRunning(100, TimeUnit.MILLISECONDS);
+    }
+  }
+
+  @Test
+  void enableWaitIfRunning_includeMeterFalse_waiterStillUsable() {
+    var spanExporter = InMemorySpanExporter.create();
+
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .includeMeter(false)
+      .spanExporter(spanExporter)
+      .enableWaitIfRunning()
+      .build();
+
+    try (var sdk = result.sdk()) {
+      assertThat(sdk).isNotNull();
+      result.waiter().waitIfRunning();
+    }
+  }
+
+  @Test
+  void enableWaitIfRunning_defaultFlushIfStale_firesOnFirstInvocation() {
+    var metricExporter = new CapturingMetricExporter();
+    var spanExporter = InMemorySpanExporter.create();
+    var registry = Metrics.createRegistry();
+
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .registry(registry)
+      .metricExporter(metricExporter)
+      .spanExporter(spanExporter)
+      .enableWaitIfRunning()
+      .timeout(2, TimeUnit.SECONDS)
+      .build();
+
+    try (var sdk = result.sdk()) {
+      registry.counter("app.requests").inc(7);
+
+      // lastSuccessAtMillis starts at 0 so default flushIfStale (= 2 * meterInterval)
+      // is exceeded => waitIfRunning() triggers a synchronous forceFlush.
+      result.waiter().waitIfRunning();
+
+      assertThat(byName(metricExporter.exportedMetrics())).containsKey("app.requests");
+    }
+  }
+
+  @Test
+  void enableWaitIfRunning_flushIfStaleDisabled_doesNotForceFlush() {
+    var metricExporter = new CapturingMetricExporter();
+    var registry = Metrics.createRegistry();
+
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .includeTrace(false)
+      .registry(registry)
+      .metricExporter(metricExporter)
+      .meterInterval(Duration.ofMinutes(30))
+      .enableWaitIfRunning()
+      .timeout(2, TimeUnit.SECONDS)
+      .flushIfStale(Duration.ZERO)
+      .build();
+
+    try (var sdk = result.sdk()) {
+      registry.counter("app.requests").inc(7);
+
+      result.waiter().waitIfRunning();
+
+      assertThat(metricExporter.exportedMetrics()).isEmpty();
+    }
+  }
+
+  @Test
+  void enableWaitIfRunning_explicitFlushIfStaleZero_overridesDerivedDefault() {
+    var metricExporter = new CapturingMetricExporter();
+    var registry = Metrics.createRegistry();
+
+    // No explicit meterInterval => enableWaitIfRunning() flips it to 30s and
+    // would otherwise default flushIfStale to 60s (which would fire because
+    // lastSuccess starts at 0). Passing ZERO must disable that.
+    var result = MetricsOpenTelemetry.builder()
+      .serviceName("catalog-service")
+      .includeTrace(false)
+      .registry(registry)
+      .metricExporter(metricExporter)
+      .enableWaitIfRunning()
+      .flushIfStale(Duration.ZERO)
+      .build();
+
+    try (var sdk = result.sdk()) {
+      registry.counter("app.requests").inc(1);
+
+      result.waiter().waitIfRunning();
+
+      assertThat(metricExporter.exportedMetrics()).isEmpty();
+    }
+  }
+
+  @Test
+  void noopWaiter_doesNothing() {
+    TelemetryWaiter.noop().waitIfRunning();
+    TelemetryWaiter.noop().waitIfRunning(50, TimeUnit.MILLISECONDS);
   }
 
   private static void flush(CompletableResultCode resultCode) {

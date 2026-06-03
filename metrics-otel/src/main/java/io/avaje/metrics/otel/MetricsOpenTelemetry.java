@@ -26,6 +26,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 
@@ -90,6 +91,7 @@ public final class MetricsOpenTelemetry {
 
     private static final String DEFAULT_SCOPE = "io.avaje.metrics";
     private static final Duration DEFAULT_METER_INTERVAL = Duration.ofSeconds(60);
+    private static final Duration DEFAULT_METER_INTERVAL_LAMBDA = Duration.ofSeconds(30);
     private static final Duration DEFAULT_TRACE_INTERVAL = Duration.ofSeconds(10);
     private static final AttributeKey<String> SERVICE_NAME = AttributeKey.stringKey("service.name");
     private static final String METRICS_PATH = "/v1/metrics";
@@ -101,8 +103,8 @@ public final class MetricsOpenTelemetry {
     private String endpoint;
     private String serviceName;
     private long timedThresholdMicros;
-    private Duration meterInterval = DEFAULT_METER_INTERVAL;
-    private Duration traceInterval = DEFAULT_TRACE_INTERVAL;
+    private Duration meterInterval;
+    private Duration traceInterval;
     private MetricRegistry registry;
     private final Map<String, String> resourceAttributes = new LinkedHashMap<>();
     private ContextPropagators propagators = ContextPropagators.create(W3CTraceContextPropagator.getInstance());
@@ -111,6 +113,8 @@ public final class MetricsOpenTelemetry {
     private SpanExporter spanExporter;
     private Sampler sampler;
     private Double traceSampleRatio;
+    private Duration connectTimeout;
+    private Duration exportTimeout;
 
     /**
      * Set the OTLP endpoint used for both metrics and traces.
@@ -367,11 +371,67 @@ public final class MetricsOpenTelemetry {
     }
 
     /**
+     * Set the OTLP exporter connect timeout applied to the default metric and span exporters.
+     *
+     * <p>Has no effect on exporters supplied via {@link #metricExporter(MetricExporter)} or
+     * {@link #spanExporter(SpanExporter)}.
+     *
+     * @param connectTimeout the connect timeout
+     * @return this builder
+     */
+    public Builder connectTimeout(Duration connectTimeout) {
+      this.connectTimeout = requireNonNull(connectTimeout);
+      return this;
+    }
+
+    /**
+     * Set the OTLP exporter request timeout applied to the default metric and span exporters.
+     *
+     * <p>This is the total time allowed for an export request including the response.
+     * Has no effect on exporters supplied via {@link #metricExporter(MetricExporter)} or
+     * {@link #spanExporter(SpanExporter)}.
+     *
+     * @param exportTimeout the export request timeout
+     * @return this builder
+     */
+    public Builder exportTimeout(Duration exportTimeout) {
+      this.exportTimeout = requireNonNull(exportTimeout);
+      return this;
+    }
+
+    /**
+     * Enable the {@code waitIfRunning} pattern for use with AWS Lambda or similar
+     * "freeze-on-exit" runtimes.
+     *
+     * <p>The metric and span exporters are wrapped to track in-flight exports.
+     * Background reporting continues on its normal schedule (no per-invocation flush);
+     * the returned {@link TelemetryWaiter} blocks at the end of an invocation only if a
+     * scheduled background export is currently in progress.
+     *
+     * <p>This is the last call before {@code build()} - the returned {@link WaiterBuilder}
+     * exposes only the build methods, {@link WaiterBuilder#timeout(long, TimeUnit)} and
+     * {@link WaiterBuilder#flushIfStale(Duration)}.
+     *
+     * <p>Calling this method also flips two defaults to Lambda-friendly values, but only
+     * when the caller has not already set them explicitly:
+     * <ul>
+     *   <li>{@code meterInterval} → 30 seconds (was 60 seconds)</li>
+     *   <li>{@code flushIfStale} → {@code 2 × meterInterval} (so 60 seconds by default)</li>
+     * </ul>
+     *
+     * @return a builder that produces an SDK paired with a {@link TelemetryWaiter}
+     */
+    public WaiterBuilder enableWaitIfRunning() {
+      return new WaiterBuilder(this);
+    }
+
+    /**
      * Build and return an {@link OpenTelemetrySdk}.
      *
      * @return the built SDK
      */
     public OpenTelemetrySdk build() {
+      resolveIntervals(false);
       return sdkBuilder().build();
     }
 
@@ -381,7 +441,21 @@ public final class MetricsOpenTelemetry {
      * @return the built and globally registered SDK
      */
     public OpenTelemetrySdk buildAndRegisterGlobal() {
+      resolveIntervals(false);
       return sdkBuilder().buildAndRegisterGlobal();
+    }
+
+    /**
+     * Apply default intervals (Lambda-friendly when {@code waiting}, otherwise standard)
+     * for any interval the caller has not explicitly set.
+     */
+    void resolveIntervals(boolean waiting) {
+      if (meterInterval == null) {
+        meterInterval = waiting ? DEFAULT_METER_INTERVAL_LAMBDA : DEFAULT_METER_INTERVAL;
+      }
+      if (traceInterval == null) {
+        traceInterval = DEFAULT_TRACE_INTERVAL;
+      }
     }
 
     Builder metricReader(MetricReader metricReader) {
@@ -492,36 +566,191 @@ public final class MetricsOpenTelemetry {
         .build();
     }
 
-    private MetricExporter metricExporter() {
+    MetricExporter metricExporter() {
       if (metricExporter != null) {
         return metricExporter;
       }
       if (protocol == Protocol.HTTP_PROTOBUF) {
-        return OtlpHttpMetricExporter.builder()
-          .setEndpoint(metricExporterEndpoint())
-          .build();
+        var b = OtlpHttpMetricExporter.builder()
+          .setEndpoint(metricExporterEndpoint());
+        if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+        if (exportTimeout != null) b.setTimeout(exportTimeout);
+        return b.build();
       }
-      return OtlpGrpcMetricExporter.builder()
-        .setEndpoint(metricExporterEndpoint())
-        .build();
+      var b = OtlpGrpcMetricExporter.builder()
+        .setEndpoint(metricExporterEndpoint());
+      if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+      if (exportTimeout != null) b.setTimeout(exportTimeout);
+      return b.build();
     }
 
-    private SpanExporter spanExporter() {
+    SpanExporter spanExporter() {
       if (spanExporter != null) {
         return spanExporter;
       }
       if (protocol == Protocol.HTTP_PROTOBUF) {
-        return OtlpHttpSpanExporter.builder()
-          .setEndpoint(spanExporterEndpoint())
-          .build();
+        var b = OtlpHttpSpanExporter.builder()
+          .setEndpoint(spanExporterEndpoint());
+        if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+        if (exportTimeout != null) b.setTimeout(exportTimeout);
+        return b.build();
       }
-      return OtlpGrpcSpanExporter.builder()
-        .setEndpoint(spanExporterEndpoint())
-        .build();
+      var b = OtlpGrpcSpanExporter.builder()
+        .setEndpoint(spanExporterEndpoint());
+      if (connectTimeout != null) b.setConnectTimeout(connectTimeout);
+      if (exportTimeout != null) b.setTimeout(exportTimeout);
+      return b.build();
+    }
+
+    boolean includeMeter() {
+      return includeMeter;
+    }
+
+    boolean includeTrace() {
+      return includeTrace;
+    }
+
+    Duration meterInterval() {
+      return meterInterval;
+    }
+
+    void setMetricExporterField(MetricExporter exporter) {
+      this.metricExporter = exporter;
+    }
+
+    void setSpanExporterField(SpanExporter exporter) {
+      this.spanExporter = exporter;
     }
 
     private String endpoint() {
       return endpoint != null ? endpoint : protocol.defaultEndpoint();
+    }
+  }
+
+  /**
+   * Result of building an SDK with {@link Builder#enableWaitIfRunning()}, pairing the
+   * {@link OpenTelemetrySdk} with a {@link TelemetryWaiter} that can be used at the end
+   * of a Lambda invocation to wait for any in-flight background export to complete.
+   */
+  public static final class Result {
+
+    private final OpenTelemetrySdk sdk;
+    private final TelemetryWaiter waiter;
+
+    Result(OpenTelemetrySdk sdk, TelemetryWaiter waiter) {
+      this.sdk = sdk;
+      this.waiter = waiter;
+    }
+
+    /** The built OpenTelemetry SDK. */
+    public OpenTelemetrySdk sdk() {
+      return sdk;
+    }
+
+    /** The waiter coordinating in-flight exports. */
+    public TelemetryWaiter waiter() {
+      return waiter;
+    }
+  }
+
+  /**
+   * Builder produced by {@link Builder#enableWaitIfRunning()} that builds an
+   * {@link OpenTelemetrySdk} together with a {@link TelemetryWaiter}.
+   *
+   * <p>The configured (or default) metric and span exporters are wrapped so the
+   * waiter can observe in-flight background exports without triggering an additional
+   * export. Background reporting continues on its normal schedule.
+   */
+  public static final class WaiterBuilder {
+
+    private static final long DEFAULT_TIMEOUT_MILLIS = 5_000L;
+
+    private final Builder builder;
+    private long timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
+    private Duration flushIfStale;
+
+    WaiterBuilder(Builder builder) {
+      this.builder = builder;
+    }
+
+    /**
+     * Set the default timeout used by {@link TelemetryWaiter#waitIfRunning()}.
+     *
+     * <p>Default is 5 seconds. The timeout applies independently per signal
+     * (metrics, traces) and to any subsequent stale {@code forceFlush()}.
+     *
+     * @param timeout the wait timeout
+     * @param unit the time unit
+     * @return this builder
+     */
+    public WaiterBuilder timeout(long timeout, TimeUnit unit) {
+      this.timeoutMillis = unit.toMillis(timeout);
+      return this;
+    }
+
+    /**
+     * Set the stale threshold that triggers a synchronous {@code forceFlush()} at the end
+     * of {@link TelemetryWaiter#waitIfRunning()} when no successful background export has
+     * completed within the threshold.
+     *
+     * <p>This is intended for low-traffic Lambda environments where the periodic metric
+     * reader is frozen between invocations and may not tick before the runtime is
+     * suspended again. In busy environments {@code lastSuccess} stays fresh and
+     * forceFlush is a no-op.
+     *
+     * <p>Default is {@code 2 × meterInterval}, so a healthy reader keeps {@code lastSuccess}
+     * younger than the threshold; one missed tick is tolerated; two or more missed ticks
+     * trigger a flush. Pass {@link Duration#ZERO} to disable.
+     *
+     * @param flushIfStale the stale threshold
+     * @return this builder
+     */
+    public WaiterBuilder flushIfStale(Duration flushIfStale) {
+      this.flushIfStale = requireNonNull(flushIfStale);
+      return this;
+    }
+
+    /**
+     * Build the {@link OpenTelemetrySdk} paired with a {@link TelemetryWaiter}.
+     *
+     * @return the result containing both the SDK and the waiter
+     */
+    public Result build() {
+      return buildResult(false);
+    }
+
+    /**
+     * Build the SDK, register it as the global OpenTelemetry instance, and return it
+     * paired with a {@link TelemetryWaiter}.
+     *
+     * @return the result containing both the SDK and the waiter
+     */
+    public Result buildAndRegisterGlobal() {
+      return buildResult(true);
+    }
+
+    private Result buildResult(boolean registerGlobal) {
+      builder.resolveIntervals(true);
+      WaitingMetricExporter waitingMetric = null;
+      WaitingSpanExporter waitingSpan = null;
+      if (builder.includeMeter()) {
+        waitingMetric = new WaitingMetricExporter(builder.metricExporter());
+        builder.setMetricExporterField(waitingMetric);
+      }
+      if (builder.includeTrace()) {
+        waitingSpan = new WaitingSpanExporter(builder.spanExporter());
+        builder.setSpanExporterField(waitingSpan);
+      }
+      var sdk = registerGlobal ? builder.buildAndRegisterGlobal() : builder.build();
+      var waiter = new TelemetryWaiter(waitingMetric, waitingSpan, sdk, timeoutMillis, effectiveFlushIfStale());
+      return new Result(sdk, waiter);
+    }
+
+    private Duration effectiveFlushIfStale() {
+      if (flushIfStale != null) {
+        return flushIfStale;
+      }
+      return builder.meterInterval().multipliedBy(2);
     }
   }
 }
