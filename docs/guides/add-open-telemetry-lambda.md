@@ -96,7 +96,7 @@ public class OrdersHandler {
         .exportTimeout(Duration.ofSeconds(5))
         .connectTimeout(Duration.ofSeconds(2))
         .enableWaitIfRunning()
-            .timeout(35, TimeUnit.SECONDS)
+            .timeout(Duration.ofSeconds(35))
             // .flushIfStale(Duration.ofSeconds(60))  // optional
             .buildAndRegisterGlobal();
 
@@ -122,6 +122,13 @@ The two critical pieces are:
 If you have multiple Lambda handler classes in the same deployment artifact (e.g. an
 event handler **and** a schedule handler), build the SDK in a shared class so all
 handlers use the same `TelemetryWaiter` instance.
+
+> **Tip:** Most of the per-environment values above (`endpoint`, `deploymentEnvironmentName`,
+> `serviceName`) can be supplied via standard OTel SDK environment variables instead of
+> explicit builder calls. See
+> [Configure OpenTelemetry environment variables](configure-otel-environment.md) — this
+> keeps the handler code identical across environments and the values configurable from
+> CloudFormation / Lambda env vars.
 
 ---
 
@@ -156,6 +163,11 @@ triggers a forceFlush — this is intentional, and ships startup metrics promptl
 
 ## Step 4 — Wiring with dependency injection
 
+> **⚠ Ordering matters.** The `@Bean` method that returns `TelemetryWaiter` must
+> declare `OpenTelemetry` as a parameter so the DI container invokes
+> `openTelemetry()` first. Without that parameter, the waiter bean may be created
+> before the SDK is built, returning a no-op waiter that silently never flushes.
+
 ### Spring
 
 ```java
@@ -170,15 +182,15 @@ public class MetricsConfig {
         .serviceName("orders-lambda")
         .exportTimeout(Duration.ofSeconds(5))
         .enableWaitIfRunning()
-            .timeout(35, TimeUnit.SECONDS)
+            .timeout(Duration.ofSeconds(35))
             .buildAndRegisterGlobal();
     this.waiter = result.waiter();
     return result.sdk();
   }
 
   @Bean
-  TelemetryWaiter telemetryWaiter() {
-    return waiter;   // captured above
+  TelemetryWaiter telemetryWaiter(OpenTelemetry openTelemetry) {
+    return waiter;   // captured above; OpenTelemetry param forces this to run after openTelemetry()
   }
 
   private TelemetryWaiter waiter;
@@ -208,8 +220,8 @@ public class MetricsConfig {
   }
 
   @Bean
-  TelemetryWaiter telemetryWaiter() {
-    return waiter;
+  TelemetryWaiter telemetryWaiter(OpenTelemetry openTelemetry) {
+    return waiter;   // OpenTelemetry param forces this to run after openTelemetry()
   }
 }
 ```

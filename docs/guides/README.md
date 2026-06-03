@@ -47,6 +47,7 @@ Step-by-step guides written as instructions for AI agents and developers working
 |-------|-------------|
 | [Add OpenTelemetry export](add-open-telemetry-export.md) | Choose between `avaje-metrics-otel`, `avaje-metrics-otel-producer`, `avaje-metrics-otel-trace`, and `avaje-metrics-otel-reporter` and wire the right OTEL path |
 | [Add OpenTelemetry export — AWS Lambda](add-open-telemetry-lambda.md) | Configure `avaje-metrics-otel` for AWS Lambda using `enableWaitIfRunning()` so freeze-on-exit and low-traffic invocations do not lose metrics |
+| [Configure OpenTelemetry environment variables](configure-otel-environment.md) | Reference for `OTEL_*` environment variables and `otel.*` system properties read by `avaje-metrics-otel` (endpoint, timeouts, intervals, deployment environment name) |
 | [Add Prometheus scraping](add-prometheus-scrape.md) | Add `avaje-metrics-prometheus` and expose a pull-based Prometheus text endpoint using cumulative collection |
 | [Add StatsD reporting](add-statsd-reporting.md) | Add `avaje-metrics-statsd`, configure `StatsdReporter`, and export avaje-metrics data to StatsD / DogStatsD |
 | [Add Graphite reporting](add-graphite-reporting.md) | Add `avaje-metrics-graphite`, configure `GraphiteReporter`, and export avaje-metrics data to Graphite |
@@ -115,6 +116,7 @@ Key guides (fetch and follow when performing the relevant task):
 - Configure metrics enhancement: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/configure-metrics-agent.md
 - Add OpenTelemetry export: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-open-telemetry-export.md
 - Add OpenTelemetry export — AWS Lambda: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-open-telemetry-lambda.md
+- Configure OpenTelemetry environment variables: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/configure-otel-environment.md
 - Add Prometheus scraping: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-prometheus-scrape.md
 - Add StatsD reporting: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-statsd-reporting.md
 - Add Graphite reporting: https://raw.githubusercontent.com/avaje/avaje-metrics/HEAD/docs/guides/add-graphite-reporting.md

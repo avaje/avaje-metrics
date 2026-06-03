@@ -49,6 +49,12 @@ class MetricsOpenTelemetryTest {
     System.clearProperty(ResourceAttributes.SERVICE_NAME_PROPERTY);
     System.clearProperty(TraceSampling.TRACES_SAMPLER_PROPERTY);
     System.clearProperty(TraceSampling.TRACES_SAMPLER_ARG_PROPERTY);
+    System.clearProperty(OtelEnv.OTLP_ENDPOINT_PROP);
+    System.clearProperty(OtelEnv.OTLP_PROTOCOL_PROP);
+    System.clearProperty(OtelEnv.OTLP_TIMEOUT_PROP);
+    System.clearProperty(OtelEnv.METRIC_EXPORT_INTERVAL_PROP);
+    System.clearProperty(OtelEnv.BSP_SCHEDULE_DELAY_PROP);
+    System.clearProperty(OtelEnv.DEPLOYMENT_ENVIRONMENT_NAME_PROP);
   }
 
   @Test
@@ -267,6 +273,105 @@ class MetricsOpenTelemetryTest {
       assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("staging");
       assertThat(metricResource.getAttribute(SERVICE_NAMESPACE)).isEqualTo("fleet");
     }
+  }
+
+  @Test
+  void configuredDeploymentEnvironmentName_fromSystemProperty() {
+    System.setProperty(OtelEnv.DEPLOYMENT_ENVIRONMENT_NAME_PROP, "test-env");
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .registry(registry)
+      .metricReader(metricReader)
+      .includeTrace(false)
+      .build()) {
+
+      registry.counter("app.requests").inc(1);
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("test-env");
+    }
+  }
+
+  @Test
+  void deploymentEnvironmentName_explicit_overridesConfigured() {
+    System.setProperty(OtelEnv.DEPLOYMENT_ENVIRONMENT_NAME_PROP, "test-env");
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .deploymentEnvironmentName("production")
+      .registry(registry)
+      .metricReader(metricReader)
+      .includeTrace(false)
+      .build()) {
+
+      registry.counter("app.requests").inc(1);
+
+      var metricResource = onlyMetric(metricReader.collectAllMetrics()).getResource();
+      assertThat(metricResource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME)).isEqualTo("production");
+    }
+  }
+
+  @Test
+  void resolveIntervals_usesEnvVarsForIntervals() {
+    System.setProperty(OtelEnv.METRIC_EXPORT_INTERVAL_PROP, "45000");
+    System.setProperty(OtelEnv.BSP_SCHEDULE_DELAY_PROP, "1500");
+
+    var builder = MetricsOpenTelemetry.builder();
+    builder.resolveIntervals(false);
+
+    assertThat(builder.meterInterval()).isEqualTo(Duration.ofSeconds(45));
+    assertThat(builder.traceInterval()).isEqualTo(Duration.ofMillis(1500));
+  }
+
+  @Test
+  void resolveIntervals_usesEnvVarTimeouts_whenNotSet() {
+    System.setProperty(OtelEnv.OTLP_TIMEOUT_PROP, "20000");
+
+    var builder = MetricsOpenTelemetry.builder();
+    builder.resolveIntervals(false);
+
+    assertThat(builder.connectTimeout()).isEqualTo(Duration.ofSeconds(20));
+    assertThat(builder.exportTimeout()).isEqualTo(Duration.ofSeconds(20));
+  }
+
+  @Test
+  void resolveIntervals_explicitTimeouts_overrideEnvVar() {
+    System.setProperty(OtelEnv.OTLP_TIMEOUT_PROP, "20000");
+
+    var builder = MetricsOpenTelemetry.builder()
+      .connectTimeout(Duration.ofSeconds(7))
+      .exportTimeout(Duration.ofSeconds(8));
+    builder.resolveIntervals(false);
+
+    assertThat(builder.connectTimeout()).isEqualTo(Duration.ofSeconds(7));
+    assertThat(builder.exportTimeout()).isEqualTo(Duration.ofSeconds(8));
+  }
+
+  @Test
+  void resolveIntervals_protocolDefault_isGrpc() {
+    var builder = MetricsOpenTelemetry.builder();
+    builder.resolveIntervals(false);
+    assertThat(builder.protocol()).isEqualTo(MetricsOpenTelemetry.Protocol.GRPC);
+  }
+
+  @Test
+  void resolveIntervals_protocolFromEnvVar() {
+    System.setProperty(OtelEnv.OTLP_PROTOCOL_PROP, "http/protobuf");
+    var builder = MetricsOpenTelemetry.builder();
+    builder.resolveIntervals(false);
+    assertThat(builder.protocol()).isEqualTo(MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF);
+  }
+
+  @Test
+  void resolveIntervals_explicitProtocol_overridesEnvVar() {
+    System.setProperty(OtelEnv.OTLP_PROTOCOL_PROP, "http/protobuf");
+    var builder = MetricsOpenTelemetry.builder()
+      .protocol(MetricsOpenTelemetry.Protocol.GRPC);
+    builder.resolveIntervals(false);
+    assertThat(builder.protocol()).isEqualTo(MetricsOpenTelemetry.Protocol.GRPC);
   }
 
   @Test
@@ -572,6 +677,32 @@ class MetricsOpenTelemetryTest {
     } finally {
       GlobalOpenTelemetry.resetForTest();
     }
+  }
+
+  @Test
+  void enableWaitIfRunning_timeoutDuration_overload() {
+    var registry = Metrics.createRegistry();
+    var result = MetricsOpenTelemetry.builder()
+      .registry(registry)
+      .metricExporter(new CapturingMetricExporter())
+      .spanExporter(InMemorySpanExporter.create())
+      .enableWaitIfRunning()
+      .timeout(Duration.ofMillis(750))
+      .build();
+
+    try (var sdk = result.sdk()) {
+      assertThat(result.waiter()).isNotNull();
+      result.waiter().waitIfRunning();
+    }
+  }
+
+  @Test
+  void enableWaitIfRunning_timeoutDuration_null_throws() {
+    assertThatThrownBy(() -> MetricsOpenTelemetry.builder()
+      .enableWaitIfRunning()
+      .timeout(null))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessageContaining("timeout");
   }
 
   @Test
