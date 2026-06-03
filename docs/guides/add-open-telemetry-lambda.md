@@ -156,6 +156,11 @@ triggers a forceFlush — this is intentional, and ships startup metrics promptl
 
 ## Step 4 — Wiring with dependency injection
 
+> **⚠ Ordering matters.** The `@Bean` method that returns `TelemetryWaiter` must
+> declare `OpenTelemetry` as a parameter so the DI container invokes
+> `openTelemetry()` first. Without that parameter, the waiter bean may be created
+> before the SDK is built, returning a no-op waiter that silently never flushes.
+
 ### Spring
 
 ```java
@@ -177,8 +182,8 @@ public class MetricsConfig {
   }
 
   @Bean
-  TelemetryWaiter telemetryWaiter() {
-    return waiter;   // captured above
+  TelemetryWaiter telemetryWaiter(OpenTelemetry openTelemetry) {
+    return waiter;   // captured above; OpenTelemetry param forces this to run after openTelemetry()
   }
 
   private TelemetryWaiter waiter;
@@ -208,8 +213,8 @@ public class MetricsConfig {
   }
 
   @Bean
-  TelemetryWaiter telemetryWaiter() {
-    return waiter;
+  TelemetryWaiter telemetryWaiter(OpenTelemetry openTelemetry) {
+    return waiter;   // OpenTelemetry param forces this to run after openTelemetry()
   }
 }
 ```
