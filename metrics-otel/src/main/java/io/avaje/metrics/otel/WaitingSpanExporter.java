@@ -24,9 +24,18 @@ final class WaitingSpanExporter implements SpanExporter {
 
   private final SpanExporter delegate;
   private volatile CompletableResultCode latestExport = CompletableResultCode.ofSuccess();
+  private volatile long lastSuccessAtMillis;
 
   WaitingSpanExporter(SpanExporter delegate) {
     this.delegate = requireNonNull(delegate, "delegate");
+  }
+
+  /**
+   * The epoch milliseconds of the most recent successful export, or {@code 0}
+   * if no successful export has completed yet.
+   */
+  long lastSuccessAtMillis() {
+    return lastSuccessAtMillis;
   }
 
   @Override
@@ -39,6 +48,7 @@ final class WaitingSpanExporter implements SpanExporter {
     result.whenComplete(() -> {
       long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
       if (result.isSuccess()) {
+        lastSuccessAtMillis = System.currentTimeMillis();
         log.log(Level.DEBUG, "OTLP span export completed count:{0} elapsedMs:{1}", count, elapsedMs);
       } else {
         log.log(Level.WARNING, "OTLP span export failed count:" + count

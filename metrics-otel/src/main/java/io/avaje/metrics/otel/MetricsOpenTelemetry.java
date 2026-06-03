@@ -91,6 +91,7 @@ public final class MetricsOpenTelemetry {
 
     private static final String DEFAULT_SCOPE = "io.avaje.metrics";
     private static final Duration DEFAULT_METER_INTERVAL = Duration.ofSeconds(60);
+    private static final Duration DEFAULT_METER_INTERVAL_LAMBDA = Duration.ofSeconds(30);
     private static final Duration DEFAULT_TRACE_INTERVAL = Duration.ofSeconds(10);
     private static final AttributeKey<String> SERVICE_NAME = AttributeKey.stringKey("service.name");
     private static final String METRICS_PATH = "/v1/metrics";
@@ -102,8 +103,8 @@ public final class MetricsOpenTelemetry {
     private String endpoint;
     private String serviceName;
     private long timedThresholdMicros;
-    private Duration meterInterval = DEFAULT_METER_INTERVAL;
-    private Duration traceInterval = DEFAULT_TRACE_INTERVAL;
+    private Duration meterInterval;
+    private Duration traceInterval;
     private MetricRegistry registry;
     private final Map<String, String> resourceAttributes = new LinkedHashMap<>();
     private ContextPropagators propagators = ContextPropagators.create(W3CTraceContextPropagator.getInstance());
@@ -408,7 +409,15 @@ public final class MetricsOpenTelemetry {
      * scheduled background export is currently in progress.
      *
      * <p>This is the last call before {@code build()} - the returned {@link WaiterBuilder}
-     * exposes only the build methods.
+     * exposes only the build methods, {@link WaiterBuilder#timeout(long, TimeUnit)} and
+     * {@link WaiterBuilder#flushIfStale(Duration)}.
+     *
+     * <p>Calling this method also flips two defaults to Lambda-friendly values, but only
+     * when the caller has not already set them explicitly:
+     * <ul>
+     *   <li>{@code meterInterval} → 30 seconds (was 60 seconds)</li>
+     *   <li>{@code flushIfStale} → {@code 2 × meterInterval} (so 60 seconds by default)</li>
+     * </ul>
      *
      * @return a builder that produces an SDK paired with a {@link TelemetryWaiter}
      */
@@ -422,6 +431,7 @@ public final class MetricsOpenTelemetry {
      * @return the built SDK
      */
     public OpenTelemetrySdk build() {
+      resolveIntervals(false);
       return sdkBuilder().build();
     }
 
@@ -431,7 +441,21 @@ public final class MetricsOpenTelemetry {
      * @return the built and globally registered SDK
      */
     public OpenTelemetrySdk buildAndRegisterGlobal() {
+      resolveIntervals(false);
       return sdkBuilder().buildAndRegisterGlobal();
+    }
+
+    /**
+     * Apply default intervals (Lambda-friendly when {@code waiting}, otherwise standard)
+     * for any interval the caller has not explicitly set.
+     */
+    void resolveIntervals(boolean waiting) {
+      if (meterInterval == null) {
+        meterInterval = waiting ? DEFAULT_METER_INTERVAL_LAMBDA : DEFAULT_METER_INTERVAL;
+      }
+      if (traceInterval == null) {
+        traceInterval = DEFAULT_TRACE_INTERVAL;
+      }
     }
 
     Builder metricReader(MetricReader metricReader) {
@@ -586,6 +610,10 @@ public final class MetricsOpenTelemetry {
       return includeTrace;
     }
 
+    Duration meterInterval() {
+      return meterInterval;
+    }
+
     void setMetricExporterField(MetricExporter exporter) {
       this.metricExporter = exporter;
     }
@@ -639,6 +667,7 @@ public final class MetricsOpenTelemetry {
 
     private final Builder builder;
     private long timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
+    private Duration flushIfStale;
 
     WaiterBuilder(Builder builder) {
       this.builder = builder;
@@ -648,7 +677,7 @@ public final class MetricsOpenTelemetry {
      * Set the default timeout used by {@link TelemetryWaiter#waitIfRunning()}.
      *
      * <p>Default is 5 seconds. The timeout applies independently per signal
-     * (metrics, traces).
+     * (metrics, traces) and to any subsequent stale {@code forceFlush()}.
      *
      * @param timeout the wait timeout
      * @param unit the time unit
@@ -660,13 +689,34 @@ public final class MetricsOpenTelemetry {
     }
 
     /**
+     * Set the stale threshold that triggers a synchronous {@code forceFlush()} at the end
+     * of {@link TelemetryWaiter#waitIfRunning()} when no successful background export has
+     * completed within the threshold.
+     *
+     * <p>This is intended for low-traffic Lambda environments where the periodic metric
+     * reader is frozen between invocations and may not tick before the runtime is
+     * suspended again. In busy environments {@code lastSuccess} stays fresh and
+     * forceFlush is a no-op.
+     *
+     * <p>Default is {@code 2 × meterInterval}, so a healthy reader keeps {@code lastSuccess}
+     * younger than the threshold; one missed tick is tolerated; two or more missed ticks
+     * trigger a flush. Pass {@link Duration#ZERO} to disable.
+     *
+     * @param flushIfStale the stale threshold
+     * @return this builder
+     */
+    public WaiterBuilder flushIfStale(Duration flushIfStale) {
+      this.flushIfStale = requireNonNull(flushIfStale);
+      return this;
+    }
+
+    /**
      * Build the {@link OpenTelemetrySdk} paired with a {@link TelemetryWaiter}.
      *
      * @return the result containing both the SDK and the waiter
      */
     public Result build() {
-      var pair = wrap();
-      return new Result(builder.build(), pair);
+      return buildResult(false);
     }
 
     /**
@@ -676,11 +726,11 @@ public final class MetricsOpenTelemetry {
      * @return the result containing both the SDK and the waiter
      */
     public Result buildAndRegisterGlobal() {
-      var pair = wrap();
-      return new Result(builder.buildAndRegisterGlobal(), pair);
+      return buildResult(true);
     }
 
-    private TelemetryWaiter wrap() {
+    private Result buildResult(boolean registerGlobal) {
+      builder.resolveIntervals(true);
       WaitingMetricExporter waitingMetric = null;
       WaitingSpanExporter waitingSpan = null;
       if (builder.includeMeter()) {
@@ -691,7 +741,16 @@ public final class MetricsOpenTelemetry {
         waitingSpan = new WaitingSpanExporter(builder.spanExporter());
         builder.setSpanExporterField(waitingSpan);
       }
-      return new TelemetryWaiter(waitingMetric, waitingSpan, timeoutMillis);
+      var sdk = registerGlobal ? builder.buildAndRegisterGlobal() : builder.build();
+      var waiter = new TelemetryWaiter(waitingMetric, waitingSpan, sdk, timeoutMillis, effectiveFlushIfStale());
+      return new Result(sdk, waiter);
+    }
+
+    private Duration effectiveFlushIfStale() {
+      if (flushIfStale != null) {
+        return flushIfStale;
+      }
+      return builder.meterInterval().multipliedBy(2);
     }
   }
 }

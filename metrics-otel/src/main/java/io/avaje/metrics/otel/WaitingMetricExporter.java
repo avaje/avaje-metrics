@@ -31,9 +31,18 @@ final class WaitingMetricExporter implements MetricExporter {
 
   private final MetricExporter delegate;
   private volatile CompletableResultCode latestExport = CompletableResultCode.ofSuccess();
+  private volatile long lastSuccessAtMillis;
 
   WaitingMetricExporter(MetricExporter delegate) {
     this.delegate = requireNonNull(delegate, "delegate");
+  }
+
+  /**
+   * The epoch milliseconds of the most recent successful export, or {@code 0}
+   * if no successful export has completed yet.
+   */
+  long lastSuccessAtMillis() {
+    return lastSuccessAtMillis;
   }
 
   @Override
@@ -46,6 +55,7 @@ final class WaitingMetricExporter implements MetricExporter {
     result.whenComplete(() -> {
       long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
       if (result.isSuccess()) {
+        lastSuccessAtMillis = System.currentTimeMillis();
         log.log(Level.DEBUG, "OTLP metric export completed count:{0} elapsedMs:{1}", count, elapsedMs);
       } else {
         log.log(Level.WARNING, "OTLP metric export failed count:" + count

@@ -307,6 +307,10 @@ OpenTelemetry backend or collector.
 ## Notes
 
 - `avaje-metrics-otel` is the best default for new OTLP-backed setups.
+- For **AWS Lambda** (or other freeze-on-exit serverless runtimes) follow
+  [add-open-telemetry-lambda.md](add-open-telemetry-lambda.md) — the
+  `enableWaitIfRunning()` builder option is essential to avoid losing metrics on
+  Lambda freeze.
 - `avaje-metrics-otel-producer` is the right choice when the application already owns the SDK.
 - `avaje-metrics-otel-trace` is trace-only.
 - `avaje-metrics-otel-reporter` is a separate scheduled path and should be used intentionally.

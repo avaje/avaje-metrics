@@ -183,10 +183,22 @@ current recording span.
 
 AWS Lambda freezes the worker between invocations, which can interrupt an in-flight OTLP
 HTTP/gRPC export and cause data loss. Use `enableWaitIfRunning()` to obtain a
-`TelemetryWaiter` that, at the end of an invocation, blocks briefly only if a scheduled
-background export is currently in progress. Background reporting via `PeriodicMetricReader`
-and `BatchSpanProcessor` continues on its normal schedule — this does **not** trigger an
-extra export per invocation.
+`TelemetryWaiter` that, at the end of an invocation:
+
+1. blocks briefly if a scheduled background export is currently in progress, and
+2. force-flushes telemetry that has gone stale (no successful background export within
+   the configured `flushIfStale` window).
+
+Calling `enableWaitIfRunning()` switches two defaults to Lambda-friendly values, but
+only when the caller has not already set them explicitly:
+
+- `meterInterval` → 30 seconds (default is 60 seconds for non-Lambda usage)
+- `flushIfStale` → `2 × meterInterval` (60 seconds with the default interval)
+
+In busy environments the periodic reader keeps `lastSuccess` fresh and the stale
+forceFlush is a no-op. In low-traffic environments (e.g. a Lambda invoked once a
+minute, where the periodic reader is frozen between invocations) the stale forceFlush
+ships data on the invocation thread before the runtime is suspended again.
 
 ```java
 import io.avaje.metrics.otel.MetricsOpenTelemetry;
@@ -199,11 +211,12 @@ MetricsOpenTelemetry.Result result = MetricsOpenTelemetry.builder()
     .protocol(MetricsOpenTelemetry.Protocol.HTTP_PROTOBUF)
     .endpoint("http://otel-collector:4318")
     .serviceName("orders-lambda")
-    .exportTimeout(Duration.ofSeconds(30))
-    .connectTimeout(Duration.ofSeconds(10))
+    .exportTimeout(Duration.ofSeconds(5))
+    .connectTimeout(Duration.ofSeconds(2))
     .enableWaitIfRunning()
-    .timeout(5, TimeUnit.SECONDS)
-    .buildAndRegisterGlobal();
+        .timeout(35, TimeUnit.SECONDS)
+        // .flushIfStale(Duration.ofSeconds(60))  // optional, defaults to 2 × meterInterval
+        .buildAndRegisterGlobal();
 
 OpenTelemetrySdk sdk = result.sdk();
 TelemetryWaiter waiter = result.waiter();
@@ -217,6 +230,9 @@ public void handle(Event event) {
   }
 }
 ```
+
+Pass `Duration.ZERO` to `flushIfStale(...)` to disable the stale forceFlush and use only
+the in-flight wait behaviour.
 
 `connectTimeout` and `exportTimeout` are passed through to the default OTLP HTTP/gRPC
 exporters. They have no effect when a custom exporter is supplied via
