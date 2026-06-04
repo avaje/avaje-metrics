@@ -50,13 +50,13 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
    * for the opt-in to legacy flat-prefixed names.
    */
   public DatabaseMetricSupplier(Database database) {
-    this(database, false, true);
+    this(database, false, true, false);
   }
 
-  private DatabaseMetricSupplier(Database database, boolean legacyNames, boolean includePoolMetrics) {
+  private DatabaseMetricSupplier(Database database, boolean legacyNames, boolean includePoolMetrics, boolean verbosePoolMetrics) {
     this.database = Objects.requireNonNull(database, "database");
     this.legacyNames = legacyNames;
-    this.poolStats = includePoolMetrics ? new PoolStatsCollector(database) : null;
+    this.poolStats = includePoolMetrics ? new PoolStatsCollector(database, verbosePoolMetrics) : null;
   }
 
   /**
@@ -115,6 +115,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     private final Database database;
     private boolean legacyNames;
     private boolean includePoolMetrics = true;
+    private boolean verbosePoolMetrics;
 
     Builder(Database database) {
       this.database = Objects.requireNonNull(database, "database");
@@ -130,7 +131,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     }
 
     /**
-     * Disable {@link io.ebean.datasource.DataSourcePool} metrics ({@code ebean.pool.*}).
+     * Disable {@link io.ebean.datasource.DataSourcePool} metrics ({@code datasource.pool.*}).
      * <p>By default these are collected when the database's datasource is a
      * {@code DataSourcePool}.
      */
@@ -139,8 +140,19 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
       return this;
     }
 
+    /**
+     * Emit verbose datasource pool metrics — additionally includes
+     * {@code datasource.pool.busy}, {@code .free}, and {@code .waiting} gauges.
+     * <p>By default only {@code datasource.pool.size} (busy + free) plus the
+     * {@code .acquire} and {@code .wait} timers are emitted.
+     */
+    public Builder verbosePoolMetrics() {
+      this.verbosePoolMetrics = true;
+      return this;
+    }
+
     public DatabaseMetricSupplier build() {
-      return new DatabaseMetricSupplier(database, legacyNames, includePoolMetrics);
+      return new DatabaseMetricSupplier(database, legacyNames, includePoolMetrics, verbosePoolMetrics);
     }
   }
 }

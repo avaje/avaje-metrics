@@ -35,7 +35,7 @@ class PoolStatsCollectorTest {
   }
 
   @Test
-  void mainPoolOnly_emitsAllMetrics() {
+  void mainPoolOnly_normalMode_emitsThreeMetrics() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
     when(pool.status(true)).thenReturn(s);
@@ -45,26 +45,53 @@ class PoolStatsCollectorTest {
     when(db.dataSource()).thenReturn(pool);
     when(db.readOnlyDataSource()).thenReturn(null);
 
-    var collector = new PoolStatsCollector(db);
+    var collector = new PoolStatsCollector(db, false);
     assertThat(collector.hasAny()).isTrue();
 
     var out = new ArrayList<Metric.Statistics>();
     collector.collect(out, true);
 
-    assertThat(out).hasSize(5);
+    assertThat(out).hasSize(3);
 
     var byName = byName(out);
-    assertThat(((GaugeLongStats) byName.get("ebean.pool.busy")).id().tags().array())
-        .containsExactly("db:h2", "pool:main");
+    var size = (GaugeLongStats) byName.get("datasource.pool.size");
+    assertThat(size.value()).isEqualTo(10); // busy 3 + free 7
+    assertThat(size.id().tags().array()).containsExactly("db:h2", "type:main");
 
-    var acquire = (TimerStats) byName.get("ebean.pool.acquire");
+    assertThat(byName).doesNotContainKeys(
+        "datasource.pool.busy", "datasource.pool.free", "datasource.pool.waiting");
+
+    var acquire = (TimerStats) byName.get("datasource.pool.acquire");
     assertThat(acquire.count()).isEqualTo(100);
     assertThat(acquire.total()).isEqualTo(250_000L);
     assertThat(acquire.max()).isEqualTo(8_000L);
 
-    var wait = (TimerStats) byName.get("ebean.pool.wait");
+    var wait = (TimerStats) byName.get("datasource.pool.wait");
     assertThat(wait.count()).isEqualTo(5);
     assertThat(wait.total()).isEqualTo(1_000L);
+  }
+
+  @Test
+  void mainPoolOnly_verboseMode_emitsAllMetrics() {
+    var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
+    var pool = mock(DataSourcePool.class);
+    when(pool.status(true)).thenReturn(s);
+
+    var db = mock(Database.class);
+    when(db.name()).thenReturn("h2");
+    when(db.dataSource()).thenReturn(pool);
+    when(db.readOnlyDataSource()).thenReturn(null);
+
+    var out = new ArrayList<Metric.Statistics>();
+    new PoolStatsCollector(db, true).collect(out, true);
+
+    assertThat(out).hasSize(6);
+    var byName = byName(out);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.size")).value()).isEqualTo(10);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.busy")).value()).isEqualTo(3);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.free")).value()).isEqualTo(7);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.waiting")).value()).isEqualTo(1);
+    assertThat(byName).containsKeys("datasource.pool.acquire", "datasource.pool.wait");
   }
 
   @Test
@@ -75,7 +102,7 @@ class PoolStatsCollectorTest {
     when(db.dataSource()).thenReturn(ds);
     when(db.readOnlyDataSource()).thenReturn(ds);
 
-    var collector = new PoolStatsCollector(db);
+    var collector = new PoolStatsCollector(db, false);
     assertThat(collector.hasAny()).isFalse();
 
     var out = new ArrayList<Metric.Statistics>();
@@ -95,13 +122,13 @@ class PoolStatsCollectorTest {
     when(db.readOnlyDataSource()).thenReturn(pool);
 
     var out = new ArrayList<Metric.Statistics>();
-    new PoolStatsCollector(db).collect(out, true);
+    new PoolStatsCollector(db, false).collect(out, true);
 
     var roleTags = out.stream()
         .map(stat -> stat.id().tags().array()[1])
         .distinct()
         .collect(java.util.stream.Collectors.toList());
-    assertThat(roleTags).containsExactly("pool:main");
+    assertThat(roleTags).containsExactly("type:main");
   }
 
   @Test
@@ -119,13 +146,13 @@ class PoolStatsCollectorTest {
     when(db.readOnlyDataSource()).thenReturn(roPool);
 
     var out = new ArrayList<Metric.Statistics>();
-    new PoolStatsCollector(db).collect(out, true);
+    new PoolStatsCollector(db, false).collect(out, true);
 
-    // 5 metrics × 2 pools
-    assertThat(out).hasSize(10);
+    // 3 metrics × 2 pools (normal mode)
+    assertThat(out).hasSize(6);
     assertThat(out.stream().map(stat -> stat.id().tags().array()[1]).distinct()
         .collect(java.util.stream.Collectors.toList()))
-        .containsExactlyInAnyOrder("pool:main", "pool:readonly");
+        .containsExactlyInAnyOrder("type:main", "type:readonly");
   }
 
   @Test
@@ -139,7 +166,7 @@ class PoolStatsCollectorTest {
     when(db.dataSource()).thenReturn(pool);
     when(db.readOnlyDataSource()).thenReturn(null);
 
-    new PoolStatsCollector(db).collect(new ArrayList<>(), false);
+    new PoolStatsCollector(db, false).collect(new ArrayList<>(), false);
     // verified via the when(pool.status(false)) stub being matched
   }
 

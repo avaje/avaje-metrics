@@ -92,17 +92,33 @@ and is unaffected by the default naming change.
 
 When the database's main and/or read-only `DataSource` is an
 `io.ebean.datasource.DataSourcePool`, the supplier additionally emits connection-pool
-metrics tagged `db=<name>, pool=main|readonly`:
+metrics tagged `db=<name>, type=main|readonly`.
 
-| Metric                  | Type     | Source on `PoolStatus`                                                |
-|-------------------------|----------|-----------------------------------------------------------------------|
-| `ebean.pool.busy`       | gauge    | `busy()` — connections currently in use                               |
-| `ebean.pool.free`       | gauge    | `free()` — connections currently idle                                 |
-| `ebean.pool.waiting`    | gauge    | `waiting()` — threads currently waiting for a connection              |
-| `ebean.pool.acquire`    | timer    | count = `hitCount`, total = `totalAcquireMicros`, max = `maxAcquireMicros` |
-| `ebean.pool.wait`       | timer    | count = `waitCount`, total = `totalWaitMicros`                        |
+**Default (normal) — 3 metrics per pool:**
 
-Disable with the builder if not wanted:
+| Metric                   | Type   | Source on `PoolStatus`                                                |
+|--------------------------|--------|-----------------------------------------------------------------------|
+| `datasource.pool.size`   | gauge  | `busy() + free()`                                                     |
+| `datasource.pool.acquire`| timer  | count = `hitCount`, total = `totalAcquireMicros`, max = `maxAcquireMicros` |
+| `datasource.pool.wait`   | timer  | count = `waitCount`, total = `totalWaitMicros`                        |
+
+**Verbose — adds 3 more gauges via `.verbosePoolMetrics()`:**
+
+| Metric                     | Type   | Source on `PoolStatus`                              |
+|----------------------------|--------|-----------------------------------------------------|
+| `datasource.pool.busy`     | gauge  | `busy()` — connections currently in use             |
+| `datasource.pool.free`     | gauge  | `free()` — connections currently idle               |
+| `datasource.pool.waiting`  | gauge  | `waiting()` — threads waiting for a connection      |
+
+```java
+// verbose mode
+Metrics.addSupplier(
+    DatabaseMetricSupplier.builder(database)
+        .verbosePoolMetrics()
+        .build());
+```
+
+Disable pool metrics entirely:
 
 ```java
 Metrics.addSupplier(
