@@ -42,6 +42,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
 
   private final Database database;
   private final boolean legacyNames;
+  private final PoolStatsCollector poolStats;
   private final ConcurrentMap<String, Metric.ID> idCache = new ConcurrentHashMap<>();
 
   /**
@@ -49,12 +50,13 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
    * for the opt-in to legacy flat-prefixed names.
    */
   public DatabaseMetricSupplier(Database database) {
-    this(database, false);
+    this(database, false, true);
   }
 
-  private DatabaseMetricSupplier(Database database, boolean legacyNames) {
+  private DatabaseMetricSupplier(Database database, boolean legacyNames, boolean includePoolMetrics) {
     this.database = Objects.requireNonNull(database, "database");
     this.legacyNames = legacyNames;
+    this.poolStats = includePoolMetrics ? new PoolStatsCollector(database) : null;
   }
 
   /**
@@ -89,6 +91,9 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     for (MetaCountMetric metric : dbMetrics.countMetrics()) {
       metrics.add(new CounterStats(idFor(metric.name()), metric.count()));
     }
+    if (poolStats != null) {
+      poolStats.collect(metrics, reset);
+    }
     return metrics;
   }
 
@@ -109,6 +114,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
 
     private final Database database;
     private boolean legacyNames;
+    private boolean includePoolMetrics = true;
 
     Builder(Database database) {
       this.database = Objects.requireNonNull(database, "database");
@@ -123,8 +129,18 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
       return this;
     }
 
+    /**
+     * Disable {@link io.ebean.datasource.DataSourcePool} metrics ({@code ebean.pool.*}).
+     * <p>By default these are collected when the database's datasource is a
+     * {@code DataSourcePool}.
+     */
+    public Builder excludePoolMetrics() {
+      this.includePoolMetrics = false;
+      return this;
+    }
+
     public DatabaseMetricSupplier build() {
-      return new DatabaseMetricSupplier(database, legacyNames);
+      return new DatabaseMetricSupplier(database, legacyNames, includePoolMetrics);
     }
   }
 }

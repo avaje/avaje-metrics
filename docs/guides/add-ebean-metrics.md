@@ -88,6 +88,32 @@ Metrics.addSupplier(
 Note: `GraphiteReporter.builder().database(database)` does not go through the supplier
 and is unaffected by the default naming change.
 
+### DataSourcePool metrics
+
+When the database's main and/or read-only `DataSource` is an
+`io.ebean.datasource.DataSourcePool`, the supplier additionally emits connection-pool
+metrics tagged `db=<name>, pool=main|readonly`:
+
+| Metric                  | Type     | Source on `PoolStatus`                                                |
+|-------------------------|----------|-----------------------------------------------------------------------|
+| `ebean.pool.busy`       | gauge    | `busy()` — connections currently in use                               |
+| `ebean.pool.free`       | gauge    | `free()` — connections currently idle                                 |
+| `ebean.pool.waiting`    | gauge    | `waiting()` — threads currently waiting for a connection              |
+| `ebean.pool.acquire`    | timer    | count = `hitCount`, total = `totalAcquireMicros`, max = `maxAcquireMicros` |
+| `ebean.pool.wait`       | timer    | count = `waitCount`, total = `totalWaitMicros`                        |
+
+Disable with the builder if not wanted:
+
+```java
+Metrics.addSupplier(
+    DatabaseMetricSupplier.builder(database)
+        .excludePoolMetrics()
+        .build());
+```
+
+If neither datasource is a `DataSourcePool`, no pool metrics are emitted and there is no
+runtime cost.
+
 ---
 
 ## Step 3 — Collect or export the metrics
