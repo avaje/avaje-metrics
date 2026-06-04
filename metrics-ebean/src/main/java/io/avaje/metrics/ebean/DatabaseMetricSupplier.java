@@ -12,18 +12,56 @@ import io.ebean.meta.*;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Supplies Ebean metrics to avaje-metrics for reporting.
+ *
+ * <p>By default emits avaje-metrics names following the label-tag convention:
+ * <ul>
+ *   <li>{@code ebean.query} with tags {@code type=dto|orm|sql, label=<ebean label>}</li>
+ *   <li>{@code ebean.dml}   with tag  {@code label=<ebean label>}</li>
+ *   <li>{@code ebean.txn}   with tag  {@code label=<ebean label>}</li>
+ *   <li>{@code ebean.l2}    with tags {@code op=..., region=...}</li>
+ * </ul>
+ *
+ * <p>For the older flat-prefixed names (e.g. {@code iud.BProcessLog.insertBatch}) suitable
+ * for hierarchical reporters such as Graphite, opt in via {@link #builder(Database)}:
+ *
+ * <pre>{@code
+ * DatabaseMetricSupplier.builder(database)
+ *     .legacyNames()
+ *     .build();
+ * }</pre>
  */
 public final class DatabaseMetricSupplier implements MetricSupplier {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.metrics.ebean");
 
-  final Database database;
+  private final Database database;
+  private final boolean legacyNames;
+  private final ConcurrentMap<String, Metric.ID> idCache = new ConcurrentHashMap<>();
 
+  /**
+   * Construct a supplier emitting tagged avaje-metrics names. See {@link #builder(Database)}
+   * for the opt-in to legacy flat-prefixed names.
+   */
   public DatabaseMetricSupplier(Database database) {
-    this.database = database;
+    this(database, false);
+  }
+
+  private DatabaseMetricSupplier(Database database, boolean legacyNames) {
+    this.database = Objects.requireNonNull(database, "database");
+    this.legacyNames = legacyNames;
+  }
+
+  /**
+   * Builder for advanced configuration of the supplier.
+   */
+  public static Builder builder(Database database) {
+    return new Builder(database);
   }
 
   @Override
@@ -43,15 +81,50 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
       log.log(Level.DEBUG, dbMetrics.asJson().withHash(false).withNewLine(false).json());
     }
     for (MetaTimedMetric timedMetric : dbMetrics.timedMetrics()) {
-      metrics.add(new TimerStats(Metric.ID.of(timedMetric.name()), timedMetric.count(), timedMetric.total(), timedMetric.max()));
+      metrics.add(new TimerStats(idFor(timedMetric.name()), timedMetric.count(), timedMetric.total(), timedMetric.max()));
     }
     for (MetaQueryMetric metric : dbMetrics.queryMetrics()) {
-      metrics.add(new TimerStats(Metric.ID.of(metric.name()), metric.count(), metric.total(), metric.max()));
+      metrics.add(new TimerStats(idFor(metric.name()), metric.count(), metric.total(), metric.max()));
     }
     for (MetaCountMetric metric : dbMetrics.countMetrics()) {
-      metrics.add(new CounterStats(Metric.ID.of(metric.name()), metric.count()));
+      metrics.add(new CounterStats(idFor(metric.name()), metric.count()));
     }
     return metrics;
   }
 
+  private Metric.ID idFor(String ebeanName) {
+    var cached = idCache.get(ebeanName);
+    if (cached != null) {
+      return cached;
+    }
+    var id = legacyNames ? Metric.ID.of(ebeanName) : EbeanMetricNaming.toId(ebeanName);
+    idCache.put(ebeanName, id);
+    return id;
+  }
+
+  /**
+   * Builder for {@link DatabaseMetricSupplier}.
+   */
+  public static final class Builder {
+
+    private final Database database;
+    private boolean legacyNames;
+
+    Builder(Database database) {
+      this.database = Objects.requireNonNull(database, "database");
+    }
+
+    /**
+     * Use the legacy flat-prefixed metric names (e.g. {@code iud.BProcessLog.insertBatch})
+     * suitable for hierarchical reporters such as Graphite.
+     */
+    public Builder legacyNames() {
+      this.legacyNames = true;
+      return this;
+    }
+
+    public DatabaseMetricSupplier build() {
+      return new DatabaseMetricSupplier(database, legacyNames);
+    }
+  }
 }
