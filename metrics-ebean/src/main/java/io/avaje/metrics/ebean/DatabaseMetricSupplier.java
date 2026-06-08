@@ -121,18 +121,17 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
 
   private Metric.ID idForQuery(MetaQueryMetric metric) {
     var ebeanName = metric.name();
-    var cached = idCache.get(ebeanName);
+    Class<?> beanType = metric.type();
+    var beanTypeName = beanType == null ? null : beanType.getSimpleName();
+    // key by name + bean type: two plans can share a name (e.g. same profile
+    // location, different bean type) yet must map to distinct ids/tags
+    var cacheKey = beanTypeName == null ? ebeanName : ebeanName + '\t' + beanTypeName;
+    var cached = idCache.get(cacheKey);
     if (cached != null) {
       return cached;
     }
-    Metric.ID id;
-    if (legacyNames) {
-      id = Metric.ID.of(ebeanName);
-    } else {
-      Class<?> beanType = metric.type();
-      id = EbeanMetricNaming.toId(ebeanName, beanType == null ? null : beanType.getSimpleName());
-    }
-    idCache.put(ebeanName, id);
+    var id = legacyNames ? Metric.ID.of(ebeanName) : EbeanMetricNaming.toId(ebeanName, beanTypeName);
+    idCache.put(cacheKey, id);
     return id;
   }
 
