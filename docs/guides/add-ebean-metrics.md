@@ -63,15 +63,19 @@ small set of metric names plus tags:
 | Ebean prefix              | Metric name   | Tags                              |
 |---------------------------|---------------|-----------------------------------|
 | `iud.X`                   | `ebean.dml`   | `label=X`                         |
-| `dto.X`                   | `ebean.query` | `type=dto, label=X`               |
-| `orm.X`                   | `ebean.query` | `type=orm, label=X`               |
-| `sql.X`                   | `ebean.query` | `type=sql, label=X`               |
+| `dto.X`                   | `ebean.query` | `kind=dto, type=<bean>, label=X`  |
+| `orm.X`                   | `ebean.query` | `kind=orm, type=<bean>, label=X`  |
+| `sql.X`                   | `ebean.query` | `kind=sql, type=<bean>, label=X`  |
 | `txn.named.X` / `txn.X`   | `ebean.txn`   | `label=X`                         |
 | `l2.<region>.<op>`        | `ebean.l2`    | `op=<op>, region=<region>`        |
 | (anything else)           | `ebean.other` | `label=<original ebean name>`     |
 
 This shape works well for tag-aware backends such as Prometheus / OTLP, where all read
-paths roll up under `ebean_query` and can be filtered by `type`.
+paths roll up under `ebean_query` and can be filtered by `kind` (query category:
+orm/dto/sql) or `type` (the queried bean/entity simple name). The `type` tag is derived
+from `MetaQueryMetric.type()` and is especially useful for secondary `_lazy`/`_query`
+loads whose name reflects the parent/root query rather than the loaded entity; it is
+omitted when the bean type is unknown.
 
 ### Legacy flat names (Graphite-friendly)
 

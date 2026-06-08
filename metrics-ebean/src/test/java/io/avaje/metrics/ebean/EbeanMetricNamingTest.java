@@ -14,24 +14,51 @@ class EbeanMetricNamingTest {
   }
 
   @Test
-  void dto_mapsToQueryWithType() {
+  void dto_mapsToQueryWithKind() {
     var id = EbeanMetricNaming.toId("dto.SensorState");
     assertThat(id.name()).isEqualTo("ebean.query");
-    assertThat(id.tags().array()).containsExactly("type:dto", "label:SensorState");
+    assertThat(id.tags().array()).containsExactly("kind:dto", "label:SensorState");
   }
 
   @Test
-  void orm_mapsToQueryWithType() {
+  void orm_mapsToQueryWithKind() {
     var id = EbeanMetricNaming.toId("orm.Organisation.findById");
     assertThat(id.name()).isEqualTo("ebean.query");
-    assertThat(id.tags().array()).containsExactly("type:orm", "label:Organisation.findById");
+    assertThat(id.tags().array()).containsExactly("kind:orm", "label:Organisation.findById");
   }
 
   @Test
-  void sql_mapsToQueryWithType() {
+  void sql_mapsToQueryWithKind() {
     var id = EbeanMetricNaming.toId("sql.someRawQuery");
     assertThat(id.name()).isEqualTo("ebean.query");
-    assertThat(id.tags().array()).containsExactly("type:sql", "label:someRawQuery");
+    assertThat(id.tags().array()).containsExactly("kind:sql", "label:someRawQuery");
+  }
+
+  @Test
+  void orm_withBeanType_addsTypeTag() {
+    var id = EbeanMetricNaming.toId("orm.Customer.custMain.contacts.lazy", "Contact");
+    assertThat(id.name()).isEqualTo("ebean.query");
+    assertThat(id.tags().array())
+      .containsExactly("kind:orm", "type:Contact", "label:Customer.custMain.contacts.lazy");
+  }
+
+  @Test
+  void dto_withBeanType_addsTypeTag() {
+    var id = EbeanMetricNaming.toId("dto.SensorState", "SensorState");
+    assertThat(id.name()).isEqualTo("ebean.query");
+    assertThat(id.tags().array()).containsExactly("kind:dto", "type:SensorState", "label:SensorState");
+  }
+
+  @Test
+  void query_nullBeanType_omitsTypeTag() {
+    var id = EbeanMetricNaming.toId("orm.Organisation.findById", null);
+    assertThat(id.tags().array()).containsExactly("kind:orm", "label:Organisation.findById");
+  }
+
+  @Test
+  void query_emptyBeanType_omitsTypeTag() {
+    var id = EbeanMetricNaming.toId("orm.Organisation.findById", "");
+    assertThat(id.tags().array()).containsExactly("kind:orm", "label:Organisation.findById");
   }
 
   @Test

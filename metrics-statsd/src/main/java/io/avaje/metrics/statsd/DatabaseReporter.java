@@ -117,13 +117,25 @@ final class DatabaseReporter implements StatsdReporter.Reporter {
 
     private void reportQueryMetric(MetaQueryMetric metric) {
       final var name = metric.name();
+      final var kindTag = queryKindTag(name);
       final var queryTag = queryTag(name);
-      if (name.startsWith("orm")) {
-        reportMetric(metric, queryMetricNames, dbTag, "type:orm", queryTag);
-      } else if (name.startsWith("sql")) {
-        reportMetric(metric, queryMetricNames, dbTag, "type:sql", queryTag);
+      final var beanType = metric.type();
+      if (beanType == null) {
+        reportMetric(metric, queryMetricNames, dbTag, kindTag, queryTag);
       } else {
-        reportMetric(metric, queryMetricNames, dbTag, "type:other", queryTag);
+        reportMetric(metric, queryMetricNames, dbTag, kindTag, "type:" + beanType.getSimpleName(), queryTag);
+      }
+    }
+
+    private String queryKindTag(String name) {
+      if (name.startsWith("orm")) {
+        return "kind:orm";
+      } else if (name.startsWith("sql")) {
+        return "kind:sql";
+      } else if (name.startsWith("dto")) {
+        return "kind:dto";
+      } else {
+        return "kind:other";
       }
     }
 

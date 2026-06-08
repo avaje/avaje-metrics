@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  *
  * <p>By default emits avaje-metrics names following the label-tag convention:
  * <ul>
- *   <li>{@code ebean.query} with tags {@code type=dto|orm|sql, label=<ebean label>}</li>
+ *   <li>{@code ebean.query} with tags {@code kind=dto|orm|sql, type=<bean>, label=<ebean label>}</li>
  *   <li>{@code ebean.dml}   with tag  {@code label=<ebean label>}</li>
  *   <li>{@code ebean.txn}   with tag  {@code label=<ebean label>}</li>
  *   <li>{@code ebean.l2}    with tags {@code op=..., region=...}</li>
@@ -98,7 +98,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
       metrics.add(new TimerStats(idFor(timedMetric.name()), timedMetric.count(), timedMetric.total(), timedMetric.max()));
     }
     for (MetaQueryMetric metric : dbMetrics.queryMetrics()) {
-      metrics.add(new TimerStats(idFor(metric.name()), metric.count(), metric.total(), metric.max()));
+      metrics.add(new TimerStats(idForQuery(metric), metric.count(), metric.total(), metric.max()));
     }
     for (MetaCountMetric metric : dbMetrics.countMetrics()) {
       metrics.add(new CounterStats(idFor(metric.name()), metric.count()));
@@ -115,6 +115,23 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
       return cached;
     }
     var id = legacyNames ? Metric.ID.of(ebeanName) : EbeanMetricNaming.toId(ebeanName);
+    idCache.put(ebeanName, id);
+    return id;
+  }
+
+  private Metric.ID idForQuery(MetaQueryMetric metric) {
+    var ebeanName = metric.name();
+    var cached = idCache.get(ebeanName);
+    if (cached != null) {
+      return cached;
+    }
+    Metric.ID id;
+    if (legacyNames) {
+      id = Metric.ID.of(ebeanName);
+    } else {
+      Class<?> beanType = metric.type();
+      id = EbeanMetricNaming.toId(ebeanName, beanType == null ? null : beanType.getSimpleName());
+    }
     idCache.put(ebeanName, id);
     return id;
   }
