@@ -1,9 +1,7 @@
 package io.avaje.metrics.ebean;
 
 import io.avaje.applog.AppLog;
-import io.avaje.metrics.CollectionMode;
-import io.avaje.metrics.Metric;
-import io.avaje.metrics.MetricSupplier;
+import io.avaje.metrics.*;
 import io.avaje.metrics.stats.CounterStats;
 import io.avaje.metrics.stats.TimerStats;
 import io.ebean.Database;
@@ -34,7 +32,8 @@ import java.util.function.Consumer;
  * <pre>{@code
  * DatabaseMetricSupplier.builder(database)
  *     .legacyNames()
- *     .build();
+ *     .build()
+ *     .register(); // usually register with the default registry
  * }</pre>
  */
 public final class DatabaseMetricSupplier implements MetricSupplier {
@@ -67,6 +66,27 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
    */
   public static Builder builder(Database database) {
     return new Builder(database);
+  }
+
+  /**
+   * Register this as a MetricSupplier to the default Metrics registry.
+   * See {@link #register(MetricRegistry)} for registration to a custom registry.
+   *
+   * @return This MetricSupplier
+   */
+  public DatabaseMetricSupplier register() {
+    Metrics.addSupplier(this);
+    return this;
+  }
+
+  /**
+   * Register this MetricSupplier to the MetricRegistry.
+   *
+   * @return This MetricSupplier
+   */
+  public DatabaseMetricSupplier register(MetricRegistry registry) {
+    registry.addSupplier(this);
+    return this;
   }
 
   @Override
