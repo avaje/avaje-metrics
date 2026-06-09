@@ -4,12 +4,14 @@ import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.Metrics;
 import io.ebean.Database;
+import io.ebean.meta.ServerMetrics;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 final class DGraphiteBuilder implements GraphiteReporter.Builder {
 
@@ -68,6 +70,12 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
   @Override
   public DGraphiteBuilder database(Database database) {
     reporters.add(DatabaseReporter.reporter(database));
+    return this;
+  }
+
+  @Override
+  public DGraphiteBuilder database(Database database, Consumer<ServerMetrics> forwardTo) {
+    reporters.add(DatabaseReporter.reporter(database, forwardTo));
     return this;
   }
 

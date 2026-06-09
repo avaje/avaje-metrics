@@ -3,8 +3,10 @@ package io.avaje.metrics.graphite;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricSupplier;
 import io.ebean.Database;
+import io.ebean.meta.ServerMetrics;
 
 import javax.net.SocketFactory;
+import java.util.function.Consumer;
 
 /**
  * Report metrics to a carbon graphite server.
@@ -116,6 +118,22 @@ public interface GraphiteReporter {
      * report metrics from.
      */
     Builder database(Database database);
+
+    /**
+     * Include Ebean Database metrics in the reporting and additionally forward
+     * each collected {@link ServerMetrics} snapshot to the given consumer.
+     * <p>
+     * The metrics are reported to graphite exactly as {@link #database(Database)}
+     * (preserving the {@code <dbName>.} prefixed names) using a single
+     * reset-on-read collection. That same snapshot is then passed to the
+     * consumer, allowing another sink (for example {@code InsightClient} from
+     * ebean-insight, which implements {@code Consumer<ServerMetrics>}) to share
+     * the snapshot without performing its own reset-on-read poll.
+     *
+     * @param database  the database to report metrics from
+     * @param forwardTo consumer to additionally receive each collected snapshot
+     */
+    Builder database(Database database, Consumer<ServerMetrics> forwardTo);
 
     /**
      * Include the metric registry.
