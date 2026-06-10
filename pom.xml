@@ -30,6 +30,7 @@
     <module>metrics</module>
     <module>metrics-graphite</module>
     <module>metrics-ebean</module>
+    <module>metrics-ebean-insight</module>
     <module>metrics-statsd</module>
     <module>metrics-prometheus</module>
     <module>metrics-otel-trace</module>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>avaje-metrics-parent</artifactId>
+    <groupId>io.avaje</groupId>
+    <version>9.16-RC6</version>
+  </parent>
+
+  <artifactId>avaje-metrics-ebean-insight</artifactId>
+  <name>avaje-metrics-ebean-insight</name>
+  <description>Convenience aggregator combining avaje-metrics-ebean and ebean-insight.</description>
+
+  <properties>
+    <ebean-insight.version>2.0-RC11</ebean-insight.version>
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-metrics</artifactId>
+      <version>9.16-RC6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-metrics-ebean</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.ebean</groupId>
+      <artifactId>ebean-insight</artifactId>
+      <version>${ebean-insight.version}</version>
+    </dependency>
+
+    <!-- provided: consuming application supplies its own Ebean at runtime -->
+    <dependency>
+      <groupId>io.ebean</groupId>
+      <artifactId>ebean-api</artifactId>
+      <version>14.10.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>
