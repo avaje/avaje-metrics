@@ -31,11 +31,12 @@ class PoolStatsCollectorTest {
     when(s.waitCount()).thenReturn(waits);
     when(s.totalWaitMicros()).thenReturn(totalWaitMicros);
     when(s.maxAcquireMicros()).thenReturn(maxAcquireMicros);
+    when(s.highWaterMark()).thenReturn(busy);
     return s;
   }
 
   @Test
-  void mainPoolOnly_normalMode_emitsThreeMetrics() {
+  void mainPoolOnly_normalMode_emitsFourMetrics() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
     when(pool.status(true)).thenReturn(s);
@@ -51,12 +52,15 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     collector.collect(out, true);
 
-    assertThat(out).hasSize(3);
+    assertThat(out).hasSize(4);
 
     var byName = byName(out);
     var size = (GaugeLongStats) byName.get("datasource.pool.size");
     assertThat(size.value()).isEqualTo(10); // busy 3 + free 7
     assertThat(size.id().tags().array()).containsExactly("db:h2", "type:main");
+
+    var busyHwm = (GaugeLongStats) byName.get("datasource.pool.busyHwm");
+    assertThat(busyHwm.value()).isEqualTo(3); // highWaterMark
 
     assertThat(byName).doesNotContainKeys(
         "datasource.pool.busy", "datasource.pool.free", "datasource.pool.waiting");
@@ -85,9 +89,10 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     new PoolStatsCollector(db, true).collect(out, true);
 
-    assertThat(out).hasSize(6);
+    assertThat(out).hasSize(7);
     var byName = byName(out);
     assertThat(((GaugeLongStats) byName.get("datasource.pool.size")).value()).isEqualTo(10);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.busyHwm")).value()).isEqualTo(3);
     assertThat(((GaugeLongStats) byName.get("datasource.pool.busy")).value()).isEqualTo(3);
     assertThat(((GaugeLongStats) byName.get("datasource.pool.free")).value()).isEqualTo(7);
     assertThat(((GaugeLongStats) byName.get("datasource.pool.waiting")).value()).isEqualTo(1);
@@ -148,8 +153,8 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     new PoolStatsCollector(db, false).collect(out, true);
 
-    // 3 metrics × 2 pools (normal mode)
-    assertThat(out).hasSize(6);
+    // 4 metrics × 2 pools (normal mode, reset=true adds busyHwm)
+    assertThat(out).hasSize(8);
     assertThat(out.stream().map(stat -> stat.id().tags().array()[1]).distinct()
         .collect(java.util.stream.Collectors.toList()))
         .containsExactlyInAnyOrder("type:main", "type:readonly");
