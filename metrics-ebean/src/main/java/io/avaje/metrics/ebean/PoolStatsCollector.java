@@ -17,16 +17,14 @@ import java.util.List;
  *
  * <p>Default (normal) metric shape:
  * <ul>
- *   <li>{@code datasource.pool.size}    — gauge — busy + free</li>
+ *   <li>{@code datasource.pool.size}    — gauge — busy + free (current total connections)</li>
  *   <li>{@code datasource.pool.acquire} — timer — count = hits, total = totalAcquireMicros, max = maxAcquireMicros</li>
  *   <li>{@code datasource.pool.wait}    — timer — count = waits, total = totalWaitMicros</li>
  * </ul>
  *
- * <p>Verbose mode additionally emits:
+ * <p>Verbose mode additionally emits (only when collected in reset/delta mode):
  * <ul>
- *   <li>{@code datasource.pool.busy}    — gauge — connections currently in use</li>
- *   <li>{@code datasource.pool.free}    — gauge — connections currently idle</li>
- *   <li>{@code datasource.pool.waiting} — gauge — threads currently waiting for a connection</li>
+ *   <li>{@code datasource.pool.busyHwm} — gauge — peak busy connections since the last reset</li>
  * </ul>
  *
  * <p>All metrics carry tags {@code db=<name>, type=main|readonly}.
@@ -62,9 +60,6 @@ final class PoolStatsCollector {
     private final boolean verbose;
     private final Metric.ID sizeId;
     private final Metric.ID busyHwmId;
-    private final Metric.ID busyId;
-    private final Metric.ID freeId;
-    private final Metric.ID waitingId;
     private final Metric.ID acquireId;
     private final Metric.ID waitId;
 
@@ -76,15 +71,6 @@ final class PoolStatsCollector {
       this.acquireId = Metric.ID.of("datasource.pool.acquire", tags);
       this.busyHwmId = Metric.ID.of("datasource.pool.busyHwm", tags);
       this.waitId = Metric.ID.of("datasource.pool.wait", tags);
-      if (verbose) {
-        this.busyId = Metric.ID.of("datasource.pool.busy", tags);
-        this.freeId = Metric.ID.of("datasource.pool.free", tags);
-        this.waitingId = Metric.ID.of("datasource.pool.waiting", tags);
-      } else {
-        this.busyId = null;
-        this.freeId = null;
-        this.waitingId = null;
-      }
     }
 
     void collect(List<Metric.Statistics> out, boolean reset) {
@@ -92,16 +78,11 @@ final class PoolStatsCollector {
       int busy = status.busy();
       int free = status.free();
       out.add(new GaugeLongStats(sizeId, busy + free));
-      if (reset) {
-        out.add(new GaugeLongStats(busyHwmId, status.highWaterMark()));
-      }
-      if (verbose) {
-        out.add(new GaugeLongStats(busyId, busy));
-        out.add(new GaugeLongStats(freeId, free));
-        out.add(new GaugeLongStats(waitingId, status.waiting()));
-      }
       out.add(new TimerStats(acquireId, status.hitCount(), status.totalAcquireMicros(), status.maxAcquireMicros()));
       out.add(new TimerStats(waitId, status.waitCount(), status.totalWaitMicros(), 0));
+      if (verbose && reset) {
+        out.add(new GaugeLongStats(busyHwmId, status.highWaterMark()));
+      }
     }
   }
 }

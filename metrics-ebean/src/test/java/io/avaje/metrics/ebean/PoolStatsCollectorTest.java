@@ -36,7 +36,7 @@ class PoolStatsCollectorTest {
   }
 
   @Test
-  void mainPoolOnly_normalMode_emitsFourMetrics() {
+  void mainPoolOnly_normalMode_emitsThreeMetrics() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
     when(pool.status(true)).thenReturn(s);
@@ -52,17 +52,16 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     collector.collect(out, true);
 
-    assertThat(out).hasSize(4);
+    assertThat(out).hasSize(3);
 
     var byName = byName(out);
     var size = (GaugeLongStats) byName.get("datasource.pool.size");
     assertThat(size.value()).isEqualTo(10); // busy 3 + free 7
     assertThat(size.id().tags().array()).containsExactly("db:h2", "type:main");
 
-    var busyHwm = (GaugeLongStats) byName.get("datasource.pool.busyHwm");
-    assertThat(busyHwm.value()).isEqualTo(3); // highWaterMark
-
+    // normal mode: no busyHwm (verbose only) and no instantaneous gauges
     assertThat(byName).doesNotContainKeys(
+        "datasource.pool.busyHwm",
         "datasource.pool.busy", "datasource.pool.free", "datasource.pool.waiting");
 
     var acquire = (TimerStats) byName.get("datasource.pool.acquire");
@@ -76,7 +75,7 @@ class PoolStatsCollectorTest {
   }
 
   @Test
-  void mainPoolOnly_verboseMode_emitsAllMetrics() {
+  void mainPoolOnly_verboseMode_emitsBusyHwm() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
     when(pool.status(true)).thenReturn(s);
@@ -89,14 +88,33 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     new PoolStatsCollector(db, true).collect(out, true);
 
-    assertThat(out).hasSize(7);
+    assertThat(out).hasSize(4);
     var byName = byName(out);
     assertThat(((GaugeLongStats) byName.get("datasource.pool.size")).value()).isEqualTo(10);
-    assertThat(((GaugeLongStats) byName.get("datasource.pool.busyHwm")).value()).isEqualTo(3);
-    assertThat(((GaugeLongStats) byName.get("datasource.pool.busy")).value()).isEqualTo(3);
-    assertThat(((GaugeLongStats) byName.get("datasource.pool.free")).value()).isEqualTo(7);
-    assertThat(((GaugeLongStats) byName.get("datasource.pool.waiting")).value()).isEqualTo(1);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.busyHwm")).value()).isEqualTo(3); // highWaterMark
     assertThat(byName).containsKeys("datasource.pool.acquire", "datasource.pool.wait");
+    // instantaneous gauges are no longer emitted, even in verbose mode
+    assertThat(byName).doesNotContainKeys(
+        "datasource.pool.busy", "datasource.pool.free", "datasource.pool.waiting");
+  }
+
+  @Test
+  void mainPoolOnly_verboseMode_cumulative_noBusyHwm() {
+    var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
+    var pool = mock(DataSourcePool.class);
+    when(pool.status(false)).thenReturn(s);
+
+    var db = mock(Database.class);
+    when(db.name()).thenReturn("h2");
+    when(db.dataSource()).thenReturn(pool);
+    when(db.readOnlyDataSource()).thenReturn(null);
+
+    var out = new ArrayList<Metric.Statistics>();
+    new PoolStatsCollector(db, true).collect(out, false);
+
+    // busyHwm only emitted on reset/delta collection
+    assertThat(out).hasSize(3);
+    assertThat(byName(out)).doesNotContainKey("datasource.pool.busyHwm");
   }
 
   @Test
@@ -153,8 +171,8 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     new PoolStatsCollector(db, false).collect(out, true);
 
-    // 4 metrics × 2 pools (normal mode, reset=true adds busyHwm)
-    assertThat(out).hasSize(8);
+    // 3 metrics × 2 pools (normal mode: size + acquire + wait, no busyHwm)
+    assertThat(out).hasSize(6);
     assertThat(out.stream().map(stat -> stat.id().tags().array()[1]).distinct()
         .collect(java.util.stream.Collectors.toList()))
         .containsExactlyInAnyOrder("type:main", "type:readonly");

@@ -190,8 +190,9 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     }
 
     /**
-     * Emit verbose datasource pool metrics — additionally includes
-     * {@code datasource.pool.busy}, {@code .free}, and {@code .waiting} gauges.
+     * Emit verbose datasource pool metrics — additionally includes the
+     * {@code datasource.pool.busyHwm} gauge (peak busy connections since the last
+     * reset), emitted when metrics are collected in reset/delta mode.
      * <p>By default only {@code datasource.pool.size} (busy + free) plus the
      * {@code .acquire} and {@code .wait} timers are emitted.
      */
