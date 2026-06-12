@@ -136,6 +136,18 @@ public interface MetricRegistry extends JvmMetrics {
     void write(Appendable appendable);
 
     /**
+     * Write the metrics in JSON form (v2) to the given appendable.
+     * <p>
+     * The v2 form emits tags as a single canonical sorted {@code "key:value,key2:value2"}
+     * string rather than a JSON array. As with {@link #write(Appendable)} this doesn't add
+     * the JSON array start and end.
+     * </p>
+     *
+     * @param appendable The buffer to write the metrics to
+     */
+    void writeV2(Appendable appendable);
+
+    /**
      * Collect and return the metrics as JSON array content.
      */
     String asJson();

@@ -58,6 +58,28 @@ class CollectAsJsonTest {
   }
 
   @Test
+  void collectAsJsonV2_tagsAsSortedString() {
+
+    Counter counter = registry.counter("my.count");
+    Counter counter2 = registry.counterBuilder("my.count").tags(Tags.of("type:Customer", "kind:orm", "label:X")).build();
+    counter.inc();
+    counter2.inc();
+    counter2.inc();
+
+    var jsonMetrics = registry.collectAsJson();
+    StringBuilder sb = new StringBuilder("[\n");
+    jsonMetrics.writeV2(sb);
+    sb.append("]");
+    String v2 = sb.toString();
+
+    // no-tag metric unchanged
+    assertThat(v2).contains("{\"name\":\"my.count\",\"value\":1}");
+    // tags emitted as a single canonical sorted "key:value,..." string (not a JSON array)
+    assertThat(v2).contains("{\"name\":\"my.count\",\"value\":2,\"tags\":\"kind:orm,label:X,type:Customer\"}");
+    assertThat(v2).doesNotContain("\"tags\":[");
+  }
+
+  @Test
   void collectAsJsonCumulative() {
 
     Counter counter = registry.counter("my.cumulative.count");

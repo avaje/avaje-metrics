@@ -5,6 +5,7 @@ import io.avaje.metrics.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,16 +16,21 @@ final class JsonWriter implements Metric.Visitor {
   private static final DecimalFormat formatDecimal = new DecimalFormat("0.0#");
 
   private final Appendable buffer;
-
   private final List<Metric.Statistics> metrics;
+  private final boolean v2;
 
   static void writeTo(Appendable writer, List<Metric.Statistics> metrics) {
-    new JsonWriter(writer, metrics).write();
+    new JsonWriter(writer, metrics, false).write();
   }
 
-  private JsonWriter(Appendable writer, List<Metric.Statistics> metrics) {
+  static void writeToV2(Appendable writer, List<Metric.Statistics> metrics) {
+    new JsonWriter(writer, metrics, true).write();
+  }
+
+  private JsonWriter(Appendable writer, List<Metric.Statistics> metrics, boolean v2) {
     this.buffer = writer;
     this.metrics = metrics;
+    this.v2 = v2;
   }
 
   private void write() {
@@ -59,17 +65,31 @@ final class JsonWriter implements Metric.Visitor {
     if (!tags.isEmpty()) {
       buffer.append(',');
       writeKey("tags");
-      buffer.append('[');
-      String[] tagVals = tags.array();
-      for (int i = 0; i < tagVals.length; i++) {
-        if (i > 0) {
-          buffer.append(',');
+      if (v2) {
+        writeValue(canonicalTags(tags));
+      } else {
+        buffer.append('[');
+        String[] tagVals = tags.array();
+        for (int i = 0; i < tagVals.length; i++) {
+          if (i > 0) {
+            buffer.append(',');
+          }
+          writeValue(tagVals[i]);
         }
-        writeValue(tagVals[i]);
+        buffer.append(']');
       }
-      buffer.append(']');
     }
     buffer.append('}');
+  }
+
+  /**
+   * Canonical v2 tag form: the {@code key:value} entries sorted and joined with commas
+   * (e.g. {@code "kind:orm,label:Customer.findList,type:Customer"}).
+   */
+  private static String canonicalTags(Tags tags) {
+    String[] tagVals = tags.array().clone();
+    Arrays.sort(tagVals);
+    return String.join(",", tagVals);
   }
 
   @Override

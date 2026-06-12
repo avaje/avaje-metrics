@@ -612,6 +612,11 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
     }
 
     @Override
+    public void writeV2(Appendable appendable) {
+      JsonWriter.writeToV2(appendable, provider.collectMetrics(mode));
+    }
+
+    @Override
     public String asJson() {
       final var buffer = new StringBuilder(1000);
       buffer.append("[\n");
