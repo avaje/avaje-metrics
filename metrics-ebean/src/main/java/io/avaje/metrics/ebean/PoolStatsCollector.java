@@ -22,6 +22,10 @@ import java.util.List;
  *   <li>{@code datasource.pool.wait}    — timer — count = waits, total = totalWaitMicros</li>
  * </ul>
  *
+ * <p>The {@code acquire} and {@code wait} timers are emitted only when there was activity
+ * (count &gt; 0) during the collection interval — idle intervals (and the very common case of
+ * no waits) omit them rather than reporting zero-count timers.
+ *
  * <p>Verbose mode additionally emits (only when collected in reset/delta mode):
  * <ul>
  *   <li>{@code datasource.pool.busyHwm} — gauge — peak busy connections since the last reset</li>
@@ -78,8 +82,14 @@ final class PoolStatsCollector {
       int busy = status.busy();
       int free = status.free();
       out.add(new GaugeLongStats(sizeId, busy + free));
-      out.add(new TimerStats(acquireId, status.hitCount(), status.totalAcquireMicros(), status.maxAcquireMicros()));
-      out.add(new TimerStats(waitId, status.waitCount(), status.totalWaitMicros(), 0));
+      int hitCount = status.hitCount();
+      if (hitCount > 0) {
+        out.add(new TimerStats(acquireId, hitCount, status.totalAcquireMicros(), status.maxAcquireMicros()));
+      }
+      int waitCount = status.waitCount();
+      if (waitCount > 0) {
+        out.add(new TimerStats(waitId, waitCount, status.totalWaitMicros(), 0));
+      }
       if (verbose && reset) {
         out.add(new GaugeLongStats(busyHwmId, status.highWaterMark()));
       }

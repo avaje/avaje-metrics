@@ -171,11 +171,53 @@ class PoolStatsCollectorTest {
     var out = new ArrayList<Metric.Statistics>();
     new PoolStatsCollector(db, false).collect(out, true);
 
-    // 3 metrics × 2 pools (normal mode: size + acquire + wait, no busyHwm)
-    assertThat(out).hasSize(6);
+    // both pools idle (no hits, no waits) -> only the size gauge per pool
+    assertThat(out).hasSize(2);
     assertThat(out.stream().map(stat -> stat.id().tags().array()[1]).distinct()
         .collect(java.util.stream.Collectors.toList()))
         .containsExactlyInAnyOrder("type:main", "type:readonly");
+  }
+
+  @Test
+  void idleInterval_emitsOnlySize() {
+    var s = status(0, 5, 0, 0, 0L, 0, 0L, 0L); // no hits, no waits
+    var pool = mock(DataSourcePool.class);
+    when(pool.status(true)).thenReturn(s);
+
+    var db = mock(Database.class);
+    when(db.name()).thenReturn("h2");
+    when(db.dataSource()).thenReturn(pool);
+    when(db.readOnlyDataSource()).thenReturn(null);
+
+    var out = new ArrayList<Metric.Statistics>();
+    new PoolStatsCollector(db, false).collect(out, true);
+
+    assertThat(out).hasSize(1);
+    var byName = byName(out);
+    assertThat(((GaugeLongStats) byName.get("datasource.pool.size")).value()).isEqualTo(5);
+    assertThat(byName).doesNotContainKeys("datasource.pool.acquire", "datasource.pool.wait");
+  }
+
+  @Test
+  void acquireWithoutWaits_emitsSizeAndAcquireOnly() {
+    var s = status(3, 7, 0, 100, 250_000L, 0, 0L, 8_000L); // hits but no waits
+    var pool = mock(DataSourcePool.class);
+    when(pool.status(true)).thenReturn(s);
+
+    var db = mock(Database.class);
+    when(db.name()).thenReturn("h2");
+    when(db.dataSource()).thenReturn(pool);
+    when(db.readOnlyDataSource()).thenReturn(null);
+
+    var out = new ArrayList<Metric.Statistics>();
+    new PoolStatsCollector(db, false).collect(out, true);
+
+    assertThat(out).hasSize(2);
+    var byName = byName(out);
+    assertThat(byName).containsKeys("datasource.pool.size", "datasource.pool.acquire");
+    assertThat(byName).doesNotContainKey("datasource.pool.wait");
+    var acquire = (TimerStats) byName.get("datasource.pool.acquire");
+    assertThat(acquire.count()).isEqualTo(100);
   }
 
   @Test
