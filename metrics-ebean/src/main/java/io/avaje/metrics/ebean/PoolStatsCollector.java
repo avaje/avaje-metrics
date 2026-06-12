@@ -61,6 +61,7 @@ final class PoolStatsCollector {
     private final DataSourcePool pool;
     private final boolean verbose;
     private final Metric.ID sizeId;
+    private final Metric.ID busyHwmId;
     private final Metric.ID busyId;
     private final Metric.ID freeId;
     private final Metric.ID waitingId;
@@ -73,6 +74,7 @@ final class PoolStatsCollector {
       var tags = Tags.of("db:" + db, "type:" + role);
       this.sizeId = Metric.ID.of("datasource.pool.size", tags);
       this.acquireId = Metric.ID.of("datasource.pool.acquire", tags);
+      this.busyHwmId = Metric.ID.of("datasource.pool.busyHwm", tags);
       this.waitId = Metric.ID.of("datasource.pool.wait", tags);
       if (verbose) {
         this.busyId = Metric.ID.of("datasource.pool.busy", tags);
@@ -90,6 +92,9 @@ final class PoolStatsCollector {
       int busy = status.busy();
       int free = status.free();
       out.add(new GaugeLongStats(sizeId, busy + free));
+      if (reset) {
+        out.add(new GaugeLongStats(busyHwmId, status.highWaterMark()));
+      }
       if (verbose) {
         out.add(new GaugeLongStats(busyId, busy));
         out.add(new GaugeLongStats(freeId, free));
