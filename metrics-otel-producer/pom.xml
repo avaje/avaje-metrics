@@ -11,7 +11,7 @@
   <name>avaje-metrics-otel-producer</name>
 
   <properties>
-    <otel.version>1.62.0</otel.version>
+    <otel.version>1.63.0</otel.version>
     <surefire.useModulePath>false</surefire.useModulePath>
   </properties>
 
