@@ -12,7 +12,7 @@
   <artifactId>avaje-metrics-logback</artifactId>
 
   <properties>
-    <logback.version>1.5.33</logback.version>
+    <logback.version>1.5.35</logback.version>
   </properties>
 
   <dependencies>
