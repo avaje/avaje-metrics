@@ -12,7 +12,7 @@
   <description>Convenience aggregator combining avaje-metrics-ebean and ebean-insight.</description>
 
   <properties>
-    <ebean-insight.version>2.0-RC13</ebean-insight.version>
+    <ebean-insight.version>2.0</ebean-insight.version>
   </properties>
 
   <dependencies>
