@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -44,6 +45,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
   private final boolean legacyNames;
   private final PoolStatsCollector poolStats;
   private final Consumer<ServerMetrics> forwardTo;
+  private final BiConsumer<ServerMetrics, List<Metric.Statistics>> forwardSnapshotTo;
   private final ConcurrentMap<String, Metric.ID> idCache = new ConcurrentHashMap<>();
 
   /**
@@ -51,14 +53,17 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
    * for the opt-in to legacy flat-prefixed names.
    */
   public DatabaseMetricSupplier(Database database) {
-    this(database, false, true, false, null);
+    this(database, false, true, false, null, null);
   }
 
-  private DatabaseMetricSupplier(Database database, boolean legacyNames, boolean includePoolMetrics, boolean verbosePoolMetrics, Consumer<ServerMetrics> forwardTo) {
+  private DatabaseMetricSupplier(Database database, boolean legacyNames, boolean includePoolMetrics,
+                                 boolean verbosePoolMetrics, Consumer<ServerMetrics> forwardTo,
+                                 BiConsumer<ServerMetrics, List<Metric.Statistics>> forwardSnapshotTo) {
     this.database = Objects.requireNonNull(database, "database");
     this.legacyNames = legacyNames;
     this.poolStats = includePoolMetrics ? new PoolStatsCollector(database, verbosePoolMetrics) : null;
     this.forwardTo = forwardTo;
+    this.forwardSnapshotTo = forwardSnapshotTo;
   }
 
   /**
@@ -126,6 +131,14 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     if (poolStats != null) {
       poolStats.collect(metrics, reset);
     }
+    if (forwardSnapshotTo != null && reset) {
+      try {
+        // forward the already-collected Avaje metrics without polling again
+        forwardSnapshotTo.accept(dbMetrics, List.copyOf(metrics));
+      } catch (Throwable e) {
+        log.log(Level.WARNING, "forwardSnapshotTo consumer threw", e);
+      }
+    }
     return metrics;
   }
 
@@ -165,6 +178,7 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     private boolean includePoolMetrics = true;
     private boolean verbosePoolMetrics;
     private Consumer<ServerMetrics> forwardTo;
+    private BiConsumer<ServerMetrics, List<Metric.Statistics>> forwardSnapshotTo;
 
     Builder(Database database) {
       this.database = Objects.requireNonNull(database, "database");
@@ -206,15 +220,27 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
      * consumer, in addition to translating it for avaje-metrics. Lets a single
      * upstream collector own the reset-on-read poll while sharing the snapshot
      * with another sink (e.g. {@code InsightClient} from ebean-insight-client).
-     * Only invoked in {@code DELTA} mode.
+     * Invoked for every collection mode.
      */
     public Builder forwardTo(Consumer<ServerMetrics> forwardTo) {
       this.forwardTo = forwardTo;
       return this;
     }
 
+    /**
+     * Forward each reset-on-read Ebean snapshot together with the already-collected
+     * Avaje statistics, including datasource pool metrics, to the given consumer.
+     * This avoids a second collection that could otherwise split or reset the
+     * reporting interval. Only invoked in {@code DELTA} mode.
+     */
+    public Builder forwardSnapshotTo(BiConsumer<ServerMetrics, List<Metric.Statistics>> forwardSnapshotTo) {
+      this.forwardSnapshotTo = forwardSnapshotTo;
+      return this;
+    }
+
     public DatabaseMetricSupplier build() {
-      return new DatabaseMetricSupplier(database, legacyNames, includePoolMetrics, verbosePoolMetrics, forwardTo);
+      return new DatabaseMetricSupplier(database, legacyNames, includePoolMetrics, verbosePoolMetrics,
+        forwardTo, forwardSnapshotTo);
     }
   }
 }
