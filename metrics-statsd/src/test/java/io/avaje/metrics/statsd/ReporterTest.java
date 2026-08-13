@@ -1,8 +1,11 @@
 package io.avaje.metrics.statsd;
 
 import com.timgroup.statsd.StatsDClient;
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.Metrics;
+import io.avaje.metrics.MetricsProvider;
 import io.avaje.metrics.Tags;
+import io.avaje.metrics.stats.CounterStats;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -20,7 +23,7 @@ class ReporterTest {
     registry.timerBuilder("app.component").tags(Tags.of("env:dev", "label:DefaultTimedResource.defaultMethod")).build().time(() -> {});
 
     var calls = new ArrayList<MetricCall>();
-    var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
+    var reporter = new Reporter(MetricsProvider.forRegistry(registry), recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
 
     reporter.run();
 
@@ -38,7 +41,7 @@ class ReporterTest {
     registry.timerBuilder("app.SimpleService.doSomething").tags(Tags.of("env:dev")).build().time(() -> {});
 
     var calls = new ArrayList<MetricCall>();
-    var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
+    var reporter = new Reporter(MetricsProvider.forRegistry(registry), recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
 
     reporter.run();
 
@@ -56,7 +59,7 @@ class ReporterTest {
     var timer = registry.timerBuilder("app.SimpleService.doSomething").tags(Tags.of("env:dev")).build();
 
     var calls = new ArrayList<MetricCall>();
-    var reporter = new Reporter(registry, recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
+    var reporter = new Reporter(MetricsProvider.forRegistry(registry), recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
 
     timer.time(() -> {});
     reporter.run();
@@ -69,6 +72,31 @@ class ReporterTest {
       assertThat(calls.get(i).metricName()).isSameAs(calls.get(i + 4).metricName());
       assertThat(calls.get(i).tags()).isSameAs(calls.get(i + 4).tags());
     }
+  }
+
+  @Test
+  void metricsProvider_filtersScheduledSnapshot() {
+    var registry = Metrics.createRegistry();
+    registry.counter("app.filtered").inc();
+    var calls = new ArrayList<MetricCall>();
+    var reporter = new Reporter(mode -> List.of(), recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
+
+    reporter.run();
+
+    assertThat(calls).isEmpty();
+  }
+
+  @Test
+  void reportSnapshot_doesNotCollectRegistry() {
+    var registry = Metrics.createRegistry();
+    registry.counter("app.registry").inc();
+    var calls = new ArrayList<MetricCall>();
+    var reporter = new Reporter(MetricsProvider.forRegistry(registry), recordingClient(calls), 0, 60, TimeUnit.SECONDS, List.of());
+
+    reporter.report(List.of(new CounterStats(Metric.ID.of("app.snapshot"), 3)));
+
+    assertThat(calls).isNotEmpty();
+    assertThat(calls).allSatisfy(call -> assertThat(call.metricName()).isEqualTo("app.snapshot"));
   }
 
   private StatsDClient recordingClient(List<MetricCall> calls) {

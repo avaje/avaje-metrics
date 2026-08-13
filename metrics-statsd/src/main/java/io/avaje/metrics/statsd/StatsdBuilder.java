@@ -5,6 +5,7 @@ import com.timgroup.statsd.NonBlockingStatsDClientBuilder;
 import com.timgroup.statsd.StatsDClient;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
+import io.avaje.metrics.MetricsProvider;
 import io.ebean.Database;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ final class StatsdBuilder implements StatsdReporter.Builder {
 
   private final List<StatsdReporter.Reporter> reporters = new ArrayList<>();
   private MetricRegistry registry;
+  private MetricsProvider metricsProvider;
   private String hostname = "localhost";
   private int port = NonBlockingStatsDClient.DEFAULT_DOGSTATSD_PORT;
   private StatsDClient client;
@@ -69,6 +71,12 @@ final class StatsdBuilder implements StatsdReporter.Builder {
   }
 
   @Override
+  public StatsdReporter.Builder metricsProvider(MetricsProvider metricsProvider) {
+    this.metricsProvider = requireNonNull(metricsProvider);
+    return this;
+  }
+
+  @Override
   public StatsdReporter.Builder database(Database database) {
     reporters.add(DatabaseReporter.reporter(database, false));
     return this;
@@ -91,6 +99,9 @@ final class StatsdBuilder implements StatsdReporter.Builder {
     if (registry == null) {
       registry = Metrics.registry();
     }
+    if (metricsProvider == null) {
+      metricsProvider = MetricsProvider.forRegistry(registry);
+    }
     if (client == null) {
       client = new NonBlockingStatsDClientBuilder()
         .hostname(requireNonNull(hostname))
@@ -99,6 +110,6 @@ final class StatsdBuilder implements StatsdReporter.Builder {
         .build();
     }
 
-    return new Reporter(registry, client, timedThresholdMicros, schedule, scheduleTimeUnit, reporters);
+    return new Reporter(metricsProvider, client, timedThresholdMicros, schedule, scheduleTimeUnit, reporters);
   }
 }

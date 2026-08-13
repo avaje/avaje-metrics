@@ -1,9 +1,12 @@
 package io.avaje.metrics.statsd;
 
 import com.timgroup.statsd.StatsDClient;
+import io.avaje.metrics.Metric;
 import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.MetricsProvider;
 import io.ebean.Database;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,6 +36,13 @@ public interface StatsdReporter extends AutoCloseable {
    * Shutdown and stop reporting.
    */
   void close();
+
+  /**
+   * Report the supplied metric snapshot to StatsD once.
+   *
+   * <p>The snapshot is not collected or modified by the reporter.
+   */
+  void report(List<Metric.Statistics> snapshot);
 
   /**
    * Custom reporters that can be included.
@@ -90,6 +100,12 @@ public interface StatsdReporter extends AutoCloseable {
      * Specify the Metrics registry to use. If not specified the global registry is used.
      */
     Builder registry(MetricRegistry registry);
+
+    /**
+     * Specify the provider used to obtain metrics for scheduled reporting.
+     * Defaults to collecting from the configured registry.
+     */
+    Builder metricsProvider(MetricsProvider metricsProvider);
 
     /**
      * Add a database to report on.

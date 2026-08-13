@@ -20,7 +20,7 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
   private static final String APP_PREFIX = "app.";
   private static final String APP_COMPONENT_NAME = "app.component";
 
-  private final MetricRegistry registry;
+  private final MetricsProvider metricsProvider;
   private final StatsDClient client;
   private final long timedThreshold;
   private final List<StatsdReporter.Reporter> reporters;
@@ -29,9 +29,9 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
   private final ConcurrentHashMap<String, MetricNames> metricNames = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Metric.ID, MetricTarget> timerTargets = new ConcurrentHashMap<>();
 
-  Reporter(MetricRegistry registry, StatsDClient client, long timedThreshold, int schedule,
+  Reporter(MetricsProvider metricsProvider, StatsDClient client, long timedThreshold, int schedule,
            TimeUnit scheduleTimeUnit, List<StatsdReporter.Reporter> reporters) {
-    this.registry = registry;
+    this.metricsProvider = metricsProvider;
     this.client = client;
     this.timedThreshold = timedThreshold;
     this.reporters = reporters;
@@ -57,8 +57,13 @@ final class Reporter implements Runnable, AutoCloseable, StatsdReporter {
 
   @Override
   public void run() {
+    report(metricsProvider.provide());
+  }
+
+  @Override
+  public void report(List<Metric.Statistics> snapshot) {
     var visitor = new AvajeMetricsVisitor();
-    for (Metric.Statistics metric : registry.collectMetrics()) {
+    for (Metric.Statistics metric : snapshot) {
       metric.visit(visitor);
     }
     for (StatsdReporter.Reporter reporter : reporters) {
