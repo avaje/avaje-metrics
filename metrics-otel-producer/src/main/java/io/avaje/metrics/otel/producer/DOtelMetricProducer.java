@@ -2,6 +2,7 @@ package io.avaje.metrics.otel.producer;
 
 import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.MetricsProvider;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
@@ -13,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 
 final class DOtelMetricProducer implements OtelMetricProducer {
 
-  private final MetricRegistry registry;
+  private final MetricsProvider metricsProvider;
   private final MetricDataMapper mapper;
   private final LongSupplier epochNanosSource;
   private final long startEpochNanos;
@@ -24,7 +25,16 @@ final class DOtelMetricProducer implements OtelMetricProducer {
     long timedThresholdMicros,
     LongSupplier epochNanosSource) {
 
-    this.registry = requireNonNull(registry, "registry");
+    this(MetricsProvider.forRegistry(registry), scopeInfo, timedThresholdMicros, epochNanosSource);
+  }
+
+  DOtelMetricProducer(
+    MetricsProvider metricsProvider,
+    InstrumentationScopeInfo scopeInfo,
+    long timedThresholdMicros,
+    LongSupplier epochNanosSource) {
+
+    this.metricsProvider = requireNonNull(metricsProvider, "metricsProvider");
     this.mapper = new MetricDataMapper(requireNonNull(scopeInfo, "scopeInfo"), timedThresholdMicros);
     this.epochNanosSource = requireNonNull(epochNanosSource, "epochNanosSource");
     this.startEpochNanos = epochNanosSource.getAsLong();
@@ -34,7 +44,7 @@ final class DOtelMetricProducer implements OtelMetricProducer {
   public synchronized Collection<MetricData> produce(Resource resource) {
     requireNonNull(resource, "resource");
     var epochNanos = epochNanosSource.getAsLong();
-    var statistics = registry.collectMetrics(CollectionMode.CUMULATIVE);
+    var statistics = metricsProvider.provide(CollectionMode.CUMULATIVE);
     return mapper.map(resource, startEpochNanos, epochNanos, statistics);
   }
 }

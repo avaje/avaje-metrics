@@ -1,5 +1,6 @@
 package io.avaje.metrics.otel.producer;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.Counter;
 import io.avaje.metrics.Meter;
 import io.avaje.metrics.MetricRegistry;
@@ -18,6 +19,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.LongSupplier;
@@ -246,6 +248,25 @@ class OtelMetricProducerTest {
       assertThat(metric.getResource().getAttribute(AttributeKey.stringKey("service.name"))).isEqualTo("catalog");
       assertThat(onlyLongPoint(metric).getValue()).isEqualTo(4);
     }
+  }
+
+  @Test
+  void customMetricsProvider_isCollectedCumulatively() {
+    var registry = Metrics.createRegistry();
+    var modes = new ArrayList<CollectionMode>();
+    var producer = OtelMetricProducer.builder()
+      .metricsProvider(mode -> {
+        modes.add(mode);
+        return registry.collectMetrics(mode);
+      })
+      .build();
+
+    registry.counter("app.requests").inc(4);
+
+    MetricData metric = onlyMetric(producer.produce(Resource.empty()));
+
+    assertThat(modes).containsExactly(CollectionMode.CUMULATIVE);
+    assertThat(onlyLongPoint(metric).getValue()).isEqualTo(4);
   }
 
   private static Map<String, MetricData> byName(Collection<MetricData> metrics) {

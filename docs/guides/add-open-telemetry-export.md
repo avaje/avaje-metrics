@@ -96,6 +96,19 @@ var openTelemetry = MetricsOpenTelemetry.builder()
   .buildAndRegisterGlobal();
 ```
 
+When metrics need to be collected from more than the Avaje registry, provide a
+`MetricsProvider`. This allows one collection to coordinate Ebean metrics and other reporting
+destinations:
+
+```java
+var openTelemetry = MetricsOpenTelemetry.builder()
+  .metricsProvider(ebeanInsightProvider)
+  .buildAndRegisterGlobal();
+```
+
+The provider is called with cumulative collection mode by the OTEL producer. It takes precedence
+over `registry(...)` when both are configured.
+
 This is the best default when the application wants both OTEL metrics export and traced
 timer support with minimal setup code.
 

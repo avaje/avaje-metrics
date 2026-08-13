@@ -266,6 +266,19 @@ OpenTelemetrySdk sdk =
         .build();
 ```
 
+To use a coordinated metrics source, provide a `MetricsProvider`. It replaces direct registry
+collection while leaving normal OpenTelemetry meter and trace export unchanged:
+
+```java
+OpenTelemetrySdk sdk =
+    MetricsOpenTelemetry.builder()
+        .metricsProvider(ebeanInsightProvider)
+        .build();
+```
+
+The provider is called with cumulative collection mode for each OTEL collection. It takes
+precedence over `registry(...)` when both are configured.
+
 ## Notes
 
 - Normal OpenTelemetry meters and tracers created from the returned SDK are exported alongside the

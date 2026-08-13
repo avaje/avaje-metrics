@@ -103,6 +103,18 @@ OtelMetricProducer producer = OtelMetricProducer.builder()
     .build();
 ```
 
+Use a `MetricsProvider` when metric collection needs to combine or filter sources, such as
+forwarding the same collection to Ebean Insight and OpenTelemetry:
+
+```java
+OtelMetricProducer producer = OtelMetricProducer.builder()
+    .metricsProvider(ebeanInsightProvider)
+    .build();
+```
+
+The provider is called with `CollectionMode.CUMULATIVE`. When both `metricsProvider(...)` and
+`registry(...)` are configured, the provider takes precedence.
+
 ## Metric mapping
 
 avaje metrics are mapped to OTEL metric data as follows:

@@ -1,6 +1,8 @@
 package io.avaje.metrics.otel.producer;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.MetricsProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
 
@@ -39,6 +41,17 @@ public interface OtelMetricProducer extends MetricProducer {
      * @return this builder
      */
     Builder registry(MetricRegistry registry);
+
+    /**
+     * Specify the provider used to supply metrics.
+     *
+     * <p>When configured, this takes precedence over {@link #registry(MetricRegistry)}.
+     * The provider is called with {@code CollectionMode.CUMULATIVE} for each OTEL collection.
+     *
+     * @param metricsProvider the metrics provider
+     * @return this builder
+     */
+    Builder metricsProvider(MetricsProvider metricsProvider);
 
     /**
      * Set a threshold in microseconds for timed metrics.

@@ -2,6 +2,7 @@ package io.avaje.metrics.otel;
 
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
+import io.avaje.metrics.MetricsProvider;
 import io.avaje.metrics.otel.producer.OtelMetricProducer;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -106,6 +107,7 @@ public final class MetricsOpenTelemetry {
     private Duration meterInterval;
     private Duration traceInterval;
     private MetricRegistry registry;
+    private MetricsProvider metricsProvider;
     private final Map<String, String> resourceAttributes = new LinkedHashMap<>();
     private ContextPropagators propagators = ContextPropagators.create(W3CTraceContextPropagator.getInstance());
     private MetricExporter metricExporter;
@@ -302,6 +304,20 @@ public final class MetricsOpenTelemetry {
      */
     public Builder registry(MetricRegistry registry) {
       this.registry = requireNonNull(registry);
+      return this;
+    }
+
+    /**
+     * Set the provider used by {@link OtelMetricProducer} to supply metrics.
+     *
+     * <p>The provider is called with cumulative collection mode for each OTEL collection.
+     * When configured, it takes precedence over {@link #registry(MetricRegistry)}.
+     *
+     * @param metricsProvider the metrics provider
+     * @return this builder
+     */
+    public Builder metricsProvider(MetricsProvider metricsProvider) {
+      this.metricsProvider = requireNonNull(metricsProvider);
       return this;
     }
 
@@ -540,11 +556,14 @@ public final class MetricsOpenTelemetry {
     }
 
     private SdkMeterProvider meterProvider(Resource resource) {
-      var effectiveRegistry = registry != null ? registry : Metrics.registry();
+      var effectiveProvider = metricsProvider != null
+        ? metricsProvider
+        : MetricsProvider.forRegistry(registry != null ? registry : Metrics.registry());
+
       var producer = OtelMetricProducer.builder()
-        .registry(effectiveRegistry)
         .scopeName(DEFAULT_SCOPE)
         .timedThresholdMicros(timedThresholdMicros)
+        .metricsProvider(effectiveProvider)
         .build();
 
       return SdkMeterProvider.builder()

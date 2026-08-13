@@ -1,7 +1,9 @@
 package io.avaje.metrics.otel;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Metrics;
+import io.avaje.metrics.MetricsProvider;
 import io.avaje.metrics.Timer;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +93,31 @@ class MetricsOpenTelemetryTest {
       assertThat(spans).hasSize(1);
       assertThat(spans.get(0).getName()).isEqualTo("manual-span");
       assertThat(spans.get(0).getResource().getAttribute(SERVICE_NAME)).isEqualTo("catalog-service");
+    }
+  }
+
+  @Test
+  void customMetricsProvider_isUsedByProducer() {
+    var metricReader = InMemoryMetricReader.create();
+    var registry = Metrics.createRegistry();
+    var modes = new ArrayList<CollectionMode>();
+    MetricsProvider provider = mode -> {
+      modes.add(mode);
+      return registry.collectMetrics(mode);
+    };
+
+    try (var openTelemetry = MetricsOpenTelemetry.builder()
+      .registry(registry)
+      .metricsProvider(provider)
+      .includeTrace(false)
+      .metricReader(metricReader)
+      .build()) {
+
+      registry.counter("app.requests").inc(3);
+      flush(openTelemetry.getSdkMeterProvider().forceFlush());
+
+      assertThat(byName(metricReader.collectAllMetrics())).containsKey("app.requests");
+      assertThat(modes).isNotEmpty().allMatch(mode -> mode == CollectionMode.CUMULATIVE);
     }
   }
 
