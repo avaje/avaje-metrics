@@ -36,7 +36,7 @@ class JvmCGroupCpuMetricGroupTest {
     var cpuMax = new FileLines("src/test/resources/cgroup/cpu-v2.max");
     assertThat(cpuMax.exists()).isTrue();
 
-    assertThat(cpu.createCGroupCpuLimit(cpuMax, Tags.of("app:shop")))
+    assertThat(cpu.createCGroupCpuLimit(cpuMax, false, Tags.of("app:shop")))
       .isPresent()
       .hasValueSatisfying(metric -> {
         assertThat(metric.name()).isEqualTo("jvm.cgroup.cpu.limitMillicores");

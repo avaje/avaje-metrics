@@ -38,18 +38,19 @@ final class JvmCGroupCpu {
 
     var cpuMax = new FileLines(CPU_MAX_PATH);
     if (cpuMax.exists()) {
-      createCGroupCpuLimit(cpuMax, globalTags).ifPresent(registry::register);
+      createCGroupCpuLimit(cpuMax, reportChangesOnly, globalTags).ifPresent(registry::register);
     }
   }
 
-  Optional<GaugeLong> createCGroupCpuLimit(FileLines cpuMax, Tags globalTags) {
+  Optional<GaugeLong> createCGroupCpuLimit(FileLines cpuMax, boolean reportChangesOnly, Tags globalTags) {
     return cpuMax.readLines().stream()
       .findFirst()
       .flatMap(this::parseCpuMax)
-      .map(limit -> DGaugeLong.once(
+      .map(limit -> DGaugeLong.of(
         Metric.ID.of("jvm.cgroup.cpu.limitMillicores", globalTags),
         MILLICORES,
-        () -> limit));
+        () -> limit,
+        reportChangesOnly));
   }
 
   Optional<Long> parseCpuMax(String cpuMax) {
