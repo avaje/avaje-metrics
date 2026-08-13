@@ -1,9 +1,12 @@
 package io.avaje.metrics.otel.reporter;
 
 import io.avaje.metrics.MetricRegistry;
+import io.avaje.metrics.Metric;
+import io.avaje.metrics.MetricsProvider;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.MeterProvider;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +48,13 @@ public interface OtelReporter extends AutoCloseable {
   void report();
 
   /**
+   * Push the supplied metric snapshot to OpenTelemetry once.
+   *
+   * <p>The snapshot is not collected or modified by the reporter.
+   */
+  void report(List<Metric.Statistics> snapshot);
+
+  /**
    * Start periodic reporting on the configured schedule.
    */
   void start();
@@ -81,6 +91,12 @@ public interface OtelReporter extends AutoCloseable {
      * Defaults to the global registry ({@code Metrics.registry()}).
      */
     Builder registry(MetricRegistry registry);
+
+    /**
+     * Specify the provider used to obtain metrics for scheduled and manual reporting.
+     * Defaults to collecting from the configured registry.
+     */
+    Builder metricsProvider(MetricsProvider metricsProvider);
 
     /**
      * Specify the reporting schedule. Default is 60 seconds.
