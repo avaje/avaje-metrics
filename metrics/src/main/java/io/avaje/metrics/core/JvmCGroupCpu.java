@@ -13,180 +13,114 @@ import static java.math.BigDecimal.valueOf;
 
 final class JvmCGroupCpu {
 
-  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {
-    new JvmCGroupCpu().create(registry, reportChangesOnly, withDetails, globalTags);
+  private static final String CPU_STAT_PATH = "/sys/fs/cgroup/cpu.stat";
+  private static final String CPU_MAX_PATH = "/sys/fs/cgroup/cpu.max";
+  private static final String MICROSECONDS = "us";
+  private static final String MILLICORES = "mCPU";
+
+  static void createGauges(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
+    new JvmCGroupCpu().create(registry, reportChangesOnly, globalTags);
   }
 
-  void create(MetricRegistry registry, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {
-     FileLines cpu = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpuacct.usage");
-    if (cpu.exists()) {
-      createCGroupCpuUsage(registry, cpu, globalTags);
+  void create(MetricRegistry registry, boolean reportChangesOnly, Tags globalTags) {
+    var cpuStat = new FileLines(CPU_STAT_PATH);
+    if (!cpuStat.exists()) {
+      return;
     }
-    FileLines cpuStat = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.stat");
-    if (cpuStat.exists()) {
-      createCGroupCpuThrottle(registry, cpuStat, reportChangesOnly, withDetails, globalTags);
-    }
-    FileLines cpuShares = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.shares");
-    if (cpuStat.exists()) {
-      registry.register(createCGroupCpuRequests(cpuShares, globalTags));
-    }
-    FileLines cpuQuota = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_quota_us");
-    FileLines period = new FileLines("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_period_us");
-    if (cpuQuota.exists() && period.exists()) {
-      createCGroupCpuLimit(cpuQuota, period, globalTags).ifPresent(registry::register);
+
+    var source = new CpuStatsSource(cpuStat);
+    registry.register(gauge("jvm.cgroup.cpu.usageMicros", source::usageMicros, reportChangesOnly, globalTags));
+    registry.register(gauge("jvm.cgroup.cpu.userMicros", source::userMicros, reportChangesOnly, globalTags));
+    registry.register(gauge("jvm.cgroup.cpu.systemMicros", source::systemMicros, reportChangesOnly, globalTags));
+    registry.register(gauge("jvm.cgroup.cpu.throttledMicros", source::throttledMicros, reportChangesOnly, globalTags));
+    registry.register(gauge("jvm.cgroup.cpu.periods", source::periods, reportChangesOnly, globalTags));
+    registry.register(gauge("jvm.cgroup.cpu.throttledPeriods", source::throttledPeriods, reportChangesOnly, globalTags));
+
+    var cpuMax = new FileLines(CPU_MAX_PATH);
+    if (cpuMax.exists()) {
+      createCGroupCpuLimit(cpuMax, globalTags).ifPresent(registry::register);
     }
   }
 
-  Optional<GaugeLong> createCGroupCpuLimit(FileLines cpuQuota, FileLines period, Tags globalTags) {
-    final long cpuQuotaVal = cpuQuota.single();
-    long quotaPeriod = period.single();
-    if (cpuQuotaVal > 0 && quotaPeriod > 0) {
-      final long limit = convertQuotaToLimits(cpuQuotaVal, quotaPeriod);
-      return Optional.of(DGaugeLong.once(Metric.ID.of("jvm.cgroup.cpu.limit", globalTags), new FixedGauge(limit)));
+  Optional<GaugeLong> createCGroupCpuLimit(FileLines cpuMax, Tags globalTags) {
+    return cpuMax.readLines().stream()
+      .findFirst()
+      .flatMap(this::parseCpuMax)
+      .map(limit -> DGaugeLong.once(
+        Metric.ID.of("jvm.cgroup.cpu.limitMillicores", globalTags),
+        MILLICORES,
+        () -> limit));
+  }
+
+  Optional<Long> parseCpuMax(String cpuMax) {
+    var values = cpuMax.trim().split("\\s+");
+    if (values.length != 2) {
+      throw new IllegalArgumentException("Expected quota and period in cpu.max: " + cpuMax);
     }
-    return Optional.empty();
+    if ("max".equals(values[0])) {
+      return Optional.empty();
+    }
+
+    var quotaMicros = Long.parseLong(values[0]);
+    var periodMicros = Long.parseLong(values[1]);
+    if (quotaMicros <= 0 || periodMicros <= 0) {
+      throw new IllegalArgumentException("Expected positive quota and period in cpu.max: " + cpuMax);
+    }
+    return Optional.of(convertQuotaToMillicores(quotaMicros, periodMicros));
   }
 
-  GaugeLong createCGroupCpuRequests(FileLines cpuShares, Tags globalTags) {
-    final long requests = convertSharesToRequests(cpuShares.single());
-    return DGaugeLong.once(Metric.ID.of("jvm.cgroup.cpu.requests", globalTags), new FixedGauge(requests));
-  }
-
-  long convertQuotaToLimits(long cpuQuotaVal, long quotaPeriod) {
-    return valueOf(cpuQuotaVal)
-      .multiply(valueOf(1000)) // to micro cores
-      .divide(valueOf(quotaPeriod), RoundingMode.HALF_UP)
-      .longValue();
-  }
-
-  /**
-   * Convert docker cpu shares to K8s micro cores.
-   */
-  long convertSharesToRequests(long shares) {
-    return valueOf(shares)
+  long convertQuotaToMillicores(long quotaMicros, long periodMicros) {
+    return valueOf(quotaMicros)
       .multiply(valueOf(1000))
-      .divide(valueOf(1024), RoundingMode.HALF_UP)
-      .setScale(-1, RoundingMode.HALF_UP)
+      .divide(valueOf(periodMicros), RoundingMode.HALF_UP)
       .longValue();
   }
 
-  private void createCGroupCpuUsage(MetricRegistry registry, FileLines cpu, Tags globalTags) {
-    registry.gauge("jvm.cgroup.cpu.usage").tags(globalTags).ofLongs(new CpuUsage(cpu));
-  }
-
-  private void createCGroupCpuThrottle(MetricRegistry registry, FileLines cpuStat, boolean reportChangesOnly, boolean withDetails, Tags globalTags) {
-    final var source = new CpuStatsSource(cpuStat);
-    registry.register(gauge(Metric.ID.of("jvm.cgroup.cpu.throttleMicros", globalTags), source::getThrottleMicros, reportChangesOnly));
-    if (withDetails) {
-      registry.register(gauge(Metric.ID.of("jvm.cgroup.cpu.numPeriod", globalTags), source::getNumPeriod, reportChangesOnly));
-      registry.register(gauge(Metric.ID.of("jvm.cgroup.cpu.numThrottle", globalTags), source::getNumThrottle, reportChangesOnly));
-      registry.register(gauge(Metric.ID.of("jvm.cgroup.cpu.pctThrottle", globalTags), source::getPctThrottle, reportChangesOnly));
-    }
-  }
-
-  private GaugeLong gauge(Metric.ID id, LongSupplier gauge, boolean reportChangesOnly) {
-    return DGaugeLong.of(id, gauge, reportChangesOnly);
-  }
-
-  /** CPU Usage in Millicores */
-  static final class CpuUsage implements LongSupplier {
-
-    private final FileLines source;
-
-    private long prevUsageNanos;
-    private long prevTimeMillis;
-
-    CpuUsage(FileLines source) {
-      this.source = source;
-    }
-
-    @Override
-    public long getAsLong() {
-      final long newTimeMillis = System.currentTimeMillis();
-      final long newUsageNanos = source.single();
-      if (prevUsageNanos == 0) {
-        prevUsageNanos = newUsageNanos;
-        prevTimeMillis = newTimeMillis;
-        return 0;
-      }
-      final long deltaTimeMicros = (newTimeMillis - prevTimeMillis) * 1000;
-      final long millicores = (newUsageNanos - prevUsageNanos) / deltaTimeMicros;
-      this.prevTimeMillis = newTimeMillis;
-      this.prevUsageNanos = newUsageNanos;
-      return millicores;
-    }
+  private GaugeLong gauge(String name, LongSupplier supplier, boolean reportChangesOnly, Tags globalTags) {
+    var unit = name.endsWith("Micros") ? MICROSECONDS : "";
+    return DGaugeLong.of(Metric.ID.of(name, globalTags), unit, supplier, reportChangesOnly);
   }
 
   static final class CpuStatsSource {
 
     private final FileLines source;
 
-    private long prevNumPeriod;
-    private long prevNumThrottle;
-    private long prevThrottleMicros;
-
-    private long currNumPeriod;
-    private long currNumThrottle;
-    private long currThrottleMicros;
-
-    private long numPeriod;
-    private long numThrottle;
-    private long throttleMicros;
-
     CpuStatsSource(FileLines source) {
       this.source = source;
     }
 
-    void load() {
-      synchronized (this) {
-        for (String line : source.readLines()) {
-          if (line.startsWith("nr_p")) {
-            currNumPeriod = Long.parseLong(line.substring(11));
-          } else if (line.startsWith("nr_t")) {
-            // convert from nanos to micros
-            currNumThrottle = Long.parseLong(line.substring(13));
-          } else {
-            currThrottleMicros = Long.parseLong(line.substring(15)) / 1000;
-          }
+    long usageMicros() {
+      return value("usage_usec");
+    }
+
+    long userMicros() {
+      return value("user_usec");
+    }
+
+    long systemMicros() {
+      return value("system_usec");
+    }
+
+    long throttledMicros() {
+      return value("throttled_usec");
+    }
+
+    long periods() {
+      return value("nr_periods");
+    }
+
+    long throttledPeriods() {
+      return value("nr_throttled");
+    }
+
+    private long value(String field) {
+      for (var line : source.readLines()) {
+        var values = line.split("\\s+", 2);
+        if (values.length == 2 && field.equals(values[0])) {
+          return Long.parseLong(values[1]);
         }
-        numPeriod = currNumPeriod - prevNumPeriod;
-        numThrottle = currNumThrottle - prevNumThrottle;
-        throttleMicros = currThrottleMicros - prevThrottleMicros;
-        prevNumPeriod = currNumPeriod;
-        prevNumThrottle = currNumThrottle;
-        prevThrottleMicros = currThrottleMicros;
       }
-    }
-
-    long getThrottleMicros() {
-      load();
-      return throttleMicros;
-    }
-
-    long getNumThrottle() {
-      return numThrottle;
-    }
-
-    long getNumPeriod() {
-      return numPeriod;
-    }
-
-    long getPctThrottle() {
-      return (numPeriod <= 0) ? 0 : numThrottle * 100 / numPeriod;
-    }
-  }
-
-  static final class FixedGauge implements LongSupplier {
-
-    private final long value;
-
-    FixedGauge(long value) {
-      this.value = value;
-    }
-
-    @Override
-    public long getAsLong() {
-      return value;
+      return 0;
     }
   }
 }

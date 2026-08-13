@@ -127,25 +127,20 @@ public interface JvmMetrics {
   JvmMetrics registerProcessMemoryMetrics();
 
   /**
-   * Register CGroup metrics for CPU usage time, throttle time, requests and limits.
+   * Register CGroup metrics.
    *
-   * <h4>Base metrics</h4>
+   * <p>CGroup v2 hosts expose these cumulative CPU counters:
    * <ul>
-   *   <li>jvm.cgroup.cpu.requests</li>
-   *   <li>jvm.cgroup.cpu.limit (if a limit is applied)</li>
    *   <li>jvm.cgroup.cpu.usageMicros</li>
-   *   <li>jvm.cgroup.cpu.throttleMicros</li>
-   *   <li>jvm.cgroup.memory.usage</li>
-   *   <li>jvm.cgroup.memory.limit/li>
-   *   <li>jvm.cgroup.memory.pctUsage/li>
+   *   <li>jvm.cgroup.cpu.userMicros</li>
+   *   <li>jvm.cgroup.cpu.systemMicros</li>
+   *   <li>jvm.cgroup.cpu.throttledMicros</li>
+   *   <li>jvm.cgroup.cpu.periods</li>
+   *   <li>jvm.cgroup.cpu.throttledPeriods</li>
    * </ul>
    *
-   * <h4>Extra metrics with {@link #withDetails()} enabled</h4>
-   * <ul>
-   *   <li>jvm.cgroup.cpu.numPeriod</li>
-   *   <li>jvm.cgroup.cpu.numThrottle</li>
-   *   <li>jvm.cgroup.cpu.pctThrottle/li>
-   * </ul>
+   * <p>{@code jvm.cgroup.cpu.limitMillicores} is also reported when a cgroup CPU
+   * limit is configured.
    */
   JvmMetrics registerCGroupMetrics();
 
