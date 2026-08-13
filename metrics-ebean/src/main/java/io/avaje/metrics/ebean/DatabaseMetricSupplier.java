@@ -6,6 +6,7 @@ import io.avaje.metrics.stats.CounterStats;
 import io.avaje.metrics.stats.TimerStats;
 import io.ebean.Database;
 import io.ebean.meta.*;
+import org.jspecify.annotations.NonNull;
 
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
@@ -102,19 +103,51 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
   @Override
   public List<Metric.Statistics> collectMetrics(CollectionMode mode) {
     boolean reset = mode == CollectionMode.DELTA;
-
-    var dbMetrics = new BasicMetricVisitor(database.name(), MetricNamingMatch.INSTANCE, reset, true, true, true);
-    database.metaInfo().visitMetrics(dbMetrics);
+    var databaseMetrics = collect(mode);
 
     if (forwardTo != null) {
       try {
         // forward to an external consumer (e.g. ebean-insight)
-        forwardTo.accept(dbMetrics);
+        forwardTo.accept(databaseMetrics.serverMetrics());
       } catch (Throwable e) {
         log.log(Level.WARNING, "forwardTo consumer threw", e);
       }
     }
 
+    if (forwardSnapshotTo != null && reset) {
+      try {
+        // forward the already-collected Avaje metrics without polling again
+        forwardSnapshotTo.accept(databaseMetrics.serverMetrics(), databaseMetrics.poolMetrics());
+      } catch (Throwable e) {
+        log.log(Level.WARNING, "forwardSnapshotTo consumer threw", e);
+      }
+    }
+    List<Metric.Statistics> metrics = convert(databaseMetrics.serverMetrics());
+    metrics.addAll(databaseMetrics.poolMetrics());
+    return metrics;
+  }
+
+  @NonNull
+  public DatabaseMetrics collect(CollectionMode mode) {
+    boolean reset = mode == CollectionMode.DELTA;
+    var dbMetrics = new BasicMetricVisitor(database.name(), MetricNamingMatch.INSTANCE, reset, true, true, true);
+    database.metaInfo().visitMetrics(dbMetrics);
+
+    return new DatabaseMetrics(dbMetrics, poolMetrics(reset));
+  }
+
+  @NonNull
+  private List<Metric.Statistics> poolMetrics(boolean reset) {
+    if (poolStats == null) {
+      return List.of();
+    }
+    List<Metric.Statistics> poolMetrics = new ArrayList<>();
+    poolStats.collect(poolMetrics, reset);
+    return poolMetrics;
+  }
+
+  @NonNull
+  public List<Metric.Statistics> convert(ServerMetrics dbMetrics) {
     List<Metric.Statistics> metrics = new ArrayList<>();
     if (log.isLoggable(Level.DEBUG)) {
       log.log(Level.DEBUG, dbMetrics.asJson().withHash(false).withNewLine(false).json());
@@ -127,17 +160,6 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     }
     for (MetaCountMetric metric : dbMetrics.countMetrics()) {
       metrics.add(new CounterStats(idFor(metric.name()), metric.count()));
-    }
-    if (poolStats != null) {
-      poolStats.collect(metrics, reset);
-    }
-    if (forwardSnapshotTo != null && reset) {
-      try {
-        // forward the already-collected Avaje metrics without polling again
-        forwardSnapshotTo.accept(dbMetrics, List.copyOf(metrics));
-      } catch (Throwable e) {
-        log.log(Level.WARNING, "forwardSnapshotTo consumer threw", e);
-      }
     }
     return metrics;
   }
@@ -241,6 +263,25 @@ public final class DatabaseMetricSupplier implements MetricSupplier {
     public DatabaseMetricSupplier build() {
       return new DatabaseMetricSupplier(database, legacyNames, includePoolMetrics, verbosePoolMetrics,
         forwardTo, forwardSnapshotTo);
+    }
+  }
+
+  public static final class DatabaseMetrics {
+
+    private final ServerMetrics serverMetrics;
+    private final List<Metric.Statistics> poolMetrics;
+
+    public DatabaseMetrics(ServerMetrics serverMetrics, List<Metric.Statistics> poolMetrics) {
+      this.serverMetrics = serverMetrics;
+      this.poolMetrics = poolMetrics;
+    }
+
+    public ServerMetrics serverMetrics() {
+      return serverMetrics;
+    }
+
+    public List<Metric.Statistics> poolMetrics() {
+      return poolMetrics;
     }
   }
 }

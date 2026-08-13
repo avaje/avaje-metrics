@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Writes the metric information as JSON to a buffer for sending.
  */
-final class JsonWriter implements Metric.Visitor {
+public final class JsonWriter implements Metric.Visitor {
 
   private static final DecimalFormat formatDecimal = new DecimalFormat("0.0#");
 
@@ -19,11 +19,11 @@ final class JsonWriter implements Metric.Visitor {
   private final List<Metric.Statistics> metrics;
   private final boolean v2;
 
-  static void writeTo(Appendable writer, List<Metric.Statistics> metrics) {
+  public static void writeTo(Appendable writer, List<Metric.Statistics> metrics) {
     new JsonWriter(writer, metrics, false).write();
   }
 
-  static void writeToV2(Appendable writer, List<Metric.Statistics> metrics) {
+  public static void writeToV2(Appendable writer, List<Metric.Statistics> metrics) {
     new JsonWriter(writer, metrics, true).write();
   }
 
