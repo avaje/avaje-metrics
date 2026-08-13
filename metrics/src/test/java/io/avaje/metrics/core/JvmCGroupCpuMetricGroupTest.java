@@ -1,84 +1,47 @@
 package io.avaje.metrics.core;
 
-
-import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.Tags;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JvmCGroupCpuMetricGroupTest {
 
-  private final JvmCGroupCpu me = new JvmCGroupCpu();
+  private final JvmCGroupCpu cpu = new JvmCGroupCpu();
 
   @Test
-  void convertQuotaToLimits() {
-    assertEquals(600, me.convertQuotaToLimits(60_000, 100_000));
-    assertEquals(1900, me.convertQuotaToLimits(190_000, 100_000));
+  void readsCGroupV2CpuCounters() {
+    var source = new FileLines("src/test/resources/cgroup/cpu-v2.stat");
+    assertThat(source.exists()).isTrue();
+
+    var stats = new JvmCGroupCpu.CpuStatsSource(source);
+
+    assertThat(stats.usageMicros()).isEqualTo(1_234_567L);
+    assertThat(stats.userMicros()).isEqualTo(987_654L);
+    assertThat(stats.systemMicros()).isEqualTo(246_913L);
+    assertThat(stats.throttledMicros()).isEqualTo(7_890L);
+    assertThat(stats.periods()).isEqualTo(1_234L);
+    assertThat(stats.throttledPeriods()).isEqualTo(56L);
   }
 
   @Test
-  void convertSharesToRequests() {
-    assertEquals(800, me.convertSharesToRequests(819));
-    assertEquals(200, me.convertSharesToRequests(204));
+  void parsesCpuLimitInMillicores() {
+    assertThat(cpu.parseCpuMax("60000 100000")).contains(600L);
+    assertThat(cpu.parseCpuMax("190000 100000")).contains(1_900L);
+    assertThat(cpu.parseCpuMax("max 100000")).isEmpty();
   }
 
   @Test
-  void cpuUsageMillis_firstReadingIsZero() {
-    FileLines source = new FileLines("src/test/resources/cgroup/cpuacct.usage");
-    assertTrue(source.exists());
+  void createsCpuLimitMetric() {
+    var cpuMax = new FileLines("src/test/resources/cgroup/cpu-v2.max");
+    assertThat(cpuMax.exists()).isTrue();
 
-    final JvmCGroupCpu.CpuUsage usageMicros = new JvmCGroupCpu.CpuUsage(source);
-
-    final long value = usageMicros.getAsLong();
-    assertThat(value).isEqualTo(0L);
-  }
-
-  @Test
-  void cpuThrottleMicros() {
-
-    FileLines source = new FileLines("src/test/resources/cgroup/cpu.stat");
-    assertTrue(source.exists());
-
-    final JvmCGroupCpu.CpuStatsSource cpuStats = new JvmCGroupCpu.CpuStatsSource(source);
-
-    assertThat(cpuStats.getThrottleMicros()).isEqualTo(87738876L);
-    assertThat(cpuStats.getNumPeriod()).isEqualTo(19295);
-    assertThat(cpuStats.getNumThrottle()).isEqualTo(802);
-  }
-
-  @Test
-  void createCGroupCpuLimit() {
-
-    FileLines cpuQuota = new FileLines("src/test/resources/cgroup/cpu.cfs_quota_us");
-    FileLines period = new FileLines("src/test/resources/cgroup/cpu.cfs_period_us");
-    assertTrue(cpuQuota.exists());
-    assertTrue(period.exists());
-
-    JvmCGroupCpu me = new JvmCGroupCpu();
-    Optional<GaugeLong> cGroupCpuLimit = me.createCGroupCpuLimit(cpuQuota, period, Tags.of("myTag:myVal"));
-    assertThat(cGroupCpuLimit)
+    assertThat(cpu.createCGroupCpuLimit(cpuMax, Tags.of("app:shop")))
       .isPresent()
       .hasValueSatisfying(metric -> {
-        final long limit = metric.value();
-        assertThat(limit).isEqualTo(600L);
+        assertThat(metric.name()).isEqualTo("jvm.cgroup.cpu.limitMillicores");
+        assertThat(metric.unit()).isEqualTo("mCPU");
+        assertThat(metric.value()).isEqualTo(600L);
       });
   }
-
-  @Test
-  void createCGroupCpuRequests() {
-
-    FileLines cpuShares = new FileLines("src/test/resources/cgroup/cpu.shares");
-    assertTrue(cpuShares.exists());
-
-    JvmCGroupCpu me = new JvmCGroupCpu();
-    final GaugeLong metric = me.createCGroupCpuRequests(cpuShares, Tags.EMPTY);
-    final long requests = metric.value();
-    assertThat(requests).isEqualTo(200L);
-  }
-
 }

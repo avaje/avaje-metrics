@@ -174,7 +174,7 @@ public final class DefaultMetricProvider implements SpiMetricProvider {
 
   @Override
   public JvmMetrics registerCGroupMetrics() {
-    JvmCGroupCpu.createGauges(this, reportChangesOnly, withDetails, globalTags);
+    JvmCGroupCpu.createGauges(this, reportChangesOnly, globalTags);
     JvmCGroupMemory.createGauges(this, reportChangesOnly, globalTags);
     return this;
   }
