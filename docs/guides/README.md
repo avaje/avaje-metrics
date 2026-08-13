@@ -57,6 +57,7 @@ Step-by-step guides written as instructions for AI agents and developers working
 | Guide | Description |
 |-------|-------------|
 | [Add Ebean metrics](add-ebean-metrics.md) | Add `avaje-metrics-ebean`, register `DatabaseMetricSupplier`, and expose Ebean database metrics through avaje-metrics |
+| [Add Ebean Insight metrics](add-ebean-insight-metrics.md) | Send multiple Ebean database snapshots and filtered Avaje metrics to Ebean Insight, OTEL, or StatsD |
 
 ---
 
