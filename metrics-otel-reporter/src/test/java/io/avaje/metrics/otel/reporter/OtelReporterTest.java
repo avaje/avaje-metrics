@@ -1,6 +1,7 @@
 package io.avaje.metrics.otel.reporter;
 
 import io.avaje.metrics.*;
+import io.avaje.metrics.stats.CounterStats;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
@@ -106,6 +107,33 @@ class OtelReporterTest {
 
     Map<String, MetricData> metrics = collectByName();
     assertThat(metrics).doesNotContainKey("app.noop.count");
+  }
+
+  @Test
+  void metricsProvider_filtersScheduledSnapshot() {
+    reporter.close();
+    reporter = OtelReporter.builder()
+      .openTelemetry(openTelemetry)
+      .registry(registry)
+      .metricsProvider(mode -> java.util.List.of())
+      .build();
+
+    registry.counter("app.filtered").inc();
+
+    reporter.report();
+
+    assertThat(collectByName()).doesNotContainKey("app.filtered");
+  }
+
+  @Test
+  void reportSnapshot_doesNotCollectRegistry() {
+    registry.counter("app.registry").inc();
+
+    reporter.report(java.util.List.of(new CounterStats(Metric.ID.of("app.snapshot"), 3)));
+
+    Map<String, MetricData> metrics = collectByName();
+    assertThat(metrics).containsKey("app.snapshot");
+    assertThat(metrics).doesNotContainKey("app.registry");
   }
 
   @Test

@@ -1,7 +1,6 @@
 package io.avaje.metrics.otel.reporter;
 
-import io.avaje.metrics.MetricRegistry;
-import io.avaje.metrics.Metrics;
+import io.avaje.metrics.*;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterProvider;
@@ -15,6 +14,7 @@ final class DOtelBuilder implements OtelReporter.Builder {
   private OpenTelemetry openTelemetry;
   private MeterProvider meterProvider;
   private MetricRegistry registry;
+  private MetricsProvider metricsProvider;
   private int schedule = 60;
   private TimeUnit scheduleTimeUnit = TimeUnit.SECONDS;
   private long timedThresholdMicros = 0;
@@ -35,6 +35,12 @@ final class DOtelBuilder implements OtelReporter.Builder {
   @Override
   public OtelReporter.Builder registry(MetricRegistry registry) {
     this.registry = registry;
+    return this;
+  }
+
+  @Override
+  public OtelReporter.Builder metricsProvider(MetricsProvider metricsProvider) {
+    this.metricsProvider = metricsProvider;
     return this;
   }
 
@@ -60,9 +66,12 @@ final class DOtelBuilder implements OtelReporter.Builder {
   @Override
   public OtelReporter build() {
     MetricRegistry effectiveRegistry = registry != null ? registry : Metrics.registry();
+    MetricsProvider effectiveProvider = metricsProvider != null
+      ? metricsProvider
+      : MetricsProvider.forRegistry(effectiveRegistry);
     Meter otelMeter = resolveMeter();
     OtelVisitor visitor = new OtelVisitor(otelMeter, timedThresholdMicros);
-    return new DOtelReporter(effectiveRegistry, visitor, schedule, scheduleTimeUnit);
+    return new DOtelReporter(effectiveProvider, visitor, schedule, scheduleTimeUnit);
   }
 
   private Meter resolveMeter() {
