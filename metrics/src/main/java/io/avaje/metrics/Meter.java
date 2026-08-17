@@ -24,7 +24,9 @@ package io.avaje.metrics;
 public interface Meter extends Metric {
 
   /**
-   * Add a value (bytes, time, rows etc).
+   * Add a non-negative value (bytes, time, rows etc).
+   *
+   * @throws IllegalArgumentException if value is negative
    */
   void addEvent(long value);
 

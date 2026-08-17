@@ -9,7 +9,6 @@ import io.avaje.metrics.stats.TimerStats;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.LongAccumulator;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Used to collect long value statistics for meter and timer metrics.
@@ -20,8 +19,8 @@ import java.util.concurrent.atomic.LongAdder;
 final class ValueCounter extends BaseReportName {
 
   private final @Nullable String bucketRange;
-  private final LongAdder count = new LongAdder();
-  private final LongAdder total = new LongAdder();
+  private final ValueAdder count = new ValueAdder();
+  private final ValueAdder total = new ValueAdder();
   private final LongAccumulator max = new LongAccumulator(Math::max, 0);
 
   ValueCounter(Metric.ID id) {
@@ -47,7 +46,7 @@ final class ValueCounter extends BaseReportName {
    * Add a value. Usually the value is Time or Bytes etc.
    */
   void add(long value) {
-    count.increment();
+    count.add(1);
     total.add(value);
     max.accumulate(value);
   }
@@ -63,16 +62,14 @@ final class ValueCounter extends BaseReportName {
   }
 
   private @Nullable Snapshot collectSnapshot(Metric.Visitor collector) {
-    final boolean cumulative = collector.collectionMode() == CollectionMode.CUMULATIVE;
-    final long count = cumulative ? this.count.sum() : this.count.sumThenReset();
+    final long count = this.count.get(collector.collectionMode());
     if (count == 0) {
       return null;
-    } else {
-      final long totalVal = cumulative ? total.sum() : total.sumThenReset();
-      final long maxVal = max.getThenReset();
-      final Metric.ID reportId = reportId(collector);
-      return new Snapshot(reportId, count, totalVal, maxVal);
     }
+    final long totalVal = total.get(collector.collectionMode());
+    final long maxVal = max.getThenReset();
+    final Metric.ID reportId = reportId(collector);
+    return new Snapshot(reportId, count, totalVal, maxVal);
   }
 
   /**
@@ -88,14 +85,14 @@ final class ValueCounter extends BaseReportName {
    * Return the count of values.
    */
   long count() {
-    return count.sum();
+    return count.deltaValue();
   }
 
   /**
    * Return the total of values.
    */
   long total() {
-    return total.sum();
+    return total.deltaValue();
   }
 
   /**
