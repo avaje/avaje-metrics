@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static io.avaje.metrics.CollectionMode.DELTA;
+
 /**
  * Provides filtered Avaje metrics while forwarding Ebean metrics and a filtered
  * Avaje snapshot to an {@link InsightClient}.
@@ -25,10 +27,28 @@ import java.util.stream.Collectors;
  */
 public final class EbeanInsightProvider implements MetricsProvider {
 
+  /**
+   * Controls when the provider forwards metrics to Ebean Insight.
+   */
+  public enum Mode {
+
+    /**
+     * Forward Insight metrics only when the provider is collecting DELTA metrics.
+     */
+    DELTA_ONLY,
+
+    /**
+     * Forward DELTA metrics to Insight when the provider is collecting
+     * CUMULATIVE metrics for another destination.
+     */
+    DELTA_ON_CUMULATIVE
+  }
+
   private final MetricRegistry registry;
   private final InsightClient insightClient;
   private final Predicate<Metric.Statistics> insightFilter;
   private final Predicate<Metric.Statistics> exportFilter;
+  private final Mode mode;
   private final List<DatabaseMetricSupplier> databaseSuppliers;
 
   private EbeanInsightProvider(
@@ -36,7 +56,8 @@ public final class EbeanInsightProvider implements MetricsProvider {
     List<Database> databases,
     InsightClient insightClient,
     Predicate<Metric.Statistics> insightFilter,
-    Predicate<Metric.Statistics> exportFilter) {
+    Predicate<Metric.Statistics> exportFilter,
+    Mode mode) {
 
     this.registry = Objects.requireNonNull(registry, "registry");
     Objects.requireNonNull(databases, "databases");
@@ -46,6 +67,7 @@ public final class EbeanInsightProvider implements MetricsProvider {
     this.insightClient = Objects.requireNonNull(insightClient, "insightClient");
     this.insightFilter = Objects.requireNonNull(insightFilter, "insightFilter");
     this.exportFilter = Objects.requireNonNull(exportFilter, "exportFilter");
+    this.mode = Objects.requireNonNull(mode, "mode");
     this.databaseSuppliers = databases.stream()
       .map(database -> DatabaseMetricSupplier.builder(
         Objects.requireNonNull(database, "database")).build())
@@ -68,11 +90,21 @@ public final class EbeanInsightProvider implements MetricsProvider {
 
   @Override
   public List<Metric.Statistics> provide(CollectionMode mode) {
+    Snapshot snapshot = collect(mode);
+    if (mode == DELTA || (mode == CollectionMode.CUMULATIVE
+      && this.mode == Mode.DELTA_ON_CUMULATIVE)) {
+      sendToInsight(mode == DELTA ? snapshot : collect(DELTA));
+    }
+    return snapshot.exportProjection.stream()
+      .filter(exportFilter)
+      .collect(Collectors.toList());
+  }
+
+  private Snapshot collect(CollectionMode mode) {
     List<Metric.Statistics> registryMetrics = registry.collectMetrics(mode);
     List<Metric.Statistics> insightProjection = new ArrayList<>(registryMetrics);
     List<Metric.Statistics> exportProjection = new ArrayList<>(registryMetrics);
     List<ServerMetrics> databaseSnapshots = new ArrayList<>(databaseSuppliers.size());
-
     for (DatabaseMetricSupplier databaseSupplier : databaseSuppliers) {
       var databaseMetrics = databaseSupplier.collect(mode);
       databaseSnapshots.add(databaseMetrics.serverMetrics());
@@ -80,16 +112,30 @@ public final class EbeanInsightProvider implements MetricsProvider {
       exportProjection.addAll(databaseSupplier.convert(databaseMetrics.serverMetrics()));
       exportProjection.addAll(databaseMetrics.poolMetrics());
     }
+    return new Snapshot(insightProjection, exportProjection, databaseSnapshots);
+  }
 
-    var insightMetrics = insightProjection.stream()
+  private void sendToInsight(Snapshot snapshot) {
+    var insightMetrics = snapshot.insightProjection.stream()
       .filter(insightFilter)
       .collect(Collectors.toList());
+    insightClient.sendNow(insightMetrics, snapshot.databaseSnapshots);
+  }
 
-    insightClient.sendNow(insightMetrics, databaseSnapshots);
+  private static final class Snapshot {
 
-    return exportProjection.stream()
-      .filter(exportFilter)
-      .collect(Collectors.toList());
+    private final List<Metric.Statistics> insightProjection;
+    private final List<Metric.Statistics> exportProjection;
+    private final List<ServerMetrics> databaseSnapshots;
+
+    private Snapshot(
+      List<Metric.Statistics> insightProjection,
+      List<Metric.Statistics> exportProjection,
+      List<ServerMetrics> databaseSnapshots) {
+      this.insightProjection = insightProjection;
+      this.exportProjection = exportProjection;
+      this.databaseSnapshots = databaseSnapshots;
+    }
   }
 
 
@@ -103,6 +149,7 @@ public final class EbeanInsightProvider implements MetricsProvider {
     private final List<Database> databases = new ArrayList<>();
     private Predicate<Metric.Statistics> insightFilter = statistics -> true;
     private Predicate<Metric.Statistics> exportFilter = statistics -> true;
+    private Mode mode = Mode.DELTA_ONLY;
 
     private Builder(MetricRegistry registry, InsightClient insightClient) {
       this.registry = Objects.requireNonNull(registry, "registry");
@@ -144,11 +191,19 @@ public final class EbeanInsightProvider implements MetricsProvider {
     }
 
     /**
+     * Configure when metrics are forwarded to Insight.
+     */
+    public Builder mode(Mode mode) {
+      this.mode = Objects.requireNonNull(mode, "mode");
+      return this;
+    }
+
+    /**
      * Build the provider without changing the registry configuration.
      */
     public EbeanInsightProvider build() {
       return new EbeanInsightProvider(
-        registry, List.copyOf(databases), insightClient, insightFilter, exportFilter);
+        registry, List.copyOf(databases), insightClient, insightFilter, exportFilter, mode);
     }
   }
 }
