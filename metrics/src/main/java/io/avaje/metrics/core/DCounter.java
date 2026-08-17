@@ -14,7 +14,8 @@ import java.util.concurrent.atomic.LongAdder;
  */
 final class DCounter extends BaseReportName implements Counter {
 
-  private final LongAdder count = new LongAdder();
+  private final LongAdder cumulativeCount = new LongAdder();
+  private final LongAdder deltaCount = new LongAdder();
 
   DCounter(ID id, String unit) {
     super(id, unit);
@@ -22,7 +23,7 @@ final class DCounter extends BaseReportName implements Counter {
 
   @Override
   public String toString() {
-    return id + ":" + count;
+    return id + ":" + cumulativeCount;
   }
 
   /**
@@ -30,14 +31,15 @@ final class DCounter extends BaseReportName implements Counter {
    */
   @Override
   public void reset() {
-    count.reset();
+    cumulativeCount.reset();
+    deltaCount.reset();
   }
 
   @Override
   public void collect(Visitor collector) {
     final long sum = (collector.collectionMode() == CollectionMode.CUMULATIVE)
-      ? count.sum()
-      : count.sumThenReset();
+      ? cumulativeCount.sum()
+      : deltaCount.sumThenReset();
     if (sum != 0) {
       final ID reportId = reportId(collector);
       collector.visit(new CounterStats(reportId, unit, sum));
@@ -46,7 +48,7 @@ final class DCounter extends BaseReportName implements Counter {
 
   @Override
   public long count() {
-    return count.sum();
+    return deltaCount.sum();
   }
 
   @Override
@@ -69,7 +71,8 @@ final class DCounter extends BaseReportName implements Counter {
    */
   @Override
   public void inc() {
-    count.increment();
+    cumulativeCount.increment();
+    deltaCount.increment();
   }
 
   /**
@@ -77,17 +80,20 @@ final class DCounter extends BaseReportName implements Counter {
    */
   @Override
   public void inc(long numberOfEventsOccurred) {
-    count.add(numberOfEventsOccurred);
+    cumulativeCount.add(numberOfEventsOccurred);
+    deltaCount.add(numberOfEventsOccurred);
   }
 
   @Override
   public void dec() {
-    count.decrement();
+    cumulativeCount.decrement();
+    deltaCount.decrement();
   }
 
   @Override
   public void dec(long value) {
-    count.add(-value);
+    cumulativeCount.add(-value);
+    deltaCount.add(-value);
   }
 
 }
