@@ -63,10 +63,10 @@ final class ValueCounter extends BaseReportName {
 
   private @Nullable Snapshot collectSnapshot(Metric.Visitor collector) {
     final long count = this.count.get(collector.collectionMode());
-    final long totalVal = total.get(collector.collectionMode());
     if (count == 0) {
       return null;
     }
+    final long totalVal = total.get(collector.collectionMode());
     final long maxVal = max.getThenReset();
     final Metric.ID reportId = reportId(collector);
     return new Snapshot(reportId, count, totalVal, maxVal);
