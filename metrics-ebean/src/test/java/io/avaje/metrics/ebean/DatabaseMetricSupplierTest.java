@@ -28,7 +28,7 @@ class DatabaseMetricSupplierTest {
     when(status.highWaterMark()).thenReturn(3);
 
     var pool = mock(DataSourcePool.class);
-    when(pool.status(true)).thenReturn(status);
+    when(pool.collect(true)).thenReturn(status);
 
     var metaInfo = mock(MetaInfoManager.class);
     var database = mock(Database.class);

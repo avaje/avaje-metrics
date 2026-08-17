@@ -39,7 +39,7 @@ class PoolStatsCollectorTest {
   void mainPoolOnly_normalMode_emitsThreeMetrics() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
-    when(pool.status(true)).thenReturn(s);
+    when(pool.collect(true)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -78,7 +78,7 @@ class PoolStatsCollectorTest {
   void mainPoolOnly_verboseMode_emitsBusyHwm() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
-    when(pool.status(true)).thenReturn(s);
+    when(pool.collect(true)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -102,7 +102,7 @@ class PoolStatsCollectorTest {
   void mainPoolOnly_verboseMode_cumulative_noBusyHwm() {
     var s = status(3, 7, 1, 100, 250_000L, 5, 1_000L, 8_000L);
     var pool = mock(DataSourcePool.class);
-    when(pool.status(false)).thenReturn(s);
+    when(pool.collect(false)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -137,7 +137,7 @@ class PoolStatsCollectorTest {
   void samePoolForMainAndReadOnly_emitsOnce() {
     var s = status(1, 1, 0, 1, 0L, 0, 0L, 0L);
     var pool = mock(DataSourcePool.class);
-    when(pool.status(true)).thenReturn(s);
+    when(pool.collect(true)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -159,9 +159,9 @@ class PoolStatsCollectorTest {
     var s1 = status(0, 0, 0, 0, 0L, 0, 0L, 0L);
     var s2 = status(0, 0, 0, 0, 0L, 0, 0L, 0L);
     var mainPool = mock(DataSourcePool.class);
-    when(mainPool.status(true)).thenReturn(s1);
+    when(mainPool.collect(true)).thenReturn(s1);
     var roPool = mock(DataSourcePool.class);
-    when(roPool.status(true)).thenReturn(s2);
+    when(roPool.collect(true)).thenReturn(s2);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -182,7 +182,7 @@ class PoolStatsCollectorTest {
   void idleInterval_emitsOnlySize() {
     var s = status(0, 5, 0, 0, 0L, 0, 0L, 0L); // no hits, no waits
     var pool = mock(DataSourcePool.class);
-    when(pool.status(true)).thenReturn(s);
+    when(pool.collect(true)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -202,7 +202,7 @@ class PoolStatsCollectorTest {
   void acquireWithoutWaits_emitsSizeAndAcquireOnly() {
     var s = status(3, 7, 0, 100, 250_000L, 0, 0L, 8_000L); // hits but no waits
     var pool = mock(DataSourcePool.class);
-    when(pool.status(true)).thenReturn(s);
+    when(pool.collect(true)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -224,7 +224,7 @@ class PoolStatsCollectorTest {
   void cumulativeMode_passesResetFalse() {
     var s = status(0, 0, 0, 0, 0L, 0, 0L, 0L);
     var pool = mock(DataSourcePool.class);
-    when(pool.status(false)).thenReturn(s);
+    when(pool.collect(false)).thenReturn(s);
 
     var db = mock(Database.class);
     when(db.name()).thenReturn("h2");
@@ -232,7 +232,7 @@ class PoolStatsCollectorTest {
     when(db.readOnlyDataSource()).thenReturn(null);
 
     new PoolStatsCollector(db, false).collect(new ArrayList<>(), false);
-    // verified via the when(pool.status(false)) stub being matched
+    // verified via the when(pool.collect(false)) stub being matched
   }
 
   private static java.util.Map<String, Metric.Statistics> byName(List<Metric.Statistics> stats) {
