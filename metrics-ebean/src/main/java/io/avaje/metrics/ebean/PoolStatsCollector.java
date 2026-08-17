@@ -78,7 +78,7 @@ final class PoolStatsCollector {
     }
 
     void collect(List<Metric.Statistics> out, boolean reset) {
-      PoolStatus status = pool.status(reset);
+      PoolStatus status = pool.collect(reset);
       int busy = status.busy();
       int free = status.free();
       out.add(new GaugeLongStats(sizeId, busy + free));
