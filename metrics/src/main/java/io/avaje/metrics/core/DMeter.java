@@ -51,6 +51,9 @@ final class DMeter extends BaseReportName implements Meter {
 
   @Override
   public void addEvent(long value) {
+    if (value < 0) {
+      throw new IllegalArgumentException("Meter value must be non-negative: " + value);
+    }
     values.add(value);
   }
 

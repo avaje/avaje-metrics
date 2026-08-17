@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MeterTest {
@@ -31,6 +32,15 @@ class MeterTest {
     assertEquals(2000, statistics.max());
     assertEquals(1500, statistics.mean());
     assertThat(collect(metric)).isEmpty();
+  }
+
+  @Test
+  void addEvent_whenNegativeValue_expectIllegalArgumentException() {
+    Meter metric = new DMeter(Metric.ID.of("org.test.negative"), "");
+
+    assertThatThrownBy(() -> metric.addEvent(-1))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Meter value must be non-negative: -1");
   }
 
   @Test
