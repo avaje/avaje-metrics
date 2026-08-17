@@ -49,6 +49,7 @@ public final class EbeanInsightProvider implements MetricsProvider {
   private final Predicate<Metric.Statistics> insightFilter;
   private final Predicate<Metric.Statistics> exportFilter;
   private final Mode mode;
+  private final boolean exportDatabaseMetrics;
   private final List<DatabaseMetricSupplier> databaseSuppliers;
 
   private EbeanInsightProvider(
@@ -57,7 +58,8 @@ public final class EbeanInsightProvider implements MetricsProvider {
     InsightClient insightClient,
     Predicate<Metric.Statistics> insightFilter,
     Predicate<Metric.Statistics> exportFilter,
-    Mode mode) {
+    Mode mode,
+    boolean exportDatabaseMetrics) {
 
     this.registry = Objects.requireNonNull(registry, "registry");
     Objects.requireNonNull(databases, "databases");
@@ -68,6 +70,7 @@ public final class EbeanInsightProvider implements MetricsProvider {
     this.insightFilter = Objects.requireNonNull(insightFilter, "insightFilter");
     this.exportFilter = Objects.requireNonNull(exportFilter, "exportFilter");
     this.mode = Objects.requireNonNull(mode, "mode");
+    this.exportDatabaseMetrics = exportDatabaseMetrics;
     this.databaseSuppliers = databases.stream()
       .map(database -> DatabaseMetricSupplier.builder(
         Objects.requireNonNull(database, "database")).build())
@@ -90,10 +93,20 @@ public final class EbeanInsightProvider implements MetricsProvider {
 
   @Override
   public List<Metric.Statistics> provide(CollectionMode mode) {
+    if (mode == CollectionMode.CUMULATIVE && this.mode == Mode.DELTA_ON_CUMULATIVE) {
+      // Max values are reset by either collection mode, so capture the Insight
+      // delta before collecting the cumulative export projection.
+      Snapshot insightSnapshot = collect(DELTA);
+      Snapshot exportSnapshot = collect(mode);
+      sendToInsight(insightSnapshot);
+      return exportSnapshot.exportProjection.stream()
+        .filter(exportFilter)
+        .collect(Collectors.toList());
+    }
+
     Snapshot snapshot = collect(mode);
-    if (mode == DELTA || (mode == CollectionMode.CUMULATIVE
-      && this.mode == Mode.DELTA_ON_CUMULATIVE)) {
-      sendToInsight(mode == DELTA ? snapshot : collect(DELTA));
+    if (mode == DELTA) {
+      sendToInsight(snapshot);
     }
     return snapshot.exportProjection.stream()
       .filter(exportFilter)
@@ -109,8 +122,10 @@ public final class EbeanInsightProvider implements MetricsProvider {
       var databaseMetrics = databaseSupplier.collect(mode);
       databaseSnapshots.add(databaseMetrics.serverMetrics());
       insightProjection.addAll(databaseMetrics.poolMetrics());
-      exportProjection.addAll(databaseSupplier.convert(databaseMetrics.serverMetrics()));
-      exportProjection.addAll(databaseMetrics.poolMetrics());
+      if (exportDatabaseMetrics) {
+        exportProjection.addAll(databaseSupplier.convert(databaseMetrics.serverMetrics()));
+        exportProjection.addAll(databaseMetrics.poolMetrics());
+      }
     }
     return new Snapshot(insightProjection, exportProjection, databaseSnapshots);
   }
@@ -150,6 +165,7 @@ public final class EbeanInsightProvider implements MetricsProvider {
     private Predicate<Metric.Statistics> insightFilter = statistics -> true;
     private Predicate<Metric.Statistics> exportFilter = statistics -> true;
     private Mode mode = Mode.DELTA_ONLY;
+    private boolean exportDatabaseMetrics = true;
 
     private Builder(MetricRegistry registry, InsightClient insightClient) {
       this.registry = Objects.requireNonNull(registry, "registry");
@@ -191,6 +207,18 @@ public final class EbeanInsightProvider implements MetricsProvider {
     }
 
     /**
+     * Include Ebean and datasource pool metrics in the statistics returned for
+     * StatsD or OpenTelemetry.
+     *
+     * <p>When disabled, these metrics continue to be collected and sent to
+     * Ebean Insight but are excluded from the export projection.
+     */
+    public Builder exportDatabaseMetrics(boolean exportDatabaseMetrics) {
+      this.exportDatabaseMetrics = exportDatabaseMetrics;
+      return this;
+    }
+
+    /**
      * Configure when metrics are forwarded to Insight.
      */
     public Builder mode(Mode mode) {
@@ -203,7 +231,8 @@ public final class EbeanInsightProvider implements MetricsProvider {
      */
     public EbeanInsightProvider build() {
       return new EbeanInsightProvider(
-        registry, List.copyOf(databases), insightClient, insightFilter, exportFilter, mode);
+        registry, List.copyOf(databases), insightClient, insightFilter, exportFilter, mode,
+        exportDatabaseMetrics);
     }
   }
 }
