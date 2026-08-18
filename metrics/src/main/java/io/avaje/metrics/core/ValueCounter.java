@@ -8,8 +8,6 @@ import io.avaje.metrics.stats.MeterStats;
 import io.avaje.metrics.stats.TimerStats;
 import org.jspecify.annotations.Nullable;
 
-import java.util.concurrent.atomic.LongAccumulator;
-
 /**
  * Used to collect long value statistics for meter and timer metrics.
  * <p>
@@ -21,16 +19,24 @@ final class ValueCounter extends BaseReportName {
   private final @Nullable String bucketRange;
   private final ValueAdder count = new ValueAdder();
   private final ValueAdder total = new ValueAdder();
-  private final LongAccumulator max = new LongAccumulator(Math::max, 0);
+  private final ValueMax max;
 
   ValueCounter(Metric.ID id) {
-    super(id);
-    this.bucketRange = null;
+    this(id, null, new ValueMax());
   }
 
   ValueCounter(Metric.ID id, String bucketRange) {
+    this(id, bucketRange, new ValueMax());
+  }
+
+  ValueCounter(Metric.ID id, ValueMax max) {
+    this(id, null, max);
+  }
+
+  private ValueCounter(Metric.ID id, @Nullable String bucketRange, ValueMax max) {
     super(id);
     this.bucketRange = bucketRange;
+    this.max = max;
   }
 
   @Override
@@ -48,7 +54,7 @@ final class ValueCounter extends BaseReportName {
   void add(long value) {
     count.add(1);
     total.add(value);
-    max.accumulate(value);
+    max.add(value);
   }
 
   Meter.@Nullable Stats collect(Metric.Visitor collector, String unit) {
@@ -67,7 +73,7 @@ final class ValueCounter extends BaseReportName {
       return null;
     }
     final long totalVal = total.get(collector.collectionMode());
-    final long maxVal = max.getThenReset();
+    final long maxVal = max.collect();
     final Metric.ID reportId = reportId(collector);
     return new Snapshot(reportId, count, totalVal, maxVal);
   }
@@ -99,7 +105,7 @@ final class ValueCounter extends BaseReportName {
    * Return the max value.
    */
   long max() {
-    return max.get();
+    return max.current();
   }
 
   long mean() {

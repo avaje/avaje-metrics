@@ -86,19 +86,19 @@ class DBucketTimerTest {
     Timer.Stats stats2 = collectTimer(bucket, CollectionMode.CUMULATIVE);
     assertEquals(1, stats2.count());
     assertEquals(50_000, stats2.total());
-    assertEquals(0, stats2.max());
+    assertEquals(50_000, stats2.max());
 
     long fortyMillisAsNanos = TimeUnit.MILLISECONDS.toNanos(40);
     bucketTimedMetric.addEventDuration(true, fortyMillisAsNanos);
     Timer.Stats stats3 = collectTimer(bucket, CollectionMode.CUMULATIVE);
     assertEquals(2, stats3.count());
     assertEquals(90_000, stats3.total());
-    assertEquals(40_000, stats3.max());
+    assertEquals(50_000, stats3.max());
 
     Timer.Stats delta = collectTimer(bucket);
     assertEquals(2, delta.count());
     assertEquals(90_000, delta.total());
-    assertEquals(0, delta.max());
+    assertEquals(50_000, delta.max());
     assertThat(collect(bucket)).isEmpty();
   }
 
