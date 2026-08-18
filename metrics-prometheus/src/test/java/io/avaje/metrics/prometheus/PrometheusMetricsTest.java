@@ -98,7 +98,7 @@ class PrometheusMetricsTest {
     assertThat(first).contains(
       "# TYPE app_service_max_seconds_max gauge\n",
       "app_service_max_seconds_max 0.005\n");
-    assertThat(second).contains("app_service_max_seconds_max 0.0\n");
+    assertThat(second).contains("app_service_max_seconds_max 0.005\n");
   }
 
   @Test
