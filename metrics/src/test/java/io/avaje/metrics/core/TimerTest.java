@@ -212,10 +212,10 @@ class TimerTest {
     assertThat(stats2).hasSize(2);
     assertEquals(1, ((Timer.Stats) stats2.get(0)).count());
     assertEquals(5_000, ((Timer.Stats) stats2.get(0)).total());
-    assertEquals(0, ((Timer.Stats) stats2.get(0)).max());
+    assertEquals(5_000, ((Timer.Stats) stats2.get(0)).max());
     assertEquals(1, ((Timer.Stats) stats2.get(1)).count());
     assertEquals(2_000, ((Timer.Stats) stats2.get(1)).total());
-    assertEquals(0, ((Timer.Stats) stats2.get(1)).max());
+    assertEquals(2_000, ((Timer.Stats) stats2.get(1)).max());
 
     metric.addEventDuration(true, TimeUnit.MILLISECONDS.toNanos(3));
     metric.addEventDuration(false, TimeUnit.MILLISECONDS.toNanos(7));
@@ -223,19 +223,19 @@ class TimerTest {
     assertThat(stats3).hasSize(2);
     assertEquals(2, ((Timer.Stats) stats3.get(0)).count());
     assertEquals(8_000, ((Timer.Stats) stats3.get(0)).total());
-    assertEquals(3_000, ((Timer.Stats) stats3.get(0)).max());
+    assertEquals(5_000, ((Timer.Stats) stats3.get(0)).max());
     assertEquals(2, ((Timer.Stats) stats3.get(1)).count());
     assertEquals(9_000, ((Timer.Stats) stats3.get(1)).total());
-    assertEquals(7_000, ((Timer.Stats) stats3.get(1)).max());
+    assertEquals(2_000, ((Timer.Stats) stats3.get(1)).max());
 
     List<Metric.Statistics> stats4 = registry.collectMetrics();
     assertThat(stats4).hasSize(2);
     assertEquals(2, ((Timer.Stats) stats4.get(0)).count());
     assertEquals(8_000, ((Timer.Stats) stats4.get(0)).total());
-    assertEquals(0, ((Timer.Stats) stats4.get(0)).max());
+    assertEquals(5_000, ((Timer.Stats) stats4.get(0)).max());
     assertEquals(2, ((Timer.Stats) stats4.get(1)).count());
     assertEquals(9_000, ((Timer.Stats) stats4.get(1)).total());
-    assertEquals(0, ((Timer.Stats) stats4.get(1)).max());
+    assertEquals(2_000, ((Timer.Stats) stats4.get(1)).max());
     assertThat(registry.collectMetrics()).isEmpty();
   }
 

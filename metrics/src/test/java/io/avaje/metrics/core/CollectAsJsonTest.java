@@ -98,7 +98,7 @@ class CollectAsJsonTest {
   }
 
   @Test
-  void collectAsJsonCumulative_maxResets() {
+  void collectAsJsonCumulative_publishesSharedMax() {
 
     Meter meter = registry.meter("my.cumulative.meter");
     meter.addEvent(40);
@@ -108,10 +108,10 @@ class CollectAsJsonTest {
     assertThat(first).contains("{\"name\":\"my.cumulative.meter\",\"count\":2,\"mean\":45,\"max\":50,\"total\":90}");
 
     String second = registry.collectAsJson(CollectionMode.CUMULATIVE).asJson();
-    assertThat(second).contains("{\"name\":\"my.cumulative.meter\",\"count\":2,\"mean\":45,\"max\":0,\"total\":90}");
+    assertThat(second).contains("{\"name\":\"my.cumulative.meter\",\"count\":2,\"mean\":45,\"max\":50,\"total\":90}");
 
     meter.addEvent(30);
     String third = registry.collectAsJson(CollectionMode.CUMULATIVE).asJson();
-    assertThat(third).contains("{\"name\":\"my.cumulative.meter\",\"count\":3,\"mean\":40,\"max\":30,\"total\":120}");
+    assertThat(third).contains("{\"name\":\"my.cumulative.meter\",\"count\":3,\"mean\":40,\"max\":50,\"total\":120}");
   }
 }

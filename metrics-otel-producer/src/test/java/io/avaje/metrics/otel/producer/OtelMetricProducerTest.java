@@ -86,7 +86,7 @@ class OtelMetricProducerTest {
   }
 
   @Test
-  void timer_metricsAreCumulativeAndMaxResets() {
+  void timer_metricsAreCumulativeAndMaxIsShared() {
     var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
     var registry = Metrics.createRegistry();
     var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
@@ -130,10 +130,10 @@ class OtelMetricProducerTest {
 
     assertThat(onlyLongSumPoint(second.get("app.service.method.count")).getValue()).isEqualTo(1);
     assertThat(onlyLongSumPoint(second.get("app.service.method.total")).getValue()).isEqualTo(5_000L);
-    assertThat(onlyLongGaugePoint(second.get("app.service.method.max")).getValue()).isEqualTo(0L);
+    assertThat(onlyLongGaugePoint(second.get("app.service.method.max")).getValue()).isEqualTo(5_000L);
     assertThat(onlyLongSumPoint(second.get("app.service.method.error.count")).getValue()).isEqualTo(1);
     assertThat(onlyLongSumPoint(second.get("app.service.method.error.total")).getValue()).isEqualTo(2_000L);
-    assertThat(onlyLongGaugePoint(second.get("app.service.method.error.max")).getValue()).isEqualTo(0L);
+    assertThat(onlyLongGaugePoint(second.get("app.service.method.error.max")).getValue()).isEqualTo(2_000L);
 
     timer.addEventDuration(true, 3_000_000L);
     timer.addEventDuration(false, 7_000_000L);
@@ -142,10 +142,10 @@ class OtelMetricProducerTest {
 
     assertThat(onlyLongSumPoint(third.get("app.service.method.count")).getValue()).isEqualTo(2);
     assertThat(onlyLongSumPoint(third.get("app.service.method.total")).getValue()).isEqualTo(8_000L);
-    assertThat(onlyLongGaugePoint(third.get("app.service.method.max")).getValue()).isEqualTo(3_000L);
+    assertThat(onlyLongGaugePoint(third.get("app.service.method.max")).getValue()).isEqualTo(5_000L);
     assertThat(onlyLongSumPoint(third.get("app.service.method.error.count")).getValue()).isEqualTo(2);
     assertThat(onlyLongSumPoint(third.get("app.service.method.error.total")).getValue()).isEqualTo(9_000L);
-    assertThat(onlyLongGaugePoint(third.get("app.service.method.error.max")).getValue()).isEqualTo(7_000L);
+    assertThat(onlyLongGaugePoint(third.get("app.service.method.error.max")).getValue()).isEqualTo(2_000L);
   }
 
   @Test
@@ -167,7 +167,7 @@ class OtelMetricProducerTest {
 
     assertThat(onlyLongSumPoint(metrics.get("app.fast.method.count")).getValue()).isEqualTo(2);
     assertThat(onlyLongSumPoint(metrics.get("app.fast.method.total")).getValue()).isEqualTo(10_000L);
-    assertThat(onlyLongGaugePoint(metrics.get("app.fast.method.max")).getValue()).isEqualTo(9_000L);
+    assertThat(onlyLongGaugePoint(metrics.get("app.fast.method.max")).getValue()).isEqualTo(1_000L);
   }
 
   @Test
