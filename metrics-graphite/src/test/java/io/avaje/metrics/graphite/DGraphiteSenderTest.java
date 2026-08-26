@@ -1,5 +1,6 @@
 package io.avaje.metrics.graphite;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.Metric;
 import io.avaje.metrics.Tags;
 import io.avaje.metrics.stats.CounterStats;
@@ -17,11 +18,33 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DGraphiteSenderTest {
+
+  @Test
+  void report_withMetricsProvider_usesDeltaSnapshot() {
+    var socketFactory = new RecordingSocketFactory();
+    var collectionMode = new AtomicReference<CollectionMode>();
+    var reporter = GraphiteReporter.builder()
+      .hostname("localhost")
+      .port(2003)
+      .socketFactory(socketFactory)
+      .excludeDefaultRegistry()
+      .metricsProvider(mode -> {
+        collectionMode.set(mode);
+        return List.of(new CounterStats(Metric.ID.of("provider.metric"), 42));
+      })
+      .build();
+
+    reporter.report();
+
+    assertThat(collectionMode.get()).isEqualTo(CollectionMode.DELTA);
+    assertThat(payload(socketFactory)).contains("'provider.metric'");
+  }
 
   @Test
   void sendTimer_withLabelTag_flattensLabelIntoMetricName() throws IOException {

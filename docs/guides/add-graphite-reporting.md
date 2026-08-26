@@ -62,6 +62,7 @@ Common builder options:
 - `batchSize(...)` tunes the number of tuples per Graphite payload.
 - `timedThresholdMicros(...)` suppresses low-value timer metrics.
 - `excludeDefaultRegistry()` reports only explicitly added registries or suppliers.
+- `metricsProvider(...)` obtains metrics from a `MetricsProvider` using DELTA collection.
 
 ---
 
@@ -109,6 +110,21 @@ GraphiteReporter reporter = GraphiteReporter.builder()
 
 Use `registry(MetricSupplier)` when a custom supplier exposes metrics from another
 source.
+
+Use `metricsProvider(...)` when metrics are composed or filtered by a provider:
+
+```java
+GraphiteReporter reporter = GraphiteReporter.builder()
+  .prefix("prod.billing.")
+  .hostname("graphite.example.com")
+  .port(2003)
+  .metricsProvider(metricsProvider)
+  .build();
+```
+
+An explicitly configured provider replaces the default registry collection.
+Providers such as `MetricsProviderCoordinator` can therefore be shared with
+other reporters. The provider is called with `CollectionMode.DELTA`.
 
 ---
 

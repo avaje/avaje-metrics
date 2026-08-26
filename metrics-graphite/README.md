@@ -41,8 +41,26 @@ reporter.report();
 - `batchSize(...)` — tune batching
 - `timedThresholdMicros(...)` — suppress low-value timer metrics
 - `registry(...)` — include a non-default registry or custom `MetricSupplier`
+- `metricsProvider(...)` — obtain metrics from a `MetricsProvider` using DELTA collection
 - `database(...)` — include Ebean database metrics directly
 - `excludeDefaultRegistry()` — report only explicitly added registries/suppliers
+
+When `metricsProvider(...)` is configured, it replaces the default registry
+collection. This supports composing Graphite with providers such as
+`MetricsProviderCoordinator`:
+
+```java
+GraphiteReporter reporter = GraphiteReporter.builder()
+  .prefix("prod.billing.")
+  .hostname("graphite.example.com")
+  .port(2003)
+  .metricsProvider(metricsProvider)
+  .build();
+```
+
+The provider is called with `CollectionMode.DELTA`. If the provider already
+includes Ebean database metrics, do not also add the same databases with
+`database(...)`.
 
 ## Label tags
 

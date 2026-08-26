@@ -3,6 +3,7 @@ package io.avaje.metrics.graphite;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricSupplier;
 import io.avaje.metrics.Metrics;
+import io.avaje.metrics.MetricsProvider;
 import io.ebean.Database;
 import io.ebean.meta.ServerMetrics;
 
@@ -12,6 +13,8 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static java.util.Objects.requireNonNull;
 
 final class DGraphiteBuilder implements GraphiteReporter.Builder {
 
@@ -24,6 +27,7 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
 
   private final List<GraphiteSender.Reporter> reporters = new ArrayList<>();
   private boolean excludeDefaultRegistry;
+  private MetricsProvider metricsProvider;
 
   @Override
   public DGraphiteBuilder prefix(String prefix) {
@@ -91,6 +95,12 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
     return this;
   }
 
+  @Override
+  public DGraphiteBuilder metricsProvider(MetricsProvider metricsProvider) {
+    this.metricsProvider = requireNonNull(metricsProvider, "metricsProvider");
+    return this;
+  }
+
   private GraphiteSender buildSender() {
     if (hostname == null) throw new IllegalStateException("hostname required");
     if (port == 0) throw new IllegalStateException("port must be set");
@@ -104,7 +114,9 @@ final class DGraphiteBuilder implements GraphiteReporter.Builder {
   }
 
   public GraphiteReporter build() {
-    if (!excludeDefaultRegistry) {
+    if (metricsProvider != null) {
+      reporters.add(new DProviderReporter(metricsProvider));
+    } else if (!excludeDefaultRegistry) {
       reporters.add(new DRegistryReporter(Metrics.registry()));
     }
     return new DGraphiteReporter(buildSender(), reporters);
