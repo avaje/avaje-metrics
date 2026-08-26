@@ -1,7 +1,9 @@
 package io.avaje.metrics.graphite;
 
+import io.avaje.metrics.CollectionMode;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.MetricSupplier;
+import io.avaje.metrics.MetricsProvider;
 import io.ebean.Database;
 import io.ebean.meta.ServerMetrics;
 
@@ -148,6 +150,14 @@ public interface GraphiteReporter {
      * Include metrics from the MetricSupplier
      */
     Builder registry(MetricSupplier supplier);
+
+    /**
+     * Specify the provider used to obtain metrics for reporting.
+     * <p>
+     * When specified, this takes precedence over the default registry.
+     * The provider is called using {@link CollectionMode#DELTA}.
+     */
+    Builder metricsProvider(MetricsProvider metricsProvider);
 
     /**
      * Build and return the Reporter.
