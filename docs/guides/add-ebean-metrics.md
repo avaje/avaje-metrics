@@ -134,6 +134,19 @@ Metrics.addSupplier(
 If neither datasource is a `DataSourcePool`, no pool metrics are emitted and there is no
 runtime cost.
 
+### Datasource pool metrics only
+
+When Ebean metrics are collected separately, register `DataSourcePoolMetricSupplier` to
+report only the database's main and read-only datasource pool metrics:
+
+```java
+Metrics.addSupplier(new DataSourcePoolMetricSupplier(database));
+```
+
+This supplier does not read Ebean's reset-on-read metrics. Do not register it for a database
+that is already registered with `DatabaseMetricSupplier`, which includes datasource pool
+metrics by default.
+
 ---
 
 ## Step 3 — Collect or export the metrics
