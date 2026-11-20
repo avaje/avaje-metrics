@@ -17,6 +17,19 @@ import java.util.Objects;
  *
  * <p>Use this when Ebean metrics are collected separately, such as by
  * {@code InsightClient.collectEbeanMetrics(true)}.
+ *
+ * <p>Register a default supplier with:
+ * <pre>{@code
+ * new DataSourcePoolMetricSupplier(database).register();
+ * }</pre>
+ *
+ * <p>Or use the builder to enable verbose metrics before registering:
+ * <pre>{@code
+ * DataSourcePoolMetricSupplier.builder(database)
+ *     .verbosePoolMetrics()
+ *     .build()
+ *     .register();
+ * }</pre>
  */
 @NullMarked
 public final class DataSourcePoolMetricSupplier implements MetricSupplier {
