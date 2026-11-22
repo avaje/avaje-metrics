@@ -11,6 +11,7 @@
   <name>avaje-metrics-otel-trace</name>
 
   <properties>
+    <otel.version>1.67.0</otel.version>
     <surefire.useModulePath>false</surefire.useModulePath>
   </properties>
 
@@ -25,7 +26,7 @@
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-api</artifactId>
-      <version>1.63.0</version>
+      <version>${otel.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -39,14 +40,14 @@
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk</artifactId>
-      <version>1.63.0</version>
+      <version>${otel.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk-testing</artifactId>
-      <version>1.63.0</version>
+      <version>${otel.version}</version>
       <scope>test</scope>
     </dependency>
 
