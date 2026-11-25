@@ -16,7 +16,7 @@ package io.avaje.metrics;
 public interface JvmMetrics {
 
   /**
-   * Set to include details for GC and threads.
+   * Set to include details for memory and threads.
    */
   JvmMetrics withDetails();
 
@@ -72,15 +72,19 @@ public interface JvmMetrics {
   /**
    * Register metrics for GC activity.
    *
+   * <p>Publishes per-collector incrementing gauges {@code jvm.gc.count} and {@code jvm.gc.time}
+   * (in milliseconds) tagged with {@code gc} (such as {@code gc:young}, {@code gc:full},
+   * {@code gc:concurrent}).
+   *
+   * <p>On GraalVM Native Image with G1 ({@code --gc=G1}), build with
+   * {@code --enable-monitoring=jvmstat} so GC count and time counters can be read from
+   * {@code hsperfdata} while {@code GarbageCollectorMXBean} is not yet provided by G1.
+   *
    * <h4>Base metrics</h4>
    * <ul>
-   *   <li>jvm.gc.time</li>
+   *   <li>jvm.gc.count (tagged with {@code gc:<collector>})</li>
+   *   <li>jvm.gc.time (tagged with {@code gc:<collector>})</li>
    * </ul>
-   *
-   * <h4>Extra metrics with {@link #withDetails()} enabled</h4>
-   * <p>
-   *   count and time for each Garbage Collector being used.
-   * </p>
    */
   JvmMetrics registerJvmGCMetrics();
 

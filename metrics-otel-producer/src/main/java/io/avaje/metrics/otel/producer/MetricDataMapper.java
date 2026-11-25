@@ -21,7 +21,9 @@ import io.opentelemetry.sdk.resources.Resource;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 final class MetricDataMapper {
@@ -61,13 +63,13 @@ final class MetricDataMapper {
     private final Resource resource;
     private final long startEpochNanos;
     private final long epochNanos;
-    private final List<MetricData> metrics;
+    private final Map<String, MetricSeries> series;
 
     private ProduceVisitor(Resource resource, long startEpochNanos, long epochNanos, int capacity) {
       this.resource = resource;
       this.startEpochNanos = startEpochNanos;
       this.epochNanos = epochNanos;
-      this.metrics = new ArrayList<>(capacity);
+      this.series = new LinkedHashMap<>(capacity);
     }
 
     @Override
@@ -94,64 +96,135 @@ final class MetricDataMapper {
       if (stats.count() == 0) {
         return;
       }
-      metrics.add(longSumMetric(stats.name(), stats.unit(), stats.count(), true, attributes(stats.id())));
+      addLongSum(stats.name(), stats.unit(), stats.count(), true, attributes(stats.id()));
     }
 
     @Override
     public void visit(GaugeDouble.Stats stats) {
-      metrics.add(doubleGaugeMetric(stats.name(), stats.unit(), stats.value(), attributes(stats.id())));
+      addDoubleGauge(stats.name(), stats.unit(), stats.value(), attributes(stats.id()));
     }
 
     @Override
     public void visit(GaugeLong.Stats stats) {
-      metrics.add(longGaugeMetric(stats.name(), stats.unit(), stats.value(), attributes(stats.id())));
+      addLongGauge(stats.name(), stats.unit(), stats.value(), attributes(stats.id()));
     }
 
     private List<MetricData> metrics() {
+      var metrics = new ArrayList<MetricData>(series.size());
+      for (var item : series.values()) {
+        metrics.add(item.toMetricData(resource, scopeInfo));
+      }
       return metrics;
     }
 
     private void recordMeterStats(Meter.Stats stats, String unit) {
       var names = derivedMetricNames(stats.name());
       var attributes = attributes(stats.id());
-      metrics.add(longSumMetric(names.count(), COUNT_UNIT, stats.count(), true, attributes));
-      metrics.add(longSumMetric(names.total(), unit, stats.total(), true, attributes));
-      metrics.add(longGaugeMetric(names.max(), unit, stats.max(), attributes));
+      addLongSum(names.count(), COUNT_UNIT, stats.count(), true, attributes);
+      addLongSum(names.total(), unit, stats.total(), true, attributes);
+      addLongGauge(names.max(), unit, stats.max(), attributes);
     }
 
-    private MetricData longSumMetric(String name, String unit, long value, boolean monotonic, Attributes attributes) {
+    private void addLongSum(String name, String unit, long value, boolean monotonic, Attributes attributes) {
+      var target = (LongSumSeries) series.computeIfAbsent("S:" + name, key -> new LongSumSeries(name, unit, monotonic));
+      target.add(LongPointData.create(startEpochNanos, epochNanos, attributes, value));
+    }
+
+    private void addLongGauge(String name, String unit, long value, Attributes attributes) {
+      var target = (LongGaugeSeries) series.computeIfAbsent("LG:" + name, key -> new LongGaugeSeries(name, unit));
+      target.add(LongPointData.create(startEpochNanos, epochNanos, attributes, value));
+    }
+
+    private void addDoubleGauge(String name, String unit, double value, Attributes attributes) {
+      var target = (DoubleGaugeSeries) series.computeIfAbsent("DG:" + name, key -> new DoubleGaugeSeries(name, unit));
+      target.add(DoublePointData.create(startEpochNanos, epochNanos, attributes, value, List.of()));
+    }
+  }
+
+  private interface MetricSeries {
+    MetricData toMetricData(Resource resource, InstrumentationScopeInfo scopeInfo);
+  }
+
+  private static final class LongSumSeries implements MetricSeries {
+
+    private final String name;
+    private final String unit;
+    private final boolean monotonic;
+    private final List<LongPointData> points = new ArrayList<>(4);
+
+    private LongSumSeries(String name, String unit, boolean monotonic) {
+      this.name = name;
+      this.unit = unit;
+      this.monotonic = monotonic;
+    }
+
+    private void add(LongPointData point) {
+      points.add(point);
+    }
+
+    @Override
+    public MetricData toMetricData(Resource resource, InstrumentationScopeInfo scopeInfo) {
       return ImmutableMetricData.createLongSum(
         resource,
         scopeInfo,
         name,
         DESCRIPTION,
         unit,
-        SumData.createLongSumData(
-          monotonic,
-          AggregationTemporality.CUMULATIVE,
-          List.of(LongPointData.create(startEpochNanos, epochNanos, attributes, value))));
+        SumData.createLongSumData(monotonic, AggregationTemporality.CUMULATIVE, points));
+    }
+  }
+
+  private static final class LongGaugeSeries implements MetricSeries {
+
+    private final String name;
+    private final String unit;
+    private final List<LongPointData> points = new ArrayList<>(4);
+
+    private LongGaugeSeries(String name, String unit) {
+      this.name = name;
+      this.unit = unit;
     }
 
-    private MetricData longGaugeMetric(String name, String unit, long value, Attributes attributes) {
+    private void add(LongPointData point) {
+      points.add(point);
+    }
+
+    @Override
+    public MetricData toMetricData(Resource resource, InstrumentationScopeInfo scopeInfo) {
       return ImmutableMetricData.createLongGauge(
         resource,
         scopeInfo,
         name,
         DESCRIPTION,
         unit,
-        GaugeData.createLongGaugeData(
-          List.of(LongPointData.create(startEpochNanos, epochNanos, attributes, value))));
+        GaugeData.createLongGaugeData(points));
+    }
+  }
+
+  private static final class DoubleGaugeSeries implements MetricSeries {
+
+    private final String name;
+    private final String unit;
+    private final List<DoublePointData> points = new ArrayList<>(4);
+
+    private DoubleGaugeSeries(String name, String unit) {
+      this.name = name;
+      this.unit = unit;
     }
 
-    private MetricData doubleGaugeMetric(String name, String unit, double value, Attributes attributes) {
+    private void add(DoublePointData point) {
+      points.add(point);
+    }
+
+    @Override
+    public MetricData toMetricData(Resource resource, InstrumentationScopeInfo scopeInfo) {
       return ImmutableMetricData.createDoubleGauge(
         resource,
         scopeInfo,
         name,
         DESCRIPTION,
         unit,
-        GaugeData.createDoubleGaugeData(
-          List.of(DoublePointData.create(startEpochNanos, epochNanos, attributes, value, List.of()))));
+        GaugeData.createDoubleGaugeData(points));
     }
   }
 

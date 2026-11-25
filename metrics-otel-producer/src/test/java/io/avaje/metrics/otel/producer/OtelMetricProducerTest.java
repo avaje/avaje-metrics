@@ -269,6 +269,31 @@ class OtelMetricProducerTest {
     assertThat(onlyLongPoint(metric).getValue()).isEqualTo(4);
   }
 
+  @Test
+  void multiTagGauges_areGroupedIntoSingleMetricData() {
+    var epochNanosSource = new MutableEpochNanosSource(epochNanos(Instant.parse("2026-01-01T00:00:00Z")));
+    var registry = Metrics.createRegistry();
+    var producer = new DOtelMetricProducer(registry, InstrumentationScopeInfo.create("test.scope"), 0, epochNanosSource);
+
+    registry.gauge("jvm.gc.time").tags(Tags.of("pod:app-1", "gc:young")).ofLongs(() -> 12L);
+    registry.gauge("jvm.gc.time").tags(Tags.of("pod:app-1", "gc:full")).ofLongs(() -> 45L);
+    registry.gauge("jvm.gc.time").tags(Tags.of("pod:app-1", "gc:concurrent")).ofLongs(() -> 3L);
+    epochNanosSource.advanceSeconds(5);
+
+    Map<String, MetricData> metrics = byName(producer.produce(Resource.empty()));
+    assertThat(metrics).containsOnlyKeys("jvm.gc.time");
+
+    Map<String, Long> byGcTag = metrics.get("jvm.gc.time").getLongGaugeData().getPoints().stream()
+      .collect(Collectors.toMap(
+        point -> point.getAttributes().get(AttributeKey.stringKey("gc")),
+        LongPointData::getValue));
+
+    assertThat(byGcTag)
+      .containsEntry("young", 12L)
+      .containsEntry("full", 45L)
+      .containsEntry("concurrent", 3L);
+  }
+
   private static Map<String, MetricData> byName(Collection<MetricData> metrics) {
     return metrics.stream().collect(Collectors.toMap(MetricData::getName, metric -> metric));
   }
