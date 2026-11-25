@@ -1,42 +1,100 @@
 package io.avaje.metrics.core;
 
+import io.avaje.applog.AppLog;
 import io.avaje.metrics.GaugeLong;
 import io.avaje.metrics.MetricRegistry;
 import io.avaje.metrics.Tags;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.LongSupplier;
 
+import static java.lang.System.Logger.Level.INFO;
+
 /**
- * Collect statistics on the rate of garbage collection.
+ * Collect statistics on the count and pause time of garbage collection.
  */
 final class JvmGarbageCollection {
 
-  static void createGauges(MetricRegistry registry, boolean withDetails, Tags globalTags) {
+  private static final System.Logger log = AppLog.getLogger("io.avaje.metrics");
+  private static final String GC_COUNT = "jvm.gc.count";
+  private static final String GC_TIME = "jvm.gc.time";
+
+  static void createGauges(MetricRegistry registry, Tags globalTags) {
     List<GarbageCollectorMXBean> gcMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
-    createTotalGcTime(registry, gcMXBeans, globalTags);
-    if (withDetails) {
-      for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
-        // modify collector name replacing spaces with hyphens.
-        String gcName = gcMXBean.getName().toLowerCase().replace(' ', '_').replace(".", "");
-        registry.gauge(name("count", gcName)).tags(globalTags).ofLongs(GaugeLong.incrementing(new Count(gcMXBean)));
-        registry.gauge(name("time", gcName)).tags(globalTags).ofLongs(GaugeLong.incrementing(new Time(gcMXBean)));
-      }
+    if (!gcMXBeans.isEmpty()) {
+      registerMxBeans(registry, gcMXBeans, globalTags);
+      return;
+    }
+    List<HsPerfDataGc.Collector> perfCollectors = HsPerfDataGc.discover();
+    if (!perfCollectors.isEmpty()) {
+      registerPerfCollectors(registry, perfCollectors, globalTags);
+      return;
+    }
+    log.log(INFO, "GC metrics not available, empty GarbageCollectorMXBeans (for GraalVM G1 use --enable-monitoring=jvmstat)");
+  }
+
+  static void registerMxBeans(MetricRegistry registry, List<GarbageCollectorMXBean> gcMXBeans, Tags globalTags) {
+    Set<String> usedTags = new HashSet<>();
+    for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
+      Tags tags = collectorTags(globalTags, gcMXBean.getName(), usedTags);
+      registry.gauge(GC_COUNT).tags(tags).ofLongs(GaugeLong.incrementing(new Count(gcMXBean)));
+      registry.gauge(GC_TIME).tags(tags).ofLongs(GaugeLong.incrementing(new Time(gcMXBean)));
     }
   }
 
-  /**
-   * Return a Gauge for the total GC time in millis. Gives us a single metric to measure aggregate GC activity.
-   */
-  private static void createTotalGcTime(MetricRegistry registry, List<GarbageCollectorMXBean> garbageCollectorMXBeans, Tags globalTags) {
-    GarbageCollectorMXBean[] gcBeans = garbageCollectorMXBeans.toArray(new GarbageCollectorMXBean[0]);
-    registry.gauge("jvm.gc.time").tags(globalTags).ofLongs(GaugeLong.incrementing(new TotalTime(gcBeans)));
+  static void registerPerfCollectors(MetricRegistry registry, List<HsPerfDataGc.Collector> collectors, Tags globalTags) {
+    Set<String> usedTags = new HashSet<>();
+    for (HsPerfDataGc.Collector collector : collectors) {
+      Tags tags = collectorTags(globalTags, collector.name(), usedTags);
+      registry.gauge(GC_COUNT).tags(tags).ofLongs(GaugeLong.incrementing(collector::collectionCount));
+      registry.gauge(GC_TIME).tags(tags).ofLongs(GaugeLong.incrementing(collector::collectionTimeMillis));
+    }
   }
 
-  private static String name(String prefix, String gcName) {
-    return "jvm.gc." + prefix + "." + gcName;
+  static Tags collectorTags(Tags globalTags, String collectorName, Set<String> usedTags) {
+    String gc = gcTag(collectorName);
+    if (!usedTags.add(gc)) {
+      gc = normalizeGcName(collectorName);
+      usedTags.add(gc);
+    }
+    return Tags.of(globalTags.append("gc:" + gc));
+  }
+
+  static String gcTag(String collectorName) {
+    String lower = collectorName.trim().toLowerCase();
+    switch (lower) {
+      case "g1 young generation":
+      case "g1 young collection pauses":
+      case "serial young collection pauses":
+      case "young generation scavenger":
+      case "ps scavenge":
+      case "copy":
+      case "parnew":
+        return "young";
+      case "g1 old generation":
+      case "g1 full collection pauses":
+      case "serial full collection pauses":
+      case "complete scavenger":
+      case "ps marksweep":
+      case "marksweepcompact":
+        return "full";
+      case "g1 concurrent gc":
+      case "g1 concurrent cycle pauses":
+      case "concurrentmarksweep":
+      case "shenandoah cycles":
+      case "zgc cycles":
+        return "concurrent";
+      default:
+        return normalizeGcName(lower);
+    }
+  }
+
+  static String normalizeGcName(String collectorName) {
+    return collectorName.trim().toLowerCase().replace(' ', '_').replace(".", "");
   }
 
   private static final class Count implements LongSupplier {
@@ -64,24 +122,6 @@ final class JvmGarbageCollection {
     @Override
     public long getAsLong() {
       return gcMXBean.getCollectionTime();
-    }
-  }
-
-  private static final class TotalTime implements LongSupplier {
-
-    private final GarbageCollectorMXBean[] gcMXBeans;
-
-    TotalTime(GarbageCollectorMXBean[] gcMXBeans) {
-      this.gcMXBeans = gcMXBeans;
-    }
-
-    @Override
-    public long getAsLong() {
-      long total = 0;
-      for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
-        total += gcMXBean.getCollectionTime();
-      }
-      return total;
     }
   }
 }

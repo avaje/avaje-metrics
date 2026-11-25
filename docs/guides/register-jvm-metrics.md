@@ -63,7 +63,7 @@ Metrics.jvmMetrics()
 
 Useful options:
 
-- `withDetails()` — include more detailed GC, thread, and cgroup metrics where supported
+- `withDetails()` — include more detailed memory and thread metrics where supported
 - `withGlobalTags(...)` — apply stable tags such as environment or service name
 - `withReportAlways()` — report even metrics that do not change often
 - `withReportChangesOnly()` — reduce repeated reporting for stable values
@@ -105,7 +105,7 @@ Look for names such as:
 
 - `jvm.memory.heap.used`
 - `jvm.threads.current`
-- `jvm.gc.time`
+- `jvm.gc.count` and `jvm.gc.time` (tagged with `gc:young`, `gc:full`, `gc:concurrent`)
 
 ---
 
@@ -114,5 +114,6 @@ Look for names such as:
 - `registerJvmCoreMetrics()` is usually the safest starting point for production export.
 - `withDetails()` increases metric volume; use it intentionally.
 - `withGlobalTags(...)` is a good place to apply stable tags such as environment or service.
+- On GraalVM Native Image with G1 (`--gc=G1`), build with `--enable-monitoring=jvmstat` so `registerJvmGCMetrics()` / `registerJvmMetrics()` can read GC count and pause time from `hsperfdata` (`GarbageCollectorMXBean` is currently empty on G1 Native Image).
 - The built-in JVM metrics can be registered on the default registry or any custom
   `MetricRegistry`.
